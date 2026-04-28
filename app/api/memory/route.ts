@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createMemoryRecord, createMemoryVault, type MemoryVaultKind } from "../../../lib/memory-vault";
+import { hasDatabaseUrl, query } from "../../../lib/db";
+import { createMemoryRecord, createMemoryVault, type MemoryVaultKind, type MemoryVaultRecord } from "../../../lib/memory-vault";
+import { insertMemoryRecord, listMemoryRecords } from "../../../lib/memory-vault-sql";
 
 const allowedKinds: MemoryVaultKind[] = ["hyperscript", "progress", "approval", "receipt", "outpost-entry", "uv7", "health", "ledger", "note"];
 
 function isMemoryKind(value: unknown): value is MemoryVaultKind {
   return typeof value === "string" && allowedKinds.includes(value as MemoryVaultKind);
+}
+
+function mapDbRow(row: Record<string, unknown>): MemoryVaultRecord {
+  return {
+    id: String(row.id),
+    kind: row.kind as MemoryVaultKind,
+    title: String(row.title),
+    payload: row.payload ?? {},
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
+    outpostReturnUrl: typeof row.outpost_return_url === "string" ? row.outpost_return_url : undefined,
+    tags: Array.isArray(row.tags) ? row.tags.filter((tag): tag is string => typeof tag === "string") : []
+  };
 }
 
 const seeded = createMemoryVault([
@@ -19,7 +33,27 @@ const seeded = createMemoryVault([
 ]);
 
 export async function GET() {
-  return NextResponse.json({ ok: true, system: "Memory Vault", vault: seeded });
+  if (hasDatabaseUrl()) {
+    try {
+      const rows = await query(listMemoryRecords(50));
+      return NextResponse.json({
+        ok: true,
+        system: "Memory Vault",
+        persistentStorage: true,
+        vault: createMemoryVault(rows.map(mapDbRow))
+      });
+    } catch (error) {
+      return NextResponse.json({
+        ok: false,
+        system: "Memory Vault",
+        persistentStorage: true,
+        fallback: seeded,
+        error: error instanceof Error ? error.message : "Unknown database error"
+      }, { status: 503 });
+    }
+  }
+
+  return NextResponse.json({ ok: true, system: "Memory Vault", persistentStorage: false, vault: seeded });
 }
 
 export async function POST(request: NextRequest) {
@@ -38,6 +72,26 @@ export async function POST(request: NextRequest) {
     tags,
     outpostReturnUrl: `/api/outpost/entry/${id}/return`
   });
+
+  if (hasDatabaseUrl()) {
+    try {
+      const rows = await query(insertMemoryRecord(record));
+      return NextResponse.json({
+        ok: true,
+        system: "Memory Vault",
+        persistentStorage: true,
+        record: rows[0] ? mapDbRow(rows[0]) : record
+      });
+    } catch (error) {
+      return NextResponse.json({
+        ok: false,
+        system: "Memory Vault",
+        persistentStorage: true,
+        record,
+        error: error instanceof Error ? error.message : "Unknown database error"
+      }, { status: 503 });
+    }
+  }
 
   return NextResponse.json({
     ok: true,
