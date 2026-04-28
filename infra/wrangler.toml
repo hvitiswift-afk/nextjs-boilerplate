@@ -1,0 +1,23 @@
+name = "goblin-edge-bridge"
+main = "cloudflare-worker-goblin.js"
+compatibility_date = "2026-04-28"
+
+[vars]
+APPROVAL_REQUIRED = "true"
+OUTPOST_ID = "2099-2100"
+OUTPOST_RETURN_BASE_URL = "/api/outpost/entry"
+GOBLIN_MODE = "edge-enclave-bridge"
+
+# Secrets must be set in Cloudflare, never committed here:
+# wrangler secret put OPENAI_API_KEY
+# wrangler secret put ANTHROPIC_API_KEY
+# wrangler secret put XAI_API_KEY
+# wrangler secret put PAYPAL_CLIENT_ID
+# wrangler secret put PAYPAL_WEBHOOK_ID
+
+[observability]
+enabled = true
+
+[[routes]]
+pattern = "example.com/api/goblin*"
+zone_name = "example.com"
