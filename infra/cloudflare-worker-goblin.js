@@ -3,12 +3,14 @@ export default {
     const url = new URL(request.url);
     const method = request.method.toUpperCase();
 
-    const risk = method === "GET" || method === "HEAD" ? "read-only" : "needs-human-approval";
     const algorithm = {
       name: "Goblin",
+      mode: "edge-enclave-bridge",
       law: ["listen", "classify", "route", "draft", "verify", "approve", "deploy"],
+      risk: method === "GET" || method === "HEAD" ? "read-only" : "needs-human-approval",
       openLoop: true,
-      risk,
+      enclave: "local-first / private-control-plane",
+      outpost: "2099-2100",
       path: url.pathname,
       timestamp: new Date().toISOString()
     };
