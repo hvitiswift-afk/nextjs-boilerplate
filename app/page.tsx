@@ -1,44 +1,44 @@
 const signals = [
-  { label: "Listen", value: 100, note: "Reed-breath before command" },
-  { label: "Draw", value: 82, note: "Aural cartograph from live tools" },
-  { label: "Verify", value: 74, note: "Sources, logs, receipts, human approval" },
-  { label: "Deploy", value: 61, note: "AWS-ready, Cloudflare-routed" },
+  { label: "Fabian", value: 88, note: "Architect LLM: decomposes intent and writes hyperscripts" },
+  { label: "Goblin", value: 82, note: "Router LLM: verifies, tracks, and keeps approval visible" },
+  { label: "Enclave", value: 74, note: "Local-first control plane with memory vault and local LLMs" },
+  { label: "Outpost", value: 61, note: "2099-2100 continuity layer for receipts and audit trails" },
 ];
 
 const stack = [
-  "Commercial LLM router: ChatGPT, Claude, Grok, local models",
-  "Goblin algorithm: rank intent, choose model, verify output, keep open loop",
-  "ML pattern engines: classify, score, forecast, detect anomalies",
-  "Script goblins: fetch, clean, route, check, deploy, notify",
-  "Server tower: Next.js app, API routes, logs, receipt spine",
-  "AWS path: Amplify or S3 + CloudFront + Route 53",
-  "Cloudflare edge: DNS, cache, firewall, Workers algorithm layer",
-  "PayPal-ready commerce: checkout links, webhooks, receipts",
+  "Fabian LLM: architect, planner, hyperscript writer",
+  "Goblin LLM: router, verifier, progress lantern, edge operator",
+  "LLM mesh: ChatGPT, Claude, Grok-compatible, Fabian, Goblin, local models",
+  "Hyperscripts: fetch, clean, route, check, deploy, notify",
+  "AWS server tower: Amplify first, larger worker services later",
+  "Cloudflare edge: DNS, cache, firewall, Goblin Worker algorithm",
+  "Memory vault: Postgres records tasks, approvals, receipts, logs",
+  "Open Loop: human approval before consequence",
 ];
+
+const scale = ["0 Local enclave", "1 Edge bridge", "2 Server tower", "3 Worker swarm", "4 LLM mesh", "5 Outpost 2099-2100"];
 
 export default function Home() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#07070b] text-[#f5efe2]">
+    <main className="min-h-screen bg-[#07070b] text-[#f5efe2]">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:px-10 lg:px-12">
         <nav className="flex items-center justify-between border-b border-white/10 pb-5 text-sm text-white/60">
-          <span className="font-mono uppercase tracking-[0.45em] text-cyan-200">Goblin</span>
-          <span>Lichburn Commercial GeneralAI Console</span>
+          <span className="font-mono uppercase tracking-[0.35em] text-cyan-200">Goblin + Fabian</span>
+          <span>Lichburn Enclave / 2099-2100 Outpost</span>
         </nav>
 
         <div className="grid flex-1 items-center gap-10 py-16 lg:grid-cols-[1.05fr_0.95fr]">
           <section>
             <p className="mb-4 inline-flex rounded-full border border-fuchsia-300/30 bg-fuchsia-300/10 px-4 py-2 text-sm text-fuchsia-100">
-              AWS-ready • Cloudflare algorithm • LLM router • Progress lantern
+              Fabian LLM • Goblin router • hyperscale scripts • AWS + Cloudflare bridge
             </p>
-            <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-              Build the Goblin cloud brain.
-            </h1>
+            <h1 className="text-5xl font-black tracking-tight sm:text-7xl">Build the hyper-enclave brain.</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
-              A deployable Lichburn website for commercially available cybernetic intelligence: LLMs, ML engines, scripts, hosted servers, PayPal-ready receipts, and a visible progress system that keeps the Open Loop intact.
+              Fabian plans, Goblin routes, hyperscripts coordinate, servers execute only after approval, and the 2099-2100 Outpost preserves continuity.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="#goblin-algorithm">Open Goblin Algorithm</a>
-              <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#deploy">Deploy Path</a>
+              <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="#algorithm">Open Algorithm</a>
+              <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#scale">Hyperscale Path</a>
             </div>
           </section>
 
@@ -50,13 +50,8 @@ export default function Home() {
             <div className="space-y-5">
               {signals.map((signal) => (
                 <div key={signal.label}>
-                  <div className="mb-2 flex justify-between text-sm">
-                    <span className="font-semibold">{signal.label}</span>
-                    <span className="text-white/55">{signal.value}%</span>
-                  </div>
-                  <div className="h-3 overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300" style={{ width: `${signal.value}%` }} />
-                  </div>
+                  <div className="mb-2 flex justify-between text-sm"><span className="font-semibold">{signal.label}</span><span className="text-white/55">{signal.value}%</span></div>
+                  <div className="h-3 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300" style={{ width: `${signal.value}%` }} /></div>
                   <p className="mt-1 text-sm text-white/50">{signal.note}</p>
                 </div>
               ))}
@@ -64,30 +59,24 @@ export default function Home() {
           </section>
         </div>
 
-        <section id="goblin-algorithm" className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
-          <div className="lg:col-span-1">
-            <h2 className="text-3xl font-black">Cloudflare Algorithm: Goblin</h2>
-            <p className="mt-3 text-white/65">The edge brain ranks the request, routes the model, checks cost and risk, then requires human approval before consequence.</p>
+        <section id="algorithm" className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
+          <div>
+            <h2 className="text-3xl font-black">Algorithm</h2>
+            <p className="mt-3 text-white/65">HyperIntent → Fabian plan → Goblin route → verify → approve → deploy.</p>
           </div>
           <div className="grid gap-4 lg:col-span-2 sm:grid-cols-2">
-            {stack.map((item) => (
-              <article key={item} className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 text-white/75">
-                {item}
-              </article>
-            ))}
+            {stack.map((item) => <article key={item} className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 text-white/75">{item}</article>)}
           </div>
         </section>
 
-        <section id="deploy" className="rounded-[2rem] border border-cyan-200/20 bg-cyan-200/[0.06] p-7 mb-10">
-          <h2 className="text-2xl font-black">Deploy contract</h2>
-          <p className="mt-3 text-white/70">
-            GitHub holds the source. AWS hosts the app. Cloudflare guards the edge. PayPal records payment as receipts, not hidden debt. Human approval remains the final gate.
-          </p>
-          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`GOBLIN(request) = listen → classify → route → draft → verify → approve → deploy
-Cloudflare Worker = edge gate
-AWS Amplify/S3+CloudFront = server tower
-PayPal = receipt spine
-Progress Lantern = visible task state`}</pre>
+        <section id="scale" className="rounded-[2rem] border border-cyan-200/20 bg-cyan-200/[0.06] p-7 mb-10">
+          <h2 className="text-2xl font-black">Hyperscale path</h2>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {scale.map((item) => <div key={item} className="rounded-2xl bg-black/30 p-4 text-cyan-100">{item}</div>)}
+          </div>
+          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`FABIAN(intent) = listen → decompose → hyperscript → verify → hand-back
+GOBLIN(task) = classify → route → track → approve → deploy
+OUTPOST = receipts + logs + approval + continuity`}</pre>
         </section>
       </section>
     </main>
