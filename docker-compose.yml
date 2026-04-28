@@ -1,0 +1,48 @@
+services:
+  goblin-web:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      LOCAL_LLM_URL: http://goblin-llm:11434
+      FABIAN_LLM_URL: http://fabian-llm:11434
+      DATABASE_URL: postgres://goblin:goblin@memory-vault:5432/goblin
+      APPROVAL_REQUIRED: "true"
+    depends_on:
+      - memory-vault
+      - goblin-llm
+      - fabian-llm
+
+  memory-vault:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: goblin
+      POSTGRES_PASSWORD: goblin
+      POSTGRES_DB: goblin
+    volumes:
+      - goblin_pg:/var/lib/postgresql/data
+
+  goblin-llm:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - goblin_ollama:/root/.ollama
+
+  fabian-llm:
+    image: ollama/ollama:latest
+    ports:
+      - "11435:11434"
+    volumes:
+      - fabian_ollama:/root/.ollama
+
+volumes:
+  goblin_pg:
+  goblin_ollama:
+  fabian_ollama:
