@@ -13,6 +13,7 @@ GET /api/vault/health
 ```txt
 memory_records
 approval_records
+approval_decision_audit_records
 progress_events
 outpost_entries
 receipt_records
@@ -53,6 +54,17 @@ count
 error
 ```
 
+## Current labels
+
+```txt
+Memory Vault
+Approval Vault
+Approval Decision Audit Vault
+Progress Vault
+Outpost Vault
+Receipt Vault
+```
+
 ## Example read
 
 ```bash
@@ -73,7 +85,24 @@ table count visible
 ≠ approved
 ```
 
+```txt
+approval_decision_audit_records healthy
+≠ executed
+```
+
 Approval still belongs to Violet Gate.
+
+## Audit health
+
+The Approval Decision Audit Vault check confirms that decision transition records can be counted.
+
+```txt
+approval_decision_audit_records
+→ durable audit notes for Violet Gate decisions
+→ diagnostic evidence only
+```
+
+A missing or failing audit table means local readiness is incomplete because persisted approval decisions are expected to leave an audit trail.
 
 ## Law
 
@@ -81,6 +110,7 @@ Approval still belongs to Violet Gate.
 Health is diagnostic, not approval.
 Missing database configuration is visible.
 Each durable table reports independently.
+Approval decision audit health is evidence, not authorization.
 Violet Gate still controls consequence-bearing execution.
 ```
 
@@ -97,9 +127,11 @@ HyperIntent
 → Unified Vault Ledger Manual
 → Stone Vault Health API
 → Stone Vault Health Manual
+→ Approval Decision Audit Vault
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
+→ Approval Decision API
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
