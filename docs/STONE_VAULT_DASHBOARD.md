@@ -45,7 +45,10 @@ ML gated task trace
 Outpost round trips
 Outpost outbound filters
 Outpost inbound filters
-receipt filters
+receipt cards
+receipt reconciliation filters
+receipt completion filters
+receipt pending filters
 ```
 
 ## Read doors
@@ -154,6 +157,28 @@ Round-trip ledger
 
 Outpost cards make send/return continuity visible. Outpost return is still not approval.
 
+## Receipt cards
+
+```txt
+All receipts
+→ GET /api/vault/ledger?kind=receipt&limit=25
+→ receipt evidence
+```
+
+```txt
+Completed receipts
+→ GET /api/vault/ledger?kind=receipt&status=complete&limit=25
+→ completion evidence
+```
+
+```txt
+Pending receipts
+→ GET /api/vault/ledger?kind=receipt&status=pending&limit=25
+→ pending reconciliation evidence
+```
+
+Receipt cards make reconciliation visible. Receipts are evidence, not approval.
+
 ## Ledger filter doors
 
 ```txt
@@ -171,6 +196,8 @@ Outpost cards make send/return continuity visible. Outpost return is still not a
 /api/vault/ledger?kind=outpost&status=outbound&limit=25
 /api/vault/ledger?kind=outpost&status=inbound&limit=25
 /api/vault/ledger?kind=receipt&limit=25
+/api/vault/ledger?kind=receipt&status=complete&limit=25
+/api/vault/ledger?kind=receipt&status=pending&limit=25
 ```
 
 ## Operator cards
@@ -200,6 +227,7 @@ inspect
 → track progress
 → inspect ML evidence
 → inspect Outpost round trips
+→ reconcile receipts
 → verify ledger
 ```
 
@@ -248,6 +276,11 @@ Outpost return visible
 ```
 
 ```txt
+receipt visible
+≠ approved
+```
+
+```txt
 audit row visible
 ≠ executed
 ```
@@ -264,6 +297,7 @@ Approval review is visibility, not authorization.
 Progress timeline cards are evidence, not approval.
 ML evidence cards are receipts and memory, not approval.
 Outpost round-trip cards are continuity evidence, not approval.
+Receipt cards are reconciliation evidence, not approval.
 Approval decision audit rows are transition evidence, not execution.
 Only Violet Gate authorizes consequence-bearing work.
 ```
@@ -302,6 +336,8 @@ HyperIntent
 → ML Gated Task Trace
 → Outpost Round-Trip Cards
 → Outpost Continuity Trace
+→ Receipt Cards
+→ Receipt Reconciliation Filters
 → Violet Gate
 → Outpost 2099-2100
 → Return Door
