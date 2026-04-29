@@ -4,6 +4,7 @@ import { hasDatabaseUrl, query } from "../../../../lib/db";
 const checks = [
   { table: "memory_records", label: "Memory Vault" },
   { table: "approval_records", label: "Approval Vault" },
+  { table: "approval_decision_audit_records", label: "Approval Decision Audit Vault" },
   { table: "progress_events", label: "Progress Vault" },
   { table: "outpost_entries", label: "Outpost Vault" },
   { table: "receipt_records", label: "Receipt Vault" }
@@ -43,6 +44,7 @@ export async function GET() {
         "Health is diagnostic, not approval.",
         "Missing database configuration is visible.",
         "Each durable table reports independently.",
+        "Approval decision audit health is evidence, not authorization.",
         "Violet Gate still controls consequence-bearing execution."
       ]
     });
@@ -79,6 +81,7 @@ export async function GET() {
       "Health is diagnostic, not approval.",
       "Missing database configuration is visible.",
       "Each durable table reports independently.",
+      "Approval decision audit health is evidence, not authorization.",
       "Violet Gate still controls consequence-bearing execution."
     ]
   }, { status: allOk ? 200 : 503 });
