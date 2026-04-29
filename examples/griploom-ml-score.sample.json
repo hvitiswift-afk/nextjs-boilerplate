@@ -1,4 +1,15 @@
 {
+  "nodeCount": 8,
+  "vitality": {
+    "qCoulombs": 6,
+    "cFarads": 1.6,
+    "iCurrent": 0.8,
+    "resistance": 0.5,
+    "crewSignal": 6,
+    "directorSignal": 1,
+    "houseSignal": 2,
+    "audienceSignal": 1
+  },
   "beams": [
     {
       "id": "GL-BEAM-SHAWN-JOSEPH",
