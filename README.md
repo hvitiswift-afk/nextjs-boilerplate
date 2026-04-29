@@ -70,3 +70,119 @@ Payments should be processed by PayPal checkout or invoices, then recorded as re
 - Progress must be visible.
 - Receipts, not hidden debt.
 - Human approval before consequence.
+
+---
+
+# GRIPLOOM AI
+
+Production Geometry from Verified Credits.
+
+```txt
+GRIPLOOM ML ranks.
+GOBLIN ML challenges.
+BLACKLETTER permits.
+Only sourced, non-causal collaboration signals publish.
+```
+
+## GRIPLOOM modules
+
+- `GRIPLOOM ML`: scores repeat beams and production geometry signals.
+- `GOBLIN ML`: flags weak beams, low confidence, duplicates, gaps, and overclaim risk.
+- `BLACKLETTER`: evidence and claim-safety gate.
+- `SAME-TICK`: event intake for scanner/barcode/QR/inventory/credit events.
+
+## API: score beams
+
+```http
+POST /api/ml/score
+```
+
+Example request:
+
+```json
+{
+  "beams": [
+    {
+      "id": "GL-BEAM-SHAWN-JOSEPH",
+      "people": ["Shawn Ensign", "Joseph Dianda"],
+      "sharedProductions": [
+        "The Usual Suspects",
+        "Boogie Nights",
+        "Gun Shy",
+        "The Truth About Cats & Dogs",
+        "The Trigger Effect",
+        "Wag the Dog"
+      ],
+      "repeatCount": 6,
+      "layer": "crew",
+      "confidence": 0.95,
+      "status": "CORE"
+    }
+  ]
+}
+```
+
+Example response shape:
+
+```json
+{
+  "product": "GRIPLOOM ML + GOBLIN ML",
+  "rule": "GRIPLOOM ranks. GOBLIN challenges. BLACKLETTER permits.",
+  "results": [
+    {
+      "beam": {},
+      "griploom": { "beamId": "GL-BEAM-SHAWN-JOSEPH", "score": 5.7, "label": "STRONG" },
+      "goblin": { "beamId": "GL-BEAM-SHAWN-JOSEPH", "flags": [] },
+      "blackletter": { "status": "APPROVED" }
+    }
+  ]
+}
+```
+
+## API: SAME-TICK event intake
+
+```http
+POST /api/tick
+```
+
+Example request:
+
+```json
+{
+  "idempotency_key": "GL-20260429-CAM-BATT-001-SCANOUT",
+  "timestamp": "2026-04-29T12:00:00Z",
+  "production_id": "GL-FACE-BOOGIE-NIGHTS",
+  "event_type": "scan_out",
+  "layer": ["🛠️", "🧾"],
+  "actor": {
+    "type": "crew",
+    "id": "GL-CREW-0001",
+    "role": "camera assistant"
+  },
+  "object": {
+    "type": "equipment",
+    "id": "CAM-BATT-001",
+    "barcode": "GL-BARCODE-CAM-BATT-001"
+  },
+  "location": {
+    "type": "cad_zone",
+    "id": "GL-CAD-CAMERA-CART"
+  },
+  "source": {
+    "type": "scanner",
+    "id": "SCANNER-001"
+  }
+}
+```
+
+## BLACKLETTER publication rule
+
+GRIPLOOM outputs are credit-based collaboration signals. They must not claim hiring guarantees, performance outcomes, legal conclusions, union determinations, private facts, or causation.
+
+## Documentation
+
+- `docs/WHITEPAPER.md`
+- `docs/BREACH-PLAN.md`
+- `docs/CONTRACT-PACK.md`
+
+Verified credits in. Production geometry out.
