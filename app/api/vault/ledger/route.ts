@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hasDatabaseUrl, query } from "../../../../lib/db";
 import { listVaultLedgerFiltered, mapVaultLedgerRow, type VaultLedgerKind } from "../../../../lib/vault-ledger-sql";
 
-const ledgerKinds: VaultLedgerKind[] = ["memory", "approval", "progress", "outpost", "receipt"];
+const ledgerKinds: VaultLedgerKind[] = ["memory", "approval", "approval-audit", "progress", "outpost", "receipt"];
 
 function isVaultLedgerKind(value: unknown): value is VaultLedgerKind {
   return typeof value === "string" && ledgerKinds.includes(value as VaultLedgerKind);
@@ -25,11 +25,13 @@ export async function GET(request: NextRequest) {
   const kind = searchParams.get("kind");
   const status = readOptionalText(searchParams.get("status"));
   const taskId = readOptionalText(searchParams.get("taskId"));
+  const approvalId = readOptionalText(searchParams.get("approvalId"));
   const limit = readLimit(searchParams.get("limit"));
   const filter = {
     kind: isVaultLedgerKind(kind) ? kind : undefined,
     status,
     taskId,
+    approvalId,
     limit
   };
 
@@ -41,7 +43,7 @@ export async function GET(request: NextRequest) {
       rows: [],
       accepts: {
         kinds: ledgerKinds,
-        filters: ["kind", "status", "taskId", "limit"]
+        filters: ["kind", "status", "taskId", "approvalId", "limit"]
       },
       filter,
       message: "DATABASE_URL is not configured. The unified ledger is available when the Stone Vault database is connected."
@@ -62,8 +64,9 @@ export async function GET(request: NextRequest) {
         "The ledger is a read model over durable vault tables.",
         "Ledger rows are evidence, not approval.",
         "Each source table remains the authority for its own record type.",
-        "Status and task filters narrow evidence without changing authorization.",
-        "The unified ledger exists so the Enclave can see time-ordered memory, approval, progress, outpost, and receipt records together."
+        "Status, task, and approval filters narrow evidence without changing authorization.",
+        "Approval decision audit rows show Violet Gate transition evidence.",
+        "The unified ledger exists so the Enclave can see time-ordered memory, approval, audit, progress, outpost, and receipt records together."
       ]
     });
   } catch (error) {
