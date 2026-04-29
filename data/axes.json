@@ -1,0 +1,12 @@
+{
+  "generated": "2026-04-29",
+  "axes": [
+    { "tag": "WGHT", "name": "Weight", "default": 620, "min": 250, "max": 900 },
+    { "tag": "SHMR", "name": "Shimmer", "default": 0.28, "min": 0, "max": 1 },
+    { "tag": "RAIL", "name": "Rail Contact", "default": 0.85, "min": 0, "max": 1 },
+    { "tag": "MIRR", "name": "Mirror Blend", "default": 0.12, "min": 0, "max": 0.5 },
+    { "tag": "TANC", "name": "T Anchor", "default": 0.9, "min": 0, "max": 1 },
+    { "tag": "CURV", "name": "Curvature", "default": 0.22, "min": 0, "max": 1 },
+    { "tag": "SLNT", "name": "Slant", "default": 0, "min": -12, "max": 12 }
+  ]
+}
