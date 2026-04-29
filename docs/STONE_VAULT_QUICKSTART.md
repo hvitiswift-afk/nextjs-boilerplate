@@ -114,7 +114,37 @@ curl -X POST http://localhost:3000/api/approval \
 
 Approval records are visible evidence. Silent approval is not allowed for `needs-approval` work.
 
-## 8. Record progress
+## 8. Decide the approval record
+
+Approve example:
+
+```bash
+curl -X POST http://localhost:3000/api/approval/decision \
+  -H "content-type: application/json" \
+  -d '{
+    "id": "approval-demo-gated",
+    "status": "approved",
+    "decidedBy": "manual-operator",
+    "note": "Approved after reviewing the gated demo execution."
+  }'
+```
+
+Reject example:
+
+```bash
+curl -X POST http://localhost:3000/api/approval/decision \
+  -H "content-type: application/json" \
+  -d '{
+    "id": "approval-demo-gated",
+    "status": "rejected",
+    "decidedBy": "manual-operator",
+    "note": "Rejected because the request was not ready."
+  }'
+```
+
+Approval decisions update pending approval records. They do not silently execute work.
+
+## 9. Record progress
 
 ```bash
 curl -X POST http://localhost:3000/api/progress \
@@ -130,7 +160,7 @@ curl -X POST http://localhost:3000/api/progress \
 
 Progress records are evidence, not approval.
 
-## 9. Send an Outpost round trip
+## 10. Send an Outpost round trip
 
 ```bash
 curl -X POST http://localhost:3000/api/outpost/entry \
@@ -146,7 +176,7 @@ curl -X POST http://localhost:3000/api/outpost/entry \
 
 The response includes a return URL.
 
-## 10. Inspect the unified ledger
+## 11. Inspect the unified ledger
 
 ```bash
 curl http://localhost:3000/api/vault/ledger?limit=25
@@ -166,6 +196,8 @@ curl http://localhost:3000/api/vault/ledger?kind=outpost&limit=25
 Manifest is discovery.
 Health is diagnosis.
 Ledger is evidence.
+Approval creation is evidence.
+Approval decision is explicit Violet Gate action.
 Progress is evidence.
 Outpost routing is evidence.
 Only Violet Gate can approve consequence-bearing execution.
@@ -190,6 +222,7 @@ HyperIntent
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
+→ Approval Decision API
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
