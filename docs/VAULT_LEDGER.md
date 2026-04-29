@@ -21,6 +21,7 @@ The ledger reads across these durable vault tables:
 ```txt
 memory_records
 approval_records
+approval_decision_audit_records
 progress_events
 outpost_entries
 receipt_records
@@ -33,6 +34,7 @@ Each source table remains authoritative for its own record type. The ledger is a
 ```txt
 memory
 approval
+approval-audit
 progress
 outpost
 receipt
@@ -61,6 +63,7 @@ DATABASE_URL present
 ```txt
 /api/vault/ledger?kind=memory
 /api/vault/ledger?kind=approval
+/api/vault/ledger?kind=approval-audit
 /api/vault/ledger?kind=progress
 /api/vault/ledger?kind=outpost
 /api/vault/ledger?kind=receipt
@@ -68,7 +71,10 @@ DATABASE_URL present
 /api/vault/ledger?status=approved
 /api/vault/ledger?status=rejected
 /api/vault/ledger?taskId=execute-demo-gated
+/api/vault/ledger?approvalId=approval-demo-gated
 /api/vault/ledger?kind=approval&status=approved
+/api/vault/ledger?kind=approval-audit&status=approved
+/api/vault/ledger?kind=approval-audit&approvalId=approval-demo-gated
 /api/vault/ledger?kind=progress&taskId=execute-demo-gated
 /api/vault/ledger?limit=50
 ```
@@ -90,6 +96,11 @@ status
 ```txt
 taskId
 → narrows rows whose payload.taskId matches the requested task
+```
+
+```txt
+approvalId
+→ narrows rows whose payload.approvalId matches the requested approval record
 ```
 
 ```txt
@@ -121,15 +132,18 @@ curl http://localhost:3000/api/vault/ledger?limit=25
 
 ```bash
 curl http://localhost:3000/api/vault/ledger?kind=approval&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&limit=25
 curl http://localhost:3000/api/vault/ledger?status=pending&limit=25
 curl http://localhost:3000/api/vault/ledger?taskId=execute-demo-gated&limit=25
+curl http://localhost:3000/api/vault/ledger?approvalId=approval-demo-gated&limit=25
 curl http://localhost:3000/api/vault/ledger?kind=approval&status=approved&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&status=rejected&limit=25
 curl http://localhost:3000/api/vault/ledger?kind=progress&taskId=execute-demo-gated&limit=25
 ```
 
 ## Approval decision inspection
 
-Approval decisions can be inspected through approval ledger rows.
+Approval decisions can be inspected through approval ledger rows and audit ledger rows.
 
 ```txt
 kind=approval&status=pending
@@ -147,9 +161,45 @@ kind=approval&status=rejected
 ```
 
 ```txt
+kind=approval-audit
+→ decision transition audit evidence
+```
+
+```txt
+kind=approval-audit&approvalId=approval-demo-gated
+→ audit trail for one approval record
+```
+
+```txt
+kind=approval-audit&status=approved
+→ approved decision transitions
+```
+
+```txt
+kind=approval-audit&status=rejected
+→ rejected decision transitions
+```
+
+```txt
 taskId=execute-demo-gated
 → evidence trail for the matching task across source tables that emit taskId
 ```
+
+## Approval audit payload
+
+Approval audit rows include:
+
+```txt
+approvalId
+taskId
+previousStatus
+decisionStatus
+decidedBy
+note
+payload
+```
+
+The audit payload shows what Violet Gate changed and who made the decision.
 
 ## Ledger is not approval
 
@@ -175,6 +225,11 @@ status filter says approved
 ≠ executed
 ```
 
+```txt
+audit row visible
+≠ executed
+```
+
 Approval still belongs to Violet Gate.
 
 ## Law
@@ -183,8 +238,9 @@ Approval still belongs to Violet Gate.
 The ledger is a read model over durable vault tables.
 Ledger rows are evidence, not approval.
 Each source table remains the authority for its own record type.
-Status and task filters narrow evidence without changing authorization.
-The unified ledger exists so the Enclave can see time-ordered memory, approval, progress, outpost, and receipt records together.
+Status, task, and approval filters narrow evidence without changing authorization.
+Approval decision audit rows show Violet Gate transition evidence.
+The unified ledger exists so the Enclave can see time-ordered memory, approval, audit, progress, outpost, and receipt records together.
 ```
 
 ## Current spine
@@ -198,12 +254,15 @@ HyperIntent
 → Unified Vault Ledger Read Model
 → Ledger Status Filters
 → Ledger Task Filters
+→ Ledger Approval Filters
+→ Approval Decision Audit Ledger Rows
 → Unified Vault Ledger API
 → Unified Vault Ledger Manual
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
 → Approval Decision API
+→ Approval Decision Audit Vault
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
