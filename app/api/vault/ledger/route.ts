@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasDatabaseUrl, query } from "../../../../lib/db";
-import { listVaultLedger, listVaultLedgerByKind, mapVaultLedgerRow, type VaultLedgerKind } from "../../../../lib/vault-ledger-sql";
+import { listVaultLedgerFiltered, mapVaultLedgerRow, type VaultLedgerKind } from "../../../../lib/vault-ledger-sql";
 
 const ledgerKinds: VaultLedgerKind[] = ["memory", "approval", "progress", "outpost", "receipt"];
 
@@ -14,10 +14,24 @@ function readLimit(value: string | null): number {
   return Math.min(Math.max(parsed, 1), 250);
 }
 
+function readOptionalText(value: string | null): string | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const kind = searchParams.get("kind");
+  const status = readOptionalText(searchParams.get("status"));
+  const taskId = readOptionalText(searchParams.get("taskId"));
   const limit = readLimit(searchParams.get("limit"));
+  const filter = {
+    kind: isVaultLedgerKind(kind) ? kind : undefined,
+    status,
+    taskId,
+    limit
+  };
 
   if (!hasDatabaseUrl()) {
     return NextResponse.json({
@@ -25,25 +39,30 @@ export async function GET(request: NextRequest) {
       system: "Unified Vault Ledger",
       persistentStorage: false,
       rows: [],
-      accepts: ledgerKinds,
+      accepts: {
+        kinds: ledgerKinds,
+        filters: ["kind", "status", "taskId", "limit"]
+      },
+      filter,
       message: "DATABASE_URL is not configured. The unified ledger is available when the Stone Vault database is connected."
     });
   }
 
   try {
-    const rows = await query(isVaultLedgerKind(kind) ? listVaultLedgerByKind(kind, limit) : listVaultLedger(limit));
+    const rows = await query(listVaultLedgerFiltered(filter));
 
     return NextResponse.json({
       ok: true,
       system: "Unified Vault Ledger",
       persistentStorage: true,
-      filter: isVaultLedgerKind(kind) ? { kind } : null,
+      filter,
       limit,
       rows: rows.map(mapVaultLedgerRow),
       law: [
         "The ledger is a read model over durable vault tables.",
         "Ledger rows are evidence, not approval.",
         "Each source table remains the authority for its own record type.",
+        "Status and task filters narrow evidence without changing authorization.",
         "The unified ledger exists so the Enclave can see time-ordered memory, approval, progress, outpost, and receipt records together."
       ]
     });
@@ -52,6 +71,7 @@ export async function GET(request: NextRequest) {
       ok: false,
       system: "Unified Vault Ledger",
       persistentStorage: true,
+      filter,
       error: error instanceof Error ? error.message : "Unknown database error"
     }, { status: 503 });
   }
