@@ -26,8 +26,10 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 
 ```txt
 [ ] GET /api/vault/manifest returns ok: true.
-[ ] Manifest lists health, ledger, execute, approval, progress, outpost, and return routes.
-[ ] Manifest marks /api/approval as the only approval-authority route.
+[ ] Manifest lists health, ledger, execute, approval, approval decision, progress, outpost, and return routes.
+[ ] Manifest marks /api/approval as approval-authority route for creating approval evidence.
+[ ] Manifest marks /api/approval/decision as approval-authority route for explicit decisions.
+[ ] Manifest does not treat health, ledger, progress, outpost, return, or manifest as approval.
 ```
 
 ## Health
@@ -50,14 +52,31 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 [ ] Approved execution requires an approval identifier.
 ```
 
-## Approval
+## Approval creation
 
 ```txt
 [ ] GET /api/approval lists durable approval records when DATABASE_URL is configured.
 [ ] POST /api/approval creates an approval record.
 [ ] read-only approvals may auto-pass.
 [ ] draft and needs-approval records remain pending unless explicitly decided.
+[ ] Approval creation is visible evidence, not silent execution.
 [ ] No silent approval occurs for needs-approval work.
+```
+
+## Approval decision
+
+```txt
+[ ] POST /api/approval/decision requires an approval id.
+[ ] POST /api/approval/decision requires decidedBy evidence.
+[ ] approved is accepted as a valid decision outcome.
+[ ] rejected is accepted as a valid decision outcome.
+[ ] unknown decision status falls back to rejected.
+[ ] missing approval id returns 400.
+[ ] missing approval record returns 404 when DATABASE_URL is configured.
+[ ] already-decided approval returns 409 when DATABASE_URL is configured.
+[ ] decided approval updates approval_records.status.
+[ ] decided approval updates approval_records.decided_at.
+[ ] Approval decision is explicit Violet Gate action, not silent execution.
 ```
 
 ## Progress
@@ -89,6 +108,7 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 [ ] GET /api/vault/ledger reads across outpost_entries.
 [ ] GET /api/vault/ledger reads across receipt_records.
 [ ] kind filters work for memory, approval, progress, outpost, and receipt.
+[ ] approval decision transitions are visible through approval ledger rows.
 [ ] limit is bounded.
 [ ] Ledger rows remain evidence, not approval.
 ```
@@ -103,6 +123,7 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 [ ] docs/VAULT_LEDGER.md documents unified reads.
 [ ] docs/EXECUTION_MEMORY.md documents execution memory.
 [ ] docs/APPROVAL_VAULT.md documents Violet Gate persistence.
+[ ] docs/APPROVAL_DECISION.md documents explicit approval decisions.
 [ ] docs/PROGRESS_VAULT.md documents Progress Lantern persistence.
 [ ] docs/OUTPOST_VAULT.md documents Outpost round trips.
 ```
@@ -113,6 +134,8 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 Discovery does not authorize.
 Health does not authorize.
 Ledger visibility does not authorize.
+Approval creation does not execute.
+Approval decision does not silently execute.
 Progress does not authorize.
 Outpost return does not authorize.
 Only Violet Gate can authorize consequence-bearing execution.
@@ -138,6 +161,7 @@ HyperIntent
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
+→ Approval Decision API
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
