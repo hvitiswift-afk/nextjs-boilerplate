@@ -29,7 +29,12 @@ Local Postgres can store, read, and inspect memory, approval, progress, outpost,
 [x] Add acceptance checks for decision safety behavior.
 [x] Add ledger filters for status and taskId.
 [x] Document ledger filters for approval decision inspection.
-[ ] Add audit notes for every decision transition.
+[x] Add audit notes for every decision transition.
+[x] Add approval_decision_audit_records to schema.
+[x] Add approval-audit rows to the unified ledger.
+[x] Add approvalId ledger filter for audit inspection.
+[x] Add audit table health checks.
+[x] Add audit checks to acceptance.
 ```
 
 Exit condition:
@@ -41,14 +46,18 @@ Violet Gate can create, decide, and audit approval records without silent author
 Current Phase 2 state:
 
 ```txt
+Complete.
 Approval creation exists.
 Approval decision exists.
 Decision docs exist.
 Ledger status filters exist.
 Ledger taskId filters exist.
-The ledger manual teaches decision inspection.
+Ledger approvalId filters exist.
+Approval decision audit rows exist.
+The health door checks audit storage.
+The ledger manual teaches decision and audit inspection.
 Manifest, index, quickstart, and acceptance checklist know the decision door.
-Next stone: durable audit notes for every decision transition.
+Next road: Phase 3 Operator Dashboard.
 ```
 
 ## Phase 3 — Operator dashboard
@@ -56,6 +65,7 @@ Next stone: durable audit notes for every decision transition.
 ```txt
 [ ] Add a dashboard page for health, manifest, and ledger.
 [ ] Add approval review cards.
+[ ] Add approval decision audit cards.
 [ ] Add progress timeline cards.
 [ ] Add Outpost round-trip cards.
 [ ] Add receipt cards.
@@ -141,6 +151,7 @@ No phase turns routing into approval.
 Ledger filters narrow evidence without granting authorization.
 Approval creation does not execute.
 Approval decision does not silently execute.
+Approval decision audit does not execute.
 Only Violet Gate authorizes consequence-bearing execution.
 ```
 
@@ -155,6 +166,8 @@ HyperIntent
 → Unified Vault Ledger Read Model
 → Ledger Status Filters
 → Ledger Task Filters
+→ Ledger Approval Filters
+→ Approval Decision Audit Records
 → Unified Vault Ledger API
 → Stone Vault Health API
 → Vault Manifest
@@ -164,11 +177,14 @@ HyperIntent
 → Stone Vault Quickstart
 → Stone Vault Acceptance Checklist
 → Stone Vault Roadmap
+→ Phase 2 Complete
+→ Phase 3 Operator Dashboard
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
 → Approval Decision API
 → Approval Decision Docs
+→ Approval Decision Audit Vault
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
