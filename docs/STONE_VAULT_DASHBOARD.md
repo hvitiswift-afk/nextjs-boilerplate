@@ -42,7 +42,9 @@ ML evidence lane
 ML memory filters
 ML provider receipts
 ML gated task trace
-outpost filters
+Outpost round trips
+Outpost outbound filters
+Outpost inbound filters
 receipt filters
 ```
 
@@ -130,6 +132,28 @@ ML gated task
 
 The ML lane is for model context, provider receipts, and task evidence. ML output is never approval by itself.
 
+## Outpost round-trip cards
+
+```txt
+Outbound entries
+→ GET /api/vault/ledger?kind=outpost&status=outbound&limit=25
+→ send evidence
+```
+
+```txt
+Inbound returns
+→ GET /api/vault/ledger?kind=outpost&status=inbound&limit=25
+→ return evidence
+```
+
+```txt
+Round-trip ledger
+→ GET /api/vault/ledger?kind=outpost&limit=25
+→ continuity trace
+```
+
+Outpost cards make send/return continuity visible. Outpost return is still not approval.
+
 ## Ledger filter doors
 
 ```txt
@@ -144,6 +168,8 @@ The ML lane is for model context, provider receipts, and task evidence. ML outpu
 /api/vault/ledger?kind=memory&limit=25
 /api/vault/ledger?taskId=ml-demo-inference&limit=25
 /api/vault/ledger?kind=outpost&limit=25
+/api/vault/ledger?kind=outpost&status=outbound&limit=25
+/api/vault/ledger?kind=outpost&status=inbound&limit=25
 /api/vault/ledger?kind=receipt&limit=25
 ```
 
@@ -173,6 +199,7 @@ inspect
 → audit
 → track progress
 → inspect ML evidence
+→ inspect Outpost round trips
 → verify ledger
 ```
 
@@ -216,6 +243,11 @@ ML provider receipt visible
 ```
 
 ```txt
+Outpost return visible
+≠ approved
+```
+
+```txt
 audit row visible
 ≠ executed
 ```
@@ -231,6 +263,7 @@ Ledger rows are evidence, not approval.
 Approval review is visibility, not authorization.
 Progress timeline cards are evidence, not approval.
 ML evidence cards are receipts and memory, not approval.
+Outpost round-trip cards are continuity evidence, not approval.
 Approval decision audit rows are transition evidence, not execution.
 Only Violet Gate authorizes consequence-bearing work.
 ```
@@ -267,6 +300,8 @@ HyperIntent
 → ML Memory Filter
 → ML Provider Receipts
 → ML Gated Task Trace
+→ Outpost Round-Trip Cards
+→ Outpost Continuity Trace
 → Violet Gate
 → Outpost 2099-2100
 → Return Door
