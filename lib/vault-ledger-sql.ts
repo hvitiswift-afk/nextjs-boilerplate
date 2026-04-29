@@ -1,11 +1,12 @@
 import type { SqlStatement } from "./memory-vault-sql";
 
-export type VaultLedgerKind = "memory" | "approval" | "progress" | "outpost" | "receipt";
+export type VaultLedgerKind = "memory" | "approval" | "approval-audit" | "progress" | "outpost" | "receipt";
 
 export type VaultLedgerFilter = {
   kind?: VaultLedgerKind;
   status?: string;
   taskId?: string;
+  approvalId?: string;
   limit?: number;
 };
 
@@ -49,6 +50,26 @@ function vaultLedgerSelectSql() {
         ) as payload,
         created_at
       from approval_records
+
+      union all
+
+      select
+        id,
+        'approval-audit' as kind,
+        'Approval decision audit for ' || approval_id as title,
+        decision_status as status,
+        'approval_decision_audit_records' as source_table,
+        jsonb_build_object(
+          'approvalId', approval_id,
+          'taskId', task_id,
+          'previousStatus', previous_status,
+          'decisionStatus', decision_status,
+          'decidedBy', decided_by,
+          'note', note,
+          'payload', payload
+        ) as payload,
+        created_at
+      from approval_decision_audit_records
 
       union all
 
@@ -135,6 +156,11 @@ export function listVaultLedgerFiltered(filter: VaultLedgerFilter = {}): SqlStat
     where.push(`payload ->> 'taskId' = $${values.length}`);
   }
 
+  if (filter.approvalId) {
+    values.push(filter.approvalId);
+    where.push(`payload ->> 'approvalId' = $${values.length}`);
+  }
+
   const limit = filter.limit ?? 100;
   values.push(limit);
 
@@ -165,6 +191,7 @@ export const VAULT_LEDGER_SQL_LAW = [
   "The ledger is a read model over durable vault tables.",
   "Ledger rows are evidence, not approval.",
   "Each source table remains the authority for its own record type.",
-  "Status and task filters narrow evidence without changing authorization.",
-  "The unified ledger exists so the Enclave can see time-ordered memory, approval, progress, outpost, and receipt records together."
+  "Status, task, and approval filters narrow evidence without changing authorization.",
+  "Approval decision audit rows show Violet Gate transition evidence.",
+  "The unified ledger exists so the Enclave can see time-ordered memory, approval, audit, progress, outpost, and receipt records together."
 ] as const;
