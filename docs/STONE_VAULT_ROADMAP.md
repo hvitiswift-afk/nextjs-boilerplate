@@ -68,7 +68,8 @@ Next road: Phase 3 Operator Dashboard.
 [x] Add a dashboard manual.
 [x] Add dashboard manual to the Stone Vault index.
 [x] Add approval decision audit cards.
-[ ] Add approval review cards.
+[x] Add approval review cards.
+[x] Document approval review cards.
 [ ] Add progress timeline cards.
 [ ] Add Outpost round-trip cards.
 [ ] Add receipt cards.
@@ -89,8 +90,8 @@ The /vault dashboard page exists.
 The home page links to /vault.
 The dashboard manual exists.
 The Stone Vault index links the dashboard manual.
-The dashboard has manifest, health, ledger, and approval-audit visibility.
-Next stone: approval review cards with visible creation and decision forms.
+The dashboard has manifest, health, ledger, approval review, command examples, and approval-audit visibility.
+Next stone: progress timeline cards with task-specific ledger filters.
 ```
 
 ## Phase 4 — Provider hall
@@ -165,6 +166,7 @@ No phase turns health into approval.
 No phase turns progress into approval.
 No phase turns routing into approval.
 Dashboard visibility does not authorize execution.
+Approval review is visibility, not authorization.
 Ledger filters narrow evidence without granting authorization.
 Approval creation does not execute.
 Approval decision does not silently execute.
@@ -199,6 +201,8 @@ HyperIntent
 → Home Page Vault Link
 → Stone Vault Dashboard Manual
 → Stone Vault Operator Dashboard
+→ Approval Review Cards
+→ Approval Command Blocks
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
