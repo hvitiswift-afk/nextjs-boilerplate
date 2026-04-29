@@ -41,6 +41,24 @@ create index if not exists approval_records_task_id_idx on approval_records(task
 create index if not exists approval_records_status_idx on approval_records(status);
 create index if not exists approval_records_created_at_idx on approval_records(created_at desc);
 
+create table if not exists approval_decision_audit_records (
+  id text primary key,
+  approval_id text not null references approval_records(id) on delete cascade,
+  task_id text not null,
+  previous_status text not null,
+  decision_status text not null check (decision_status in ('approved', 'rejected')),
+  decided_by text not null,
+  note text,
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists approval_decision_audit_records_approval_id_idx on approval_decision_audit_records(approval_id);
+create index if not exists approval_decision_audit_records_task_id_idx on approval_decision_audit_records(task_id);
+create index if not exists approval_decision_audit_records_decision_status_idx on approval_decision_audit_records(decision_status);
+create index if not exists approval_decision_audit_records_created_at_idx on approval_decision_audit_records(created_at desc);
+create index if not exists approval_decision_audit_records_payload_idx on approval_decision_audit_records using gin(payload);
+
 create table if not exists progress_events (
   id text primary key,
   task_id text not null,
@@ -90,4 +108,5 @@ create index if not exists receipt_records_created_at_idx on receipt_records(cre
 -- No hidden payments.
 -- No silent deploys.
 -- No irreversible action without approval.
+-- Every approval decision receives a durable audit note.
 -- Every important record can receive an Outpost return path.
