@@ -27,7 +27,8 @@ Local Postgres can store, read, and inspect memory, approval, progress, outpost,
 [x] Require explicit approver evidence for needs-approval tasks.
 [x] Document approval creation and approval decision as separate visible acts.
 [x] Add acceptance checks for decision safety behavior.
-[ ] Add ledger filters for status and taskId.
+[x] Add ledger filters for status and taskId.
+[x] Document ledger filters for approval decision inspection.
 [ ] Add audit notes for every decision transition.
 ```
 
@@ -43,8 +44,11 @@ Current Phase 2 state:
 Approval creation exists.
 Approval decision exists.
 Decision docs exist.
+Ledger status filters exist.
+Ledger taskId filters exist.
+The ledger manual teaches decision inspection.
 Manifest, index, quickstart, and acceptance checklist know the decision door.
-Next stone: richer ledger filters and durable audit notes.
+Next stone: durable audit notes for every decision transition.
 ```
 
 ## Phase 3 — Operator dashboard
@@ -134,6 +138,7 @@ Every phase preserves the evidence boundary.
 No phase turns health into approval.
 No phase turns progress into approval.
 No phase turns routing into approval.
+Ledger filters narrow evidence without granting authorization.
 Approval creation does not execute.
 Approval decision does not silently execute.
 Only Violet Gate authorizes consequence-bearing execution.
@@ -148,6 +153,8 @@ HyperIntent
 → Memory Vault
 → Stone Vault Schema Indexes
 → Unified Vault Ledger Read Model
+→ Ledger Status Filters
+→ Ledger Task Filters
 → Unified Vault Ledger API
 → Stone Vault Health API
 → Vault Manifest
