@@ -74,7 +74,8 @@ Next road: Phase 3 Operator Dashboard.
 [x] Document progress timeline cards.
 [x] Add ML evidence lane cards.
 [x] Document ML evidence lane cards.
-[ ] Add Outpost round-trip cards.
+[x] Add Outpost round-trip cards.
+[x] Document Outpost round-trip cards.
 [ ] Add receipt cards.
 [ ] Add interactive operator forms for approval creation and approval decisions.
 ```
@@ -93,10 +94,11 @@ The /vault dashboard page exists.
 The home page links to /vault.
 The dashboard manual exists.
 The Stone Vault index links the dashboard manual.
-The dashboard has manifest, health, ledger, approval review, command examples, approval-audit visibility, progress timeline cards, and an ML evidence lane.
+The dashboard has manifest, health, ledger, approval review, command examples, approval-audit visibility, progress timeline cards, an ML evidence lane, and Outpost round-trip cards.
 Progress timeline cards inspect task-specific, all-progress, and complete-step evidence.
 ML evidence cards inspect model memory, provider receipts, and gated ML task traces.
-Next stone: Outpost round-trip cards and receipt cards.
+Outpost round-trip cards inspect outbound entries, inbound returns, and continuity traces.
+Next stone: receipt cards.
 ```
 
 ## Phase 4 — Provider hall
@@ -175,6 +177,7 @@ Dashboard visibility does not authorize execution.
 Approval review is visibility, not authorization.
 Progress timeline cards are evidence, not approval.
 ML evidence cards are receipts and memory, not approval.
+Outpost round-trip cards are continuity evidence, not approval.
 Ledger filters narrow evidence without granting authorization.
 Approval creation does not execute.
 Approval decision does not silently execute.
@@ -216,6 +219,8 @@ HyperIntent
 → ML Memory Filter
 → ML Provider Receipts
 → ML Gated Task Trace
+→ Outpost Round-Trip Cards
+→ Outpost Continuity Trace
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
