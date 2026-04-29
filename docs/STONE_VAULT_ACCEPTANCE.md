@@ -16,10 +16,12 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 [ ] infra/memory-vault.sql applies cleanly.
 [ ] memory_records exists.
 [ ] approval_records exists.
+[ ] approval_decision_audit_records exists.
 [ ] progress_events exists.
 [ ] outpost_entries exists.
 [ ] receipt_records exists.
 [ ] indexes exist for chronological and filtered reads.
+[ ] audit indexes exist for approval_id, task_id, decision_status, created_at, and payload.
 ```
 
 ## Discovery
@@ -37,8 +39,10 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 ```txt
 [ ] GET /api/vault/health returns persistentStorage: true when DATABASE_URL is configured.
 [ ] Each durable table returns an independent count.
+[ ] approval_decision_audit_records returns an independent count.
 [ ] Any table failure returns visible error evidence.
 [ ] Health is not treated as approval.
+[ ] Audit health is not treated as execution.
 ```
 
 ## Execution
@@ -76,7 +80,16 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 [ ] already-decided approval returns 409 when DATABASE_URL is configured.
 [ ] decided approval updates approval_records.status.
 [ ] decided approval updates approval_records.decided_at.
+[ ] decided approval inserts approval_decision_audit_records.
+[ ] audit row includes approval_id.
+[ ] audit row includes task_id.
+[ ] audit row includes previous_status.
+[ ] audit row includes decision_status.
+[ ] audit row includes decided_by.
+[ ] audit row includes note when provided.
+[ ] audit row includes payload evidence.
 [ ] Approval decision is explicit Violet Gate action, not silent execution.
+[ ] Approval decision audit is transition evidence, not execution.
 ```
 
 ## Progress
@@ -104,11 +117,15 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 ```txt
 [ ] GET /api/vault/ledger reads across memory_records.
 [ ] GET /api/vault/ledger reads across approval_records.
+[ ] GET /api/vault/ledger reads across approval_decision_audit_records.
 [ ] GET /api/vault/ledger reads across progress_events.
 [ ] GET /api/vault/ledger reads across outpost_entries.
 [ ] GET /api/vault/ledger reads across receipt_records.
-[ ] kind filters work for memory, approval, progress, outpost, and receipt.
-[ ] approval decision transitions are visible through approval ledger rows.
+[ ] kind filters work for memory, approval, approval-audit, progress, outpost, and receipt.
+[ ] status filters work for approval, approval-audit, progress, outpost, and receipt rows where status exists.
+[ ] taskId filters work for approval, approval-audit, and progress rows.
+[ ] approvalId filters work for approval-audit rows.
+[ ] approval decision transitions are visible through approval-audit ledger rows.
 [ ] limit is bounded.
 [ ] Ledger rows remain evidence, not approval.
 ```
@@ -120,10 +137,10 @@ This checklist defines what must be true before the Goblin + Fabian Stone Vault 
 [ ] docs/STONE_VAULT_QUICKSTART.md gives a first-run path.
 [ ] docs/VAULT_MANIFEST.md documents discovery.
 [ ] docs/VAULT_HEALTH.md documents diagnostics.
-[ ] docs/VAULT_LEDGER.md documents unified reads.
+[ ] docs/VAULT_LEDGER.md documents unified reads and approval-audit rows.
 [ ] docs/EXECUTION_MEMORY.md documents execution memory.
 [ ] docs/APPROVAL_VAULT.md documents Violet Gate persistence.
-[ ] docs/APPROVAL_DECISION.md documents explicit approval decisions.
+[ ] docs/APPROVAL_DECISION.md documents explicit approval decisions and audit persistence.
 [ ] docs/PROGRESS_VAULT.md documents Progress Lantern persistence.
 [ ] docs/OUTPOST_VAULT.md documents Outpost round trips.
 ```
@@ -136,6 +153,7 @@ Health does not authorize.
 Ledger visibility does not authorize.
 Approval creation does not execute.
 Approval decision does not silently execute.
+Approval decision audit does not execute.
 Progress does not authorize.
 Outpost return does not authorize.
 Only Violet Gate can authorize consequence-bearing execution.
@@ -150,6 +168,9 @@ HyperIntent
 → Memory Vault
 → Stone Vault Schema Indexes
 → Unified Vault Ledger Read Model
+→ Ledger Status Filters
+→ Ledger Task Filters
+→ Ledger Approval Filters
 → Unified Vault Ledger API
 → Stone Vault Health API
 → Vault Manifest
@@ -162,6 +183,7 @@ HyperIntent
 → Execution Memory Persistence
 → Approval Vault Persistence
 → Approval Decision API
+→ Approval Decision Audit Vault
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
