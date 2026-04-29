@@ -133,6 +133,27 @@ const mlEvidenceCards = [
   }
 ];
 
+const outpostRoundTripCards = [
+  {
+    title: "Outbound entries",
+    href: "/api/vault/ledger?kind=outpost&status=outbound&limit=25",
+    status: "send evidence",
+    body: "Inspect records that left the Vault for Outpost routing."
+  },
+  {
+    title: "Inbound returns",
+    href: "/api/vault/ledger?kind=outpost&status=inbound&limit=25",
+    status: "return evidence",
+    body: "Inspect records that returned through the Outpost return path."
+  },
+  {
+    title: "Round-trip ledger",
+    href: "/api/vault/ledger?kind=outpost&limit=25",
+    status: "continuity trace",
+    body: "See recent Outpost entries as a continuity trail without treating return as approval."
+  }
+];
+
 const operatorCards = [
   {
     title: "Violet Gate",
@@ -157,6 +178,7 @@ const laws = [
   "Ledger rows are evidence, not approval.",
   "Progress timeline cards are evidence, not approval.",
   "ML evidence cards are receipts and memory, not approval.",
+  "Outpost round-trip cards are continuity evidence, not approval.",
   "Approval decision audit rows are transition evidence, not execution.",
   "Only Violet Gate authorizes consequence-bearing work."
 ];
@@ -172,11 +194,11 @@ export default function VaultDashboardPage() {
 
         <section className="py-14">
           <p className="mb-4 inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100">
-            Phase 3 • health • manifest • ledger • approval review • progress timeline • ML lane
+            Phase 3 • health • manifest • ledger • approval review • progress timeline • ML lane • Outpost
           </p>
           <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-7xl">Operate the Stone Vault without guessing.</h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-            This dashboard gives an operator quick doors into the manifest, health checks, ledger filters, Violet Gate decisions, approval review, progress timelines, ML evidence, and approval audit evidence.
+            This dashboard gives an operator quick doors into the manifest, health checks, ledger filters, Violet Gate decisions, approval review, progress timelines, ML evidence, Outpost round trips, and approval audit evidence.
           </p>
         </section>
 
@@ -264,6 +286,26 @@ export default function VaultDashboardPage() {
           </div>
         </section>
 
+        <section className="mt-8 rounded-[2rem] border border-amber-200/20 bg-amber-200/[0.05] p-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-black">Outpost round trips</h2>
+              <p className="mt-2 text-white/65">Inspect outbound entries, inbound returns, and continuity traces without treating return as approval.</p>
+            </div>
+            <a className="rounded-full border border-white/15 px-4 py-2 font-bold text-white" href="/api/vault/ledger?kind=outpost&limit=25">Open Outpost ledger</a>
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {outpostRoundTripCards.map((card) => (
+              <a key={card.title} href={card.href} className="rounded-[1.5rem] border border-white/10 bg-black/25 p-5 transition hover:border-amber-100/40 hover:bg-black/35">
+                <h3 className="text-xl font-black">{card.title}</h3>
+                <p className="mt-3 inline-flex rounded-full bg-amber-300/10 px-3 py-1 text-sm text-amber-100">{card.status}</p>
+                <p className="mt-4 text-sm text-white/65">{card.body}</p>
+                <p className="mt-4 break-all font-mono text-xs text-amber-100/70">{card.href}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+
         <section className="mt-8 rounded-[2rem] border border-fuchsia-200/20 bg-fuchsia-200/[0.05] p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -294,12 +336,12 @@ export default function VaultDashboardPage() {
 
         <section className="mt-8 rounded-[2rem] border border-cyan-200/20 bg-cyan-200/[0.06] p-7">
           <h2 className="text-2xl font-black">Operator law</h2>
-          <div className="mt-5 grid gap-3 lg:grid-cols-7">
+          <div className="mt-5 grid gap-3 lg:grid-cols-4">
             {laws.map((law) => (
               <div key={law} className="rounded-2xl bg-black/30 p-4 text-sm text-cyan-50">{law}</div>
             ))}
           </div>
-          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`OPERATOR = inspect → create approval → decide explicitly → audit → track progress → inspect ML evidence → verify ledger
+          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`OPERATOR = inspect → create approval → decide explicitly → audit → track progress → inspect ML evidence → inspect Outpost round trips → verify ledger
 DASHBOARD = visibility, not authorization
 VIOLET_GATE = only approval line for consequence-bearing work`}</pre>
         </section>
