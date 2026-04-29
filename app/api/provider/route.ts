@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasDatabaseUrl, query } from "../../../lib/db";
+import type { ProviderName } from "../../../lib/hyperscript";
+import { insertMemoryRecord } from "../../../lib/memory-vault-sql";
 import { chooseProvider, getProviderAdapters, type ProviderCapability, type ProviderRouteRequest } from "../../../lib/provider-adapters";
 import { providerDecisionToMemory } from "../../../lib/provider-memory";
-import type { ProviderName } from "../../../lib/hyperscript";
 
 const providerNames: ProviderName[] = ["openai", "anthropic", "grok", "local", "fabian", "goblin"];
 const capabilities: ProviderCapability[] = ["chat", "planning", "routing", "summarizing", "code-draft", "local-only"];
@@ -29,6 +31,7 @@ export async function GET() {
     ok: true,
     system: "Provider Adapter Hall",
     providers: adapters,
+    persistentStorageAvailable: hasDatabaseUrl(),
     law: [
       "Secrets stay in environment variables.",
       "Provider execution is routed, logged, and approval-gated.",
@@ -55,11 +58,36 @@ export async function POST(request: NextRequest) {
   const decision = chooseProvider(providerRequest);
   const memory = providerDecisionToMemory({ request: providerRequest, decision });
 
+  if (hasDatabaseUrl()) {
+    try {
+      await query(insertMemoryRecord(memory));
+      return NextResponse.json({
+        ok: true,
+        system: "Provider Adapter Hall",
+        decision,
+        memory,
+        persistentStorage: true,
+        next: decision.approvalRequired ? "/api/approval" : "/api/progress"
+      });
+    } catch (error) {
+      return NextResponse.json({
+        ok: false,
+        system: "Provider Adapter Hall",
+        decision,
+        memory,
+        persistentStorage: true,
+        error: error instanceof Error ? error.message : "Unknown database error",
+        next: "/api/approval"
+      }, { status: 503 });
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     system: "Provider Adapter Hall",
     decision,
     memory,
+    persistentStorage: false,
     next: decision.approvalRequired ? "/api/approval" : "/api/progress"
   });
 }
