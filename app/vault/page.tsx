@@ -1,0 +1,133 @@
+const readDoors = [
+  {
+    name: "Manifest",
+    href: "/api/vault/manifest",
+    method: "GET",
+    note: "Discover every durable route and approval-authority marker."
+  },
+  {
+    name: "Health",
+    href: "/api/vault/health",
+    method: "GET",
+    note: "Check durable table counts, including approval decision audit storage."
+  },
+  {
+    name: "Ledger",
+    href: "/api/vault/ledger?limit=25",
+    method: "GET",
+    note: "Inspect time-ordered memory, approval, audit, progress, outpost, and receipt evidence."
+  }
+];
+
+const ledgerFilters = [
+  { label: "Approvals", href: "/api/vault/ledger?kind=approval&limit=25" },
+  { label: "Approval audit", href: "/api/vault/ledger?kind=approval-audit&limit=25" },
+  { label: "Pending", href: "/api/vault/ledger?status=pending&limit=25" },
+  { label: "Approved", href: "/api/vault/ledger?status=approved&limit=25" },
+  { label: "Rejected", href: "/api/vault/ledger?status=rejected&limit=25" },
+  { label: "Progress", href: "/api/vault/ledger?kind=progress&limit=25" },
+  { label: "Outpost", href: "/api/vault/ledger?kind=outpost&limit=25" },
+  { label: "Receipts", href: "/api/vault/ledger?kind=receipt&limit=25" }
+];
+
+const operatorCards = [
+  {
+    title: "Violet Gate",
+    status: "explicit approval only",
+    body: "Approval creation, decision, and audit are separate visible acts."
+  },
+  {
+    title: "Audit Vault",
+    status: "transition evidence",
+    body: "Every persisted decision writes an approval_decision_audit_records row."
+  },
+  {
+    title: "Ledger View",
+    status: "evidence only",
+    body: "Filters narrow the visible timeline without granting authorization."
+  }
+];
+
+const laws = [
+  "Dashboard visibility does not authorize execution.",
+  "Health is diagnostic, not approval.",
+  "Ledger rows are evidence, not approval.",
+  "Approval decision audit rows are transition evidence, not execution.",
+  "Only Violet Gate authorizes consequence-bearing work."
+];
+
+export default function VaultDashboardPage() {
+  return (
+    <main className="min-h-screen bg-[#07070b] text-[#f5efe2]">
+      <section className="mx-auto w-full max-w-6xl px-6 py-10 sm:px-10 lg:px-12">
+        <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5 text-sm text-white/60">
+          <a className="font-mono uppercase tracking-[0.35em] text-cyan-200" href="/">Goblin + Fabian</a>
+          <span>Stone Vault Operator Dashboard</span>
+        </nav>
+
+        <section className="py-14">
+          <p className="mb-4 inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100">
+            Phase 3 • health • manifest • ledger • audit visibility
+          </p>
+          <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-7xl">Operate the Stone Vault without guessing.</h1>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
+            This dashboard gives an operator quick doors into the manifest, health checks, ledger filters, Violet Gate decisions, and approval audit evidence.
+          </p>
+        </section>
+
+        <section className="grid gap-5 lg:grid-cols-3">
+          {readDoors.map((door) => (
+            <a key={door.name} href={door.href} className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-cyan-950/30 transition hover:border-cyan-200/40 hover:bg-cyan-200/[0.06]">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <h2 className="text-2xl font-black">{door.name}</h2>
+                <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-cyan-100">{door.method}</span>
+              </div>
+              <p className="text-white/65">{door.note}</p>
+              <p className="mt-5 font-mono text-sm text-cyan-100">{door.href}</p>
+            </a>
+          ))}
+        </section>
+
+        <section className="mt-8 rounded-[2rem] border border-fuchsia-200/20 bg-fuchsia-200/[0.05] p-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-black">Ledger filters</h2>
+              <p className="mt-2 text-white/65">Jump directly to evidence slices for decisions, audit rows, progress, outpost, and receipts.</p>
+            </div>
+            <a className="rounded-full border border-white/15 px-4 py-2 font-bold text-white" href="/api/vault/ledger?limit=100">Open full ledger</a>
+          </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {ledgerFilters.map((filter) => (
+              <a key={filter.href} href={filter.href} className="rounded-2xl bg-black/30 p-4 text-cyan-100 transition hover:bg-black/45">
+                <span className="font-bold">{filter.label}</span>
+                <span className="mt-2 block break-all font-mono text-xs text-white/45">{filter.href}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-8 grid gap-5 lg:grid-cols-3">
+          {operatorCards.map((card) => (
+            <article key={card.title} className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-6">
+              <h2 className="text-2xl font-black">{card.title}</h2>
+              <p className="mt-3 inline-flex rounded-full bg-emerald-300/10 px-3 py-1 text-sm text-emerald-200">{card.status}</p>
+              <p className="mt-4 text-white/65">{card.body}</p>
+            </article>
+          ))}
+        </section>
+
+        <section className="mt-8 rounded-[2rem] border border-cyan-200/20 bg-cyan-200/[0.06] p-7">
+          <h2 className="text-2xl font-black">Operator law</h2>
+          <div className="mt-5 grid gap-3 lg:grid-cols-5">
+            {laws.map((law) => (
+              <div key={law} className="rounded-2xl bg-black/30 p-4 text-sm text-cyan-50">{law}</div>
+            ))}
+          </div>
+          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`OPERATOR = inspect → decide explicitly → audit → verify ledger
+DASHBOARD = visibility, not authorization
+VIOLET_GATE = only approval line for consequence-bearing work`}</pre>
+        </section>
+      </section>
+    </main>
+  );
+}
