@@ -46,6 +46,7 @@ GET  /api/vault/health
 GET  /api/vault/ledger
 POST /api/execute
 POST /api/approval
+POST /api/approval/decision
 POST /api/progress
 POST /api/outpost/entry
 GET  /api/outpost/entry/{id}/return
@@ -53,11 +54,25 @@ GET  /api/outpost/entry/{id}/return
 
 ## Approval authority
 
-Only the Approval Gate / Violet Gate carries approval authority.
+Violet Gate carries approval authority through two separate visible acts.
 
 ```txt
 /api/approval
+→ creates visible approval records
 → approvalAuthority: true
+```
+
+```txt
+/api/approval/decision
+→ explicitly approves or rejects pending approval records
+→ approvalAuthority: true
+```
+
+Approval creation and approval decision are intentionally separate.
+
+```txt
+create approval
+≠ decide approval
 ```
 
 All other manifest routes are evidence, diagnostics, routing, or discoverability.
@@ -84,6 +99,7 @@ curl http://localhost:3000/api/vault/manifest
 ```txt
 The manifest is a map, not an authorization.
 Only Violet Gate can approve consequence-bearing execution.
+Approval creation and approval decision are separate visible acts.
 Health, ledger, progress, outpost, and receipt records are evidence.
 Every durable route should be discoverable without guessing.
 ```
@@ -105,6 +121,7 @@ HyperIntent
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
+→ Approval Decision API
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
