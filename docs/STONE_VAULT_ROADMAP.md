@@ -76,7 +76,8 @@ Next road: Phase 3 Operator Dashboard.
 [x] Document ML evidence lane cards.
 [x] Add Outpost round-trip cards.
 [x] Document Outpost round-trip cards.
-[ ] Add receipt cards.
+[x] Add receipt cards.
+[x] Document receipt cards.
 [ ] Add interactive operator forms for approval creation and approval decisions.
 ```
 
@@ -94,11 +95,12 @@ The /vault dashboard page exists.
 The home page links to /vault.
 The dashboard manual exists.
 The Stone Vault index links the dashboard manual.
-The dashboard has manifest, health, ledger, approval review, command examples, approval-audit visibility, progress timeline cards, an ML evidence lane, and Outpost round-trip cards.
+The dashboard has manifest, health, ledger, approval review, command examples, approval-audit visibility, progress timeline cards, an ML evidence lane, Outpost round-trip cards, and receipt cards.
 Progress timeline cards inspect task-specific, all-progress, and complete-step evidence.
 ML evidence cards inspect model memory, provider receipts, and gated ML task traces.
 Outpost round-trip cards inspect outbound entries, inbound returns, and continuity traces.
-Next stone: receipt cards.
+Receipt cards inspect all receipts, completed receipts, and pending receipt reconciliation.
+Next stone: interactive operator forms for approval creation and approval decisions.
 ```
 
 ## Phase 4 — Provider hall
@@ -178,6 +180,7 @@ Approval review is visibility, not authorization.
 Progress timeline cards are evidence, not approval.
 ML evidence cards are receipts and memory, not approval.
 Outpost round-trip cards are continuity evidence, not approval.
+Receipt cards are reconciliation evidence, not approval.
 Ledger filters narrow evidence without granting authorization.
 Approval creation does not execute.
 Approval decision does not silently execute.
@@ -221,6 +224,8 @@ HyperIntent
 → ML Gated Task Trace
 → Outpost Round-Trip Cards
 → Outpost Continuity Trace
+→ Receipt Cards
+→ Receipt Reconciliation Filters
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
