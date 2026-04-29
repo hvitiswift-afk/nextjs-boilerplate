@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasDatabaseUrl, query } from "../../../lib/db";
+import { executionDecisionToMemory } from "../../../lib/execution-memory";
 import { createExecutionIntent, decideExecution, type ExecutionRisk } from "../../../lib/execution-worker";
+import { insertMemoryRecord } from "../../../lib/memory-vault-sql";
 
 const risks: ExecutionRisk[] = ["read-only", "draft", "needs-approval"];
 
@@ -13,6 +16,7 @@ export async function GET() {
     system: "Approval-Gated Execution Worker",
     route: "/api/execute",
     accepts: risks,
+    persistentStorageAvailable: hasDatabaseUrl(),
     law: [
       "Read-only work can proceed into progress logging.",
       "Draft work can proceed when it creates no external consequence.",
@@ -43,12 +47,41 @@ export async function POST(request: NextRequest) {
   });
 
   const decision = decideExecution(intent);
+  const memory = executionDecisionToMemory({ intent, decision });
+
+  if (hasDatabaseUrl()) {
+    try {
+      await query(insertMemoryRecord(memory));
+      return NextResponse.json({
+        ok: decision.canExecute,
+        system: "Approval-Gated Execution Worker",
+        intent,
+        decision,
+        memory,
+        persistentStorage: true,
+        next: decision.next
+      }, { status: decision.canExecute ? 200 : 202 });
+    } catch (error) {
+      return NextResponse.json({
+        ok: false,
+        system: "Approval-Gated Execution Worker",
+        intent,
+        decision,
+        memory,
+        persistentStorage: true,
+        error: error instanceof Error ? error.message : "Unknown database error",
+        next: "/api/approval"
+      }, { status: 503 });
+    }
+  }
 
   return NextResponse.json({
     ok: decision.canExecute,
     system: "Approval-Gated Execution Worker",
     intent,
     decision,
+    memory,
+    persistentStorage: false,
     next: decision.next
   }, { status: decision.canExecute ? 200 : 202 });
 }
