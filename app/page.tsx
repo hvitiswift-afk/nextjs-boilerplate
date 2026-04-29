@@ -18,13 +18,23 @@ const stack = [
 
 const scale = ["0 Local enclave", "1 Edge bridge", "2 Server tower", "3 Worker swarm", "4 LLM mesh", "5 Outpost 2099-2100"];
 
+const vaultDoors = [
+  { label: "Operator Dashboard", href: "/vault", note: "Inspect manifest, health, ledger, and approval audit filters." },
+  { label: "Manifest API", href: "/api/vault/manifest", note: "Discover durable route authority and evidence law." },
+  { label: "Health API", href: "/api/vault/health", note: "Diagnose vault table connectivity and audit storage." },
+  { label: "Ledger API", href: "/api/vault/ledger?limit=25", note: "Read time-ordered evidence across the Stone Vault." },
+];
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#07070b] text-[#f5efe2]">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:px-10 lg:px-12">
-        <nav className="flex items-center justify-between border-b border-white/10 pb-5 text-sm text-white/60">
+        <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5 text-sm text-white/60">
           <span className="font-mono uppercase tracking-[0.35em] text-cyan-200">Goblin + Fabian</span>
-          <span>Lichburn Enclave / 2099-2100 Outpost</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <a className="transition hover:text-cyan-100" href="/vault">Vault Dashboard</a>
+            <span>Lichburn Enclave / 2099-2100 Outpost</span>
+          </div>
         </nav>
 
         <div className="grid flex-1 items-center gap-10 py-16 lg:grid-cols-[1.05fr_0.95fr]">
@@ -37,7 +47,8 @@ export default function Home() {
               Fabian plans, Goblin routes, hyperscripts coordinate, servers execute only after approval, and the 2099-2100 Outpost preserves continuity.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="#algorithm">Open Algorithm</a>
+              <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="/vault">Open Vault Dashboard</a>
+              <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#algorithm">Open Algorithm</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#scale">Hyperscale Path</a>
             </div>
           </section>
@@ -59,6 +70,22 @@ export default function Home() {
           </section>
         </div>
 
+        <section id="vault" className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
+          <div>
+            <h2 className="text-3xl font-black">Stone Vault</h2>
+            <p className="mt-3 text-white/65">Operator visibility for manifest, health, ledger, Violet Gate decisions, and approval audit evidence.</p>
+          </div>
+          <div className="grid gap-4 lg:col-span-2 sm:grid-cols-2">
+            {vaultDoors.map((door) => (
+              <a key={door.href} href={door.href} className="rounded-3xl border border-cyan-200/15 bg-cyan-200/[0.045] p-5 text-white/75 transition hover:border-cyan-200/40 hover:bg-cyan-200/[0.08]">
+                <span className="block font-bold text-cyan-100">{door.label}</span>
+                <span className="mt-2 block text-sm text-white/55">{door.note}</span>
+                <span className="mt-3 block break-all font-mono text-xs text-cyan-100/70">{door.href}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
         <section id="algorithm" className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
           <div>
             <h2 className="text-3xl font-black">Algorithm</h2>
@@ -76,7 +103,8 @@ export default function Home() {
           </div>
           <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`FABIAN(intent) = listen → decompose → hyperscript → verify → hand-back
 GOBLIN(task) = classify → route → track → approve → deploy
-OUTPOST = receipts + logs + approval + continuity`}</pre>
+OUTPOST = receipts + logs + approval + continuity
+STONE_VAULT = manifest + health + ledger + audit evidence`}</pre>
         </section>
       </section>
     </main>
