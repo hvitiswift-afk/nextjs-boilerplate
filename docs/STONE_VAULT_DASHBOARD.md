@@ -2,16 +2,18 @@
 
 The Stone Vault Operator Dashboard is the first Phase 3 inspection page for the Goblin + Fabian Stone Vault.
 
-## Connected page
+## Connected pages
 
 ```txt
 /vault
+/vault/operator-forms
 ```
 
-## Source file
+## Source files
 
 ```txt
 app/vault/page.tsx
+app/vault/operator-forms/page.tsx
 ```
 
 ## Home link
@@ -30,6 +32,8 @@ The dashboard gives an operator visible doors into the Vault without requiring c
 manifest
 health
 ledger
+operator action cards
+interactive operator forms
 approval review
 approval creation examples
 approval decision examples
@@ -58,6 +62,42 @@ GET /api/vault/manifest
 GET /api/vault/health
 GET /api/vault/ledger?limit=25
 ```
+
+## Operator action cards
+
+```txt
+Operator forms
+→ /vault/operator-forms
+→ live POST forms
+```
+
+```txt
+Pending approval review
+→ GET /api/vault/ledger?kind=approval&status=pending&limit=25
+→ review queue
+```
+
+```txt
+Decision audit
+→ GET /api/vault/ledger?kind=approval-audit&limit=25
+→ transition evidence
+```
+
+## Interactive operator forms
+
+```txt
+Create approval form
+→ POST /api/approval
+→ response console
+```
+
+```txt
+Decide approval form
+→ POST /api/approval/decision
+→ response console
+```
+
+The forms turn operator input into explicit JSON posts. They do not hide execution behind the interface.
 
 ## Approval review cards
 
@@ -221,6 +261,7 @@ Ledger View
 
 ```txt
 inspect
+→ use forms
 → create approval
 → decide explicitly
 → audit
@@ -238,6 +279,16 @@ The dashboard helps an operator inspect the Vault, but it does not authorize con
 ```txt
 dashboard visible
 ≠ approved
+```
+
+```txt
+operator form visible
+≠ approved
+```
+
+```txt
+form submitted
+≠ hidden execution
 ```
 
 ```txt
@@ -291,6 +342,7 @@ Approval still belongs to Violet Gate.
 
 ```txt
 Dashboard visibility does not authorize execution.
+Operator forms post visible evidence, not hidden execution.
 Health is diagnostic, not approval.
 Ledger rows are evidence, not approval.
 Approval review is visibility, not authorization.
@@ -326,6 +378,10 @@ HyperIntent
 → Phase 3 Operator Dashboard
 → Home Page Vault Link
 → /vault Dashboard Page
+→ /vault/operator-forms Page
+→ Operator Action Cards
+→ Interactive Approval Forms
+→ Response Console
 → Approval Review Cards
 → Approval Command Blocks
 → Progress Timeline Cards
