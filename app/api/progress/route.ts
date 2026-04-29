@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasDatabaseUrl, query } from "../../../lib/db";
+import { createProgressEvent } from "../../../lib/progress-event-builder";
 import type { ProgressEvent } from "../../../lib/hyperscript";
-import { listProgressEvents, listProgressEventsForTask, mapProgressRow } from "../../../lib/progress-vault-sql";
+import { insertProgressEvent, listProgressEvents, listProgressEventsForTask, mapProgressRow } from "../../../lib/progress-vault-sql";
 
 const now = new Date().toISOString();
 
@@ -61,5 +62,43 @@ export async function GET(request: NextRequest) {
     system: "Progress Lantern",
     persistentStorage: false,
     events: taskId ? progress.filter((event) => event.taskId === taskId) : progress
+  });
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json().catch(() => ({}));
+  const event = createProgressEvent({
+    id: typeof body.id === "string" ? body.id : undefined,
+    taskId: typeof body.taskId === "string" ? body.taskId : undefined,
+    step: body.step,
+    status: body.status,
+    message: typeof body.message === "string" ? body.message : undefined
+  });
+
+  if (hasDatabaseUrl()) {
+    try {
+      const rows = await query(insertProgressEvent(event));
+      return NextResponse.json({
+        ok: true,
+        system: "Progress Lantern",
+        event: rows[0] ? mapProgressRow(rows[0]) : event,
+        persistentStorage: true
+      });
+    } catch (error) {
+      return NextResponse.json({
+        ok: false,
+        system: "Progress Lantern",
+        event,
+        persistentStorage: true,
+        error: error instanceof Error ? error.message : "Unknown database error"
+      }, { status: 503 });
+    }
+  }
+
+  return NextResponse.json({
+    ok: true,
+    system: "Progress Lantern",
+    event,
+    persistentStorage: false
   });
 }
