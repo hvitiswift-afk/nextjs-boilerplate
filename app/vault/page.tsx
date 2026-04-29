@@ -30,6 +30,66 @@ const ledgerFilters = [
   { label: "Receipts", href: "/api/vault/ledger?kind=receipt&limit=25" }
 ];
 
+const approvalReviewCards = [
+  {
+    title: "Create approval evidence",
+    method: "POST",
+    endpoint: "/api/approval",
+    status: "visible request",
+    body: "Create a pending approval record for a gated task before any consequence-bearing execution."
+  },
+  {
+    title: "Review pending approvals",
+    method: "GET",
+    endpoint: "/api/vault/ledger?kind=approval&status=pending&limit=25",
+    status: "operator review",
+    body: "Inspect pending approval rows in the ledger before deciding."
+  },
+  {
+    title: "Decide with Violet Gate",
+    method: "POST",
+    endpoint: "/api/approval/decision",
+    status: "explicit decision",
+    body: "Approve or reject a pending approval with decidedBy and note evidence."
+  }
+];
+
+const approvalCommandBlocks = [
+  {
+    title: "Create",
+    code: `curl -X POST http://localhost:3000/api/approval \\
+  -H "content-type: application/json" \\
+  -d '{
+    "id": "approval-demo-gated",
+    "taskId": "execute-demo-gated",
+    "risk": "needs-approval",
+    "requestedAction": "Approve the gated demo execution."
+  }'`
+  },
+  {
+    title: "Approve",
+    code: `curl -X POST http://localhost:3000/api/approval/decision \\
+  -H "content-type: application/json" \\
+  -d '{
+    "id": "approval-demo-gated",
+    "status": "approved",
+    "decidedBy": "manual-operator",
+    "note": "Approved after reviewing the gated demo execution."
+  }'`
+  },
+  {
+    title: "Reject",
+    code: `curl -X POST http://localhost:3000/api/approval/decision \\
+  -H "content-type: application/json" \\
+  -d '{
+    "id": "approval-demo-gated",
+    "status": "rejected",
+    "decidedBy": "manual-operator",
+    "note": "Rejected because the request was not ready."
+  }'`
+  }
+];
+
 const operatorCards = [
   {
     title: "Violet Gate",
@@ -67,11 +127,11 @@ export default function VaultDashboardPage() {
 
         <section className="py-14">
           <p className="mb-4 inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100">
-            Phase 3 • health • manifest • ledger • audit visibility
+            Phase 3 • health • manifest • ledger • approval review
           </p>
           <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-7xl">Operate the Stone Vault without guessing.</h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-            This dashboard gives an operator quick doors into the manifest, health checks, ledger filters, Violet Gate decisions, and approval audit evidence.
+            This dashboard gives an operator quick doors into the manifest, health checks, ledger filters, Violet Gate decisions, approval review, and approval audit evidence.
           </p>
         </section>
 
@@ -86,6 +146,37 @@ export default function VaultDashboardPage() {
               <p className="mt-5 font-mono text-sm text-cyan-100">{door.href}</p>
             </a>
           ))}
+        </section>
+
+        <section className="mt-8 rounded-[2rem] border border-violet-200/20 bg-violet-200/[0.05] p-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-black">Approval review</h2>
+              <p className="mt-2 text-white/65">Create approval evidence, inspect pending rows, then decide explicitly through Violet Gate.</p>
+            </div>
+            <a className="rounded-full border border-white/15 px-4 py-2 font-bold text-white" href="/api/vault/ledger?kind=approval&status=pending&limit=25">Open pending approvals</a>
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {approvalReviewCards.map((card) => (
+              <a key={card.title} href={card.endpoint} className="rounded-[1.5rem] border border-white/10 bg-black/25 p-5 transition hover:border-violet-100/40 hover:bg-black/35">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-xl font-black">{card.title}</h3>
+                  <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-xs text-violet-100">{card.method}</span>
+                </div>
+                <p className="mt-3 inline-flex rounded-full bg-violet-300/10 px-3 py-1 text-sm text-violet-100">{card.status}</p>
+                <p className="mt-4 text-sm text-white/65">{card.body}</p>
+                <p className="mt-4 break-all font-mono text-xs text-violet-100/70">{card.endpoint}</p>
+              </a>
+            ))}
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {approvalCommandBlocks.map((block) => (
+              <article key={block.title} className="rounded-[1.5rem] bg-black/35 p-5">
+                <h3 className="text-lg font-black text-violet-100">{block.title}</h3>
+                <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-2xl bg-black/40 p-4 text-xs leading-6 text-cyan-100">{block.code}</pre>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="mt-8 rounded-[2rem] border border-fuchsia-200/20 bg-fuchsia-200/[0.05] p-6">
@@ -123,7 +214,7 @@ export default function VaultDashboardPage() {
               <div key={law} className="rounded-2xl bg-black/30 p-4 text-sm text-cyan-50">{law}</div>
             ))}
           </div>
-          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`OPERATOR = inspect → decide explicitly → audit → verify ledger
+          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`OPERATOR = inspect → create approval → decide explicitly → audit → verify ledger
 DASHBOARD = visibility, not authorization
 VIOLET_GATE = only approval line for consequence-bearing work`}</pre>
         </section>
