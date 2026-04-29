@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chooseProvider, getProviderAdapters, type ProviderCapability } from "../../../lib/provider-adapters";
+import { chooseProvider, getProviderAdapters, type ProviderCapability, type ProviderRouteRequest } from "../../../lib/provider-adapters";
+import { providerDecisionToMemory } from "../../../lib/provider-memory";
 import type { ProviderName } from "../../../lib/hyperscript";
 
 const providerNames: ProviderName[] = ["openai", "anthropic", "grok", "local", "fabian", "goblin"];
@@ -44,17 +45,21 @@ export async function POST(request: NextRequest) {
   const preferredProvider = isProviderName(body.preferredProvider) ? body.preferredProvider : undefined;
   const requiredCapability = isProviderCapability(body.requiredCapability) ? body.requiredCapability : undefined;
 
-  const decision = chooseProvider({
+  const providerRequest: ProviderRouteRequest = {
     id,
     intent,
     preferredProvider,
     requiredCapability
-  });
+  };
+
+  const decision = chooseProvider(providerRequest);
+  const memory = providerDecisionToMemory({ request: providerRequest, decision });
 
   return NextResponse.json({
     ok: true,
     system: "Provider Adapter Hall",
     decision,
+    memory,
     next: decision.approvalRequired ? "/api/approval" : "/api/progress"
   });
 }
