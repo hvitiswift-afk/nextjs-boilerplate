@@ -43,6 +43,32 @@ const samplePayload = {
   ]
 };
 
+const tickPayload = {
+  idempotency_key: "GL-20260429-CAM-BATT-001-SCANOUT",
+  timestamp: "2026-04-29T12:00:00Z",
+  production_id: "GL-FACE-BOOGIE-NIGHTS",
+  event_type: "scan_out",
+  layer: ["🛠️", "🧾"],
+  actor: {
+    type: "crew",
+    id: "GL-CREW-0001",
+    role: "camera assistant"
+  },
+  object: {
+    type: "equipment",
+    id: "CAM-BATT-001",
+    barcode: "GL-BARCODE-CAM-BATT-001"
+  },
+  location: {
+    type: "cad_zone",
+    id: "GL-CAD-CAMERA-CART"
+  },
+  source: {
+    type: "scanner",
+    id: "SCANNER-001"
+  }
+};
+
 const polarityLegend = [
   { name: "Positive", color: "#FFEA4A", shape: "▲", line: "ray", meaning: "outward drive / emission / activation" },
   { name: "Negative", color: "#2B6CFF", shape: "■", line: "ground", meaning: "return path / containment / sink" },
@@ -93,6 +119,17 @@ type ScoreResult = {
   }>;
 };
 
+type TickResult = {
+  ok: boolean;
+  tick_id?: string;
+  status: string;
+  metrics_updated?: boolean;
+  reason?: string;
+  missing?: string[];
+  event?: Record<string, unknown>;
+  rule?: string;
+};
+
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 18, background: "rgba(255,255,255,0.04)", padding: 18 }}>
@@ -104,7 +141,9 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 
 export default function GriploomPage() {
   const [result, setResult] = useState<ScoreResult | null>(null);
+  const [tickResult, setTickResult] = useState<TickResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [tickLoading, setTickLoading] = useState(false);
 
   async function runSample() {
     setLoading(true);
@@ -122,6 +161,22 @@ export default function GriploomPage() {
     }
   }
 
+  async function runTick() {
+    setTickLoading(true);
+    try {
+      const response = await fetch("/api/tick", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(tickPayload)
+      });
+
+      const json = await response.json();
+      setTickResult(json);
+    } finally {
+      setTickLoading(false);
+    }
+  }
+
   return (
     <main style={{ maxWidth: 1120, margin: "0 auto", padding: 32, color: "#f5efe2" }}>
       <p><a href="/" style={{ color: "#a5f3fc" }}>← Back home</a></p>
@@ -130,10 +185,13 @@ export default function GriploomPage() {
 
       <section style={{ margin: "24px 0", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <button onClick={runSample} disabled={loading} style={{ borderRadius: 999, padding: "12px 18px", fontWeight: 800 }}>
-          {loading ? "Running…" : "Run Sample"}
+          {loading ? "Running…" : "Run ML Sample"}
+        </button>
+        <button onClick={runTick} disabled={tickLoading} style={{ borderRadius: 999, padding: "12px 18px", fontWeight: 800 }}>
+          {tickLoading ? "Sending…" : "Send SAME-TICK"}
         </button>
         <span style={{ color: "rgba(245,239,226,0.68)" }}>
-          GRIPLOOM ML ranks. GOBLIN ML challenges. BLACKLETTER permits.
+          GRIPLOOM ML ranks. GOBLIN ML challenges. BLACKLETTER permits. SAME-TICK records the pulse.
         </span>
       </section>
 
@@ -184,6 +242,18 @@ export default function GriploomPage() {
         </div>
       )}
 
+      {tickResult && (
+        <div style={{ margin: "24px 0" }}>
+          <Card title="⏱️ SAME-TICK Result">
+            <p><strong>Status:</strong> {tickResult.status}</p>
+            <p><strong>Tick ID:</strong> {tickResult.tick_id ?? "-"}</p>
+            <p><strong>Metrics Updated:</strong> {String(tickResult.metrics_updated ?? false)}</p>
+            <p><strong>Rule:</strong> {tickResult.rule ?? tickResult.reason}</p>
+            {tickResult.missing?.length ? <p><strong>Missing:</strong> {tickResult.missing.join(", ")}</p> : null}
+          </Card>
+        </div>
+      )}
+
       {result?.results && (
         <section style={{ display: "grid", gap: 16, margin: "24px 0" }}>
           <h2>Repeat Beams</h2>
@@ -208,16 +278,25 @@ export default function GriploomPage() {
       )}
 
       <details style={{ marginTop: 28 }}>
-        <summary>Sample Payload</summary>
+        <summary>ML Sample Payload</summary>
         <pre style={{ overflowX: "auto", background: "#111", color: "#eee", padding: 16, borderRadius: 14 }}>
           {JSON.stringify(samplePayload, null, 2)}
         </pre>
       </details>
 
-      <details style={{ marginTop: 16 }} open={!result}>
-        <summary>Raw Result</summary>
+      <details style={{ marginTop: 16 }}>
+        <summary>SAME-TICK Payload</summary>
         <pre style={{ overflowX: "auto", background: "#111", color: "#eee", padding: 16, borderRadius: 14 }}>
-          {result ? JSON.stringify(result, null, 2) : "Run the sample to see mesh, vitality, beam scores, GOBLIN flags, and BLACKLETTER status."}
+          {JSON.stringify(tickPayload, null, 2)}
+        </pre>
+      </details>
+
+      <details style={{ marginTop: 16 }} open={!result && !tickResult}>
+        <summary>Raw Results</summary>
+        <pre style={{ overflowX: "auto", background: "#111", color: "#eee", padding: 16, borderRadius: 14 }}>
+          {result || tickResult
+            ? JSON.stringify({ ml: result, tick: tickResult }, null, 2)
+            : "Run the samples to see mesh, vitality, beam scores, GOBLIN flags, BLACKLETTER status, and SAME-TICK ingestion."}
         </pre>
       </details>
     </main>
