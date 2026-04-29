@@ -31,6 +31,27 @@ const ledgerFilters = [
   { label: "Receipts", href: "/api/vault/ledger?kind=receipt&limit=25" }
 ];
 
+const operatorActionCards = [
+  {
+    title: "Operator forms",
+    href: "/vault/operator-forms",
+    status: "live POST forms",
+    body: "Create approval evidence and submit Violet Gate decisions from visible forms."
+  },
+  {
+    title: "Pending approval review",
+    href: "/api/vault/ledger?kind=approval&status=pending&limit=25",
+    status: "review queue",
+    body: "Inspect pending approval records before creating a decision."
+  },
+  {
+    title: "Decision audit",
+    href: "/api/vault/ledger?kind=approval-audit&limit=25",
+    status: "transition evidence",
+    body: "Verify approval transitions after a decision form is submitted."
+  }
+];
+
 const approvalReviewCards = [
   {
     title: "Create approval evidence",
@@ -195,6 +216,7 @@ const operatorCards = [
 
 const laws = [
   "Dashboard visibility does not authorize execution.",
+  "Operator forms post visible evidence, not hidden execution.",
   "Health is diagnostic, not approval.",
   "Ledger rows are evidence, not approval.",
   "Progress timeline cards are evidence, not approval.",
@@ -211,17 +233,25 @@ export default function VaultDashboardPage() {
       <section className="mx-auto w-full max-w-6xl px-6 py-10 sm:px-10 lg:px-12">
         <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5 text-sm text-white/60">
           <a className="font-mono uppercase tracking-[0.35em] text-cyan-200" href="/">Goblin + Fabian</a>
-          <span>Stone Vault Operator Dashboard</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <a className="transition hover:text-cyan-100" href="/vault/operator-forms">Operator Forms</a>
+            <span>Stone Vault Operator Dashboard</span>
+          </div>
         </nav>
 
         <section className="py-14">
           <p className="mb-4 inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100">
-            Phase 3 • health • manifest • ledger • approval review • progress timeline • ML lane • Outpost • receipts
+            Phase 3 • health • manifest • ledger • operator forms • approval review • progress timeline • ML lane • Outpost • receipts
           </p>
           <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-7xl">Operate the Stone Vault without guessing.</h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-            This dashboard gives an operator quick doors into the manifest, health checks, ledger filters, Violet Gate decisions, approval review, progress timelines, ML evidence, Outpost round trips, receipts, and approval audit evidence.
+            This dashboard gives an operator quick doors into the manifest, health checks, ledger filters, live approval forms, Violet Gate decisions, approval review, progress timelines, ML evidence, Outpost round trips, receipts, and approval audit evidence.
           </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a className="rounded-full bg-violet-200 px-5 py-3 font-black text-black" href="/vault/operator-forms">Open Operator Forms</a>
+            <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="/api/vault/ledger?kind=approval&status=pending&limit=25">Review pending approvals</a>
+            <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="/api/vault/ledger?kind=approval-audit&limit=25">Verify audit</a>
+          </div>
         </section>
 
         <section className="grid gap-5 lg:grid-cols-3">
@@ -235,6 +265,26 @@ export default function VaultDashboardPage() {
               <p className="mt-5 font-mono text-sm text-cyan-100">{door.href}</p>
             </a>
           ))}
+        </section>
+
+        <section className="mt-8 rounded-[2rem] border border-violet-200/20 bg-violet-200/[0.05] p-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-black">Operator actions</h2>
+              <p className="mt-2 text-white/65">Use forms for explicit approval work, then verify pending and audit evidence in the ledger.</p>
+            </div>
+            <a className="rounded-full border border-white/15 px-4 py-2 font-bold text-white" href="/vault/operator-forms">Open forms</a>
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {operatorActionCards.map((card) => (
+              <a key={card.title} href={card.href} className="rounded-[1.5rem] border border-white/10 bg-black/25 p-5 transition hover:border-violet-100/40 hover:bg-black/35">
+                <h3 className="text-xl font-black">{card.title}</h3>
+                <p className="mt-3 inline-flex rounded-full bg-violet-300/10 px-3 py-1 text-sm text-violet-100">{card.status}</p>
+                <p className="mt-4 text-sm text-white/65">{card.body}</p>
+                <p className="mt-4 break-all font-mono text-xs text-violet-100/70">{card.href}</p>
+              </a>
+            ))}
+          </div>
         </section>
 
         <section className="mt-8 rounded-[2rem] border border-violet-200/20 bg-violet-200/[0.05] p-6">
@@ -378,13 +428,14 @@ export default function VaultDashboardPage() {
 
         <section className="mt-8 rounded-[2rem] border border-cyan-200/20 bg-cyan-200/[0.06] p-7">
           <h2 className="text-2xl font-black">Operator law</h2>
-          <div className="mt-5 grid gap-3 lg:grid-cols-3">
+          <div className="mt-5 grid gap-3 lg:grid-cols-2">
             {laws.map((law) => (
               <div key={law} className="rounded-2xl bg-black/30 p-4 text-sm text-cyan-50">{law}</div>
             ))}
           </div>
-          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`OPERATOR = inspect → create approval → decide explicitly → audit → track progress → inspect ML evidence → inspect Outpost round trips → reconcile receipts → verify ledger
+          <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`OPERATOR = inspect → use forms → create approval → decide explicitly → audit → track progress → inspect ML evidence → inspect Outpost round trips → reconcile receipts → verify ledger
 DASHBOARD = visibility, not authorization
+FORMS = explicit JSON posts, not hidden execution
 VIOLET_GATE = only approval line for consequence-bearing work`}</pre>
         </section>
       </section>
