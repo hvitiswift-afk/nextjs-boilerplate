@@ -1,0 +1,25 @@
+{
+  "idempotency_key": "GL-20260429-CAM-BATT-001-SCANOUT",
+  "timestamp": "2026-04-29T12:00:00Z",
+  "production_id": "GL-FACE-BOOGIE-NIGHTS",
+  "event_type": "scan_out",
+  "layer": ["🛠️", "🧾"],
+  "actor": {
+    "type": "crew",
+    "id": "GL-CREW-0001",
+    "role": "camera assistant"
+  },
+  "object": {
+    "type": "equipment",
+    "id": "CAM-BATT-001",
+    "barcode": "GL-BARCODE-CAM-BATT-001"
+  },
+  "location": {
+    "type": "cad_zone",
+    "id": "GL-CAD-CAMERA-CART"
+  },
+  "source": {
+    "type": "scanner",
+    "id": "SCANNER-001"
+  }
+}
