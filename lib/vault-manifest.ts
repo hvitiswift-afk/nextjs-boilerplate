@@ -44,6 +44,13 @@ export const VAULT_MANIFEST_ENDPOINTS: VaultManifestEndpoint[] = [
     approvalAuthority: true
   },
   {
+    name: "Approval Decision",
+    method: "POST",
+    path: "/api/approval/decision",
+    purpose: "Explicitly approve or reject an existing pending approval record.",
+    approvalAuthority: true
+  },
+  {
     name: "Progress Lantern",
     method: "POST",
     path: "/api/progress",
@@ -69,6 +76,7 @@ export const VAULT_MANIFEST_ENDPOINTS: VaultManifestEndpoint[] = [
 export const VAULT_MANIFEST_LAW = [
   "The manifest is a map, not an authorization.",
   "Only Violet Gate can approve consequence-bearing execution.",
+  "Approval creation and approval decision are separate visible acts.",
   "Health, ledger, progress, outpost, and receipt records are evidence.",
   "Every durable route should be discoverable without guessing."
 ] as const;
@@ -86,6 +94,7 @@ export const VAULT_MANIFEST_SPINE = [
   "Execution Worker API",
   "Execution Memory Persistence",
   "Approval Vault Persistence",
+  "Approval Decision API",
   "Progress Vault Persistence",
   "Outpost Vault Persistence",
   "Receipt Records",
