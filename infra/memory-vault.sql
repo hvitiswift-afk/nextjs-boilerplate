@@ -37,6 +37,10 @@ create table if not exists approval_records (
   decided_at timestamptz
 );
 
+create index if not exists approval_records_task_id_idx on approval_records(task_id);
+create index if not exists approval_records_status_idx on approval_records(status);
+create index if not exists approval_records_created_at_idx on approval_records(created_at desc);
+
 create table if not exists progress_events (
   id text primary key,
   task_id text not null,
@@ -45,6 +49,10 @@ create table if not exists progress_events (
   message text not null,
   created_at timestamptz not null default now()
 );
+
+create index if not exists progress_events_task_id_idx on progress_events(task_id);
+create index if not exists progress_events_status_idx on progress_events(status);
+create index if not exists progress_events_created_at_idx on progress_events(created_at desc);
 
 create table if not exists outpost_entries (
   id text primary key,
@@ -57,6 +65,11 @@ create table if not exists outpost_entries (
   created_at timestamptz not null default now()
 );
 
+create index if not exists outpost_entries_kind_idx on outpost_entries(kind);
+create index if not exists outpost_entries_direction_idx on outpost_entries(direction);
+create index if not exists outpost_entries_created_at_idx on outpost_entries(created_at desc);
+create index if not exists outpost_entries_payload_idx on outpost_entries using gin(payload);
+
 create table if not exists receipt_records (
   id text primary key,
   source text not null,
@@ -67,6 +80,10 @@ create table if not exists receipt_records (
   outpost_return_url text,
   created_at timestamptz not null default now()
 );
+
+create index if not exists receipt_records_source_idx on receipt_records(source);
+create index if not exists receipt_records_status_idx on receipt_records(status);
+create index if not exists receipt_records_created_at_idx on receipt_records(created_at desc);
 
 -- Law of the Vault:
 -- No secrets in source.
