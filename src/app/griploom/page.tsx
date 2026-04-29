@@ -43,6 +43,13 @@ const samplePayload = {
   ]
 };
 
+const polarityLegend = [
+  { name: "Positive", color: "#FFEA4A", shape: "▲", line: "ray", meaning: "outward drive / emission / activation" },
+  { name: "Negative", color: "#2B6CFF", shape: "■", line: "ground", meaning: "return path / containment / sink" },
+  { name: "Neutral", color: "#C0C0C0", shape: "●", line: "axis", meaning: "balance / reference / stable node" },
+  { name: "Alternating", color: "#D84AD8", shape: "◆", line: "wave", meaning: "oscillation / exchange / same-tick switching" }
+];
+
 type ScoreResult = {
   product: string;
   rule: string;
@@ -129,6 +136,33 @@ export default function GriploomPage() {
           GRIPLOOM ML ranks. GOBLIN ML challenges. BLACKLETTER permits.
         </span>
       </section>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, margin: "24px 0" }}>
+        <Card title="🎨 Electronic Color">
+          <p><strong>Color identifies the shirt layer.</strong></p>
+          <p>Examples: 🛠️ crew, 🎭 cast, 🎯 director, 🏛️ house, 👥 audience.</p>
+          <p style={{ color: "rgba(245,239,226,0.68)" }}>Electronic color answers: what is this node?</p>
+        </Card>
+
+        <Card title="⚡ Electronic Polarity">
+          <p><strong>Polarity identifies movement and charge behavior.</strong></p>
+          <div style={{ display: "grid", gap: 10 }}>
+            {polarityLegend.map((item) => (
+              <div key={item.name} style={{ display: "grid", gridTemplateColumns: "36px 1fr", gap: 10, alignItems: "center" }}>
+                <span style={{ color: item.color, fontSize: 26 }}>{item.shape}</span>
+                <span><strong>{item.name}</strong> / {item.line}: {item.meaning}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card title="🔦 Shape + Line Rule">
+          <p><strong>Color tells identity.</strong></p>
+          <p><strong>Polarity tells direction.</strong></p>
+          <p><strong>Shape gives body.</strong></p>
+          <p><strong>Ray / line / wave shows how energy moves.</strong></p>
+        </Card>
+      </div>
 
       {result && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, margin: "24px 0" }}>
