@@ -38,6 +38,10 @@ approval audit filters
 progress timeline
 progress task filters
 progress completion filters
+ML evidence lane
+ML memory filters
+ML provider receipts
+ML gated task trace
 outpost filters
 receipt filters
 ```
@@ -104,6 +108,28 @@ Complete steps
 
 Progress timeline cards make task state easier to inspect. They do not grant approval.
 
+## ML evidence cards
+
+```txt
+ML memory lane
+→ GET /api/vault/ledger?kind=memory&limit=25
+→ model context evidence
+```
+
+```txt
+ML provider receipts
+→ GET /api/vault/ledger?kind=receipt&limit=25
+→ provider receipt evidence
+```
+
+```txt
+ML gated task
+→ GET /api/vault/ledger?taskId=ml-demo-inference&limit=25
+→ cross-table task evidence for an ML inference path
+```
+
+The ML lane is for model context, provider receipts, and task evidence. ML output is never approval by itself.
+
 ## Ledger filter doors
 
 ```txt
@@ -115,6 +141,8 @@ Progress timeline cards make task state easier to inspect. They do not grant app
 /api/vault/ledger?kind=progress&limit=25
 /api/vault/ledger?kind=progress&taskId=execute-demo-gated&limit=25
 /api/vault/ledger?kind=progress&status=complete&limit=25
+/api/vault/ledger?kind=memory&limit=25
+/api/vault/ledger?taskId=ml-demo-inference&limit=25
 /api/vault/ledger?kind=outpost&limit=25
 /api/vault/ledger?kind=receipt&limit=25
 ```
@@ -144,6 +172,7 @@ inspect
 → decide explicitly
 → audit
 → track progress
+→ inspect ML evidence
 → verify ledger
 ```
 
@@ -177,6 +206,16 @@ progress timeline card visible
 ```
 
 ```txt
+ML evidence card visible
+≠ approved
+```
+
+```txt
+ML provider receipt visible
+≠ executed
+```
+
+```txt
 audit row visible
 ≠ executed
 ```
@@ -191,6 +230,7 @@ Health is diagnostic, not approval.
 Ledger rows are evidence, not approval.
 Approval review is visibility, not authorization.
 Progress timeline cards are evidence, not approval.
+ML evidence cards are receipts and memory, not approval.
 Approval decision audit rows are transition evidence, not execution.
 Only Violet Gate authorizes consequence-bearing work.
 ```
@@ -223,6 +263,10 @@ HyperIntent
 → Approval Command Blocks
 → Progress Timeline Cards
 → Progress Task Filters
+→ ML Evidence Lane
+→ ML Memory Filter
+→ ML Provider Receipts
+→ ML Gated Task Trace
 → Violet Gate
 → Outpost 2099-2100
 → Return Door
