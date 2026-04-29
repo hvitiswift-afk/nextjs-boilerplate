@@ -14,11 +14,18 @@ POST /api/approval/decision
 lib/approval-decision-sql.ts
 ```
 
+## Durable tables
+
+```txt
+approval_records
+approval_decision_audit_records
+```
+
 ## Purpose
 
-The decision route updates an existing pending approval record to either `approved` or `rejected`.
+The decision route updates an existing pending approval record to either `approved` or `rejected`, then writes a durable audit note for the transition.
 
-Approval creation and approval decision are intentionally separate.
+Approval creation, approval decision, and approval audit are intentionally separate visible acts.
 
 ```txt
 POST /api/approval
@@ -28,6 +35,12 @@ POST /api/approval
 ```txt
 POST /api/approval/decision
 → decides pending approval evidence
+→ writes approval decision audit evidence
+```
+
+```txt
+GET /api/vault/ledger?kind=approval-audit
+→ inspects approval decision audit evidence
 ```
 
 ## Decision outcomes
@@ -57,8 +70,29 @@ raw request body
 → decideApprovalRecord()
 → update approval_records.status
 → update approval_records.decided_at
-→ return memoryPayload evidence
+→ createApprovalDecisionAuditInput()
+→ insertApprovalDecisionAuditRecord()
+→ write approval_decision_audit_records
+→ return approval + audit + memoryPayload evidence
 ```
+
+## Audit payload
+
+Each persisted decision receives an audit row with:
+
+```txt
+id
+approval_id
+task_id
+previous_status
+decision_status
+decided_by
+note
+payload
+created_at
+```
+
+Audit payload includes the normalized decision, updated approval record, and decision law.
 
 ## Safety behavior
 
@@ -83,6 +117,12 @@ approval already decided
 ```txt
 unknown status
 → rejected
+```
+
+```txt
+audit insert fails
+→ 503
+→ decision response is not reported as complete
 ```
 
 ## Example approve
@@ -111,6 +151,15 @@ curl -X POST http://localhost:3000/api/approval/decision \
   }'
 ```
 
+## Example audit inspection
+
+```bash
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&limit=25
+curl http://localhost:3000/api/vault/ledger?approvalId=approval-demo-gated&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&status=approved&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&status=rejected&limit=25
+```
+
 ## Decision is not execution
 
 An approved decision is evidence that a matching gated task may proceed. It does not silently execute the task.
@@ -125,12 +174,18 @@ approval rejected
 → Violet Gate remains closed
 ```
 
+```txt
+audit row visible
+≠ executed
+```
+
 ## Law
 
 ```txt
 Only approved or rejected are valid decision outcomes.
 Unknown decision status falls back to rejected.
 Every decision requires visible decidedBy evidence.
+Every persisted decision receives a durable audit note.
 Approval decisions update approval_records but do not silently execute work.
 ```
 
@@ -147,8 +202,10 @@ HyperIntent
 → Phase 2 Decision Records
 → Approval Decision SQL Helpers
 → Approval Decision API
+→ Approval Decision Audit Vault
 → Approval Decision Manual
 → Approval Vault Persistence
+→ Unified Vault Ledger Audit Rows
 → Violet Gate
 → Outpost 2099-2100
 → Return Door
