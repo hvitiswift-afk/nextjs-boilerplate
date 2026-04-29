@@ -1,0 +1,29 @@
+{
+  "beams": [
+    {
+      "id": "GL-BEAM-SHAWN-JOSEPH",
+      "people": ["Shawn Ensign", "Joseph Dianda"],
+      "sharedProductions": [
+        "The Usual Suspects",
+        "Boogie Nights",
+        "Gun Shy",
+        "The Truth About Cats & Dogs",
+        "The Trigger Effect",
+        "Wag the Dog"
+      ],
+      "repeatCount": 6,
+      "layer": "crew",
+      "confidence": 0.95,
+      "status": "CORE"
+    },
+    {
+      "id": "GL-BEAM-CANDIDATE-WEAK",
+      "people": ["Candidate Person A", "Candidate Person B"],
+      "sharedProductions": ["One Production"],
+      "repeatCount": 1,
+      "layer": "crew",
+      "confidence": 0.62,
+      "status": "CANDIDATE"
+    }
+  ]
+}
