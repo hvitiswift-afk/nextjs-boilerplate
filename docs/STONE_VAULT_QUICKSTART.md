@@ -25,6 +25,7 @@ This creates:
 ```txt
 memory_records
 approval_records
+approval_decision_audit_records
 progress_events
 outpost_entries
 receipt_records
@@ -114,7 +115,7 @@ curl -X POST http://localhost:3000/api/approval \
 
 Approval records are visible evidence. Silent approval is not allowed for `needs-approval` work.
 
-## 8. Decide the approval record
+## 8. Decide and audit the approval record
 
 Approve example:
 
@@ -142,9 +143,20 @@ curl -X POST http://localhost:3000/api/approval/decision \
   }'
 ```
 
-Approval decisions update pending approval records. They do not silently execute work.
+Approval decisions update pending approval records and write durable audit rows to `approval_decision_audit_records`. They do not silently execute work.
 
-## 9. Record progress
+## 9. Inspect the audit trail
+
+```bash
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&limit=25
+curl http://localhost:3000/api/vault/ledger?approvalId=approval-demo-gated&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&status=approved&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&status=rejected&limit=25
+```
+
+Audit rows are transition evidence, not execution.
+
+## 10. Record progress
 
 ```bash
 curl -X POST http://localhost:3000/api/progress \
@@ -160,7 +172,7 @@ curl -X POST http://localhost:3000/api/progress \
 
 Progress records are evidence, not approval.
 
-## 10. Send an Outpost round trip
+## 11. Send an Outpost round trip
 
 ```bash
 curl -X POST http://localhost:3000/api/outpost/entry \
@@ -176,7 +188,7 @@ curl -X POST http://localhost:3000/api/outpost/entry \
 
 The response includes a return URL.
 
-## 11. Inspect the unified ledger
+## 12. Inspect the unified ledger
 
 ```bash
 curl http://localhost:3000/api/vault/ledger?limit=25
@@ -186,6 +198,7 @@ Filter by kind:
 
 ```bash
 curl http://localhost:3000/api/vault/ledger?kind=approval&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=approval-audit&limit=25
 curl http://localhost:3000/api/vault/ledger?kind=progress&limit=25
 curl http://localhost:3000/api/vault/ledger?kind=outpost&limit=25
 ```
@@ -198,6 +211,7 @@ Health is diagnosis.
 Ledger is evidence.
 Approval creation is evidence.
 Approval decision is explicit Violet Gate action.
+Approval decision audit is transition evidence.
 Progress is evidence.
 Outpost routing is evidence.
 Only Violet Gate can approve consequence-bearing execution.
@@ -223,6 +237,7 @@ HyperIntent
 → Execution Memory Persistence
 → Approval Vault Persistence
 → Approval Decision API
+→ Approval Decision Audit Vault
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
