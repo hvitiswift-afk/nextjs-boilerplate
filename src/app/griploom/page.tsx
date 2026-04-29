@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GriploomGraphPreview } from "@/components/GriploomGraphPreview";
 
 const samplePayload = {
   nodeCount: 8,
@@ -221,6 +222,12 @@ export default function GriploomPage() {
           <p><strong>Ray / line / wave shows how energy moves.</strong></p>
         </Card>
       </div>
+
+      {result?.results && (
+        <div style={{ margin: "24px 0" }}>
+          <GriploomGraphPreview beams={result.results.map((item) => item.beam)} />
+        </div>
+      )}
 
       {result && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, margin: "24px 0" }}>
