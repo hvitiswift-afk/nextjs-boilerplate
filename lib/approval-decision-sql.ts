@@ -16,6 +16,17 @@ export type ApprovalDecisionRecord = ApprovalRecord & {
   decisionNote?: string;
 };
 
+export type ApprovalDecisionAuditInput = {
+  id: string;
+  approvalId: string;
+  taskId: string;
+  previousStatus: string;
+  decisionStatus: ApprovalDecisionStatus;
+  decidedBy: string;
+  note?: string;
+  payload: Record<string, unknown>;
+};
+
 export function isApprovalDecisionStatus(value: unknown): value is ApprovalDecisionStatus {
   return value === "approved" || value === "rejected";
 }
@@ -61,6 +72,53 @@ export function getApprovalRecord(id: string): SqlStatement {
   };
 }
 
+export function createApprovalDecisionAuditInput(input: {
+  decision: ApprovalDecisionInput;
+  previousApproval: ApprovalRecord;
+  updatedApproval: ApprovalRecord;
+}): ApprovalDecisionAuditInput {
+  const payload = createApprovalDecisionMemoryPayload(input.decision, input.updatedApproval);
+
+  return {
+    id: `audit-${input.decision.id}-${input.decision.decidedAt ?? new Date().toISOString()}`,
+    approvalId: input.decision.id,
+    taskId: input.updatedApproval.taskId,
+    previousStatus: input.previousApproval.status,
+    decisionStatus: input.decision.status,
+    decidedBy: input.decision.decidedBy,
+    note: input.decision.note,
+    payload
+  };
+}
+
+export function insertApprovalDecisionAuditRecord(audit: ApprovalDecisionAuditInput): SqlStatement {
+  return {
+    text: `
+      insert into approval_decision_audit_records (
+        id,
+        approval_id,
+        task_id,
+        previous_status,
+        decision_status,
+        decided_by,
+        note,
+        payload
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
+      returning *;
+    `,
+    values: [
+      audit.id,
+      audit.approvalId,
+      audit.taskId,
+      audit.previousStatus,
+      audit.decisionStatus,
+      audit.decidedBy,
+      audit.note ?? null,
+      JSON.stringify(audit.payload)
+    ]
+  };
+}
+
 export function createApprovalDecisionMemoryPayload(decision: ApprovalDecisionInput, approval: ApprovalRecord | null) {
   return {
     decision: {
@@ -75,7 +133,8 @@ export function createApprovalDecisionMemoryPayload(decision: ApprovalDecisionIn
       "Approval decisions must be explicit.",
       "Decision evidence does not hide the approver.",
       "Rejected decisions keep Violet Gate closed.",
-      "Approved decisions can unlock only the matching gated task."
+      "Approved decisions can unlock only the matching gated task.",
+      "Every persisted decision receives a durable audit note."
     ]
   };
 }
@@ -84,5 +143,6 @@ export const APPROVAL_DECISION_SQL_LAW = [
   "Only approved or rejected are valid decision outcomes.",
   "Unknown decision status falls back to rejected.",
   "Every decision requires visible decidedBy evidence.",
+  "Every persisted decision receives a durable audit note.",
   "Approval decisions update approval_records but do not silently execute work."
 ] as const;
