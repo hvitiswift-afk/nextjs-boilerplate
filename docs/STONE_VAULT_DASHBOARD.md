@@ -35,7 +35,9 @@ approval creation examples
 approval decision examples
 approval ledger filters
 approval audit filters
-progress filters
+progress timeline
+progress task filters
+progress completion filters
 outpost filters
 receipt filters
 ```
@@ -80,6 +82,28 @@ Reject approval
 
 These commands are examples. The operator still chooses when to run them.
 
+## Progress timeline cards
+
+```txt
+Task trail
+→ GET /api/vault/ledger?kind=progress&taskId=execute-demo-gated&limit=25
+→ task-specific progress evidence
+```
+
+```txt
+All progress
+→ GET /api/vault/ledger?kind=progress&limit=25
+→ recent progress timeline
+```
+
+```txt
+Complete steps
+→ GET /api/vault/ledger?kind=progress&status=complete&limit=25
+→ completion evidence
+```
+
+Progress timeline cards make task state easier to inspect. They do not grant approval.
+
 ## Ledger filter doors
 
 ```txt
@@ -89,6 +113,8 @@ These commands are examples. The operator still chooses when to run them.
 /api/vault/ledger?status=approved&limit=25
 /api/vault/ledger?status=rejected&limit=25
 /api/vault/ledger?kind=progress&limit=25
+/api/vault/ledger?kind=progress&taskId=execute-demo-gated&limit=25
+/api/vault/ledger?kind=progress&status=complete&limit=25
 /api/vault/ledger?kind=outpost&limit=25
 /api/vault/ledger?kind=receipt&limit=25
 ```
@@ -117,6 +143,7 @@ inspect
 → create approval
 → decide explicitly
 → audit
+→ track progress
 → verify ledger
 ```
 
@@ -145,6 +172,11 @@ approval review card visible
 ```
 
 ```txt
+progress timeline card visible
+≠ approved
+```
+
+```txt
 audit row visible
 ≠ executed
 ```
@@ -158,6 +190,7 @@ Dashboard visibility does not authorize execution.
 Health is diagnostic, not approval.
 Ledger rows are evidence, not approval.
 Approval review is visibility, not authorization.
+Progress timeline cards are evidence, not approval.
 Approval decision audit rows are transition evidence, not execution.
 Only Violet Gate authorizes consequence-bearing work.
 ```
@@ -188,6 +221,8 @@ HyperIntent
 → /vault Dashboard Page
 → Approval Review Cards
 → Approval Command Blocks
+→ Progress Timeline Cards
+→ Progress Task Filters
 → Violet Gate
 → Outpost 2099-2100
 → Return Door
