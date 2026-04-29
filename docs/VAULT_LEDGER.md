@@ -45,14 +45,15 @@ No DATABASE_URL
 → rows: []
 → persistentStorage: false
 → explanatory message returned
+→ accepted filters are returned
 ```
 
 ```txt
 DATABASE_URL present
-→ listVaultLedger() or listVaultLedgerByKind()
+→ listVaultLedgerFiltered()
 → query()
 → mapVaultLedgerRow()
-→ chronological ledger response
+→ filtered chronological ledger response
 ```
 
 ## Filters
@@ -63,10 +64,40 @@ DATABASE_URL present
 /api/vault/ledger?kind=progress
 /api/vault/ledger?kind=outpost
 /api/vault/ledger?kind=receipt
+/api/vault/ledger?status=pending
+/api/vault/ledger?status=approved
+/api/vault/ledger?status=rejected
+/api/vault/ledger?taskId=execute-demo-gated
+/api/vault/ledger?kind=approval&status=approved
+/api/vault/ledger?kind=progress&taskId=execute-demo-gated
 /api/vault/ledger?limit=50
 ```
 
 The `limit` parameter is bounded from 1 to 250.
+
+## Filter meaning
+
+```txt
+kind
+→ narrows by ledger row type
+```
+
+```txt
+status
+→ narrows by row status evidence
+```
+
+```txt
+taskId
+→ narrows rows whose payload.taskId matches the requested task
+```
+
+```txt
+limit
+→ narrows the number of returned rows
+```
+
+Filters narrow evidence. They do not grant approval.
 
 ## Row shape
 
@@ -86,10 +117,38 @@ createdAt
 curl http://localhost:3000/api/vault/ledger?limit=25
 ```
 
-## Example filtered read
+## Example filtered reads
 
 ```bash
 curl http://localhost:3000/api/vault/ledger?kind=approval&limit=25
+curl http://localhost:3000/api/vault/ledger?status=pending&limit=25
+curl http://localhost:3000/api/vault/ledger?taskId=execute-demo-gated&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=approval&status=approved&limit=25
+curl http://localhost:3000/api/vault/ledger?kind=progress&taskId=execute-demo-gated&limit=25
+```
+
+## Approval decision inspection
+
+Approval decisions can be inspected through approval ledger rows.
+
+```txt
+kind=approval&status=pending
+→ pending approval evidence
+```
+
+```txt
+kind=approval&status=approved
+→ explicitly approved approval evidence
+```
+
+```txt
+kind=approval&status=rejected
+→ explicitly rejected approval evidence
+```
+
+```txt
+taskId=execute-demo-gated
+→ evidence trail for the matching task across source tables that emit taskId
 ```
 
 ## Ledger is not approval
@@ -111,6 +170,11 @@ outpost return recorded in ledger
 ≠ approved
 ```
 
+```txt
+status filter says approved
+≠ executed
+```
+
 Approval still belongs to Violet Gate.
 
 ## Law
@@ -119,6 +183,7 @@ Approval still belongs to Violet Gate.
 The ledger is a read model over durable vault tables.
 Ledger rows are evidence, not approval.
 Each source table remains the authority for its own record type.
+Status and task filters narrow evidence without changing authorization.
 The unified ledger exists so the Enclave can see time-ordered memory, approval, progress, outpost, and receipt records together.
 ```
 
@@ -131,11 +196,14 @@ HyperIntent
 → Memory Vault
 → Stone Vault Schema Indexes
 → Unified Vault Ledger Read Model
+→ Ledger Status Filters
+→ Ledger Task Filters
 → Unified Vault Ledger API
 → Unified Vault Ledger Manual
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
+→ Approval Decision API
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
