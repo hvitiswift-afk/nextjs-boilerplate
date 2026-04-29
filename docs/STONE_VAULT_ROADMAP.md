@@ -78,7 +78,8 @@ Next road: Phase 3 Operator Dashboard.
 [x] Document Outpost round-trip cards.
 [x] Add receipt cards.
 [x] Document receipt cards.
-[ ] Add interactive operator forms for approval creation and approval decisions.
+[x] Add interactive operator forms for approval creation and approval decisions.
+[x] Document interactive operator forms.
 ```
 
 Exit condition:
@@ -90,17 +91,19 @@ An operator can inspect the Vault without using curl.
 Current Phase 3 state:
 
 ```txt
-In progress.
+Complete enough for the first operator loop.
 The /vault dashboard page exists.
+The /vault/operator-forms page exists.
 The home page links to /vault.
 The dashboard manual exists.
 The Stone Vault index links the dashboard manual.
-The dashboard has manifest, health, ledger, approval review, command examples, approval-audit visibility, progress timeline cards, an ML evidence lane, Outpost round-trip cards, and receipt cards.
+The dashboard has manifest, health, ledger, operator action cards, approval review, command examples, approval-audit visibility, progress timeline cards, an ML evidence lane, Outpost round-trip cards, and receipt cards.
+Operator forms create approval evidence and submit explicit approval decisions through visible JSON posts.
 Progress timeline cards inspect task-specific, all-progress, and complete-step evidence.
 ML evidence cards inspect model memory, provider receipts, and gated ML task traces.
 Outpost round-trip cards inspect outbound entries, inbound returns, and continuity traces.
 Receipt cards inspect all receipts, completed receipts, and pending receipt reconciliation.
-Next stone: interactive operator forms for approval creation and approval decisions.
+Next road: Phase 4 Provider Hall.
 ```
 
 ## Phase 4 — Provider hall
@@ -176,6 +179,7 @@ No phase turns health into approval.
 No phase turns progress into approval.
 No phase turns routing into approval.
 Dashboard visibility does not authorize execution.
+Operator forms post visible evidence, not hidden execution.
 Approval review is visibility, not authorization.
 Progress timeline cards are evidence, not approval.
 ML evidence cards are receipts and memory, not approval.
@@ -215,6 +219,9 @@ HyperIntent
 → Home Page Vault Link
 → Stone Vault Dashboard Manual
 → Stone Vault Operator Dashboard
+→ Operator Action Cards
+→ Interactive Approval Forms
+→ Response Console
 → Approval Review Cards
 → Approval Command Blocks
 → Progress Timeline Cards
