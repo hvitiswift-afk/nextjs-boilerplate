@@ -2,6 +2,14 @@
 
 This index links the current Goblin + Fabian Stone Vault manuals into one operating map.
 
+## Operator page
+
+```txt
+/vault
+```
+
+The operator dashboard links visible doors for manifest, health, ledger, approval, approval-audit, progress, outpost, and receipt evidence.
+
 ## Read doors
 
 ```txt
@@ -33,6 +41,7 @@ docs/APPROVAL_VAULT.md
 docs/APPROVAL_DECISION.md
 docs/PROGRESS_VAULT.md
 docs/OUTPOST_VAULT.md
+docs/STONE_VAULT_DASHBOARD.md
 ```
 
 ## Database schema
@@ -46,6 +55,7 @@ Tables:
 ```txt
 memory_records
 approval_records
+approval_decision_audit_records
 progress_events
 outpost_entries
 receipt_records
@@ -56,9 +66,11 @@ receipt_records
 ```txt
 Manifest is discovery.
 Health is diagnosis.
+Dashboard is visibility.
 Ledger is evidence.
 Approval creation is evidence.
 Approval decision is explicit Violet Gate action.
+Approval decision audit is transition evidence.
 Progress is evidence.
 Outpost routing is evidence.
 Receipts are evidence.
@@ -68,14 +80,16 @@ Only Violet Gate can approve consequence-bearing execution.
 ## Operating loop
 
 ```txt
-1. Read /api/vault/manifest to discover available routes.
-2. Read /api/vault/health to confirm durable tables are connected.
-3. Submit work to /api/execute.
-4. If the worker says needs approval, use /api/approval to create approval evidence.
-5. Use /api/approval/decision to explicitly approve or reject the pending approval.
-6. Record visible state with /api/progress.
-7. Route round-trip records with /api/outpost/entry.
-8. Inspect the total timeline with /api/vault/ledger.
+1. Open /vault for the operator dashboard.
+2. Read /api/vault/manifest to discover available routes.
+3. Read /api/vault/health to confirm durable tables are connected.
+4. Submit work to /api/execute.
+5. If the worker says needs approval, use /api/approval to create approval evidence.
+6. Use /api/approval/decision to explicitly approve or reject the pending approval.
+7. Inspect approval-audit rows through /api/vault/ledger?kind=approval-audit.
+8. Record visible state with /api/progress.
+9. Route round-trip records with /api/outpost/entry.
+10. Inspect the total timeline with /api/vault/ledger.
 ```
 
 ## Current spine
@@ -93,10 +107,13 @@ HyperIntent
 → Vault Manifest API
 → Vault Manifest Manual
 → Stone Vault Index
+→ Stone Vault Dashboard Manual
+→ Stone Vault Operator Dashboard
 → Execution Worker API
 → Execution Memory Persistence
 → Approval Vault Persistence
 → Approval Decision API
+→ Approval Decision Audit Vault
 → Progress Vault Persistence
 → Outpost Vault Persistence
 → Receipt Records
