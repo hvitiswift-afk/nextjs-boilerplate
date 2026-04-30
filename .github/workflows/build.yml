@@ -7,6 +7,7 @@ on:
       - main
 
 env:
+  # Force JavaScript actions onto Node 24 while the app build still targets Node 20.
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
