@@ -1,0 +1,139 @@
+{
+  "id": "receipt-griploom-screenplay-industry-id-sample-039",
+  "kind": "griploom-screenplay-industry-id-sample",
+  "status": "sample",
+  "schema": {
+    "idFormat": "GL-WORK-{WORK}-{UNIT}-{DEPT}-{ROLE}-{SCENE}-{OBJECT}-{SERIAL}-{CHECK}",
+    "scanGraph": "screenplay → scene → department → role → object → barcode/QR → scanner → SAME-TICK receipt → BLACKLETTER gate",
+    "boundary": "Internal GRIPLOOM IDs only; not official SAG-AFTRA, IATSE, studio, guild, legal, payroll, or employment credentials."
+  },
+  "items": [
+    {
+      "id": "GL-WORK-NEONRIVER-U1-DEPT-PERFORMER-ROLE-ACTOR-SCN-012-HEROCAST-0001-K7",
+      "kind": "griploom-screenplay-industry-id",
+      "work": {
+        "slug": "NEONRIVER",
+        "type": "screenplay",
+        "unit": "U1",
+        "scene": "012",
+        "revision": "blue"
+      },
+      "department": {
+        "code": "PERFORMER",
+        "role": "ACTOR",
+        "industryRefs": {
+          "sagAftraRef": null,
+          "iatseRef": null
+        }
+      },
+      "object": {
+        "type": "cast_continuity_card",
+        "surface": "receipt_square",
+        "shape": "shield_plate"
+      },
+      "barcode": {
+        "symbology": "code128",
+        "payload": "GL-WORK-NEONRIVER-U1-DEPT-PERFORMER-ROLE-ACTOR-SCN-012-HEROCAST-0001-K7"
+      },
+      "qr": {
+        "payloadType": "json-url",
+        "url": "https://hviti.com/griploom/work/NEONRIVER/id/GL-WORK-NEONRIVER-U1-DEPT-PERFORMER-ROLE-ACTOR-SCN-012-HEROCAST-0001-K7",
+        "privacy": "public-id-only"
+      },
+      "scanner": {
+        "route": "/api/tick",
+        "eventType": "continuity_check",
+        "idempotencyKey": "GL-WORK-NEONRIVER-U1-DEPT-PERFORMER-ROLE-ACTOR-SCN-012-HEROCAST-0001-K7-CONTINUITY"
+      },
+      "blackletter": {
+        "status": "requires_review",
+        "rule": "Do not claim SAG-AFTRA membership, employment, payroll, legal status, authorship, ownership, or official certification."
+      }
+    },
+    {
+      "id": "GL-WORK-NEONRIVER-U1-DEPT-WARDROBE-ROLE-DESIGN-SCN-012-HATFIELD-0002-Q4",
+      "kind": "griploom-screenplay-industry-id",
+      "work": {
+        "slug": "NEONRIVER",
+        "type": "screenplay",
+        "unit": "U1",
+        "scene": "012",
+        "revision": "blue"
+      },
+      "department": {
+        "code": "WARDROBE",
+        "role": "DESIGN",
+        "industryRefs": {
+          "sagAftraRef": null,
+          "iatseRef": "compatibility-field-only-not-official"
+        }
+      },
+      "object": {
+        "type": "hat",
+        "surface": "front_patch",
+        "shape": "crown_arc"
+      },
+      "barcode": {
+        "symbology": "code128",
+        "payload": "GL-WORK-NEONRIVER-U1-DEPT-WARDROBE-ROLE-DESIGN-SCN-012-HATFIELD-0002-Q4"
+      },
+      "qr": {
+        "payloadType": "json-url",
+        "url": "https://hviti.com/griploom/work/NEONRIVER/id/GL-WORK-NEONRIVER-U1-DEPT-WARDROBE-ROLE-DESIGN-SCN-012-HATFIELD-0002-Q4",
+        "privacy": "public-id-only"
+      },
+      "scanner": {
+        "route": "/api/tick",
+        "eventType": "fitting_check",
+        "idempotencyKey": "GL-WORK-NEONRIVER-U1-DEPT-WARDROBE-ROLE-DESIGN-SCN-012-HATFIELD-0002-Q4-FITTING"
+      },
+      "blackletter": {
+        "status": "requires_review",
+        "rule": "IATSE reference fields must be blank or source-authorized and must not imply membership, jurisdiction, or employment."
+      }
+    },
+    {
+      "id": "GL-WORK-NEONRIVER-U2-DEPT-GRIP-ROLE-KEYGRIP-SCN-020-CSTAND-0003-R9",
+      "kind": "griploom-screenplay-industry-id",
+      "work": {
+        "slug": "NEONRIVER",
+        "type": "screenplay",
+        "unit": "U2",
+        "scene": "020",
+        "revision": "pink"
+      },
+      "department": {
+        "code": "GRIP",
+        "role": "KEYGRIP",
+        "industryRefs": {
+          "sagAftraRef": null,
+          "iatseRef": "compatibility-field-only-not-official"
+        }
+      },
+      "object": {
+        "type": "c_stand",
+        "surface": "tag_loop",
+        "shape": "tag_loop"
+      },
+      "barcode": {
+        "symbology": "code128",
+        "payload": "GL-WORK-NEONRIVER-U2-DEPT-GRIP-ROLE-KEYGRIP-SCN-020-CSTAND-0003-R9"
+      },
+      "qr": {
+        "payloadType": "json-url",
+        "url": "https://hviti.com/griploom/work/NEONRIVER/id/GL-WORK-NEONRIVER-U2-DEPT-GRIP-ROLE-KEYGRIP-SCN-020-CSTAND-0003-R9",
+        "privacy": "public-id-only"
+      },
+      "scanner": {
+        "route": "/api/tick",
+        "eventType": "scan_out",
+        "idempotencyKey": "GL-WORK-NEONRIVER-U2-DEPT-GRIP-ROLE-KEYGRIP-SCN-020-CSTAND-0003-R9-SCANOUT"
+      },
+      "blackletter": {
+        "status": "requires_review",
+        "rule": "Crew IDs are internal production receipt IDs and are not union credentials."
+      }
+    }
+  ],
+  "law": "A screenplay industry ID sample is valid only when screenplay, department, role, object, barcode, QR, scanner route, source boundary, and BLACKLETTER fields travel together."
+}
