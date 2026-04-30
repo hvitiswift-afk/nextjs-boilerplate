@@ -30,7 +30,7 @@ Open http://localhost:3000.
 
 ## Goblin observer routes
 
-Earth/Mars observer routing is documented, CI-gated, and release-gated.
+Earth/Mars observer routing is documented, CI-gated, release-gated, and receipt-sampled.
 
 ```bash
 npm run observer:routes
@@ -44,6 +44,7 @@ Observer route rails:
 - `docs/observer-route-release.md`
 - `.github/workflows/observer-routes.yml`
 - `examples/observer-route-scenarios.sample.json`
+- `examples/observer-route-release.receipt.sample.json`
 
 ## AWS deploy option A: Amplify
 
