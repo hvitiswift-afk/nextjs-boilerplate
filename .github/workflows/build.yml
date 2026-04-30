@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  # Force JavaScript actions onto Node 24 while the app build still targets Node 20.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    name: npm build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build Next.js app
+        run: npm run build
