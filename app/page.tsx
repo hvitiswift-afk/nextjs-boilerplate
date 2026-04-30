@@ -28,6 +28,12 @@ const vaultDoors = [
   { label: "Ledger API", href: "/api/vault/ledger?limit=25", note: "Read time-ordered evidence across the Stone Vault." },
 ];
 
+const labDoors = [
+  { label: "T-Oscillator", href: "/t-oscillator", invariant: "T = anchor", note: "Glyph specimen scaffold for rails, mirrors, shimmer axes, and the not-abandoning-T rule." },
+  { label: "Orbital Mechanics", href: "/orbital-mechanics", invariant: "v² = μ(2/r - 1/a)", note: "Two-body lab with orbit presets, period, energy, angular momentum, and Hohmann transfer math." },
+  { label: "Orbital Rail", href: "/orbital-rail", invariant: "rᵢ = r₀ + Δr |i - 20|", note: "Alphabet satellites around T with mirror chords, mean motion, energy, and ensemble weights." },
+];
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#07070b] text-[#f5efe2]">
@@ -37,6 +43,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-3">
             <a className="transition hover:text-cyan-100" href="/griploom">GRIPLOOM AI</a>
             <a className="transition hover:text-cyan-100" href="/vault">Vault Dashboard</a>
+            <a className="transition hover:text-cyan-100" href="#labs">Labs</a>
             <span>Lichburn Enclave / 2099-2100 Outpost</span>
           </div>
         </nav>
@@ -53,6 +60,7 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap gap-3">
               <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="/griploom">Open GRIPLOOM AI</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="/vault">Open Vault Dashboard</a>
+              <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#labs">Open Labs</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#algorithm">Open Algorithm</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#scale">Hyperscale Path</a>
             </div>
@@ -74,6 +82,24 @@ export default function Home() {
             </div>
           </section>
         </div>
+
+        <section id="labs" className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
+          <div>
+            <p className="mb-3 inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-sm text-cyan-100">Lab index</p>
+            <h2 className="text-3xl font-black">T-Oscillator route hub</h2>
+            <p className="mt-3 text-white/65">A visible launchpad for the specimen, the orbital mechanics lab, and the orbital rail bridge. No orphan planets, no mystery doors, no UI goblin cupboard.</p>
+          </div>
+          <div className="grid gap-4 lg:col-span-2 sm:grid-cols-3">
+            {labDoors.map((door) => (
+              <a key={door.href} href={door.href} className="rounded-3xl border border-fuchsia-200/15 bg-fuchsia-200/[0.045] p-5 text-white/75 transition hover:border-fuchsia-200/40 hover:bg-fuchsia-200/[0.08]">
+                <span className="block font-bold text-fuchsia-100">{door.label}</span>
+                <code className="mt-3 block rounded-xl bg-black/30 px-3 py-2 text-xs text-cyan-100">{door.invariant}</code>
+                <span className="mt-3 block text-sm text-white/55">{door.note}</span>
+                <span className="mt-4 block break-all font-mono text-xs text-fuchsia-100/70">{door.href}</span>
+              </a>
+            ))}
+          </div>
+        </section>
 
         <section id="vault" className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
           <div>
