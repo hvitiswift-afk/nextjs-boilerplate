@@ -1,0 +1,33 @@
+{
+  "id": "receipt-observer-route-release-023",
+  "kind": "llm-observer-route-release-receipt",
+  "status": "sample",
+  "release": {
+    "name": "observer-routes",
+    "version": "0.1.0",
+    "branch": "main"
+  },
+  "gates": {
+    "build": "pending",
+    "observerRoutesPrinted": "pending",
+    "observerRoutesChecked": "pending",
+    "ciWorkflow": "pending",
+    "readmeLinked": "pending",
+    "releaseRunbookLinked": "pending"
+  },
+  "commands": [
+    "npm install",
+    "npm run build",
+    "npm run observer:routes",
+    "npm run dev",
+    "npm run observer:routes:check"
+  ],
+  "artifacts": [
+    "docs/observer-route-harness.md",
+    "docs/observer-route-ci.md",
+    "docs/observer-route-release.md",
+    ".github/workflows/observer-routes.yml",
+    "examples/observer-route-scenarios.sample.json"
+  ],
+  "law": "A release receipt records every gate before the rail is called releasable."
+}
