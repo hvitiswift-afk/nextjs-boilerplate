@@ -30,7 +30,7 @@ Open http://localhost:3000.
 
 ## Goblin observer routes
 
-Earth/Mars observer routing is documented, CI-gated, release-gated, receipt-sampled, and release-receipt printable.
+Earth/Mars observer routing is documented, CI-gated, release-gated, receipt-sampled, release-receipt printable, and release-gates tracked.
 
 ```bash
 npm run observer:routes
@@ -43,6 +43,7 @@ Observer route rails:
 - `docs/observer-route-harness.md`
 - `docs/observer-route-ci.md`
 - `docs/observer-route-release.md`
+- `docs/observer-route-release-gates.md`
 - `.github/workflows/observer-routes.yml`
 - `examples/observer-route-scenarios.sample.json`
 - `examples/observer-route-release.receipt.sample.json`
@@ -207,5 +208,6 @@ GRIPLOOM outputs are credit-based collaboration signals. They must not claim hir
 - `docs/observer-route-harness.md`
 - `docs/observer-route-ci.md`
 - `docs/observer-route-release.md`
+- `docs/observer-route-release-gates.md`
 
 Verified credits in. Production geometry out.
