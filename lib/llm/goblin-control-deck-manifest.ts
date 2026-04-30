@@ -9,7 +9,8 @@ export type GoblinControlDeckRoute = {
     | "observer_parallax"
     | "observer_route"
     | "control_deck"
-    | "health";
+    | "health"
+    | "receipts";
   receiptId: string;
   law: string;
 };
@@ -19,7 +20,7 @@ export type GoblinControlDeckManifest = {
   status: "active";
   routes: GoblinControlDeckRoute[];
   receipt: {
-    id: "receipt-goblin-control-deck-manifest-020";
+    id: "receipt-goblin-control-deck-manifest-027";
     kind: "llm-goblin-control-deck-manifest";
     status: "active";
   };
@@ -36,8 +37,8 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         path: "/goblin",
         kind: "dashboard",
         layer: "control_deck",
-        receiptId: "receipt-goblin-control-deck-019",
-        law: "A router becomes usable when every gate has a visible control deck.",
+        receiptId: "receipt-goblin-control-deck-026",
+        law: "A router becomes usable when every gate has a visible control deck, every deck has health, and every receipt has a ledger.",
       },
       {
         id: "dashboard-galaxy",
@@ -81,8 +82,17 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         path: "/goblin/health",
         kind: "dashboard",
         layer: "health",
-        receiptId: "receipt-goblin-control-deck-health-dashboard-018",
-        law: "Diagnostics become governable when health is visible.",
+        receiptId: "receipt-goblin-health-dashboard-layer-diagnostics-022",
+        law: "Health is useful when layers, duplicates, receipts, and route laws are all visible.",
+      },
+      {
+        id: "dashboard-receipts",
+        title: "Receipt Ledger",
+        path: "/goblin/receipts",
+        kind: "dashboard",
+        layer: "receipts",
+        receiptId: "receipt-goblin-receipt-ledger-dashboard-025",
+        law: "A receipt ledger becomes governable when it is visible as a dashboard.",
       },
       {
         id: "api-goblin-control-deck",
@@ -101,6 +111,15 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         layer: "health",
         receiptId: "receipt-goblin-control-deck-health-api-017",
         law: "The manifest can be checked by a machine-readable health endpoint.",
+      },
+      {
+        id: "api-goblin-receipt-ledger",
+        title: "Goblin Receipt Ledger API",
+        path: "/api/llm/goblin-receipt-ledger",
+        kind: "api",
+        layer: "receipts",
+        receiptId: "receipt-goblin-receipt-ledger-api-024",
+        law: "A receipt ledger becomes useful when it can be read by machines.",
       },
       {
         id: "api-observer-constellations",
@@ -131,7 +150,7 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
       },
     ],
     receipt: {
-      id: "receipt-goblin-control-deck-manifest-020",
+      id: "receipt-goblin-control-deck-manifest-027",
       kind: "llm-goblin-control-deck-manifest",
       status: "active",
     },
