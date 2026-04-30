@@ -22,6 +22,7 @@ const scale = ["0 Local enclave", "1 Edge bridge", "2 Server tower", "3 Worker s
 
 const vaultDoors = [
   { label: "GRIPLOOM AI", href: "/griploom", note: "Run ML beam scoring, mesh density, vitality, GOBLIN checks, and BLACKLETTER status." },
+  { label: "Dipper Shift", href: "/dipper-shift", note: "Watch the Big Dipper as a moving sky reference frame: rotation, precession, and proper motion without the ceiling-sticker nonsense." },
   { label: "Operator Dashboard", href: "/vault", note: "Inspect manifest, health, ledger, and approval audit filters." },
   { label: "Manifest API", href: "/api/vault/manifest", note: "Discover durable route authority and evidence law." },
   { label: "Health API", href: "/api/vault/health", note: "Diagnose vault table connectivity and audit storage." },
@@ -36,6 +37,7 @@ export default function Home() {
           <span className="font-mono uppercase tracking-[0.35em] text-cyan-200">Goblin + Fabian + GRIPLOOM</span>
           <div className="flex flex-wrap items-center gap-3">
             <a className="transition hover:text-cyan-100" href="/griploom">GRIPLOOM AI</a>
+            <a className="transition hover:text-cyan-100" href="/dipper-shift">Dipper Shift</a>
             <a className="transition hover:text-cyan-100" href="/vault">Vault Dashboard</a>
             <span>Lichburn Enclave / 2099-2100 Outpost</span>
           </div>
@@ -52,6 +54,7 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="/griploom">Open GRIPLOOM AI</a>
+              <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="/dipper-shift">Open Dipper Shift</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="/vault">Open Vault Dashboard</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#algorithm">Open Algorithm</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#scale">Hyperscale Path</a>
