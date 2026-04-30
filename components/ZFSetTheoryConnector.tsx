@@ -1,4 +1,11 @@
-import { zfEdges, zfNetworkHealth, zfNodes, zfPredicates } from "@/data/zfSetTheory";
+import {
+  bayesianCoordinateFormula,
+  zfBayesianCoordinateSummary,
+  zfEdges,
+  zfNetworkHealth,
+  zfNodes,
+  zfPredicates,
+} from "@/data/zfSetTheory";
 
 const kindClasses = {
   axiom: "border-cyan-300/40 bg-cyan-950/40 text-cyan-100",
@@ -17,6 +24,7 @@ const edgeClasses = {
 
 export function ZFSetTheoryConnector() {
   const health = zfNetworkHealth();
+  const bayes = zfBayesianCoordinateSummary();
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
@@ -31,16 +39,31 @@ export function ZFSetTheoryConnector() {
           <p className="mt-4 max-w-3xl text-slate-300">
             A symbolic network model of ZF set theory. Nodes represent axioms,
             relations, and extension points; edges represent logical dependency,
-            construction flow, and guard constraints. The network is formal
-            scaffolding, not metaphysical fog juice.
+            construction flow, and guard constraints. Bayesian coordinates add a
+            hypothesis/evidence overlay for UI ranking only. They are not truth
+            meters, because that would be a statistics goblin in a fake crown.
           </p>
         </header>
 
         <section className="grid gap-4 md:grid-cols-4">
           <Metric label="axioms" value={health.axiomCount} />
           <Metric label="relations" value={health.relationCount} />
-          <Metric label="edges" value={health.edgeCount} />
-          <Metric label="mean axiom weight" value={health.meanAxiomWeight} />
+          <Metric label="mean posterior" value={health.meanPosterior} />
+          <Metric label="bayes confidence" value={health.meanBayesConfidence} />
+        </section>
+
+        <section className="rounded-3xl border border-slate-700 bg-slate-900/70 p-5">
+          <h2 className="text-xl font-semibold">Bayesian coordinate layer</h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Formula: <code className="rounded bg-slate-950 px-2 py-1 text-cyan-100">{bayesianCoordinateFormula}</code>
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-5">
+            <Metric label="mean prior" value={bayes.meanPrior} />
+            <Metric label="mean likelihood" value={bayes.meanLikelihood} />
+            <Metric label="mean evidence" value={bayes.meanEvidence} />
+            <Metric label="mean posterior" value={bayes.meanPosterior} />
+            <Metric label="mean confidence" value={bayes.meanConfidence} />
+          </div>
         </section>
 
         <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -84,15 +107,16 @@ export function ZFSetTheoryConnector() {
                   <circle
                     cx={node.x}
                     cy={node.y}
-                    r={node.kind === "axiom" ? 31 : 25}
+                    r={24 + node.bayes.posterior * 10}
                     className={node.kind === "axiom" ? "fill-cyan-950 stroke-cyan-300" : node.kind === "relation" ? "fill-emerald-950 stroke-emerald-300" : "fill-amber-950 stroke-amber-300"}
                     strokeWidth="2"
+                    opacity={0.62 + node.bayes.confidence * 0.35}
                   />
                   <text x={node.x} y={node.y - 4} textAnchor="middle" className="fill-white text-[10px] font-bold">
                     {node.label.split(" ")[0]}
                   </text>
                   <text x={node.x} y={node.y + 10} textAnchor="middle" className="fill-slate-300 text-[9px]">
-                    {node.kind}
+                    P={node.bayes.posterior}
                   </text>
                 </g>
               ))}
@@ -123,6 +147,15 @@ export function ZFSetTheoryConnector() {
               <p className="mt-2 text-sm opacity-85">{node.shortName}</p>
               <code className="mt-3 block rounded-xl bg-black/30 p-3 text-xs">{node.symbol}</code>
               <p className="mt-3 text-sm leading-6 opacity-90">{node.description}</p>
+              <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                <BayesPill label="prior" value={node.bayes.prior} />
+                <BayesPill label="likelihood" value={node.bayes.likelihood} />
+                <BayesPill label="evidence" value={node.bayes.evidence} />
+                <BayesPill label="posterior" value={node.bayes.posterior} />
+              </div>
+              <p className="mt-3 rounded-xl bg-black/25 p-2 text-xs opacity-85">
+                Bayesian note: {node.bayes.note}
+              </p>
             </article>
           ))}
         </section>
@@ -151,6 +184,15 @@ function Metric({ label, value }: { label: string; value: number }) {
     <div className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">
       <p className="text-sm uppercase tracking-wide text-slate-400">{label}</p>
       <p className="mt-2 text-3xl font-bold text-cyan-200">{value}</p>
+    </div>
+  );
+}
+
+function BayesPill({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl bg-black/25 p-2">
+      <p className="uppercase tracking-wide opacity-60">{label}</p>
+      <p className="font-mono text-sm">{value}</p>
     </div>
   );
 }
