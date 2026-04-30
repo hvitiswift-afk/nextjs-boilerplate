@@ -13,14 +13,37 @@ export default function GoblinReceiptsPage() {
           <h1 className="text-4xl font-semibold md:text-6xl">Receipt Ledger</h1>
           <p className="max-w-3xl text-lg text-zinc-300">
             A receipt-centered audit view for routes, paths, layers, route kinds,
-            duplicate receipt IDs, and law counts.
+            duplicate receipt IDs, law counts, and coverage totals.
           </p>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-3">
+        <section className="grid gap-4 md:grid-cols-6">
           <MetricCard label="Status" value={ledger.status} />
+          <MetricCard label="Routes" value={String(ledger.routeTotal)} />
           <MetricCard label="Receipts" value={String(ledger.receiptTotal)} />
+          <MetricCard label="Laws" value={String(ledger.lawTotal)} />
+          <MetricCard label="Coverage" value={`${ledger.lawCoveragePercent}%`} />
           <MetricCard label="Duplicates" value={String(ledger.duplicateReceiptIds.length)} />
+        </section>
+
+        <section className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-6">
+          <h2 className="text-2xl font-semibold">Layer Totals</h2>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {ledger.layerTotals.map((layer) => (
+              <article
+                key={layer.layer}
+                className="rounded-xl border border-white/10 bg-black/30 p-4"
+              >
+                <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">
+                  layer
+                </p>
+                <h3 className="mt-1 text-lg font-semibold">{layer.layer}</h3>
+                <p className="mt-3 text-sm text-zinc-300">
+                  routes: {layer.routeCount} / receipts: {layer.receiptCount} / duplicate receipts: {layer.duplicateReceiptCount}
+                </p>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-6">
@@ -41,7 +64,7 @@ export default function GoblinReceiptsPage() {
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">
-                      receipt
+                      receipt / {entry.routeCount} route{entry.routeCount === 1 ? "" : "s"}
                     </p>
                     <h3 className="mt-1 break-all text-lg font-semibold">
                       {entry.receiptId}
@@ -56,7 +79,7 @@ export default function GoblinReceiptsPage() {
                   <LedgerField label="paths" value={entry.paths.join(", ")} />
                   <LedgerField label="layers" value={entry.layers.join(", ")} />
                   <LedgerField label="kinds" value={entry.kinds.join(", ")} />
-                  <LedgerField label="laws" value={String(entry.lawCount)} />
+                  <LedgerField label="laws" value={`${entry.lawCount}/${entry.routeCount}`} />
                 </div>
               </article>
             ))}
