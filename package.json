@@ -9,7 +9,10 @@
     "db:migrate": "node scripts/migrate-memory-vault.mjs",
     "observer:routes": "node scripts/print-observer-route-scenarios.mjs",
     "observer:routes:check": "node scripts/check-observer-route-scenarios.mjs",
-    "observer:release:receipt": "node scripts/print-observer-route-release-receipt.mjs"
+    "observer:release:receipt": "node scripts/print-observer-route-release-receipt.mjs",
+    "griploom:id:check": "node scripts/check-griploom-id-barcoder-sample.mjs",
+    "griploom:screenplay:check": "node scripts/check-griploom-screenplay-industry-id-sample.mjs",
+    "griploom:checks": "npm run griploom:id:check && npm run griploom:screenplay:check"
   },
   "dependencies": {
     "next": "15.5.2",
