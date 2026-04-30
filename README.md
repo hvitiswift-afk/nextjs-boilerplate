@@ -116,6 +116,7 @@ Only sourced, non-causal collaboration signals publish.
 
 - `docs/GRIPLOOM-HATS.md`: headwear beams, patch grammar, mesh/crown roles, and release gates.
 - `docs/GRIPLOOM-ID-BARCODER.md`: function-shaped IDs, barcode/QR payloads, scanner routing, and SAME-TICK receipts.
+- `examples/griploom-id-barcoder.sample.json`: sample hat, shirt, and scanner IDs with shape, barcode, QR, scanner route, and BLACKLETTER fields.
 
 ## API: score beams
 
@@ -216,5 +217,6 @@ GRIPLOOM outputs are credit-based collaboration signals. They must not claim hir
 - `docs/observer-route-release-gates.md`
 - `docs/GRIPLOOM-HATS.md`
 - `docs/GRIPLOOM-ID-BARCODER.md`
+- `examples/griploom-id-barcoder.sample.json`
 
 Verified credits in. Production geometry out.
