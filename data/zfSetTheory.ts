@@ -1,5 +1,14 @@
 export type ZFNodeKind = "axiom" | "operator" | "relation" | "extension";
 
+export type BayesianCoordinate = {
+  prior: number;
+  likelihood: number;
+  evidence: number;
+  posterior: number;
+  confidence: number;
+  note: string;
+};
+
 export type ZFNode = {
   id: string;
   label: string;
@@ -10,6 +19,7 @@ export type ZFNode = {
   x: number;
   y: number;
   weight: number;
+  bayes: BayesianCoordinate;
 };
 
 export type ZFEdgeKind = "defines" | "requires" | "constructs" | "guards" | "extends";
@@ -21,6 +31,10 @@ export type ZFEdge = {
   kind: ZFEdgeKind;
   label: string;
 };
+
+function posterior(prior: number, likelihood: number, evidence: number) {
+  return Number(((likelihood * prior) / evidence).toFixed(3));
+}
 
 export const zfNodes: ZFNode[] = [
   {
@@ -34,6 +48,7 @@ export const zfNodes: ZFNode[] = [
     x: 280,
     y: 70,
     weight: 0.98,
+    bayes: { prior: 0.96, likelihood: 0.98, evidence: 0.97, posterior: posterior(0.96, 0.98, 0.97), confidence: 0.97, note: "identity anchor" },
   },
   {
     id: "empty-set",
@@ -46,6 +61,7 @@ export const zfNodes: ZFNode[] = [
     x: 90,
     y: 170,
     weight: 0.82,
+    bayes: { prior: 0.88, likelihood: 0.91, evidence: 0.93, posterior: posterior(0.88, 0.91, 0.93), confidence: 0.9, note: "base construction" },
   },
   {
     id: "pairing",
@@ -58,6 +74,7 @@ export const zfNodes: ZFNode[] = [
     x: 200,
     y: 210,
     weight: 0.84,
+    bayes: { prior: 0.86, likelihood: 0.89, evidence: 0.92, posterior: posterior(0.86, 0.89, 0.92), confidence: 0.88, note: "finite grouping" },
   },
   {
     id: "union",
@@ -70,6 +87,7 @@ export const zfNodes: ZFNode[] = [
     x: 380,
     y: 210,
     weight: 0.88,
+    bayes: { prior: 0.89, likelihood: 0.9, evidence: 0.91, posterior: posterior(0.89, 0.9, 0.91), confidence: 0.9, note: "layer flattening" },
   },
   {
     id: "power-set",
@@ -82,6 +100,7 @@ export const zfNodes: ZFNode[] = [
     x: 510,
     y: 170,
     weight: 0.92,
+    bayes: { prior: 0.9, likelihood: 0.94, evidence: 0.95, posterior: posterior(0.9, 0.94, 0.95), confidence: 0.92, note: "subset expansion" },
   },
   {
     id: "separation",
@@ -94,6 +113,7 @@ export const zfNodes: ZFNode[] = [
     x: 130,
     y: 350,
     weight: 0.9,
+    bayes: { prior: 0.91, likelihood: 0.92, evidence: 0.94, posterior: posterior(0.91, 0.92, 0.94), confidence: 0.91, note: "bounded filtering" },
   },
   {
     id: "replacement",
@@ -106,6 +126,7 @@ export const zfNodes: ZFNode[] = [
     x: 280,
     y: 390,
     weight: 0.94,
+    bayes: { prior: 0.9, likelihood: 0.95, evidence: 0.96, posterior: posterior(0.9, 0.95, 0.96), confidence: 0.93, note: "definable image" },
   },
   {
     id: "infinity",
@@ -118,6 +139,7 @@ export const zfNodes: ZFNode[] = [
     x: 440,
     y: 390,
     weight: 0.89,
+    bayes: { prior: 0.87, likelihood: 0.91, evidence: 0.94, posterior: posterior(0.87, 0.91, 0.94), confidence: 0.89, note: "inductive seed" },
   },
   {
     id: "foundation",
@@ -130,6 +152,7 @@ export const zfNodes: ZFNode[] = [
     x: 560,
     y: 315,
     weight: 0.86,
+    bayes: { prior: 0.83, likelihood: 0.87, evidence: 0.92, posterior: posterior(0.83, 0.87, 0.92), confidence: 0.85, note: "well-founded guard" },
   },
   {
     id: "membership",
@@ -142,6 +165,7 @@ export const zfNodes: ZFNode[] = [
     x: 280,
     y: 250,
     weight: 1,
+    bayes: { prior: 0.99, likelihood: 0.99, evidence: 0.99, posterior: posterior(0.99, 0.99, 0.99), confidence: 0.99, note: "primitive relation" },
   },
   {
     id: "subset",
@@ -154,6 +178,7 @@ export const zfNodes: ZFNode[] = [
     x: 430,
     y: 300,
     weight: 0.87,
+    bayes: { prior: 0.91, likelihood: 0.92, evidence: 0.94, posterior: posterior(0.91, 0.92, 0.94), confidence: 0.91, note: "derived relation" },
   },
   {
     id: "choice",
@@ -166,6 +191,7 @@ export const zfNodes: ZFNode[] = [
     x: 650,
     y: 170,
     weight: 0.72,
+    bayes: { prior: 0.68, likelihood: 0.76, evidence: 0.88, posterior: posterior(0.68, 0.76, 0.88), confidence: 0.72, note: "explicit extension" },
   },
 ];
 
@@ -188,8 +214,39 @@ export const zfPredicates = [
   "A = B ⇔ ∀x(x ∈ A ↔ x ∈ B)",
   "⋃A = {x | ∃y(y ∈ A ∧ x ∈ y)}",
   "P(A) = {x | x ⊆ A}",
+  "P(H|E) = P(E|H)P(H)/P(E)",
   "ZF + AC = ZFC",
 ];
+
+export const bayesianCoordinateFormula = "P(H|E) = P(E|H)P(H)/P(E)";
+
+export function bayesianUpdate(prior: number, likelihood: number, evidence: number) {
+  return posterior(prior, likelihood, evidence);
+}
+
+export function zfBayesianCoordinateSummary() {
+  const totals = zfNodes.reduce(
+    (acc, node) => {
+      acc.prior += node.bayes.prior;
+      acc.likelihood += node.bayes.likelihood;
+      acc.evidence += node.bayes.evidence;
+      acc.posterior += node.bayes.posterior;
+      acc.confidence += node.bayes.confidence;
+      return acc;
+    },
+    { prior: 0, likelihood: 0, evidence: 0, posterior: 0, confidence: 0 },
+  );
+
+  const count = zfNodes.length;
+
+  return {
+    meanPrior: Number((totals.prior / count).toFixed(3)),
+    meanLikelihood: Number((totals.likelihood / count).toFixed(3)),
+    meanEvidence: Number((totals.evidence / count).toFixed(3)),
+    meanPosterior: Number((totals.posterior / count).toFixed(3)),
+    meanConfidence: Number((totals.confidence / count).toFixed(3)),
+  };
+}
 
 export function zfNetworkHealth() {
   const axiomWeight = zfNodes
@@ -198,6 +255,7 @@ export function zfNetworkHealth() {
   const axiomCount = zfNodes.filter((node) => node.kind === "axiom").length;
   const guardEdges = zfEdges.filter((edge) => edge.kind === "guards").length;
   const extensionEdges = zfEdges.filter((edge) => edge.kind === "extends").length;
+  const bayes = zfBayesianCoordinateSummary();
 
   return {
     axiomCount,
@@ -207,5 +265,7 @@ export function zfNetworkHealth() {
     meanAxiomWeight: Number((axiomWeight / axiomCount).toFixed(3)),
     guardEdges,
     extensionEdges,
+    meanPosterior: bayes.meanPosterior,
+    meanBayesConfidence: bayes.meanConfidence,
   };
 }
