@@ -28,6 +28,22 @@ npm run dev
 
 Open http://localhost:3000.
 
+## Goblin observer routes
+
+Earth/Mars observer routing is documented and CI-gated.
+
+```bash
+npm run observer:routes
+npm run observer:routes:check
+```
+
+Observer route rails:
+
+- `docs/observer-route-harness.md`
+- `docs/observer-route-ci.md`
+- `.github/workflows/observer-routes.yml`
+- `examples/observer-route-scenarios.sample.json`
+
 ## AWS deploy option A: Amplify
 
 1. Open AWS Amplify Hosting.
@@ -184,5 +200,7 @@ GRIPLOOM outputs are credit-based collaboration signals. They must not claim hir
 - `docs/WHITEPAPER.md`
 - `docs/BREACH-PLAN.md`
 - `docs/CONTRACT-PACK.md`
+- `docs/observer-route-harness.md`
+- `docs/observer-route-ci.md`
 
 Verified credits in. Production geometry out.
