@@ -20,7 +20,7 @@ export type GoblinControlDeckManifest = {
   status: "active";
   routes: GoblinControlDeckRoute[];
   receipt: {
-    id: "receipt-goblin-control-deck-manifest-027";
+    id: "receipt-goblin-control-deck-manifest-030";
     kind: "llm-goblin-control-deck-manifest";
     status: "active";
   };
@@ -91,8 +91,8 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         path: "/goblin/receipts",
         kind: "dashboard",
         layer: "receipts",
-        receiptId: "receipt-goblin-receipt-ledger-dashboard-025",
-        law: "A receipt ledger becomes governable when it is visible as a dashboard.",
+        receiptId: "receipt-goblin-receipt-ledger-dashboard-029",
+        law: "A receipt ledger becomes governable when route totals, law coverage, layer totals, and duplicate receipt counts are visible.",
       },
       {
         id: "api-goblin-control-deck",
@@ -136,7 +136,7 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         path: "/api/llm/observer-parallax",
         kind: "api",
         layer: "observer_parallax",
-        receiptId: "receipt-observer-parallax-earth-mars-009",
+        receiptId: "receipt-observer-parallax-api-010",
         law: "Pair observer skies across a stable deep-sky bridge.",
       },
       {
@@ -150,7 +150,7 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
       },
     ],
     receipt: {
-      id: "receipt-goblin-control-deck-manifest-027",
+      id: "receipt-goblin-control-deck-manifest-030",
       kind: "llm-goblin-control-deck-manifest",
       status: "active",
     },
