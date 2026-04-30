@@ -116,7 +116,17 @@ Only sourced, non-causal collaboration signals publish.
 
 - `docs/GRIPLOOM-HATS.md`: headwear beams, patch grammar, mesh/crown roles, and release gates.
 - `docs/GRIPLOOM-ID-BARCODER.md`: function-shaped IDs, barcode/QR payloads, scanner routing, and SAME-TICK receipts.
+- `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`: whole-industry screenplay IDs for work, unit, department, role, scene, object, SAG-AFTRA/IATSE reference boundaries, barcode, QR, and scanner receipts.
 - `examples/griploom-id-barcoder.sample.json`: sample hat, shirt, and scanner IDs with shape, barcode, QR, scanner route, and BLACKLETTER fields.
+- `examples/griploom-screenplay-industry-id.sample.json`: sample performer, wardrobe, and grip screenplay IDs with guild-boundary safety fields.
+
+## GRIPLOOM checks
+
+```bash
+npm run griploom:id:check
+npm run griploom:screenplay:check
+npm run griploom:checks
+```
 
 ## API: score beams
 
@@ -217,6 +227,10 @@ GRIPLOOM outputs are credit-based collaboration signals. They must not claim hir
 - `docs/observer-route-release-gates.md`
 - `docs/GRIPLOOM-HATS.md`
 - `docs/GRIPLOOM-ID-BARCODER.md`
+- `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`
 - `examples/griploom-id-barcoder.sample.json`
+- `examples/griploom-screenplay-industry-id.sample.json`
+- `scripts/check-griploom-id-barcoder-sample.mjs`
+- `scripts/check-griploom-screenplay-industry-id-sample.mjs`
 
 Verified credits in. Production geometry out.
