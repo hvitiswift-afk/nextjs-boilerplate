@@ -6,7 +6,9 @@ on:
       - "app/api/llm/observer-route/**"
       - "lib/llm/observer-*.ts"
       - "examples/observer-route-scenarios.sample.json"
+      - "examples/observer-route-release.receipt.sample.json"
       - "scripts/check-observer-route-scenarios.mjs"
+      - "scripts/print-observer-route-release-receipt.mjs"
       - "package.json"
       - ".github/workflows/observer-routes.yml"
   pull_request:
@@ -14,7 +16,9 @@ on:
       - "app/api/llm/observer-route/**"
       - "lib/llm/observer-*.ts"
       - "examples/observer-route-scenarios.sample.json"
+      - "examples/observer-route-release.receipt.sample.json"
       - "scripts/check-observer-route-scenarios.mjs"
+      - "scripts/print-observer-route-release-receipt.mjs"
       - "package.json"
       - ".github/workflows/observer-routes.yml"
 
@@ -55,6 +59,9 @@ jobs:
 
       - name: Check observer route scenarios
         run: npm run observer:routes:check
+
+      - name: Print observer release receipt
+        run: npm run observer:release:receipt
 
       - name: Stop app
         if: always()
