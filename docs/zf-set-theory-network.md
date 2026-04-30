@@ -25,6 +25,7 @@ docs/zf-set-theory-network.md
 - Edges represent definition, construction, dependency, guard behavior, or extension behavior.
 - Membership is the primitive relation used to define equality and subset.
 - Choice is tracked as an explicit extension point, giving ZFC when added to ZF.
+- Bayesian coordinates are a visualization/ranking overlay, not proof values.
 
 ## Core predicates
 
@@ -34,8 +35,43 @@ A ⊆ B ⇔ ∀x(x ∈ A → x ∈ B)
 A = B ⇔ ∀x(x ∈ A ↔ x ∈ B)
 ⋃A = {x | ∃y(y ∈ A ∧ x ∈ y)}
 P(A) = {x | x ⊆ A}
+P(H|E) = P(E|H)P(H)/P(E)
 ZF + AC = ZFC
 ```
+
+## Bayesian coordinate layer
+
+The connector assigns each node a Bayesian coordinate object:
+
+```ts
+type BayesianCoordinate = {
+  prior: number;
+  likelihood: number;
+  evidence: number;
+  posterior: number;
+  confidence: number;
+  note: string;
+};
+```
+
+The update formula is:
+
+```txt
+P(H|E) = P(E|H)P(H)/P(E)
+```
+
+In this UI, the coordinate means:
+
+| Field | Meaning |
+|---|---|
+| `prior` | Starting relevance weight for the node in this connector. |
+| `likelihood` | How strongly the current evidence supports using this node in the network view. |
+| `evidence` | Normalizing evidence mass for the UI overlay. |
+| `posterior` | Updated coordinate used for display scaling. |
+| `confidence` | UI confidence in the node's placement/role. |
+| `note` | Human-readable reason for the coordinate. |
+
+These are not mathematical truth scores. A ZF axiom is not made more or less valid by the `posterior` field. The coordinate layer is for navigation, ranking, and visual emphasis. Do not let a Bayesian goblin sell you fake proof glitter.
 
 ## Included ZF nodes
 
@@ -70,6 +106,18 @@ edgeCount
 meanAxiomWeight
 guardEdges
 extensionEdges
+meanPosterior
+meanBayesConfidence
+```
+
+The data file also exports `zfBayesianCoordinateSummary()`, which reports:
+
+```txt
+meanPrior
+meanLikelihood
+meanEvidence
+meanPosterior
+meanConfidence
 ```
 
 These metrics are not mathematical truth scores. They are UI/system summary measures for the connector diagram.
