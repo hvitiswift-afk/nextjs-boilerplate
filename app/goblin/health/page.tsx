@@ -14,15 +14,44 @@ export default function GoblinHealthPage() {
             Control Deck Health
           </h1>
           <p className="max-w-3xl text-lg text-zinc-300">
-            Machine-readable diagnostics for dashboards, APIs, receipts, and route laws.
+            Machine-readable diagnostics for dashboards, APIs, receipts, route laws,
+            duplicate receipt IDs, and per-layer health.
           </p>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-4">
+        <section className="grid gap-4 md:grid-cols-5">
           <MetricCard label="Status" value={health.status} />
           <MetricCard label="Dashboards" value={String(health.dashboardCount)} />
           <MetricCard label="APIs" value={String(health.apiCount)} />
           <MetricCard label="Receipts" value={String(health.receiptCount)} />
+          <MetricCard label="Duplicates" value={String(health.duplicateReceiptIds.length)} />
+        </section>
+
+        <section className="rounded-2xl border border-lime-300/20 bg-lime-300/10 p-6">
+          <h2 className="text-2xl font-semibold">Layer Health</h2>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {health.layerHealth.map((layer) => (
+              <article
+                key={layer.layer}
+                className="rounded-xl border border-white/10 bg-black/30 p-4"
+              >
+                <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">
+                  layer
+                </p>
+                <h3 className="mt-1 text-lg font-semibold">{layer.layer}</h3>
+                <p className="mt-3 text-sm text-zinc-300">
+                  routes: {layer.routeCount} / dashboards: {layer.dashboardCount} / APIs: {layer.apiCount} / healthy: {layer.healthyCount}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-2xl font-semibold">Duplicate Receipt IDs</h2>
+          <pre className="mt-4 overflow-auto rounded-xl bg-black p-4 text-xs text-lime-200">
+{JSON.stringify(health.duplicateReceiptIds, null, 2)}
+          </pre>
         </section>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
@@ -36,7 +65,7 @@ export default function GoblinHealthPage() {
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">
-                      {item.kind}
+                      {item.kind} / {item.layer}
                     </p>
                     <h3 className="mt-1 text-lg font-semibold">{item.path}</h3>
                   </div>
