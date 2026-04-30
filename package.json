@@ -8,7 +8,8 @@
     "start": "next start",
     "db:migrate": "node scripts/migrate-memory-vault.mjs",
     "observer:routes": "node scripts/print-observer-route-scenarios.mjs",
-    "observer:routes:check": "node scripts/check-observer-route-scenarios.mjs"
+    "observer:routes:check": "node scripts/check-observer-route-scenarios.mjs",
+    "observer:release:receipt": "node scripts/print-observer-route-release-receipt.mjs"
   },
   "dependencies": {
     "next": "15.5.2",
