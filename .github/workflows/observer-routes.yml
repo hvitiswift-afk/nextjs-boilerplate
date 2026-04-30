@@ -1,0 +1,64 @@
+name: Observer Routes
+
+on:
+  push:
+    paths:
+      - "app/api/llm/observer-route/**"
+      - "lib/llm/observer-*.ts"
+      - "examples/observer-route-scenarios.sample.json"
+      - "scripts/check-observer-route-scenarios.mjs"
+      - "package.json"
+      - ".github/workflows/observer-routes.yml"
+  pull_request:
+    paths:
+      - "app/api/llm/observer-route/**"
+      - "lib/llm/observer-*.ts"
+      - "examples/observer-route-scenarios.sample.json"
+      - "scripts/check-observer-route-scenarios.mjs"
+      - "package.json"
+      - ".github/workflows/observer-routes.yml"
+
+jobs:
+  observer-routes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Start app
+        run: |
+          npm run start > /tmp/observer-routes-next.log 2>&1 &
+          echo $! > /tmp/observer-routes-next.pid
+
+      - name: Wait for app
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:3000/api/llm/observer-constellations > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/observer-routes-next.log
+          exit 1
+
+      - name: Check observer route scenarios
+        run: npm run observer:routes:check
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/observer-routes-next.pid ]; then
+            kill "$(cat /tmp/observer-routes-next.pid)" || true
+          fi
