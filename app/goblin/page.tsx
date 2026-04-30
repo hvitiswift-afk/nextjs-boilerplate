@@ -24,11 +24,17 @@ const links = [
     title: "Control Deck Health",
     description: "Diagnostics for dashboards, APIs, receipts, and route laws.",
   },
+  {
+    href: "/goblin/receipts",
+    title: "Receipt Ledger",
+    description: "Receipt-centered audit view for routes, paths, layers, kinds, duplicates, and laws.",
+  },
 ];
 
 const apis = [
   "/api/llm/goblin-control-deck",
   "/api/llm/goblin-control-deck-health",
+  "/api/llm/goblin-receipt-ledger",
   "/api/llm/observer-constellations",
   "/api/llm/observer-parallax",
   "/api/llm/observer-route",
@@ -45,7 +51,7 @@ export default function GoblinIndexPage() {
           <h1 className="text-4xl font-semibold md:text-6xl">Control Deck</h1>
           <p className="max-w-3xl text-lg text-zinc-300">
             A single launch page for galaxy routing, Earth/Mars observer skies,
-            parallax pairings, route resolution, and health diagnostics.
+            parallax pairings, route resolution, health diagnostics, and receipt audits.
           </p>
         </header>
 
@@ -78,11 +84,11 @@ export default function GoblinIndexPage() {
           <h2 className="text-2xl font-semibold">Receipt</h2>
           <pre className="mt-4 overflow-auto rounded-xl bg-black p-4 text-xs text-violet-200">
 {`{
-  "id": "receipt-goblin-control-deck-019",
-  "kind": "llm-goblin-control-deck-linked-health",
+  "id": "receipt-goblin-control-deck-026",
+  "kind": "llm-goblin-control-deck-linked-receipts",
   "status": "visible",
   "path": "/goblin",
-  "law": "A router becomes usable when every gate has a visible control deck, every deck has health, and every health check has receipts."
+  "law": "A router becomes usable when every gate has a visible control deck, every deck has health, and every receipt has a ledger."
 }`}
           </pre>
         </section>
