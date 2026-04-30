@@ -1,0 +1,46 @@
+{
+  "product": "Goblin LLM Observer Route Scenarios",
+  "receipt": {
+    "id": "receipt-observer-route-scenarios-012",
+    "kind": "llm-observer-route-scenarios",
+    "status": "sample"
+  },
+  "law": "Observer first, prompt second, constellation match third, Goblin route fourth, Bz consequence gate last.",
+  "scenarios": [
+    {
+      "id": "earth-orion-synthesis",
+      "observer": "earth",
+      "prompt": "compose and synthesize the creative pattern through Orion",
+      "expectedConstellationId": "earth-orion",
+      "expectedRoute": "orion_arc"
+    },
+    {
+      "id": "earth-scorpius-risk",
+      "observer": "earth",
+      "prompt": "risk heat warning flare approval shield",
+      "expectedConstellationId": "earth-scorpius",
+      "expectedRoute": "bz_shield"
+    },
+    {
+      "id": "mars-earth-return",
+      "observer": "mars",
+      "prompt": "home return beacon from Mars to Earth",
+      "expectedConstellationId": "mars-earth-star",
+      "expectedRoute": "earth_gate"
+    },
+    {
+      "id": "mars-phobos-deimos-risk",
+      "observer": "mars",
+      "prompt": "fast local clock fear terror shield check",
+      "expectedConstellationId": "mars-phobos-deimos",
+      "expectedRoute": "bz_shield"
+    },
+    {
+      "id": "mars-arcturus-verify",
+      "observer": "mars",
+      "prompt": "off world source check reference verification beam",
+      "expectedConstellationId": "mars-arcturus-line",
+      "expectedRoute": "arcturus_gate"
+    }
+  ]
+}
