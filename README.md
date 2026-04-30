@@ -112,6 +112,11 @@ Only sourced, non-causal collaboration signals publish.
 - `BLACKLETTER`: evidence and claim-safety gate.
 - `SAME-TICK`: event intake for scanner/barcode/QR/inventory/credit events.
 
+## GRIPLOOM product rails
+
+- `docs/GRIPLOOM-HATS.md`: headwear beams, patch grammar, mesh/crown roles, and release gates.
+- `docs/GRIPLOOM-ID-BARCODER.md`: function-shaped IDs, barcode/QR payloads, scanner routing, and SAME-TICK receipts.
+
 ## API: score beams
 
 ```http
@@ -209,5 +214,7 @@ GRIPLOOM outputs are credit-based collaboration signals. They must not claim hir
 - `docs/observer-route-ci.md`
 - `docs/observer-route-release.md`
 - `docs/observer-route-release-gates.md`
+- `docs/GRIPLOOM-HATS.md`
+- `docs/GRIPLOOM-ID-BARCODER.md`
 
 Verified credits in. Production geometry out.
