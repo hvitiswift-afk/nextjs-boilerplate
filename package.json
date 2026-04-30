@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "db:migrate": "node scripts/migrate-memory-vault.mjs"
+    "db:migrate": "node scripts/migrate-memory-vault.mjs",
+    "observer:routes": "node scripts/print-observer-route-scenarios.mjs"
   },
   "dependencies": {
     "next": "15.5.2",
