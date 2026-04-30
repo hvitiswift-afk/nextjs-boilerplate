@@ -1,0 +1,112 @@
+{
+  "id": "receipt-griploom-id-barcoder-sample-035",
+  "kind": "griploom-id-barcoder-sample",
+  "status": "sample",
+  "schema": {
+    "idFormat": "GL-{LAYER}-{OBJECT}-{BATCH}-{SERIAL}-{CHECK}",
+    "scannerFunction": "SCAN(input) = read → normalize → validate_check → route → receipt",
+    "publicQrRule": "URL + public ID + batch receipt; no private facts"
+  },
+  "items": [
+    {
+      "id": "GL-HAT-FIELD-20260430-0001-K7",
+      "kind": "griploom-id",
+      "object": {
+        "layer": "HAT",
+        "type": "FIELD",
+        "surface": "front_patch"
+      },
+      "shape": {
+        "name": "Crown Arc",
+        "symbol": "◠",
+        "function": "headwear identity scan"
+      },
+      "barcode": {
+        "symbology": "code128",
+        "payload": "GL-HAT-FIELD-20260430-0001-K7",
+        "humanReadable": true
+      },
+      "qr": {
+        "payloadType": "json-url",
+        "url": "https://hviti.com/griploom/id/GL-HAT-FIELD-20260430-0001-K7",
+        "privacy": "public-id-only"
+      },
+      "scanner": {
+        "eventType": "scan_in",
+        "route": "/api/tick",
+        "idempotencyKey": "GL-HAT-FIELD-20260430-0001-K7-SCANIN"
+      },
+      "blackletter": {
+        "status": "requires_review",
+        "rule": "No employment, legal status, certification, causation, or private affiliation claims."
+      }
+    },
+    {
+      "id": "GL-SHIRT-MESH-20260430-0002-Q4",
+      "kind": "griploom-id",
+      "object": {
+        "layer": "SHIRT",
+        "type": "MESH",
+        "surface": "sleeve_rail"
+      },
+      "shape": {
+        "name": "Sleeve Rail",
+        "symbol": "━",
+        "function": "side identity scan"
+      },
+      "barcode": {
+        "symbology": "code128",
+        "payload": "GL-SHIRT-MESH-20260430-0002-Q4",
+        "humanReadable": true
+      },
+      "qr": {
+        "payloadType": "json-url",
+        "url": "https://hviti.com/griploom/id/GL-SHIRT-MESH-20260430-0002-Q4",
+        "privacy": "public-id-only"
+      },
+      "scanner": {
+        "eventType": "scan_out",
+        "route": "/api/tick",
+        "idempotencyKey": "GL-SHIRT-MESH-20260430-0002-Q4-SCANOUT"
+      },
+      "blackletter": {
+        "status": "requires_review",
+        "rule": "Credit-based collaboration signals only; no outcome guarantees."
+      }
+    },
+    {
+      "id": "GL-GEAR-SCANNER-20260430-0003-R9",
+      "kind": "griploom-id",
+      "object": {
+        "layer": "GEAR",
+        "type": "SCANNER",
+        "surface": "receipt_square"
+      },
+      "shape": {
+        "name": "Receipt Square",
+        "symbol": "□",
+        "function": "audit scan"
+      },
+      "barcode": {
+        "symbology": "code128",
+        "payload": "GL-GEAR-SCANNER-20260430-0003-R9",
+        "humanReadable": true
+      },
+      "qr": {
+        "payloadType": "json-url",
+        "url": "https://hviti.com/griploom/id/GL-GEAR-SCANNER-20260430-0003-R9",
+        "privacy": "public-id-only"
+      },
+      "scanner": {
+        "eventType": "inventory_check",
+        "route": "/api/tick",
+        "idempotencyKey": "GL-GEAR-SCANNER-20260430-0003-R9-INVENTORY"
+      },
+      "blackletter": {
+        "status": "requires_review",
+        "rule": "Scanner events require source logs and receipt records."
+      }
+    }
+  ],
+  "law": "A GRIPLOOM ID sample is valid only when shape, barcode, QR, scanner route, and BLACKLETTER fields travel together."
+}
