@@ -8,7 +8,8 @@ export type GoblinControlDeckRoute = {
     | "observer_constellations"
     | "observer_parallax"
     | "observer_route"
-    | "control_deck";
+    | "control_deck"
+    | "health";
   receiptId: string;
   law: string;
 };
@@ -18,7 +19,7 @@ export type GoblinControlDeckManifest = {
   status: "active";
   routes: GoblinControlDeckRoute[];
   receipt: {
-    id: "receipt-goblin-control-deck-manifest-014";
+    id: "receipt-goblin-control-deck-manifest-020";
     kind: "llm-goblin-control-deck-manifest";
     status: "active";
   };
@@ -35,7 +36,7 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         path: "/goblin",
         kind: "dashboard",
         layer: "control_deck",
-        receiptId: "receipt-goblin-control-deck-013",
+        receiptId: "receipt-goblin-control-deck-019",
         law: "A router becomes usable when every gate has a visible control deck.",
       },
       {
@@ -75,6 +76,33 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         law: "Observer first, constellation second, Goblin route third, receipt always.",
       },
       {
+        id: "dashboard-health",
+        title: "Control Deck Health",
+        path: "/goblin/health",
+        kind: "dashboard",
+        layer: "health",
+        receiptId: "receipt-goblin-control-deck-health-dashboard-018",
+        law: "Diagnostics become governable when health is visible.",
+      },
+      {
+        id: "api-goblin-control-deck",
+        title: "Goblin Control Deck API",
+        path: "/api/llm/goblin-control-deck",
+        kind: "api",
+        layer: "control_deck",
+        receiptId: "receipt-goblin-control-deck-api-015",
+        law: "The visible control deck has a machine-readable manifest endpoint.",
+      },
+      {
+        id: "api-goblin-control-deck-health",
+        title: "Goblin Control Deck Health API",
+        path: "/api/llm/goblin-control-deck-health",
+        kind: "api",
+        layer: "health",
+        receiptId: "receipt-goblin-control-deck-health-api-017",
+        law: "The manifest can be checked by a machine-readable health endpoint.",
+      },
+      {
         id: "api-observer-constellations",
         title: "Observer Constellations API",
         path: "/api/llm/observer-constellations",
@@ -103,7 +131,7 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
       },
     ],
     receipt: {
-      id: "receipt-goblin-control-deck-manifest-014",
+      id: "receipt-goblin-control-deck-manifest-020",
       kind: "llm-goblin-control-deck-manifest",
       status: "active",
     },
