@@ -158,6 +158,14 @@ docs/GRIPLOOM-LAUNCH-CHECKLIST.md
 
 Use the checklist for the full verify → deploy → browser → API smoke-test receipt path.
 
+Launch receipt template:
+
+```txt
+docs/GRIPLOOM-LAUNCH-RECEIPT.md
+```
+
+Use the receipt template to record each deploy/release candidate result.
+
 ## API: score beams
 
 ```http
@@ -354,6 +362,7 @@ Verify, deploy, open, score, tick, verify.
 - `docs/GRIPLOOM-ID-BARCODER.md`
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`
 - `docs/GRIPLOOM-LAUNCH-CHECKLIST.md`
+- `docs/GRIPLOOM-LAUNCH-RECEIPT.md`
 - `examples/griploom-id-barcoder.sample.json`
 - `examples/griploom-screenplay-industry-id.sample.json`
 - `examples/griploom-ml-score.sample.json`
