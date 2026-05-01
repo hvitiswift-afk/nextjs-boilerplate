@@ -14,7 +14,8 @@
     "griploom:screenplay:check": "node scripts/check-griploom-screenplay-industry-id-sample.mjs",
     "griploom:ml:check": "node scripts/check-griploom-ml-score-sample.mjs",
     "griploom:tick:check": "node scripts/check-griploom-tick-sample.mjs",
-    "griploom:checks": "npm run griploom:id:check && npm run griploom:screenplay:check && npm run griploom:ml:check && npm run griploom:tick:check"
+    "griploom:checks": "npm run griploom:id:check && npm run griploom:screenplay:check && npm run griploom:ml:check && npm run griploom:tick:check",
+    "griploom:verify": "node scripts/verify-griploom-build.mjs"
   },
   "dependencies": {
     "next": "15.5.2",
