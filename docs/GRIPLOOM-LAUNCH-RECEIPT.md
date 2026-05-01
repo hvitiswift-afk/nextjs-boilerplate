@@ -6,6 +6,12 @@ Use this receipt after each deploy or release candidate. Fill it out after the v
 No hidden launch. Every launch gets a receipt.
 ```
 
+Machine-readable sample:
+
+```txt
+examples/griploom-launch.receipt.sample.json
+```
+
 ## Release identity
 
 ```txt
