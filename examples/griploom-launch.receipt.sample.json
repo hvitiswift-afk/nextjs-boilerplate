@@ -1,0 +1,69 @@
+{
+  "id": "receipt-griploom-launch-001",
+  "kind": "griploom-launch-receipt",
+  "release": {
+    "name": "GRIPLOOM release candidate",
+    "date": "2026-05-01",
+    "commit_sha": "pending",
+    "branch": "main",
+    "operator": "pending"
+  },
+  "verification": {
+    "local_command": "npm run griploom:verify",
+    "local_result": "pending",
+    "github_actions_workflow": ".github/workflows/griploom-verify.yml",
+    "github_actions_run_url": "pending",
+    "github_actions_result": "pending"
+  },
+  "hosting": {
+    "primary_host": "Netlify",
+    "site_name": "lichburn-v0-2-8",
+    "site_id": "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f",
+    "live_url": "http://lichburn-v0-2-8.netlify.app",
+    "deploy_url": "pending",
+    "deploy_result": "pending",
+    "vercel_status": "blocked-account",
+    "vercel_notes": "Vercel status is not the primary GRIPLOOM deploy rail. Treat blocked-account checks as hosting/account failures unless logs show a code error."
+  },
+  "browser": {
+    "/ loads": "pending",
+    "/griploom loads": "pending",
+    "Run ML Sample works": "pending",
+    "Send SAME-TICK works": "pending",
+    "Graph preview appears": "pending",
+    "Beam rail appears": "pending",
+    "BLACKLETTER graph legend appears": "pending",
+    "Mesh health appears": "pending",
+    "Mesh scorecard appears": "pending",
+    "Vitality field appears": "pending",
+    "Repeat beam cards appear": "pending",
+    "Beam filters update graph and cards together": "pending",
+    "Raw Results opens": "pending",
+    "No visible client crash": "pending"
+  },
+  "api_smoke_tests": {
+    "ml_score": {
+      "command": "curl -X POST https://lichburn-v0-2-8.netlify.app/api/ml/score -H 'content-type: application/json' --data @examples/griploom-ml-score.sample.json",
+      "result": "pending",
+      "expected_shape": ["product", "rule", "mesh", "field", "results"]
+    },
+    "same_tick": {
+      "command": "curl -X POST https://lichburn-v0-2-8.netlify.app/api/tick -H 'content-type: application/json' --data @examples/griploom-tick.sample.json",
+      "result": "pending",
+      "expected_shape": ["ok", "tick_id", "status", "metrics_updated", "event", "rule"]
+    }
+  },
+  "blackletter_safety": {
+    "no_hiring_guarantees_claimed": "pending",
+    "no_legal_or_union_determinations_claimed": "pending",
+    "no_private_facts_exposed": "pending",
+    "no_causal_certainty_claimed_from_collaboration_signals": "pending",
+    "speculative_language_labeled_when_needed": "pending"
+  },
+  "decision": {
+    "launch_status": "pending",
+    "blockers": [],
+    "next_action": "Run npm run griploom:verify, deploy to Netlify, run browser/API checks, then update this receipt."
+  },
+  "law": "No hidden launch. Every launch gets a receipt."
+}
