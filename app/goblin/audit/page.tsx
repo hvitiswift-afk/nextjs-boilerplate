@@ -13,20 +13,28 @@ export default function GoblinAuditPage() {
           <h1 className="text-4xl font-semibold md:text-6xl">Audit Report</h1>
           <p className="max-w-3xl text-lg text-zinc-300">
             A single verdict over the manifest, health diagnostics, receipt ledger,
-            duplicate receipts, layer counts, law coverage, check counters, and failing checks.
+            duplicate receipts, layer counts, law coverage, check counters, failing checks,
+            pass rate, verdict color, and attention reason.
           </p>
         </header>
 
+        <section className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-6">
+          <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">verdict</p>
+          <h2 className="mt-2 text-4xl font-semibold text-emerald-100">{report.verdict}</h2>
+          <p className="mt-4 text-sm text-zinc-300">{report.attentionReason}</p>
+        </section>
+
         <section className="grid gap-4 md:grid-cols-6">
           <MetricCard label="Status" value={report.status} />
+          <MetricCard label="Pass Rate" value={`${report.passRatePercent}%`} />
           <MetricCard label="Routes" value={String(report.routeTotal)} />
           <MetricCard label="Receipts" value={String(report.receiptTotal)} />
           <MetricCard label="Coverage" value={`${report.lawCoveragePercent}%`} />
-          <MetricCard label="Passed" value={`${report.passedCheckCount}/${report.checkCount}`} />
           <MetricCard label="Failing" value={String(report.failingChecks.length)} />
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
+        <section className="grid gap-4 md:grid-cols-4">
+          <MetricCard label="Passed" value={`${report.passedCheckCount}/${report.checkCount}`} />
           <MetricCard label="Layers" value={String(report.layerCount)} />
           <MetricCard label="Dashboards" value={String(report.dashboardCount)} />
           <MetricCard label="APIs" value={String(report.apiCount)} />
