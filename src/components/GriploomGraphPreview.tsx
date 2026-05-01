@@ -9,6 +9,13 @@ type GraphBeam = {
   blackletterStatus?: BlackletterStatus;
 };
 
+const blackletterLegend = [
+  { label: "APPROVED", color: "#34D399", dash: undefined, meaning: "green publish beam" },
+  { label: "CAUTION", color: "#FACC15", dash: "10 8", meaning: "yellow review beam" },
+  { label: "BLOCKED", color: "#F87171", dash: "3 9", meaning: "red stop beam" },
+  { label: "UNGATED", color: "#C0C0C0", dash: "2 6", meaning: "fallback to polarity" }
+];
+
 function polarityForBeam(beam: GraphBeam) {
   const score = beam.repeatCount * beam.confidence;
 
@@ -161,6 +168,18 @@ export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
           {blackletter.color ? blackletter.meaning : polarity.meaning}
         </text>
       </svg>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, marginTop: 14 }}>
+        {blackletterLegend.map((item) => (
+          <div key={item.label} style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: 10, background: "rgba(0,0,0,0.18)" }}>
+            <svg viewBox="0 0 120 18" style={{ width: "100%", height: 18 }} aria-hidden="true">
+              <line x1="6" y1="9" x2="114" y2="9" stroke={item.color} strokeWidth="5" strokeLinecap="round" strokeDasharray={item.dash} />
+            </svg>
+            <div style={{ color: item.color, fontWeight: 900, fontSize: 13 }}>{item.label}</div>
+            <div style={{ color: "rgba(245,239,226,0.68)", fontSize: 12 }}>{item.meaning}</div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
