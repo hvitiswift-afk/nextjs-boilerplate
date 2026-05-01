@@ -224,7 +224,7 @@ export default function GriploomPage() {
     lowSource: beamItems.filter((item) => item.beam.sharedProductions.length < 2).length
   };
   const visibleBeamItems = beamItems.filter((item) => beamMatchesFilter(item, beamFilter));
-  const graphBeams = beamItems.map((item) => ({ ...item.beam, blackletterStatus: item.blackletter.status }));
+  const graphBeams = visibleBeamItems.map((item) => ({ ...item.beam, blackletterStatus: item.blackletter.status }));
   const healthLabel = meshHealthLabel(filterCounts);
 
   async function runSample() {
