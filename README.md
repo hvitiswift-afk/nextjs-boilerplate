@@ -216,6 +216,88 @@ Example request:
 
 GRIPLOOM outputs are credit-based collaboration signals. They must not claim hiring guarantees, performance outcomes, legal conclusions, union determinations, private facts, or causation.
 
+## Netlify deployment
+
+Current Netlify project target:
+
+```txt
+name: lichburn-v0-2-8
+site_id: 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f
+primary_url: http://lichburn-v0-2-8.netlify.app
+```
+
+Local development:
+
+```bash
+npm install
+npm run dev
+```
+
+Netlify local development:
+
+```bash
+netlify dev
+```
+
+Build:
+
+```bash
+npm run build
+```
+
+Deploy from the repository root using the generated Netlify MCP upload command for the site:
+
+```bash
+npx -y @netlify/mcp@latest --site-id 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f --proxy-path "<generated-proxy-path>"
+```
+
+Live routes to verify after deployment:
+
+```txt
+/
+/griploom
+/api/ml/score
+/api/tick
+```
+
+Smoke test GRIPLOOM ML:
+
+```bash
+curl -X POST https://lichburn-v0-2-8.netlify.app/api/ml/score \
+  -H "content-type: application/json" \
+  --data @examples/griploom-ml-score.sample.json
+```
+
+Smoke test SAME-TICK:
+
+```bash
+curl -X POST https://lichburn-v0-2-8.netlify.app/api/tick \
+  -H "content-type: application/json" \
+  --data @examples/griploom-tick.sample.json
+```
+
+Browser checklist:
+
+```txt
+Home page loads.
+/griploom loads.
+Run ML Sample works.
+Send SAME-TICK works.
+Graph preview appears.
+Polarity styling appears.
+Mesh scorecard appears.
+Vitality field appears.
+Repeat beam cards appear.
+Raw Results opens.
+No visible client crash.
+```
+
+Launch rule:
+
+```txt
+Deploy, open, score, tick, verify.
+```
+
 ## Documentation
 
 - `docs/WHITEPAPER.md`
