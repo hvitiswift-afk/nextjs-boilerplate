@@ -74,6 +74,19 @@ function statusStyle(status?: BlackletterStatus) {
   return { label: status ?? "UNGATED", color: undefined, dash: undefined, meaning: "status not supplied" };
 }
 
+function edgeStyleForBeam(beam: GraphBeam) {
+  const polarity = polarityForBeam(beam);
+  const blackletter = statusStyle(beam.blackletterStatus);
+
+  return {
+    polarity,
+    blackletter,
+    color: blackletter.color ?? polarity.color,
+    dash: blackletter.dash ?? polarity.dash,
+    score: beam.repeatCount * beam.confidence
+  };
+}
+
 export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
   const primaryBeam = beams[0];
 
@@ -83,13 +96,9 @@ export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
 
   const width = 760;
   const height = 250;
-  const score = primaryBeam.repeatCount * primaryBeam.confidence;
+  const { polarity, blackletter, color: edgeColor, dash: edgeDash, score } = edgeStyleForBeam(primaryBeam);
   const edgeWidth = Math.max(2, Math.min(18, score * 2));
   const glowOpacity = Math.max(0.2, Math.min(0.95, primaryBeam.confidence));
-  const polarity = polarityForBeam(primaryBeam);
-  const blackletter = statusStyle(primaryBeam.blackletterStatus);
-  const edgeColor = blackletter.color ?? polarity.color;
-  const edgeDash = blackletter.dash ?? polarity.dash;
 
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 18, background: "rgba(255,255,255,0.04)", padding: 18 }}>
@@ -168,6 +177,27 @@ export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
           {blackletter.color ? blackletter.meaning : polarity.meaning}
         </text>
       </svg>
+
+      <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
+        <h3 style={{ margin: 0 }}>Beam Rail</h3>
+        {beams.map((beam) => {
+          const edge = edgeStyleForBeam(beam);
+          const railWidth = Math.max(3, Math.min(14, edge.score * 1.7));
+
+          return (
+            <div key={beam.id} style={{ display: "grid", gridTemplateColumns: "minmax(180px, 1fr) 2fr minmax(110px, auto)", gap: 12, alignItems: "center", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 14, padding: 10, background: "rgba(0,0,0,0.14)" }}>
+              <div>
+                <div style={{ fontWeight: 900 }}>{beam.people.join(" ↔ ")}</div>
+                <div style={{ color: "rgba(245,239,226,0.64)", fontSize: 12 }}>{beam.layer} · repeats {beam.repeatCount} · confidence {Math.round(beam.confidence * 100)}%</div>
+              </div>
+              <svg viewBox="0 0 240 24" style={{ width: "100%", height: 24 }} aria-hidden="true">
+                <line x1="8" y1="12" x2="232" y2="12" stroke={edge.color} strokeWidth={railWidth} strokeLinecap="round" strokeDasharray={edge.dash} opacity="0.9" />
+              </svg>
+              <div style={{ color: edge.color, fontWeight: 900, fontSize: 13 }}>⚖️ {edge.blackletter.label}</div>
+            </div>
+          );
+        })}
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, marginTop: 14 }}>
         {blackletterLegend.map((item) => (
