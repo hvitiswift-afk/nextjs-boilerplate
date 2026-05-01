@@ -125,8 +125,30 @@ Only sourced, non-causal collaboration signals publish.
 ```bash
 npm run griploom:id:check
 npm run griploom:screenplay:check
+npm run griploom:ml:check
+npm run griploom:tick:check
 npm run griploom:checks
+npm run griploom:verify
 ```
+
+Check rails:
+
+```txt
+griploom:id:check          verifies GRIPLOOM ID/barcode/QR sample shape
+griploom:screenplay:check  verifies screenplay industry ID sample shape
+griploom:ml:check          verifies ML score sample beam/vitality shape
+griploom:tick:check        verifies SAME-TICK event sample shape
+griploom:checks            runs all sample receipt checks
+griploom:verify            runs sample receipts, then Next.js build
+```
+
+GitHub Actions verification:
+
+```txt
+.github/workflows/griploom-verify.yml
+```
+
+The workflow runs `npm ci` and `npm run griploom:verify` on pushes to `main`, pull requests to `main`, and manual workflow dispatch.
 
 ## API: score beams
 
@@ -243,6 +265,12 @@ Netlify local development:
 netlify dev
 ```
 
+Build verification:
+
+```bash
+npm run griploom:verify
+```
+
 Build:
 
 ```bash
@@ -302,7 +330,7 @@ No visible client crash.
 Launch rule:
 
 ```txt
-Deploy, open, score, tick, verify.
+Verify, deploy, open, score, tick, verify.
 ```
 
 ## Documentation
@@ -319,7 +347,13 @@ Deploy, open, score, tick, verify.
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`
 - `examples/griploom-id-barcoder.sample.json`
 - `examples/griploom-screenplay-industry-id.sample.json`
+- `examples/griploom-ml-score.sample.json`
+- `examples/griploom-tick.sample.json`
 - `scripts/check-griploom-id-barcoder-sample.mjs`
 - `scripts/check-griploom-screenplay-industry-id-sample.mjs`
+- `scripts/check-griploom-ml-score-sample.mjs`
+- `scripts/check-griploom-tick-sample.mjs`
+- `scripts/verify-griploom-build.mjs`
+- `.github/workflows/griploom-verify.yml`
 
 Verified credits in. Production geometry out.
