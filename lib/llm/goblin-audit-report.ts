@@ -14,6 +14,9 @@ export type GoblinAuditChecks = Record<GoblinAuditCheckName, boolean>;
 export type GoblinAuditReport = {
   product: "Goblin LLM Audit Report";
   status: "pass" | "attention";
+  verdict: "green" | "amber";
+  attentionReason: string;
+  passRatePercent: number;
   manifestReceiptId: string;
   healthReceiptId: string;
   ledgerReceiptId: string;
@@ -29,7 +32,7 @@ export type GoblinAuditReport = {
   failingChecks: GoblinAuditCheckName[];
   checks: GoblinAuditChecks;
   receipt: {
-    id: "receipt-goblin-audit-report-036";
+    id: "receipt-goblin-audit-report-039";
     kind: "llm-goblin-audit-report";
     status: "active";
   };
@@ -53,11 +56,20 @@ export function createGoblinAuditReport(): GoblinAuditReport {
     .map(([name]) => name);
   const checkCount = Object.keys(checks).length;
   const passedCheckCount = checkCount - failingChecks.length;
+  const passRatePercent = checkCount === 0 ? 0 : Math.round((passedCheckCount / checkCount) * 100);
   const status = failingChecks.length === 0 ? "pass" : "attention";
+  const verdict = status === "pass" ? "green" : "amber";
+  const attentionReason =
+    failingChecks.length === 0
+      ? "All audit checks passed."
+      : `Failing checks: ${failingChecks.join(", ")}.`;
 
   return {
     product: "Goblin LLM Audit Report",
     status,
+    verdict,
+    attentionReason,
+    passRatePercent,
     manifestReceiptId: manifest.receipt.id,
     healthReceiptId: health.receipt.id,
     ledgerReceiptId: ledger.receipt.id,
@@ -73,7 +85,7 @@ export function createGoblinAuditReport(): GoblinAuditReport {
     failingChecks,
     checks,
     receipt: {
-      id: "receipt-goblin-audit-report-036",
+      id: "receipt-goblin-audit-report-039",
       kind: "llm-goblin-audit-report",
       status: "active",
     },
