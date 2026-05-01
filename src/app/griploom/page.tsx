@@ -120,6 +120,9 @@ type ScoreResult = {
   }>;
 };
 
+type BeamItem = NonNullable<ScoreResult["results"]>[number];
+type BeamFilter = "all" | "approved" | "caution" | "blocked" | "flagged" | "high-confidence" | "low-source";
+
 type TickResult = {
   ok: boolean;
   tick_id?: string;
@@ -155,6 +158,25 @@ function Badge({ children, tone = "neutral" }: { children: React.ReactNode; tone
   );
 }
 
+function FilterButton({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        borderRadius: 999,
+        border: active ? "1px solid rgba(165,243,252,0.72)" : "1px solid rgba(255,255,255,0.14)",
+        background: active ? "rgba(165,243,252,0.16)" : "rgba(255,255,255,0.05)",
+        color: active ? "#cffafe" : "#f5efe2",
+        padding: "8px 12px",
+        fontWeight: 800,
+        cursor: "pointer"
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 function confidenceTone(confidence: number) {
   if (confidence >= 0.9) return "good" as const;
   if (confidence >= 0.8) return "warn" as const;
@@ -167,11 +189,34 @@ function blackletterTone(status: string) {
   return "bad" as const;
 }
 
+function beamMatchesFilter(item: BeamItem, filter: BeamFilter) {
+  if (filter === "approved") return item.blackletter.status === "APPROVED";
+  if (filter === "caution") return item.blackletter.status === "CAUTION";
+  if (filter === "blocked") return item.blackletter.status === "BLOCKED";
+  if (filter === "flagged") return item.goblin.flags.length > 0;
+  if (filter === "high-confidence") return item.beam.confidence >= 0.9;
+  if (filter === "low-source") return item.beam.sharedProductions.length < 2;
+  return true;
+}
+
 export default function GriploomPage() {
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [tickResult, setTickResult] = useState<TickResult | null>(null);
+  const [beamFilter, setBeamFilter] = useState<BeamFilter>("all");
   const [loading, setLoading] = useState(false);
   const [tickLoading, setTickLoading] = useState(false);
+
+  const beamItems = result?.results ?? [];
+  const filterCounts = {
+    all: beamItems.length,
+    approved: beamItems.filter((item) => item.blackletter.status === "APPROVED").length,
+    caution: beamItems.filter((item) => item.blackletter.status === "CAUTION").length,
+    blocked: beamItems.filter((item) => item.blackletter.status === "BLOCKED").length,
+    flagged: beamItems.filter((item) => item.goblin.flags.length > 0).length,
+    highConfidence: beamItems.filter((item) => item.beam.confidence >= 0.9).length,
+    lowSource: beamItems.filter((item) => item.beam.sharedProductions.length < 2).length
+  };
+  const visibleBeamItems = beamItems.filter((item) => beamMatchesFilter(item, beamFilter));
 
   async function runSample() {
     setLoading(true);
@@ -290,8 +335,20 @@ export default function GriploomPage() {
 
       {result?.results && (
         <section style={{ display: "grid", gap: 16, margin: "24px 0" }}>
-          <h2>Repeat Beams</h2>
-          {result.results.map((item) => (
+          <div>
+            <h2 style={{ marginBottom: 10 }}>Repeat Beams</h2>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              <FilterButton active={beamFilter === "all"} onClick={() => setBeamFilter("all")}>All ({filterCounts.all})</FilterButton>
+              <FilterButton active={beamFilter === "approved"} onClick={() => setBeamFilter("approved")}>Approved ({filterCounts.approved})</FilterButton>
+              <FilterButton active={beamFilter === "caution"} onClick={() => setBeamFilter("caution")}>Caution ({filterCounts.caution})</FilterButton>
+              <FilterButton active={beamFilter === "blocked"} onClick={() => setBeamFilter("blocked")}>Blocked ({filterCounts.blocked})</FilterButton>
+              <FilterButton active={beamFilter === "flagged"} onClick={() => setBeamFilter("flagged")}>GOBLIN Flagged ({filterCounts.flagged})</FilterButton>
+              <FilterButton active={beamFilter === "high-confidence"} onClick={() => setBeamFilter("high-confidence")}>High Confidence ({filterCounts.highConfidence})</FilterButton>
+              <FilterButton active={beamFilter === "low-source"} onClick={() => setBeamFilter("low-source")}>Low Source ({filterCounts.lowSource})</FilterButton>
+            </div>
+          </div>
+
+          {visibleBeamItems.map((item) => (
             <article key={item.beam.id} style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 18, background: "rgba(255,255,255,0.035)", padding: 18 }}>
               <h3 style={{ marginTop: 0 }}>🔗 {item.beam.people.join(" ↔ ")}</h3>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
@@ -315,6 +372,10 @@ export default function GriploomPage() {
               )}
             </article>
           ))}
+
+          {visibleBeamItems.length === 0 ? (
+            <p style={{ color: "rgba(245,239,226,0.68)" }}>No beams match this filter.</p>
+          ) : null}
         </section>
       )}
 
