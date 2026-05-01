@@ -1,9 +1,12 @@
+type BlackletterStatus = "APPROVED" | "CAUTION" | "BLOCKED" | string;
+
 type GraphBeam = {
   id: string;
   people: [string, string];
   repeatCount: number;
   confidence: number;
   layer: string;
+  blackletterStatus?: BlackletterStatus;
 };
 
 function polarityForBeam(beam: GraphBeam) {
@@ -48,6 +51,22 @@ function polarityForBeam(beam: GraphBeam) {
   };
 }
 
+function statusStyle(status?: BlackletterStatus) {
+  if (status === "APPROVED") {
+    return { label: "APPROVED", color: "#34D399", dash: undefined, meaning: "publishable beam" };
+  }
+
+  if (status === "CAUTION") {
+    return { label: "CAUTION", color: "#FACC15", dash: "10 8", meaning: "review beam / needs operator attention" };
+  }
+
+  if (status === "BLOCKED") {
+    return { label: "BLOCKED", color: "#F87171", dash: "3 9", meaning: "stopped by BLACKLETTER gate" };
+  }
+
+  return { label: status ?? "UNGATED", color: undefined, dash: undefined, meaning: "status not supplied" };
+}
+
 export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
   const primaryBeam = beams[0];
 
@@ -61,12 +80,15 @@ export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
   const edgeWidth = Math.max(2, Math.min(18, score * 2));
   const glowOpacity = Math.max(0.2, Math.min(0.95, primaryBeam.confidence));
   const polarity = polarityForBeam(primaryBeam);
+  const blackletter = statusStyle(primaryBeam.blackletterStatus);
+  const edgeColor = blackletter.color ?? polarity.color;
+  const edgeDash = blackletter.dash ?? polarity.dash;
 
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 18, background: "rgba(255,255,255,0.04)", padding: 18 }}>
       <h2 style={{ marginTop: 0 }}>🕸️ Graph Preview</h2>
       <p style={{ color: "rgba(245,239,226,0.68)" }}>
-        Nodes are people. Edge thickness follows repeat score. Glow follows confidence. Polarity shows charge behavior.
+        Nodes are people. Edge thickness follows repeat score. Glow follows confidence. Color follows BLACKLETTER status when available.
       </p>
 
       <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto", overflow: "visible" }} role="img" aria-label="GRIPLOOM graph preview">
@@ -80,7 +102,7 @@ export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
           </filter>
 
           <marker id="positiveRay" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
-            <path d="M2,2 L10,6 L2,10 Z" fill={polarity.color} />
+            <path d="M2,2 L10,6 L2,10 Z" fill={edgeColor} />
           </marker>
         </defs>
 
@@ -89,27 +111,27 @@ export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
           y1="110"
           x2="600"
           y2="110"
-          stroke={polarity.color}
+          stroke={edgeColor}
           strokeWidth={edgeWidth}
           strokeLinecap="round"
-          strokeDasharray={polarity.dash}
+          strokeDasharray={edgeDash}
           opacity={glowOpacity}
           filter="url(#beamGlow)"
-          markerEnd={polarity.name === "Positive Ray" ? "url(#positiveRay)" : undefined}
+          markerEnd={polarity.name === "Positive Ray" && primaryBeam.blackletterStatus !== "BLOCKED" ? "url(#positiveRay)" : undefined}
         />
 
         {polarity.name === "Alternating Wave" && (
           <path
             d="M 160 110 C 250 55, 330 165, 420 110 S 520 55, 600 110"
             fill="none"
-            stroke={polarity.color}
+            stroke={edgeColor}
             strokeWidth="4"
             opacity="0.65"
           />
         )}
 
         {polarity.name === "Negative Ground" && (
-          <g stroke={polarity.color} strokeWidth="3" opacity="0.9">
+          <g stroke={edgeColor} strokeWidth="3" opacity="0.9">
             <line x1="380" y1="124" x2="380" y2="154" />
             <line x1="356" y1="154" x2="404" y2="154" />
             <line x1="364" y1="164" x2="396" y2="164" />
@@ -118,7 +140,7 @@ export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
         )}
 
         {polarity.name === "Neutral Axis" && (
-          <line x1="380" y1="50" x2="380" y2="172" stroke={polarity.color} strokeWidth="2" opacity="0.45" />
+          <line x1="380" y1="50" x2="380" y2="172" stroke={edgeColor} strokeWidth="2" opacity="0.45" />
         )}
 
         <circle cx="160" cy="110" r="48" fill="#111111" stroke="#F4F0E8" strokeWidth="3" />
@@ -130,12 +152,13 @@ export function GriploomGraphPreview({ beams }: { beams: GraphBeam[] }) {
         <text x="160" y="185" textAnchor="middle" fill="#F4F0E8" fontSize="16">{primaryBeam.people[0]}</text>
         <text x="600" y="185" textAnchor="middle" fill="#F4F0E8" fontSize="16">{primaryBeam.people[1]}</text>
 
-        <text x="380" y="72" textAnchor="middle" fill={polarity.color} fontSize="18">{polarity.shape} {polarity.name}</text>
+        <text x="380" y="62" textAnchor="middle" fill={edgeColor} fontSize="18">{polarity.shape} {polarity.name}</text>
+        <text x="380" y="86" textAnchor="middle" fill={edgeColor} fontSize="15">⚖️ {blackletter.label}</text>
         <text x="380" y="146" textAnchor="middle" fill="#F4F0E8" fontSize="16">
           repeats {primaryBeam.repeatCount} · confidence {primaryBeam.confidence}
         </text>
         <text x="380" y="220" textAnchor="middle" fill="rgba(245,239,226,0.72)" fontSize="14">
-          {polarity.meaning}
+          {blackletter.color ? blackletter.meaning : polarity.meaning}
         </text>
       </svg>
     </section>
