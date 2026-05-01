@@ -10,7 +10,8 @@ export type GoblinControlDeckRoute = {
     | "observer_route"
     | "control_deck"
     | "health"
-    | "receipts";
+    | "receipts"
+    | "audit";
   receiptId: string;
   law: string;
 };
@@ -20,7 +21,7 @@ export type GoblinControlDeckManifest = {
   status: "active";
   routes: GoblinControlDeckRoute[];
   receipt: {
-    id: "receipt-goblin-control-deck-manifest-030";
+    id: "receipt-goblin-control-deck-manifest-035";
     kind: "llm-goblin-control-deck-manifest";
     status: "active";
   };
@@ -37,8 +38,8 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         path: "/goblin",
         kind: "dashboard",
         layer: "control_deck",
-        receiptId: "receipt-goblin-control-deck-026",
-        law: "A router becomes usable when every gate has a visible control deck, every deck has health, and every receipt has a ledger.",
+        receiptId: "receipt-goblin-control-deck-034",
+        law: "A router becomes governable when every deck has health, every receipt has a ledger, and every system has an audit verdict.",
       },
       {
         id: "dashboard-galaxy",
@@ -95,6 +96,15 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         law: "A receipt ledger becomes governable when route totals, law coverage, layer totals, and duplicate receipt counts are visible.",
       },
       {
+        id: "dashboard-audit",
+        title: "Audit Report",
+        path: "/goblin/audit",
+        kind: "dashboard",
+        layer: "audit",
+        receiptId: "receipt-goblin-audit-report-dashboard-033",
+        law: "An audit report becomes governable when its verdict, checks, receipts, and duplicate list are visible.",
+      },
+      {
         id: "api-goblin-control-deck",
         title: "Goblin Control Deck API",
         path: "/api/llm/goblin-control-deck",
@@ -120,6 +130,15 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         layer: "receipts",
         receiptId: "receipt-goblin-receipt-ledger-api-024",
         law: "A receipt ledger becomes useful when it can be read by machines.",
+      },
+      {
+        id: "api-goblin-audit-report",
+        title: "Goblin Audit Report API",
+        path: "/api/llm/goblin-audit-report",
+        kind: "api",
+        layer: "audit",
+        receiptId: "receipt-goblin-audit-report-api-032",
+        law: "An audit report becomes useful when it can be read by machines.",
       },
       {
         id: "api-observer-constellations",
@@ -150,7 +169,7 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
       },
     ],
     receipt: {
-      id: "receipt-goblin-control-deck-manifest-030",
+      id: "receipt-goblin-control-deck-manifest-035",
       kind: "llm-goblin-control-deck-manifest",
       status: "active",
     },
