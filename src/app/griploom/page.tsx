@@ -140,6 +140,33 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
+function Badge({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "good" | "warn" | "bad" | "neutral" }) {
+  const colorMap = {
+    good: { bg: "rgba(52,211,153,0.16)", fg: "#bbf7d0", border: "rgba(52,211,153,0.36)" },
+    warn: { bg: "rgba(250,204,21,0.14)", fg: "#fef08a", border: "rgba(250,204,21,0.36)" },
+    bad: { bg: "rgba(248,113,113,0.16)", fg: "#fecaca", border: "rgba(248,113,113,0.36)" },
+    neutral: { bg: "rgba(255,255,255,0.07)", fg: "#f5efe2", border: "rgba(255,255,255,0.16)" }
+  }[tone];
+
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", borderRadius: 999, border: `1px solid ${colorMap.border}`, background: colorMap.bg, color: colorMap.fg, padding: "6px 10px", fontSize: 13, fontWeight: 800 }}>
+      {children}
+    </span>
+  );
+}
+
+function confidenceTone(confidence: number) {
+  if (confidence >= 0.9) return "good" as const;
+  if (confidence >= 0.8) return "warn" as const;
+  return "bad" as const;
+}
+
+function blackletterTone(status: string) {
+  if (status === "APPROVED") return "good" as const;
+  if (status === "CAUTION") return "warn" as const;
+  return "bad" as const;
+}
+
 export default function GriploomPage() {
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [tickResult, setTickResult] = useState<TickResult | null>(null);
@@ -267,9 +294,16 @@ export default function GriploomPage() {
           {result.results.map((item) => (
             <article key={item.beam.id} style={{ border: "1px solid rgba(255,255,255,0.12)", borderRadius: 18, background: "rgba(255,255,255,0.035)", padding: 18 }}>
               <h3 style={{ marginTop: 0 }}>🔗 {item.beam.people.join(" ↔ ")}</h3>
-              <p><strong>Layer:</strong> {item.beam.layer} · <strong>Repeats:</strong> {item.beam.repeatCount} · <strong>Confidence:</strong> {item.beam.confidence}</p>
-              <p><strong>GRIPLOOM:</strong> {item.griploom.label} / score {item.griploom.score}</p>
-              <p><strong>BLACKLETTER:</strong> {item.blackletter.status} {item.blackletter.reason ? `— ${item.blackletter.reason}` : ""}</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+                <Badge>🛠️ {item.beam.layer}</Badge>
+                <Badge tone={confidenceTone(item.beam.confidence)}>📶 confidence {Math.round(item.beam.confidence * 100)}%</Badge>
+                <Badge tone={item.beam.sharedProductions.length >= 2 ? "good" : "warn"}>🧾 sources {item.beam.sharedProductions.length}</Badge>
+                <Badge tone={item.goblin.flags.length ? "warn" : "good"}>👺 flags {item.goblin.flags.length}</Badge>
+                <Badge tone={blackletterTone(item.blackletter.status)}>⚖️ {item.blackletter.status}</Badge>
+              </div>
+              <p><strong>Repeats:</strong> {item.beam.repeatCount} · <strong>GRIPLOOM:</strong> {item.griploom.label} / score {item.griploom.score}</p>
+              <p><strong>Shared productions:</strong> {item.beam.sharedProductions.join(", ")}</p>
+              {item.blackletter.reason || item.blackletter.note ? <p><strong>BLACKLETTER note:</strong> {item.blackletter.reason ?? item.blackletter.note}</p> : null}
               {item.goblin.flags.length > 0 ? (
                 <ul>
                   {item.goblin.flags.map((flag) => (
