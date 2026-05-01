@@ -13,7 +13,7 @@ export default function GoblinAuditPage() {
           <h1 className="text-4xl font-semibold md:text-6xl">Audit Report</h1>
           <p className="max-w-3xl text-lg text-zinc-300">
             A single verdict over the manifest, health diagnostics, receipt ledger,
-            duplicate receipts, layer counts, and law coverage.
+            duplicate receipts, layer counts, law coverage, check counters, and failing checks.
           </p>
         </header>
 
@@ -22,8 +22,14 @@ export default function GoblinAuditPage() {
           <MetricCard label="Routes" value={String(report.routeTotal)} />
           <MetricCard label="Receipts" value={String(report.receiptTotal)} />
           <MetricCard label="Coverage" value={`${report.lawCoveragePercent}%`} />
+          <MetricCard label="Passed" value={`${report.passedCheckCount}/${report.checkCount}`} />
+          <MetricCard label="Failing" value={String(report.failingChecks.length)} />
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
           <MetricCard label="Layers" value={String(report.layerCount)} />
-          <MetricCard label="Duplicates" value={String(report.duplicateReceiptIds.length)} />
+          <MetricCard label="Dashboards" value={String(report.dashboardCount)} />
+          <MetricCard label="APIs" value={String(report.apiCount)} />
         </section>
 
         <section className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-6">
@@ -37,6 +43,13 @@ export default function GoblinAuditPage() {
               </article>
             ))}
           </div>
+        </section>
+
+        <section className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-6">
+          <h2 className="text-2xl font-semibold">Failing Checks</h2>
+          <pre className="mt-4 overflow-auto rounded-xl bg-black p-4 text-xs text-emerald-200">
+{JSON.stringify(report.failingChecks, null, 2)}
+          </pre>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
