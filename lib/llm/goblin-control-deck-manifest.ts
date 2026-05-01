@@ -21,7 +21,7 @@ export type GoblinControlDeckManifest = {
   status: "active";
   routes: GoblinControlDeckRoute[];
   receipt: {
-    id: "receipt-goblin-control-deck-manifest-035";
+    id: "receipt-goblin-control-deck-manifest-038";
     kind: "llm-goblin-control-deck-manifest";
     status: "active";
   };
@@ -101,8 +101,8 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         path: "/goblin/audit",
         kind: "dashboard",
         layer: "audit",
-        receiptId: "receipt-goblin-audit-report-dashboard-033",
-        law: "An audit report becomes governable when its verdict, checks, receipts, and duplicate list are visible.",
+        receiptId: "receipt-goblin-audit-report-dashboard-037",
+        law: "An audit dashboard becomes actionable when passed checks, failing checks, and system counts are visible.",
       },
       {
         id: "api-goblin-control-deck",
@@ -169,7 +169,7 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
       },
     ],
     receipt: {
-      id: "receipt-goblin-control-deck-manifest-035",
+      id: "receipt-goblin-control-deck-manifest-038",
       kind: "llm-goblin-control-deck-manifest",
       status: "active",
     },
