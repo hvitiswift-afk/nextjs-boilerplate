@@ -218,6 +218,8 @@ GRIPLOOM outputs are credit-based collaboration signals. They must not claim hir
 
 ## Netlify deployment
 
+Netlify is the primary GRIPLOOM deploy rail for this repo.
+
 Current Netlify project target:
 
 ```txt
@@ -225,6 +227,8 @@ name: lichburn-v0-2-8
 site_id: 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f
 primary_url: http://lichburn-v0-2-8.netlify.app
 ```
+
+Vercel checks may show deployment failures when the connected Vercel account is blocked. Treat those as hosting-account failures, not GRIPLOOM code failures, unless build logs show a TypeScript, Next.js, or package error.
 
 Local development:
 
@@ -285,9 +289,12 @@ Run ML Sample works.
 Send SAME-TICK works.
 Graph preview appears.
 Polarity styling appears.
+BLACKLETTER graph legend appears.
+Mesh health appears.
 Mesh scorecard appears.
 Vitality field appears.
 Repeat beam cards appear.
+Beam filters work.
 Raw Results opens.
 No visible client crash.
 ```
