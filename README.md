@@ -150,6 +150,14 @@ GitHub Actions verification:
 
 The workflow runs `npm ci` and `npm run griploom:verify` on pushes to `main`, pull requests to `main`, and manual workflow dispatch.
 
+Launch checklist:
+
+```txt
+docs/GRIPLOOM-LAUNCH-CHECKLIST.md
+```
+
+Use the checklist for the full verify → deploy → browser → API smoke-test receipt path.
+
 ## API: score beams
 
 ```http
@@ -345,6 +353,7 @@ Verify, deploy, open, score, tick, verify.
 - `docs/GRIPLOOM-HATS.md`
 - `docs/GRIPLOOM-ID-BARCODER.md`
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`
+- `docs/GRIPLOOM-LAUNCH-CHECKLIST.md`
 - `examples/griploom-id-barcoder.sample.json`
 - `examples/griploom-screenplay-industry-id.sample.json`
 - `examples/griploom-ml-score.sample.json`
