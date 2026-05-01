@@ -6,6 +6,12 @@ GRIPLOOM launches only after receipts, build, deploy, browser check, and smoke t
 Verify, deploy, open, score, tick, verify.
 ```
 
+Fill the final launch receipt after each release candidate:
+
+```txt
+docs/GRIPLOOM-LAUNCH-RECEIPT.md
+```
+
 ## 1. Local receipt checks
 
 Run all deterministic sample checks:
@@ -126,6 +132,12 @@ Expected smoke-test shape:
 ```
 
 ## 7. Final launch receipt
+
+Use the receipt template:
+
+```txt
+docs/GRIPLOOM-LAUNCH-RECEIPT.md
+```
 
 After verification and smoke tests, record:
 
