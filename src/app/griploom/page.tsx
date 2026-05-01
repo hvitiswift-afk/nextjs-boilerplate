@@ -199,6 +199,13 @@ function beamMatchesFilter(item: BeamItem, filter: BeamFilter) {
   return true;
 }
 
+function meshHealthLabel(counts: { all: number; approved: number; caution: number; blocked: number; flagged: number; lowSource: number }) {
+  if (counts.blocked > 0) return "BLOCKED REVIEW";
+  if (counts.flagged > 0 || counts.lowSource > 0 || counts.caution > 0) return "CAUTION FIELD";
+  if (counts.all > 0 && counts.approved === counts.all) return "PUBLISHABLE";
+  return "WAITING FOR SAMPLE";
+}
+
 export default function GriploomPage() {
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [tickResult, setTickResult] = useState<TickResult | null>(null);
@@ -217,6 +224,7 @@ export default function GriploomPage() {
     lowSource: beamItems.filter((item) => item.beam.sharedProductions.length < 2).length
   };
   const visibleBeamItems = beamItems.filter((item) => beamMatchesFilter(item, beamFilter));
+  const healthLabel = meshHealthLabel(filterCounts);
 
   async function runSample() {
     setLoading(true);
@@ -303,6 +311,16 @@ export default function GriploomPage() {
 
       {result && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, margin: "24px 0" }}>
+          <Card title="🧭 Mesh Health">
+            <p><strong>Status:</strong> {healthLabel}</p>
+            <p><strong>Publishable:</strong> {filterCounts.approved}</p>
+            <p><strong>Review:</strong> {filterCounts.caution}</p>
+            <p><strong>Blocked:</strong> {filterCounts.blocked}</p>
+            <p><strong>GOBLIN flagged:</strong> {filterCounts.flagged}</p>
+            <p><strong>High confidence:</strong> {filterCounts.highConfidence}</p>
+            <p><strong>Low source:</strong> {filterCounts.lowSource}</p>
+          </Card>
+
           <Card title="🕸️ Mesh Scorecard">
             <p><strong>Density:</strong> {result.mesh?.density}</p>
             <p><strong>Beams:</strong> {result.mesh?.beamCount} / {result.mesh?.possibleBeamCount}</p>
