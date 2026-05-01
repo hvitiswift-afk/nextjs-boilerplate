@@ -21,7 +21,7 @@ export type GoblinControlDeckManifest = {
   status: "active";
   routes: GoblinControlDeckRoute[];
   receipt: {
-    id: "receipt-goblin-control-deck-manifest-041";
+    id: "receipt-goblin-control-deck-manifest-043";
     kind: "llm-goblin-control-deck-manifest";
     status: "active";
   };
@@ -137,8 +137,8 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
         path: "/api/llm/goblin-audit-report",
         kind: "api",
         layer: "audit",
-        receiptId: "receipt-goblin-audit-report-api-032",
-        law: "An audit report becomes useful when it can be read by machines.",
+        receiptId: "receipt-goblin-audit-report-api-042",
+        law: "An audit API becomes legible when it returns route identity, verdict, pass rate, attention reason, and module receipt.",
       },
       {
         id: "api-observer-constellations",
@@ -169,7 +169,7 @@ export function createGoblinControlDeckManifest(): GoblinControlDeckManifest {
       },
     ],
     receipt: {
-      id: "receipt-goblin-control-deck-manifest-041",
+      id: "receipt-goblin-control-deck-manifest-043",
       kind: "llm-goblin-control-deck-manifest",
       status: "active",
     },
