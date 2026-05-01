@@ -2,6 +2,15 @@ import { createGoblinControlDeckHealth } from "./goblin-control-deck-health";
 import { createGoblinControlDeckManifest } from "./goblin-control-deck-manifest";
 import { createGoblinReceiptLedger } from "./goblin-receipt-ledger";
 
+export type GoblinAuditCheckName =
+  | "manifestActive"
+  | "healthHealthy"
+  | "ledgerActive"
+  | "noDuplicateReceipts"
+  | "fullLawCoverage";
+
+export type GoblinAuditChecks = Record<GoblinAuditCheckName, boolean>;
+
 export type GoblinAuditReport = {
   product: "Goblin LLM Audit Report";
   status: "pass" | "attention";
@@ -15,15 +24,12 @@ export type GoblinAuditReport = {
   layerCount: number;
   dashboardCount: number;
   apiCount: number;
-  checks: {
-    manifestActive: boolean;
-    healthHealthy: boolean;
-    ledgerActive: boolean;
-    noDuplicateReceipts: boolean;
-    fullLawCoverage: boolean;
-  };
+  checkCount: number;
+  passedCheckCount: number;
+  failingChecks: GoblinAuditCheckName[];
+  checks: GoblinAuditChecks;
   receipt: {
-    id: "receipt-goblin-audit-report-031";
+    id: "receipt-goblin-audit-report-036";
     kind: "llm-goblin-audit-report";
     status: "active";
   };
@@ -34,7 +40,7 @@ export function createGoblinAuditReport(): GoblinAuditReport {
   const health = createGoblinControlDeckHealth();
   const ledger = createGoblinReceiptLedger();
 
-  const checks = {
+  const checks: GoblinAuditChecks = {
     manifestActive: manifest.status === "active",
     healthHealthy: health.status === "healthy",
     ledgerActive: ledger.status === "active",
@@ -42,7 +48,12 @@ export function createGoblinAuditReport(): GoblinAuditReport {
     fullLawCoverage: ledger.lawCoveragePercent === 100,
   };
 
-  const status = Object.values(checks).every(Boolean) ? "pass" : "attention";
+  const failingChecks = (Object.entries(checks) as Array<[GoblinAuditCheckName, boolean]>)
+    .filter(([, passed]) => !passed)
+    .map(([name]) => name);
+  const checkCount = Object.keys(checks).length;
+  const passedCheckCount = checkCount - failingChecks.length;
+  const status = failingChecks.length === 0 ? "pass" : "attention";
 
   return {
     product: "Goblin LLM Audit Report",
@@ -57,9 +68,12 @@ export function createGoblinAuditReport(): GoblinAuditReport {
     layerCount: ledger.layerTotals.length,
     dashboardCount: health.dashboardCount,
     apiCount: health.apiCount,
+    checkCount,
+    passedCheckCount,
+    failingChecks,
     checks,
     receipt: {
-      id: "receipt-goblin-audit-report-031",
+      id: "receipt-goblin-audit-report-036",
       kind: "llm-goblin-audit-report",
       status: "active",
     },
