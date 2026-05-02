@@ -240,6 +240,14 @@ A token is a key, not a receipt. Receipts can be committed. Keys cannot.
 
 Use secret storage such as local `.env.local`, Vercel environment variables, or GitHub Actions secrets. Never commit token values.
 
+Check a locally stored token without printing it:
+
+```bash
+VERCEL_TOKEN="your-token-here" npm run vercel:token:check
+```
+
+The checker calls the Vercel user API and reports whether authentication works while keeping the token hidden.
+
 ## API: score beams
 
 ```http
@@ -450,6 +458,7 @@ Verify, deploy, open, score, tick, verify.
 - `scripts/check-griploom-tick-sample.mjs`
 - `scripts/check-griploom-launch-receipt-sample.mjs`
 - `scripts/check-griploom-launch-printer.mjs`
+- `scripts/check-vercel-token-env.mjs`
 - `scripts/print-griploom-launch-receipt.mjs`
 - `scripts/verify-griploom-build.mjs`
 - `.github/workflows/griploom-verify.yml`
