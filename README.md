@@ -127,6 +127,7 @@ npm run griploom:id:check
 npm run griploom:screenplay:check
 npm run griploom:ml:check
 npm run griploom:tick:check
+npm run griploom:launch:check
 npm run griploom:checks
 npm run griploom:verify
 ```
@@ -138,6 +139,7 @@ griploom:id:check          verifies GRIPLOOM ID/barcode/QR sample shape
 griploom:screenplay:check  verifies screenplay industry ID sample shape
 griploom:ml:check          verifies ML score sample beam/vitality shape
 griploom:tick:check        verifies SAME-TICK event sample shape
+griploom:launch:check      verifies launch receipt sample shape
 griploom:checks            runs all sample receipt checks
 griploom:verify            runs sample receipts, then Next.js build
 ```
@@ -165,6 +167,18 @@ docs/GRIPLOOM-LAUNCH-RECEIPT.md
 ```
 
 Use the receipt template to record each deploy/release candidate result.
+
+Machine-readable launch receipt sample:
+
+```txt
+examples/griploom-launch.receipt.sample.json
+```
+
+Validate it with:
+
+```bash
+npm run griploom:launch:check
+```
 
 ## API: score beams
 
@@ -367,10 +381,12 @@ Verify, deploy, open, score, tick, verify.
 - `examples/griploom-screenplay-industry-id.sample.json`
 - `examples/griploom-ml-score.sample.json`
 - `examples/griploom-tick.sample.json`
+- `examples/griploom-launch.receipt.sample.json`
 - `scripts/check-griploom-id-barcoder-sample.mjs`
 - `scripts/check-griploom-screenplay-industry-id-sample.mjs`
 - `scripts/check-griploom-ml-score-sample.mjs`
 - `scripts/check-griploom-tick-sample.mjs`
+- `scripts/check-griploom-launch-receipt-sample.mjs`
 - `scripts/verify-griploom-build.mjs`
 - `.github/workflows/griploom-verify.yml`
 
