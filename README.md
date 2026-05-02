@@ -120,6 +120,7 @@ Only sourced, non-causal collaboration signals publish.
 - `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`: Phys.org, IFLScience, and unverified FTLScience source-intake boundaries.
 - `docs/GRIPLOOM-CHECKS-INDEX.md`: explicit command, sample, and verifier index for checked GRIPLOOM rails.
 - `docs/VERCEL-API-TOKEN-SETUP.md`: safe Vercel token creation, secret storage, and no-commit rules.
+- `docs/VERCEL-BILLING-BLOCKER.md`: Vercel account/billing blocker note for expected Vercel check failures.
 - `examples/griploom-id-barcoder.sample.json`: sample hat, shirt, and scanner IDs with shape, barcode, QR, scanner route, and BLACKLETTER fields.
 - `examples/griploom-screenplay-industry-id.sample.json`: sample performer, wardrobe, and grip screenplay IDs with guild-boundary safety fields.
 
@@ -365,6 +366,12 @@ primary_url: http://lichburn-v0-2-8.netlify.app
 
 Vercel checks may show deployment failures when the connected Vercel account is blocked. Treat those as hosting-account failures, not GRIPLOOM code failures, unless build logs show a TypeScript, Next.js, or package error.
 
+Vercel billing blocker note:
+
+```txt
+docs/VERCEL-BILLING-BLOCKER.md
+```
+
 Local development:
 
 ```bash
@@ -463,6 +470,7 @@ Verify, deploy, open, score, tick, verify.
 - `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`
 - `docs/GRIPLOOM-CHECKS-INDEX.md`
 - `docs/VERCEL-API-TOKEN-SETUP.md`
+- `docs/VERCEL-BILLING-BLOCKER.md`
 - `examples/griploom-id-barcoder.sample.json`
 - `examples/griploom-screenplay-industry-id.sample.json`
 - `examples/griploom-ml-score.sample.json`
