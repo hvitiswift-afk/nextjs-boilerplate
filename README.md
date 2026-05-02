@@ -117,8 +117,35 @@ Only sourced, non-causal collaboration signals publish.
 - `docs/GRIPLOOM-HATS.md`: headwear beams, patch grammar, mesh/crown roles, and release gates.
 - `docs/GRIPLOOM-ID-BARCODER.md`: function-shaped IDs, barcode/QR payloads, scanner routing, and SAME-TICK receipts.
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`: whole-industry screenplay IDs for work, unit, department, role, scene, object, SAG-AFTRA/IATSE reference boundaries, barcode, QR, and scanner receipts.
+- `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`: Phys.org, IFLScience, and unverified FTLScience source-intake boundaries.
 - `examples/griploom-id-barcoder.sample.json`: sample hat, shirt, and scanner IDs with shape, barcode, QR, scanner route, and BLACKLETTER fields.
 - `examples/griploom-screenplay-industry-id.sample.json`: sample performer, wardrobe, and grip screenplay IDs with guild-boundary safety fields.
+
+## GRIPLOOM science source rail
+
+```txt
+Read → tag → compare → cite → label uncertainty → publish only sourced summaries.
+```
+
+Source rail:
+
+```txt
+Phys.org     active science news and research-reporting source
+IFLScience   active popular-science news and explainer source
+FTLScience   unverified candidate until a canonical URL is confirmed
+```
+
+Science intake document:
+
+```txt
+docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md
+```
+
+Science rule:
+
+```txt
+Science news opens the gate. Primary evidence carries the beam.
+```
 
 ## GRIPLOOM checks
 
@@ -129,6 +156,7 @@ npm run griploom:ml:check
 npm run griploom:tick:check
 npm run griploom:launch:check
 npm run griploom:launch:print
+npm run griploom:launch:print:check
 npm run griploom:checks
 npm run griploom:verify
 ```
@@ -142,6 +170,7 @@ griploom:ml:check          verifies ML score sample beam/vitality shape
 griploom:tick:check        verifies SAME-TICK event sample shape
 griploom:launch:check      verifies launch receipt sample shape
 griploom:launch:print      prints the launch receipt operator summary
+griploom:launch:print:check verifies the launch receipt printer output
 griploom:checks            runs all sample receipt checks
 griploom:verify            runs sample receipts, then Next.js build
 ```
@@ -186,6 +215,12 @@ Print the operator summary with:
 
 ```bash
 npm run griploom:launch:print
+```
+
+Check the printer with:
+
+```bash
+npm run griploom:launch:print:check
 ```
 
 ## API: score beams
@@ -385,6 +420,7 @@ Verify, deploy, open, score, tick, verify.
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`
 - `docs/GRIPLOOM-LAUNCH-CHECKLIST.md`
 - `docs/GRIPLOOM-LAUNCH-RECEIPT.md`
+- `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`
 - `examples/griploom-id-barcoder.sample.json`
 - `examples/griploom-screenplay-industry-id.sample.json`
 - `examples/griploom-ml-score.sample.json`
@@ -395,6 +431,7 @@ Verify, deploy, open, score, tick, verify.
 - `scripts/check-griploom-ml-score-sample.mjs`
 - `scripts/check-griploom-tick-sample.mjs`
 - `scripts/check-griploom-launch-receipt-sample.mjs`
+- `scripts/check-griploom-launch-printer.mjs`
 - `scripts/print-griploom-launch-receipt.mjs`
 - `scripts/verify-griploom-build.mjs`
 - `.github/workflows/griploom-verify.yml`
