@@ -1,0 +1,46 @@
+{
+  "id": "receipt-griploom-science-source-rail-001",
+  "kind": "griploom-science-source-rail",
+  "rule": "Science news opens the gate. Primary evidence carries the beam.",
+  "intake_flow": ["read", "tag", "compare", "cite", "label_uncertainty", "publish_sourced_summary"],
+  "sources": [
+    {
+      "name": "Phys.org",
+      "url": "https://phys.org/",
+      "role": "science news and research reporting",
+      "status": "active",
+      "allowed_use": ["source_discovery", "science_news", "summary_rail"],
+      "requires_primary_crosscheck_for_strong_claims": true
+    },
+    {
+      "name": "IFLScience",
+      "url": "https://www.iflscience.com/",
+      "role": "science news, explainers, and popular science features",
+      "status": "active",
+      "allowed_use": ["source_discovery", "popular_science", "summary_rail"],
+      "requires_primary_crosscheck_for_strong_claims": true
+    },
+    {
+      "name": "FTLScience",
+      "url": "pending",
+      "role": "requested science source candidate",
+      "status": "unverified",
+      "allowed_use": ["candidate_only"],
+      "requires_primary_crosscheck_for_strong_claims": true
+    }
+  ],
+  "claim_rules": {
+    "news_articles_are_not_primary_evidence": true,
+    "primary_sources_preferred": ["paper", "journal", "university_release", "agency_release", "institution_release"],
+    "label_speculative_or_single_study_claims": true,
+    "no_medical_legal_financial_safety_advice_from_popular_science_alone": true,
+    "date_every_current_or_research_dependent_claim": true
+  },
+  "tags": [
+    "SOURCE_DISCOVERY",
+    "SOURCE_PRIMARY_NEEDED",
+    "SOURCE_POPSCI",
+    "SOURCE_NEWS",
+    "SOURCE_UNVERIFIED"
+  ]
+}
