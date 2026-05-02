@@ -118,6 +118,7 @@ Only sourced, non-causal collaboration signals publish.
 - `docs/GRIPLOOM-ID-BARCODER.md`: function-shaped IDs, barcode/QR payloads, scanner routing, and SAME-TICK receipts.
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`: whole-industry screenplay IDs for work, unit, department, role, scene, object, SAG-AFTRA/IATSE reference boundaries, barcode, QR, and scanner receipts.
 - `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`: Phys.org, IFLScience, and unverified FTLScience source-intake boundaries.
+- `docs/GRIPLOOM-CHECKS-INDEX.md`: explicit command, sample, and verifier index for checked GRIPLOOM rails.
 - `docs/VERCEL-API-TOKEN-SETUP.md`: safe Vercel token creation, secret storage, and no-commit rules.
 - `examples/griploom-id-barcoder.sample.json`: sample hat, shirt, and scanner IDs with shape, barcode, QR, scanner route, and BLACKLETTER fields.
 - `examples/griploom-screenplay-industry-id.sample.json`: sample performer, wardrobe, and grip screenplay IDs with guild-boundary safety fields.
@@ -149,6 +150,12 @@ Science news opens the gate. Primary evidence carries the beam.
 ```
 
 ## GRIPLOOM checks
+
+Full checks index:
+
+```txt
+docs/GRIPLOOM-CHECKS-INDEX.md
+```
 
 ```bash
 npm run security:secrets:check
@@ -454,6 +461,7 @@ Verify, deploy, open, score, tick, verify.
 - `docs/GRIPLOOM-LAUNCH-CHECKLIST.md`
 - `docs/GRIPLOOM-LAUNCH-RECEIPT.md`
 - `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`
+- `docs/GRIPLOOM-CHECKS-INDEX.md`
 - `docs/VERCEL-API-TOKEN-SETUP.md`
 - `examples/griploom-id-barcoder.sample.json`
 - `examples/griploom-screenplay-industry-id.sample.json`
