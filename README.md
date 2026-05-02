@@ -151,6 +151,7 @@ Science news opens the gate. Primary evidence carries the beam.
 ## GRIPLOOM checks
 
 ```bash
+npm run security:secrets:check
 npm run griploom:id:check
 npm run griploom:screenplay:check
 npm run griploom:ml:check
@@ -165,6 +166,7 @@ npm run griploom:verify
 Check rails:
 
 ```txt
+security:secrets:check     verifies secret ignore rules and scans for committed token-looking values
 griploom:id:check          verifies GRIPLOOM ID/barcode/QR sample shape
 griploom:screenplay:check  verifies screenplay industry ID sample shape
 griploom:ml:check          verifies ML score sample beam/vitality shape
@@ -172,7 +174,7 @@ griploom:tick:check        verifies SAME-TICK event sample shape
 griploom:launch:check      verifies launch receipt sample shape
 griploom:launch:print      prints the launch receipt operator summary
 griploom:launch:print:check verifies the launch receipt printer output
-griploom:checks            runs all sample receipt checks
+griploom:checks            runs secret-boundary and sample receipt checks
 griploom:verify            runs sample receipts, then Next.js build
 ```
 
@@ -246,7 +248,13 @@ Check a locally stored token without printing it:
 VERCEL_TOKEN="your-token-here" npm run vercel:token:check
 ```
 
-The checker calls the Vercel user API and reports whether authentication works while keeping the token hidden.
+Check repository secret boundaries:
+
+```bash
+npm run security:secrets:check
+```
+
+The checker calls the Vercel user API and reports whether authentication works while keeping the token hidden. The secret-boundary checker verifies `.env*`, `.vercel`, and `*.pem` ignore rules and scans committed files for token-looking values.
 
 ## API: score beams
 
@@ -458,6 +466,7 @@ Verify, deploy, open, score, tick, verify.
 - `scripts/check-griploom-tick-sample.mjs`
 - `scripts/check-griploom-launch-receipt-sample.mjs`
 - `scripts/check-griploom-launch-printer.mjs`
+- `scripts/check-secret-boundaries.mjs`
 - `scripts/check-vercel-token-env.mjs`
 - `scripts/print-griploom-launch-receipt.mjs`
 - `scripts/verify-griploom-build.mjs`
