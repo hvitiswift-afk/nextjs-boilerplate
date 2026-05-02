@@ -33,6 +33,7 @@ SAME-TICK sample check
 launch receipt sample check
 launch receipt printer output check
 science source rail sample check
+checks index consistency check
 ```
 
 ## Explicit commands
@@ -47,6 +48,7 @@ npm run griploom:launch:check
 npm run griploom:launch:print
 npm run griploom:launch:print:check
 npm run griploom:science:check
+npm run griploom:checks:index
 npm run griploom:checks
 npm run griploom:verify
 ```
@@ -73,6 +75,7 @@ scripts/check-griploom-tick-sample.mjs
 scripts/check-griploom-launch-receipt-sample.mjs
 scripts/check-griploom-launch-printer.mjs
 scripts/check-griploom-science-source-rail-sample.mjs
+scripts/check-griploom-checks-index.mjs
 scripts/verify-griploom-build.mjs
 ```
 
