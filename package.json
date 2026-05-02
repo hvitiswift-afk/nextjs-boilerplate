@@ -18,6 +18,7 @@
     "griploom:launch:print": "node scripts/print-griploom-launch-receipt.mjs",
     "griploom:launch:print:check": "node scripts/check-griploom-launch-printer.mjs",
     "griploom:science:check": "node scripts/check-griploom-science-source-rail-sample.mjs",
+    "vercel:token:check": "node scripts/check-vercel-token-env.mjs",
     "griploom:checks": "npm run griploom:id:check && npm run griploom:screenplay:check && npm run griploom:ml:check && npm run griploom:tick:check && npm run griploom:launch:check && npm run griploom:launch:print:check && npm run griploom:science:check",
     "griploom:verify": "node scripts/verify-griploom-build.mjs"
   },
