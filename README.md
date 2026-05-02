@@ -118,6 +118,7 @@ Only sourced, non-causal collaboration signals publish.
 - `docs/GRIPLOOM-ID-BARCODER.md`: function-shaped IDs, barcode/QR payloads, scanner routing, and SAME-TICK receipts.
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`: whole-industry screenplay IDs for work, unit, department, role, scene, object, SAG-AFTRA/IATSE reference boundaries, barcode, QR, and scanner receipts.
 - `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`: Phys.org, IFLScience, and unverified FTLScience source-intake boundaries.
+- `docs/VERCEL-API-TOKEN-SETUP.md`: safe Vercel token creation, secret storage, and no-commit rules.
 - `examples/griploom-id-barcoder.sample.json`: sample hat, shirt, and scanner IDs with shape, barcode, QR, scanner route, and BLACKLETTER fields.
 - `examples/griploom-screenplay-industry-id.sample.json`: sample performer, wardrobe, and grip screenplay IDs with guild-boundary safety fields.
 
@@ -222,6 +223,22 @@ Check the printer with:
 ```bash
 npm run griploom:launch:print:check
 ```
+
+## Vercel API token setup
+
+Generate Vercel API tokens in the Vercel dashboard, not in this repo.
+
+```txt
+docs/VERCEL-API-TOKEN-SETUP.md
+```
+
+Token rule:
+
+```txt
+A token is a key, not a receipt. Receipts can be committed. Keys cannot.
+```
+
+Use secret storage such as local `.env.local`, Vercel environment variables, or GitHub Actions secrets. Never commit token values.
 
 ## API: score beams
 
@@ -421,6 +438,7 @@ Verify, deploy, open, score, tick, verify.
 - `docs/GRIPLOOM-LAUNCH-CHECKLIST.md`
 - `docs/GRIPLOOM-LAUNCH-RECEIPT.md`
 - `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`
+- `docs/VERCEL-API-TOKEN-SETUP.md`
 - `examples/griploom-id-barcoder.sample.json`
 - `examples/griploom-screenplay-industry-id.sample.json`
 - `examples/griploom-ml-score.sample.json`
