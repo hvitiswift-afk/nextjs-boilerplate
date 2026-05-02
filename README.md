@@ -128,6 +128,7 @@ npm run griploom:screenplay:check
 npm run griploom:ml:check
 npm run griploom:tick:check
 npm run griploom:launch:check
+npm run griploom:launch:print
 npm run griploom:checks
 npm run griploom:verify
 ```
@@ -140,6 +141,7 @@ griploom:screenplay:check  verifies screenplay industry ID sample shape
 griploom:ml:check          verifies ML score sample beam/vitality shape
 griploom:tick:check        verifies SAME-TICK event sample shape
 griploom:launch:check      verifies launch receipt sample shape
+griploom:launch:print      prints the launch receipt operator summary
 griploom:checks            runs all sample receipt checks
 griploom:verify            runs sample receipts, then Next.js build
 ```
@@ -178,6 +180,12 @@ Validate it with:
 
 ```bash
 npm run griploom:launch:check
+```
+
+Print the operator summary with:
+
+```bash
+npm run griploom:launch:print
 ```
 
 ## API: score beams
@@ -387,6 +395,7 @@ Verify, deploy, open, score, tick, verify.
 - `scripts/check-griploom-ml-score-sample.mjs`
 - `scripts/check-griploom-tick-sample.mjs`
 - `scripts/check-griploom-launch-receipt-sample.mjs`
+- `scripts/print-griploom-launch-receipt.mjs`
 - `scripts/verify-griploom-build.mjs`
 - `.github/workflows/griploom-verify.yml`
 
