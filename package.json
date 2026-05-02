@@ -15,6 +15,7 @@
     "griploom:ml:check": "node scripts/check-griploom-ml-score-sample.mjs",
     "griploom:tick:check": "node scripts/check-griploom-tick-sample.mjs",
     "griploom:launch:check": "node scripts/check-griploom-launch-receipt-sample.mjs",
+    "griploom:launch:print": "node scripts/print-griploom-launch-receipt.mjs",
     "griploom:checks": "npm run griploom:id:check && npm run griploom:screenplay:check && npm run griploom:ml:check && npm run griploom:tick:check && npm run griploom:launch:check",
     "griploom:verify": "node scripts/verify-griploom-build.mjs"
   },
