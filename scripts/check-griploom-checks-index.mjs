@@ -20,6 +20,7 @@ const requiredScripts = [
   "griploom:launch:print",
   "griploom:launch:print:check",
   "griploom:science:check",
+  "griploom:checks:index",
   "griploom:checks",
   "griploom:verify"
 ];
@@ -39,6 +40,7 @@ const requiredFiles = [
   "scripts/check-griploom-launch-receipt-sample.mjs",
   "scripts/check-griploom-launch-printer.mjs",
   "scripts/check-griploom-science-source-rail-sample.mjs",
+  "scripts/check-griploom-checks-index.mjs",
   "scripts/verify-griploom-build.mjs"
 ];
 
@@ -59,6 +61,10 @@ assert(
 assert(
   packageJson.scripts["griploom:checks"].includes("npm run griploom:science:check"),
   "griploom:checks must include the science source rail check"
+);
+assert(
+  packageJson.scripts["griploom:checks"].includes("npm run griploom:checks:index"),
+  "griploom:checks must include the checks index consistency check"
 );
 
 console.log(JSON.stringify({
