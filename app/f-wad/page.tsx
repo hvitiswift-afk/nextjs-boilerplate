@@ -1,3 +1,4 @@
+import { fWadPhotoPalette, fWadPaletteRule } from "../../lib/f-wad/palette";
 import { buildSwirls } from "../../lib/f-wad/swirl";
 import { fWadWorlds } from "../../lib/f-wad/worlds";
 
@@ -25,6 +26,7 @@ export default function FWadPage() {
         <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5 text-sm text-white/60">
           <a className="font-mono uppercase tracking-[0.32em] text-cyan-200" href="/">F-WAD / Quadflare Hollow</a>
           <div className="flex flex-wrap gap-3">
+            <a className="hover:text-cyan-100" href="#palette">Photo Palette</a>
             <a className="hover:text-cyan-100" href="#campaign">Campaign Worlds</a>
             <a className="hover:text-cyan-100" href="/griploom">GRIPLOOM AI</a>
             <a className="hover:text-cyan-100" href="/vault">Vault</a>
@@ -120,6 +122,27 @@ D(x)<-ε     → Gehenna
               </div>
             </div>
           </aside>
+        </section>
+
+        <section id="palette" className="border-t border-white/10 py-10">
+          <div className="mb-6">
+            <p className="font-mono text-sm uppercase tracking-[0.32em] text-cyan-200/70">Photo palette rail</p>
+            <h2 className="mt-2 text-4xl font-black">Cyan shard on synthetic red</h2>
+            <p className="mt-3 max-w-3xl text-white/65">{fWadPaletteRule}</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {fWadPhotoPalette.map((token) => (
+              <article key={token.id} className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.035] shadow-xl shadow-black/20">
+                <div className="h-28" style={{ backgroundColor: token.hex }} />
+                <div className="p-5">
+                  <div className="font-mono text-xs uppercase tracking-[0.24em] text-white/45">{token.hex}</div>
+                  <h3 className="mt-2 text-xl font-black">{token.name}</h3>
+                  <p className="mt-2 text-sm text-white/55">{token.source}</p>
+                  <p className="mt-3 text-sm leading-6 text-cyan-100/75">{token.role}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section id="campaign" className="border-t border-white/10 py-10">
