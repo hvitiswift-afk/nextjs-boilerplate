@@ -33,6 +33,7 @@ SAME-TICK sample check
 launch receipt sample check
 launch receipt printer output check
 science source rail sample check
+F-WAD arena sample check
 checks index consistency check
 ```
 
@@ -48,6 +49,7 @@ npm run griploom:launch:check
 npm run griploom:launch:print
 npm run griploom:launch:print:check
 npm run griploom:science:check
+npm run f-wad:check
 npm run griploom:checks:index
 npm run griploom:checks
 npm run griploom:verify
@@ -62,6 +64,10 @@ examples/griploom-ml-score.sample.json
 examples/griploom-tick.sample.json
 examples/griploom-launch.receipt.sample.json
 examples/griploom-science-source-rail.sample.json
+app/f-wad/page.tsx
+lib/f-wad/field.ts
+lib/f-wad/goblin-router.ts
+lib/f-wad/swirl.ts
 ```
 
 ## Check scripts
@@ -75,6 +81,7 @@ scripts/check-griploom-tick-sample.mjs
 scripts/check-griploom-launch-receipt-sample.mjs
 scripts/check-griploom-launch-printer.mjs
 scripts/check-griploom-science-source-rail-sample.mjs
+scripts/check-f-wad-sample.mjs
 scripts/check-griploom-checks-index.mjs
 scripts/verify-griploom-build.mjs
 ```
