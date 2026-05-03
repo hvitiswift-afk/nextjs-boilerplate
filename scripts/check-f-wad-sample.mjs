@@ -10,13 +10,15 @@ const requiredFiles = [
   "lib/f-wad/field.ts",
   "lib/f-wad/goblin-router.ts",
   "lib/f-wad/swirl.ts",
+  "lib/f-wad/worlds.ts",
 ];
 
 const requiredTerms = {
-  "app/f-wad/page.tsx": ["Quadflare Hollow", "Divergence", "Curl", "Stokes", "Goblin", "Griploom"],
+  "app/f-wad/page.tsx": ["Quadflare Hollow", "Divergence", "Curl", "Stokes", "Goblin", "Griploom", "Campaign rail", "World-select structure", "fWadWorlds"],
   "lib/f-wad/field.ts": ["classifyField", "classifyRealm", "stokesVerified", "Elysium", "Asphodel", "Gehenna", "Pluto"],
   "lib/f-wad/goblin-router.ts": ["routeGoblin", "positive_swirl_charge", "sink_swirl_verify", "pluto_balance"],
   "lib/f-wad/swirl.ts": ["buildSwirls", "swirl_elysium_01", "swirl_asphodel_01", "swirl_gehenna_01", "swirl_pluto_01"],
+  "lib/f-wad/worlds.ts": ["Gladiator Arena", "Hyperboreum", "Imperial Gate", "Alpha Mars", "Omega Mars", "Venus", "Constantinople-style", "MAP02", "MAP03", "MAP04", "MAP05", "MAP06", "MAP07"],
 };
 
 const failures = [];
@@ -45,4 +47,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log("F-WAD sample check passed: arena page, field classifier, Goblin router, and swirl samples are wired.");
+console.log("F-WAD sample check passed: arena page, field classifier, Goblin router, swirl samples, and campaign worlds are wired.");
