@@ -1,4 +1,5 @@
 import { buildSwirls } from "../../lib/f-wad/swirl";
+import { fWadWorlds } from "../../lib/f-wad/worlds";
 
 const cubes = [
   { id: "C1", label: "Intake", role: "weather/radio seed", color: "border-red-300/50 bg-red-300/10", position: "left-[16%] top-[18%]" },
@@ -24,6 +25,7 @@ export default function FWadPage() {
         <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5 text-sm text-white/60">
           <a className="font-mono uppercase tracking-[0.32em] text-cyan-200" href="/">F-WAD / Quadflare Hollow</a>
           <div className="flex flex-wrap gap-3">
+            <a className="hover:text-cyan-100" href="#campaign">Campaign Worlds</a>
             <a className="hover:text-cyan-100" href="/griploom">GRIPLOOM AI</a>
             <a className="hover:text-cyan-100" href="/vault">Vault</a>
           </div>
@@ -118,6 +120,45 @@ D(x)<-ε     → Gehenna
               </div>
             </div>
           </aside>
+        </section>
+
+        <section id="campaign" className="border-t border-white/10 py-10">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="font-mono text-sm uppercase tracking-[0.32em] text-fuchsia-200/70">Campaign rail</p>
+              <h2 className="mt-2 text-4xl font-black">World-select structure</h2>
+              <p className="mt-3 max-w-3xl text-white/65">Quadflare Hollow now expands into a planetary campaign: Gladiator Arena, Hyperboreum, an Imperial Gate hub, Alpha Mars, Omega Mars, and Venus.</p>
+            </div>
+            <code className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-cyan-100">Z = FieldRealm × WorldTag</code>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {fWadWorlds.map((world) => (
+              <article key={world.id} className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-5 shadow-xl shadow-black/20">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-mono text-xs uppercase tracking-[0.24em] text-cyan-100/70">{world.map}</div>
+                    <h3 className="mt-2 text-2xl font-black">{world.name}</h3>
+                    <p className="mt-1 text-sm text-white/55">{world.subtitle}</p>
+                  </div>
+                  <span className="rounded-full border border-cyan-200/20 bg-cyan-200/10 px-3 py-1 text-xs text-cyan-100">{world.fieldBias}</span>
+                </div>
+
+                <p className="mt-4 text-sm leading-6 text-white/68">{world.coreMechanic}</p>
+                <p className="mt-3 text-xs text-white/45">Palette: {world.palette}</p>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {world.sectors.map((sector) => (
+                    <span key={sector} className="rounded-full bg-black/35 px-3 py-1 text-[11px] text-white/55">{sector}</span>
+                  ))}
+                </div>
+
+                <div className="mt-4 rounded-2xl bg-black/30 p-3 text-sm text-white/65">
+                  <strong className="text-fuchsia-100">Rule:</strong> {world.rule}
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       </section>
     </main>
