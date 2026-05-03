@@ -2,6 +2,7 @@ const signals = [
   { label: "Fabian", value: 88, note: "Architect LLM: decomposes intent and writes hyperscripts" },
   { label: "Goblin", value: 82, note: "Router LLM: verifies, tracks, and keeps approval visible" },
   { label: "GRIPLOOM", value: 76, note: "Production geometry: ML scoring, GOBLIN checks, BLACKLETTER gate" },
+  { label: "F-WAD", value: 69, note: "Quadflare Hollow: four-cube field arena with swirls, Stokes, and routing" },
   { label: "Enclave", value: 74, note: "Local-first control plane with memory vault and local LLMs" },
   { label: "Outpost", value: 61, note: "2099-2100 continuity layer for receipts and audit trails" },
 ];
@@ -10,6 +11,7 @@ const stack = [
   "Fabian LLM: architect, planner, hyperscript writer",
   "Goblin LLM: router, verifier, progress lantern, edge operator",
   "GRIPLOOM AI: production geometry from verified credits",
+  "F-WAD: four-cube play arena for divergence, curl, Stokes loops, and swirl routing",
   "LLM mesh: ChatGPT, Claude, Grok-compatible, Fabian, Goblin, local models",
   "Hyperscripts: fetch, clean, route, check, deploy, notify",
   "AWS server tower: Amplify first, larger worker services later",
@@ -22,6 +24,7 @@ const scale = ["0 Local enclave", "1 Edge bridge", "2 Server tower", "3 Worker s
 
 const vaultDoors = [
   { label: "GRIPLOOM AI", href: "/griploom", note: "Run ML beam scoring, mesh density, vitality, GOBLIN checks, and BLACKLETTER status." },
+  { label: "F-WAD Arena", href: "/f-wad", note: "Play the Quadflare Hollow prototype with four cubes, swirls, Stokes verification, and Goblin routing." },
   { label: "Operator Dashboard", href: "/vault", note: "Inspect manifest, health, ledger, and approval audit filters." },
   { label: "Manifest API", href: "/api/vault/manifest", note: "Discover durable route authority and evidence law." },
   { label: "Health API", href: "/api/vault/health", note: "Diagnose vault table connectivity and audit storage." },
@@ -36,6 +39,7 @@ export default function Home() {
           <span className="font-mono uppercase tracking-[0.35em] text-cyan-200">Goblin + Fabian + GRIPLOOM</span>
           <div className="flex flex-wrap items-center gap-3">
             <a className="transition hover:text-cyan-100" href="/griploom">GRIPLOOM AI</a>
+            <a className="transition hover:text-cyan-100" href="/f-wad">F-WAD Arena</a>
             <a className="transition hover:text-cyan-100" href="/vault">Vault Dashboard</a>
             <span>Lichburn Enclave / 2099-2100 Outpost</span>
           </div>
@@ -44,14 +48,15 @@ export default function Home() {
         <div className="grid flex-1 items-center gap-10 py-16 lg:grid-cols-[1.05fr_0.95fr]">
           <section>
             <p className="mb-4 inline-flex rounded-full border border-fuchsia-300/30 bg-fuchsia-300/10 px-4 py-2 text-sm text-fuchsia-100">
-              Fabian LLM • Goblin router • GRIPLOOM production geometry • AWS + Cloudflare bridge
+              Fabian LLM • Goblin router • GRIPLOOM production geometry • F-WAD arena • AWS + Cloudflare bridge
             </p>
             <h1 className="text-5xl font-black tracking-tight sm:text-7xl">Build the hyper-enclave brain.</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
-              Fabian plans, Goblin routes, GRIPLOOM maps production geometry, hyperscripts coordinate, servers execute only after approval, and the 2099-2100 Outpost preserves continuity.
+              Fabian plans, Goblin routes, GRIPLOOM maps production geometry, F-WAD turns four-cube field logic into play, hyperscripts coordinate, servers execute only after approval, and the 2099-2100 Outpost preserves continuity.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="/griploom">Open GRIPLOOM AI</a>
+              <a className="rounded-full border border-cyan-200/30 px-5 py-3 font-bold text-cyan-100" href="/f-wad">Open F-WAD Arena</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="/vault">Open Vault Dashboard</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#algorithm">Open Algorithm</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#scale">Hyperscale Path</a>
@@ -78,7 +83,7 @@ export default function Home() {
         <section id="vault" className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
           <div>
             <h2 className="text-3xl font-black">Stone Vault + GRIPLOOM</h2>
-            <p className="mt-3 text-white/65">Operator visibility for manifest, health, ledger, Violet Gate decisions, GRIPLOOM ML scoring, and approval audit evidence.</p>
+            <p className="mt-3 text-white/65">Operator visibility for manifest, health, ledger, Violet Gate decisions, GRIPLOOM ML scoring, F-WAD swirl routing, and approval audit evidence.</p>
           </div>
           <div className="grid gap-4 lg:col-span-2 sm:grid-cols-2">
             {vaultDoors.map((door) => (
@@ -94,7 +99,7 @@ export default function Home() {
         <section id="algorithm" className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
           <div>
             <h2 className="text-3xl font-black">Algorithm</h2>
-            <p className="mt-3 text-white/65">HyperIntent → Fabian plan → Goblin route → GRIPLOOM score → verify → approve → deploy.</p>
+            <p className="mt-3 text-white/65">HyperIntent → Fabian plan → Goblin route → GRIPLOOM score → F-WAD play/proof → verify → approve → deploy.</p>
           </div>
           <div className="grid gap-4 lg:col-span-2 sm:grid-cols-2">
             {stack.map((item) => <article key={item} className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 text-white/75">{item}</article>)}
@@ -109,6 +114,7 @@ export default function Home() {
           <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/40 p-4 text-sm text-cyan-100">{`FABIAN(intent) = listen → decompose → hyperscript → verify → hand-back
 GOBLIN(task) = classify → route → track → approve → deploy
 GRIPLOOM(signal) = score → challenge → blackletter → publish
+F-WAD(field) = divergence → curl → polarity → Stokes → receipt
 OUTPOST = receipts + logs + approval + continuity
 STONE_VAULT = manifest + health + ledger + audit evidence`}</pre>
         </section>
