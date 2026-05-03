@@ -68,6 +68,7 @@ app/f-wad/page.tsx
 lib/f-wad/field.ts
 lib/f-wad/goblin-router.ts
 lib/f-wad/swirl.ts
+lib/f-wad/worlds.ts
 ```
 
 ## Check scripts
