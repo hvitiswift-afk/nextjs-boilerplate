@@ -111,6 +111,7 @@ Only sourced, non-causal collaboration signals publish.
 - `GOBLIN ML`: flags weak beams, low confidence, duplicates, gaps, and overclaim risk.
 - `BLACKLETTER`: evidence and claim-safety gate.
 - `SAME-TICK`: event intake for scanner/barcode/QR/inventory/credit events.
+- `F-WAD`: four-cube field arena and planetary campaign rail for divergence, curl, Stokes verification, Goblin routing, and Griploom receipts.
 
 ## GRIPLOOM product rails
 
@@ -119,11 +120,54 @@ Only sourced, non-causal collaboration signals publish.
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`: whole-industry screenplay IDs for work, unit, department, role, scene, object, SAG-AFTRA/IATSE reference boundaries, barcode, QR, and scanner receipts.
 - `docs/GRIPLOOM-SCIENCE-SOURCE-RAIL.md`: Phys.org, IFLScience, and unverified FTLScience source-intake boundaries.
 - `docs/GRIPLOOM-CHECKS-INDEX.md`: explicit command, sample, and verifier index for checked GRIPLOOM rails.
+- `docs/F-WAD-CAMPAIGN-RAIL.md`: Quadflare Hollow, Gladiator Arena, Hyperboreum, Imperial Gate, Alpha Mars, Omega Mars, Venus, and cyan-on-synthetic-red palette rail.
 - `docs/GRIPLOOM-DEPLOYMENT-STATUS.md`: source, Netlify, and Vercel billing/account status receipt.
 - `docs/VERCEL-API-TOKEN-SETUP.md`: safe Vercel token creation, secret storage, and no-commit rules.
 - `docs/VERCEL-BILLING-BLOCKER.md`: Vercel account/billing blocker note for expected Vercel check failures.
 - `examples/griploom-id-barcoder.sample.json`: sample hat, shirt, and scanner IDs with shape, barcode, QR, scanner route, and BLACKLETTER fields.
 - `examples/griploom-screenplay-industry-id.sample.json`: sample performer, wardrobe, and grip screenplay IDs with guild-boundary safety fields.
+
+## F-WAD campaign rail
+
+```txt
+F-WAD grows from one four-cube proof arena into a planetary campaign rail.
+```
+
+Routes:
+
+```txt
+/f-wad
+```
+
+Campaign maps:
+
+```txt
+MAP01 Quadflare Hollow
+MAP02 Gladiator Arena
+MAP03 Hyperboreum
+MAP04 Imperial Gate
+MAP05 Alpha Mars
+MAP06 Omega Mars
+MAP07 Venus
+```
+
+Local check:
+
+```bash
+npm run f-wad:check
+```
+
+Documentation:
+
+```txt
+docs/F-WAD-CAMPAIGN-RAIL.md
+```
+
+Palette token:
+
+```txt
+natural cyan shard + synthetic red field + white reflective border + gray metal post
+```
 
 ## GRIPLOOM science source rail
 
@@ -168,6 +212,8 @@ npm run griploom:tick:check
 npm run griploom:launch:check
 npm run griploom:launch:print
 npm run griploom:launch:print:check
+npm run griploom:science:check
+npm run f-wad:check
 npm run griploom:checks
 npm run griploom:verify
 ```
@@ -183,6 +229,8 @@ griploom:tick:check        verifies SAME-TICK event sample shape
 griploom:launch:check      verifies launch receipt sample shape
 griploom:launch:print      prints the launch receipt operator summary
 griploom:launch:print:check verifies the launch receipt printer output
+griploom:science:check     verifies science-source sample rail shape
+f-wad:check                verifies F-WAD arena, field, router, swirl, and campaign world wiring
 griploom:checks            runs secret-boundary and sample receipt checks
 griploom:verify            runs sample receipts, then Next.js build
 ```
@@ -423,6 +471,7 @@ Live routes to verify after deployment:
 ```txt
 /
 /griploom
+/f-wad
 /api/ml/score
 /api/tick
 ```
@@ -448,6 +497,8 @@ Browser checklist:
 ```txt
 Home page loads.
 /griploom loads.
+/f-wad loads.
+F-WAD campaign rail appears.
 Run ML Sample works.
 Send SAME-TICK works.
 Graph preview appears.
@@ -477,6 +528,7 @@ Verify, deploy, open, score, tick, verify.
 - `docs/observer-route-ci.md`
 - `docs/observer-route-release.md`
 - `docs/observer-route-release-gates.md`
+- `docs/F-WAD-CAMPAIGN-RAIL.md`
 - `docs/GRIPLOOM-HATS.md`
 - `docs/GRIPLOOM-ID-BARCODER.md`
 - `docs/GRIPLOOM-SCREENPLAY-INDUSTRY-ID.md`
@@ -498,6 +550,7 @@ Verify, deploy, open, score, tick, verify.
 - `scripts/check-griploom-tick-sample.mjs`
 - `scripts/check-griploom-launch-receipt-sample.mjs`
 - `scripts/check-griploom-launch-printer.mjs`
+- `scripts/check-f-wad-sample.mjs`
 - `scripts/check-secret-boundaries.mjs`
 - `scripts/check-vercel-token-env.mjs`
 - `scripts/print-griploom-launch-receipt.mjs`
