@@ -1,0 +1,48 @@
+{
+  "receipt": 223,
+  "state": "github_review_branch_documentation_committed",
+  "aci": {
+    "expanded_as": "Artifact Control Interface",
+    "function": "Review-unit control through scope, QA, approval state, boundary state, rollback note, receipt type, and safe claim wording.",
+    "current_state": "review_branch_only"
+  },
+  "grimteam": {
+    "roles": [
+      "Boundary Watch",
+      "QA Clerk",
+      "Review Unit Clerk",
+      "Receipter",
+      "Rollback Keeper",
+      "Hold Guard"
+    ],
+    "operating_loop": [
+      "intake_change",
+      "name_review_unit",
+      "check_target_path",
+      "check_boundary_state",
+      "route_qa_notes",
+      "detect_blockers",
+      "prepare_rollback_note",
+      "commit_or_hold",
+      "receipt_result",
+      "keep_claims_below_confirmed_state"
+    ]
+  },
+  "current_review_unit": {
+    "unit_id": "RU-223-GITHUB-REVIEW-DOCS",
+    "artifact_name": "docs/earth-mesh receipt documentation",
+    "source_receipt": "221-223",
+    "target_path": "docs/earth-mesh/",
+    "branch": "earth-mesh-receipt-220-deploy-v2",
+    "pull_request": 89,
+    "unit_class": "review_branch_documentation",
+    "qa_state": "documentation_files_committed",
+    "boundary_state": "review_branch_only_not_merged_not_production",
+    "rollback_note": "close PR or remove branch if not wanted",
+    "router_type": "github_review_branch_router",
+    "receipter_type": "draft_pr_receipter + review_unit_receipter",
+    "current_claim": "review branch docs committed and draft PR open"
+  },
+  "safe_claim": "Receipt 223 adds deeper ACI and Grimteam review-unit documentation to the GitHub review branch.",
+  "blocked_claim": "No merge to main, production release, runtime execution, model release, official archive, app sync, publication release, or external delivery was performed."
+}
