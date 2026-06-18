@@ -1,0 +1,43 @@
+name: GitHub Pages Deploy Prep
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pages-preview.yml'
+      - 'docs/deploy/**'
+      - 'next.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pages-readiness:
+    name: Check GitHub Pages readiness
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Explain Pages hold
+        run: |
+          echo "This workflow is a GitHub Pages readiness check only."
+          echo "It does not publish to GitHub Pages."
+          echo "A real Pages deploy needs static export compatibility and repository Pages settings."
