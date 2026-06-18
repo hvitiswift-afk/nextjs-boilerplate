@@ -1,0 +1,56 @@
+{
+  "receipt": 222,
+  "state": "github_review_branch_documentation_committed",
+  "aci": {
+    "expanded_as": "Artifact Control Interface",
+    "purpose": "Control deployable artifacts through scope, QA, approval, receipt, and rollback boundaries.",
+    "not_performed": [
+      "Azure Container Instances deployment",
+      "cloud infrastructure deployment",
+      "production deployment",
+      "CI/CD automation execution",
+      "container runtime execution",
+      "external delivery",
+      "ML deployment",
+      "Obsidian sync"
+    ]
+  },
+  "deploy_unit": {
+    "fields": [
+      "artifact_name",
+      "source_receipt",
+      "target_environment",
+      "approval_state",
+      "boundary_state",
+      "rollback_note",
+      "qa_state",
+      "deployer_type",
+      "receipter_type",
+      "current_claim"
+    ],
+    "current_state": [
+      "allowed_in_principle",
+      "review_branch_only",
+      "not_merged",
+      "not_production_deployed"
+    ]
+  },
+  "grimteam": {
+    "role": "Internal coordination layer for boundary review, blocker detection, QA routing, deploy-unit preparation, receipt writing, rollback checklist preparation, and external-action hold enforcement.",
+    "deployer_types": [
+      "github_review_branch_deployer",
+      "internal_file_deployer",
+      "documentation_deployer",
+      "no_op_external_deployer"
+    ],
+    "receipter_types": [
+      "github_branch_receipter",
+      "draft_pr_receipter",
+      "deploy_unit_receipter",
+      "blocker_receipter",
+      "rollback_receipter"
+    ]
+  },
+  "safe_claim": "ACI deploy-unit and Grimteam coordination documentation were committed to the GitHub review branch.",
+  "blocked_claim": "No production/cloud/container/ML deployment, official archive, Obsidian sync, publication release, or external delivery was performed."
+}

@@ -1,0 +1,52 @@
+{
+  "receipt": 220,
+  "state": "built_internal_artifact",
+  "layers": {
+    "far_seeing_stone_mesh": {
+      "private_seed": "seeing-stone pattern",
+      "safe_names": [
+        "Far-Seeing Stone Mesh",
+        "Seeing-Stone Registry",
+        "Strategic Ontology Lens"
+      ],
+      "boundary": "Internal ontology metaphor only; no surveillance, hidden access, or public/commercial IP use."
+    },
+    "shadow_discipline": {
+      "private_seed": "private caution seed",
+      "safe_names": [
+        "Shadow-Discipline Caution Kernel",
+        "Dark-Order Drift Filter",
+        "Command-Drift Boundary OS"
+      ],
+      "boundary": "Private caution seed only; no coercion, targeting, manipulation, or harm."
+    },
+    "oni_sentinel": {
+      "private_seed": "Onimusha-inspired restoration seed",
+      "safe_names": [
+        "Oni Sentinel Restoration Pattern",
+        "Gauntlet-Bound Restorer",
+        "Soul-Orb Recovery Loop"
+      ],
+      "boundary": "Private restoration seed only; no public/commercial IP use."
+    }
+  },
+  "confirmed": [
+    "workbook_created",
+    "package_created",
+    "checksum_created",
+    "github_branch_created",
+    "github_docs_committed"
+  ],
+  "not_performed": [
+    "Gmail action",
+    "phone action",
+    "live source search",
+    "external scan",
+    "publication",
+    "merge to main",
+    "submission",
+    "delivery",
+    "ML training/deployment",
+    "Obsidian sync"
+  ]
+}
