@@ -1,0 +1,27 @@
+{
+  "receipt": 224,
+  "state": "github_review_branch_documentation_committed",
+  "current_level": "L3_draft_pr",
+  "release_ladder": [
+    {"level": "L0", "name": "Schema", "state": "complete"},
+    {"level": "L1", "name": "Internal artifact", "state": "complete_for_prior_package_artifacts"},
+    {"level": "L2", "name": "Review branch", "state": "complete"},
+    {"level": "L3", "name": "Draft PR", "state": "complete"},
+    {"level": "L4", "name": "Ready for review", "state": "not_performed"},
+    {"level": "L5", "name": "Main merge", "state": "not_performed"},
+    {"level": "L6", "name": "Site or app release", "state": "not_performed"},
+    {"level": "L7", "name": "External delivery", "state": "not_performed"},
+    {"level": "L8", "name": "Official archive", "state": "not_performed"},
+    {"level": "L9", "name": "Certified claim", "state": "not_performed"}
+  ],
+  "grimteam_blockers": [
+    {"blocker": "no_ready_for_review_action", "keeps_below": "L4"},
+    {"blocker": "no_merge_action", "keeps_below": "L5"},
+    {"blocker": "no_release_target", "keeps_below": "L6"},
+    {"blocker": "no_external_recipient", "keeps_below": "L7"},
+    {"blocker": "no_archive_destination", "keeps_below": "L8"},
+    {"blocker": "no_source_or_certification_report", "keeps_below": "L9"}
+  ],
+  "safe_claim": "Receipt 224 adds a review-unit release ladder and blocker map to the GitHub draft PR branch.",
+  "blocked_claim": "No ready-for-review conversion, main merge, public release, external delivery, official archive, source certification, ML release, or app sync was performed."
+}
