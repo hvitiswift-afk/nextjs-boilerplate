@@ -1,0 +1,57 @@
+{
+  "receipt": 225,
+  "state": "github_review_branch_documentation_committed",
+  "metaphor": {
+    "private_seed": "blue-shell seeker / homing-shell style formatter",
+    "safe_name": "Seeker Formatter",
+    "boundary": "Target-seeking checklist inside authorized records only; no tracking people, devices, accounts, or private systems."
+  },
+  "solvable_targets": [
+    {
+      "target_id": "T1",
+      "missing_field": "no_exact_target",
+      "question": "Where is the action going?",
+      "completion_proof": "target_recorded"
+    },
+    {
+      "target_id": "T2",
+      "missing_field": "no_final_approval_phrase",
+      "question": "Did JP approve this exact action?",
+      "completion_proof": "approval_recorded"
+    },
+    {
+      "target_id": "T3",
+      "missing_field": "no_source_or_certification_evidence_where_required",
+      "question": "What supports the claim?",
+      "completion_proof": "evidence_recorded_or_not_required"
+    },
+    {
+      "target_id": "T4",
+      "missing_field": "no_external_tool_confirmation",
+      "question": "Did the tool or platform confirm it?",
+      "completion_proof": "tool_confirmation_recorded"
+    },
+    {
+      "target_id": "T5",
+      "missing_field": "no_delivery_archive_release_or_sync_receipt",
+      "question": "Did the state actually happen?",
+      "completion_proof": "receipt_recorded"
+    }
+  ],
+  "states": [
+    "missing",
+    "seeking",
+    "found",
+    "not_required",
+    "blocked",
+    "confirmed"
+  ],
+  "current_github_review_branch": {
+    "lane": "GitHub review-branch docs",
+    "target": "hvitiswift-afk/nextjs-boilerplate PR #89 branch earth-mesh-receipt-220-deploy-v2",
+    "tool_confirmation": "GitHub commit responses and PR #89",
+    "receipt_range": "221-225",
+    "safe_claim": "review-branch documentation confirmed",
+    "blocked_claim": "main merge, public release, external delivery, official archive, certification, sync, or model release"
+  }
+}
