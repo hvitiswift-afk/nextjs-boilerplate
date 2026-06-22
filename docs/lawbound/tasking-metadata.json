@@ -1,0 +1,49 @@
+{
+  "packet_id": "lawbound-github-tasking-v160",
+  "repo": "hvitiswift-afk/nextjs-boilerplate",
+  "branch": "hviti/lawbound-deploy-tasking-v160",
+  "slot": "primary-hvitios-lawbound",
+  "packet_type": "documentation-only-github-tasking",
+  "status": "draft-pr-review-ready",
+  "created_for": "JP",
+  "root_os": "HvitiOS",
+  "coordination": {
+    "deag_three": [
+      "witness",
+      "stabilizer",
+      "router"
+    ],
+    "checks": [
+      "branch-review",
+      "documentation-review",
+      "receipt-review",
+      "rollback-review",
+      "jp-approval-gate"
+    ]
+  },
+  "approved_actions": [
+    "create-branch",
+    "add-docs-only-tasking-packet",
+    "open-draft-pr"
+  ],
+  "held_actions": [
+    "merge",
+    "production-release",
+    "hosting-connection",
+    "secrets-change",
+    "settings-change",
+    "github-pages-enable",
+    "netlify-connect",
+    "vercel-connect"
+  ],
+  "expected_checks": [
+    "npm ci",
+    "npm run griploom:verify",
+    "npm run build"
+  ],
+  "rollback_route": [
+    "close-draft-pr",
+    "delete-branch-if-needed"
+  ],
+  "nexter": "Review the draft PR and decide whether to keep, revise, or close the docs-only tasking packet."
+}
