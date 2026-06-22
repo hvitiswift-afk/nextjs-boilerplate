@@ -1,0 +1,9 @@
+receipt: TJP-V51805-GITHUB-DIRECT-COMMIT-NORSTEIN-SEAL
+status: direct_commit_attempted
+project: Norstein Bekkler Seal
+reference_for_later_inclusion: lichburn-v0-2-8
+boundaries:
+  public_deployment: approval_gated
+  payment_collection: approval_gated
+  code_private_ip: do_not_share
+  tokens: zero_value_symbolic
