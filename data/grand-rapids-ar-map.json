@@ -1,0 +1,51 @@
+{
+  "map_id": "norstein-bekkler-grand-rapids-ar-map",
+  "title": "Norstein Bekkler Grand Rapids AR Map",
+  "city": "Grand Rapids",
+  "state": "Michigan",
+  "status": {
+    "internal_soft_open": "NOW_24_7",
+    "public_access_path": "https://hvitiswift-afk.github.io/nextjs-boilerplate/grand-rapids-ar-map",
+    "fallback_access_path": "https://github.com/hvitiswift-afk/nextjs-boilerplate"
+  },
+  "free_core": {
+    "access": "FREE_ONLY",
+    "purchase_required": false,
+    "tip_required": false,
+    "payment_required": false,
+    "card_collection": false,
+    "private_location_required": false
+  },
+  "privacy": {
+    "gps_tracking_required": false,
+    "jp_personal_location_required": false,
+    "private_address_collection": false,
+    "live_surveillance": false
+  },
+  "tokens": {
+    "name": "Silver Points",
+    "type": "zero_value_game_tokens",
+    "expire": false,
+    "cash_value": false,
+    "redeemable_for_money": false,
+    "gambling": false
+  },
+  "zones": [
+    {"id": "GR-ZONE-001", "name": "Downtown Core", "theme": "arrival / civic signal / opening gate"},
+    {"id": "GR-ZONE-002", "name": "River Route", "theme": "flow / reflection / wayfinding"},
+    {"id": "GR-ZONE-003", "name": "Museum Lore Route", "theme": "history / memory / artifact trail"},
+    {"id": "GR-ZONE-004", "name": "Eastown / Wealthy Route", "theme": "indie / street-level questing / shop-window AR"},
+    {"id": "GR-ZONE-005", "name": "Heritage Hill Route", "theme": "architecture / old-house lore / quiet walking route"},
+    {"id": "GR-ZONE-006", "name": "Fulton / Market Route", "theme": "food / gathering / daylight route"},
+    {"id": "GR-ZONE-007", "name": "Medical Mile Route", "theme": "science / healing / light corridor"},
+    {"id": "GR-ZONE-008", "name": "John Ball Route", "theme": "animals / nature / guardian route"}
+  ],
+  "nodes": [
+    {"id": "GR-GATE-001", "name": "Downtown Free-Core Gate", "zone": "Downtown Core", "type": "Gate_Node", "prompt": "Begin the free-core route. No purchase or tip required."},
+    {"id": "GR-RIVER-001", "name": "Grand River Signal", "zone": "River Route", "type": "Signal_Node", "prompt": "Follow public paths. Let the river route carry the next clue."},
+    {"id": "GR-MUSEUM-001", "name": "Museum Memory Node", "zone": "Museum Lore Route", "type": "Lore_Node", "prompt": "Read the city as memory. Keep private data private."},
+    {"id": "GR-EASTOWN-001", "name": "Eastown Street Lore", "zone": "Eastown / Wealthy Route", "type": "Lore_Node", "prompt": "Street-level lore. Respect shops, sidewalks, and people."},
+    {"id": "GR-SAFETY-001", "name": "No Trespass / No Payment Node", "zone": "All Zones", "type": "Safety_Node", "prompt": "Public routes only. No payment. No tip. No card data."},
+    {"id": "GR-TAKEHOME-001", "name": "Take-Home Free-Core Card", "zone": "All Zones", "type": "Take_Home_Node", "prompt": "Take the map with you. Leave with the free-core route."}
+  ]
+}
