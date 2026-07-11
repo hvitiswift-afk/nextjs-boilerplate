@@ -558,3 +558,25 @@ Verify, deploy, open, score, tick, verify.
 - `.github/workflows/griploom-verify.yml`
 
 Verified credits in. Production geometry out.
+
+
+---
+
+# Norstein Public Bridge
+
+This public rail connects the existing Goblin/GRIPLOOM repository to JP's public Norstein Nexus while the canonical source repository remains private.
+
+- Public Nexus: https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site
+- Public campaign: https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/campaign
+- Public X authority: https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/nexus/entries
+- Private canonical source: `hvitiswift-afk/Norstein-Bekkler` (identity only; private contents are not mirrored here)
+
+The bridge publishes only approved public metadata. It contains no secrets, credentials, donor records, private-person records, payment execution, Meta posting, or app-store submission authority.
+
+Validate the rail with:
+
+```bash
+npm run norstein:public:check
+```
+
+See `docs/NORSTEIN-PUBLIC-BRIDGE.md` and `examples/norstein-public-bridge.json`.
