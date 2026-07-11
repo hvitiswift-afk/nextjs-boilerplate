@@ -1,0 +1,28 @@
+name: Verify Norstein Public Bridge
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "docs/NORSTEIN-PUBLIC-BRIDGE.md"
+      - "examples/norstein-public-bridge.json"
+      - "scripts/check-norstein-public-bridge.mjs"
+      - "package.json"
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "docs/NORSTEIN-PUBLIC-BRIDGE.md"
+      - "examples/norstein-public-bridge.json"
+      - "scripts/check-norstein-public-bridge.mjs"
+      - "package.json"
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run norstein:public:check
