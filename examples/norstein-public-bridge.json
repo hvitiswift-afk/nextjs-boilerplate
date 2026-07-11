@@ -1,0 +1,29 @@
+{
+  "schema": "jp.norstein.public-bridge.v1",
+  "bridgeId": "NORSTEIN-PUBLIC-20260711-001",
+  "owner": "JP / Justin Rackham",
+  "publicRepository": "hvitiswift-afk/nextjs-boilerplate",
+  "privateCanonicalRepository": "hvitiswift-afk/Norstein-Bekkler",
+  "publicUrls": {
+    "nexus": "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site",
+    "campaign": "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/campaign",
+    "authority": "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/nexus/entries"
+  },
+  "fundraiser": {
+    "recipient": "Fardarter Gaming LLC",
+    "goalUsd": 1000000,
+    "fundingType": "voluntary-donation",
+    "repayment": false,
+    "paymentProvider": "PayPal"
+  },
+  "publication": {
+    "publicMetadataOnly": true,
+    "privateSourceMirrored": false,
+    "secrets": false,
+    "credentials": false,
+    "donorData": false,
+    "paymentExecution": false,
+    "metaPosting": false,
+    "storeSubmission": false
+  }
+}
