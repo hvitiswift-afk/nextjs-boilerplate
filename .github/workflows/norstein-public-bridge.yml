@@ -5,16 +5,16 @@ on:
       - "README.md"
       - "docs/NORSTEIN-PUBLIC-BRIDGE.md"
       - "examples/norstein-public-bridge.json"
+      - "examples/norstein-github-capability.json"
       - "scripts/check-norstein-public-bridge.mjs"
-      - "package.json"
   push:
     branches: [main]
     paths:
       - "README.md"
       - "docs/NORSTEIN-PUBLIC-BRIDGE.md"
       - "examples/norstein-public-bridge.json"
+      - "examples/norstein-github-capability.json"
       - "scripts/check-norstein-public-bridge.mjs"
-      - "package.json"
 permissions:
   contents: read
 jobs:
@@ -25,4 +25,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm run norstein:public:check
+      - run: node scripts/check-norstein-public-bridge.mjs
