@@ -1,6 +1,6 @@
 {
-  "schema": "jp.norstein.public-bridge.v1",
-  "bridgeId": "NORSTEIN-PUBLIC-20260711-001",
+  "schema": "jp.norstein.public-bridge.v2",
+  "bridgeId": "NORSTEIN-PUBLIC-20260711-002",
   "owner": "JP / Justin Rackham",
   "publicRepository": "hvitiswift-afk/nextjs-boilerplate",
   "privateCanonicalRepository": "hvitiswift-afk/Norstein-Bekkler",
@@ -25,5 +25,7 @@
     "paymentExecution": false,
     "metaPosting": false,
     "storeSubmission": false
-  }
+  },
+  "connectedGitHubCapability": "GITHUB-YZ-20260711-001",
+  "mode": "XYZ.improved"
 }
