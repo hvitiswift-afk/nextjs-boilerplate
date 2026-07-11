@@ -576,7 +576,7 @@ The bridge publishes only approved public metadata. It contains no secrets, cred
 Validate the rail with:
 
 ```bash
-npm run norstein:public:check
+node scripts/check-norstein-public-bridge.mjs
 ```
 
-See `docs/NORSTEIN-PUBLIC-BRIDGE.md` and `examples/norstein-public-bridge.json`.
+See `docs/NORSTEIN-PUBLIC-BRIDGE.md`, `examples/norstein-public-bridge.json`, and `examples/norstein-github-capability.json`. Y owns the connected public/private GitHub rail; Z expands verified private automation; XYZ runs both through X.
