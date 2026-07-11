@@ -1,0 +1,11 @@
+import {readFile} from "node:fs/promises";
+const b=JSON.parse(await readFile("examples/norstein-public-bridge.json","utf8"));
+const assert=(v,m)=>{if(!v)throw new Error(m)};
+assert(b.schema==="jp.norstein.public-bridge.v1","schema mismatch");
+assert(b.publicRepository==="hvitiswift-afk/nextjs-boilerplate","public repository mismatch");
+assert(b.privateCanonicalRepository==="hvitiswift-afk/Norstein-Bekkler","private canonical identity mismatch");
+assert(Object.values(b.publicUrls).every(u=>u.startsWith("https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site")),"public URL mismatch");
+assert(b.fundraiser.fundingType==="voluntary-donation"&&b.fundraiser.repayment===false,"fundraiser terms changed");
+assert(b.publication.publicMetadataOnly===true&&b.publication.privateSourceMirrored===false,"publication boundary changed");
+for(const key of ["secrets","credentials","donorData","paymentExecution","metaPosting","storeSubmission"])assert(b.publication[key]===false,key+" must remain false");
+console.log(JSON.stringify({verified:true,bridgeId:b.bridgeId,publicRepository:b.publicRepository,privateCanonicalRepository:b.privateCanonicalRepository}));
