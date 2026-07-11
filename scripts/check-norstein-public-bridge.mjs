@@ -1,0 +1,15 @@
+import {readFile} from "node:fs/promises";
+const b=JSON.parse(await readFile("examples/norstein-public-bridge.json","utf8"));
+const g=JSON.parse(await readFile("examples/norstein-github-capability.json","utf8"));
+const assert=(v,m)=>{if(!v)throw new Error(m)};
+assert(b.schema==="jp.norstein.public-bridge.v2","bridge schema mismatch");
+assert(b.publicRepository==="hvitiswift-afk/nextjs-boilerplate","public repository mismatch");
+assert(b.privateCanonicalRepository==="hvitiswift-afk/Norstein-Bekkler","private canonical identity mismatch");
+assert(Object.values(b.publicUrls).every(u=>u.startsWith("https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site")),"public URL mismatch");
+assert(b.fundraiser.fundingType==="voluntary-donation"&&b.fundraiser.repayment===false,"fundraiser terms changed");
+assert(b.publication.publicMetadataOnly===true&&b.publication.privateSourceMirrored===false,"publication boundary changed");
+for(const key of ["secrets","credentials","donorData","paymentExecution","metaPosting","storeSubmission"])assert(b.publication[key]===false,key+" must remain false");
+assert(g.schema==="jp.github.capability.yz.v1"&&g.Y.public.visibility==="public"&&g.Y.private.visibility==="private","Y repository roles invalid");
+assert(g.XYZ.checksRequired&&g.XYZ.receiptsRequired&&g.XYZ.rollbackRequired,"XYZ invariant missing");
+assert(g.Z.authorized.includes("merge after passing checks")&&g.Z.gated.includes("secret access"),"Z authority boundary invalid");
+console.log(JSON.stringify({verified:true,bridgeId:b.bridgeId,capabilityId:g.capabilityId,publicRepository:b.publicRepository,privateCanonicalRepository:b.privateCanonicalRepository,mode:"XYZ.improved"}));
