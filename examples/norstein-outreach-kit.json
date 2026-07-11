@@ -1,0 +1,24 @@
+{
+  "schema": "jp.norstein.outreach-kit.v1",
+  "kitId": "NORSTEIN-OUTREACH-20260711-001",
+  "company": "Fardarter Gaming LLC",
+  "project": "Norstein Bekkler",
+  "goalUsd": 1000000,
+  "fundingType": "voluntary-donation",
+  "repayment": false,
+  "links": {
+    "nexus": "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site",
+    "campaign": "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/campaign",
+    "paypal": "https://www.paypal.com/donate/?hosted_button_id=JJ4XGRU94T4XW",
+    "github": "https://github.com/hvitiswift-afk/nextjs-boilerplate"
+  },
+  "status": "public-source-ready",
+  "sent": false,
+  "boundaries": {
+    "donorData": false,
+    "privateSource": false,
+    "secrets": false,
+    "automaticOutreach": false,
+    "exactSendApprovalRequired": true
+  }
+}
