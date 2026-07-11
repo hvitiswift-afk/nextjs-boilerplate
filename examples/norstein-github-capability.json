@@ -1,0 +1,50 @@
+{
+  "schema": "jp.github.capability.yz.v1",
+  "capabilityId": "GITHUB-YZ-20260711-001",
+  "account": "hvitiswift-afk",
+  "Y": {
+    "role": "connected-public-private-rail",
+    "public": {
+      "repository": "hvitiswift-afk/nextjs-boilerplate",
+      "visibility": "public",
+      "purpose": "public-safe Norstein identity, documentation, campaign links, receipts"
+    },
+    "private": {
+      "repository": "hvitiswift-afk/Norstein-Bekkler",
+      "visibility": "private",
+      "purpose": "canonical source, implementation, artifacts, release packets"
+    },
+    "promotion": [
+      "classify change",
+      "remove private-only material",
+      "verify public boundary",
+      "open public PR",
+      "require checks",
+      "merge with receipt"
+    ]
+  },
+  "Z": {
+    "role": "expanded-verified-automation",
+    "authorized": [
+      "repository discovery",
+      "branch creation",
+      "file create/update",
+      "PR creation/update",
+      "workflow inspection",
+      "merge after passing checks"
+    ],
+    "gated": [
+      "repository creation",
+      "visibility changes",
+      "secret access",
+      "public source mirroring",
+      "release publication"
+    ]
+  },
+  "XYZ": {
+    "entry": "X orchestrates Y and Z",
+    "checksRequired": true,
+    "receiptsRequired": true,
+    "rollbackRequired": true
+  }
+}
