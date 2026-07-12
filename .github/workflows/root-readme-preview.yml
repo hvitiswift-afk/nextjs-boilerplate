@@ -1,0 +1,80 @@
+name: Root README Preview Receipt
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - README.md
+      - README.front-door.md
+      - scripts/prepare-root-readme-migration.mjs
+      - .github/workflows/root-readme-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate preview and receipt
+        run: node scripts/prepare-root-readme-migration.mjs | tee readme-migration-receipt.json
+
+      - name: Verify preview invariants
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+
+          const [frontDoorRaw, original, preview, receiptRaw] = await Promise.all([
+            readFile('README.front-door.md', 'utf8'),
+            readFile('README.md', 'utf8'),
+            readFile('README.migrated.preview.md', 'utf8'),
+            readFile('readme-migration-receipt.json', 'utf8'),
+          ]);
+
+          const marker = '\n## Technical documentation\n';
+          const markerIndex = frontDoorRaw.indexOf(marker);
+          if (markerIndex === -1) throw new Error('Front-door marker missing.');
+
+          const expectedFrontDoor = frontDoorRaw.slice(0, markerIndex).trimEnd();
+          const expectedPrefix = `${expectedFrontDoor}\n\n---\n\n`;
+          const receipt = JSON.parse(receiptRaw);
+
+          if (!preview.startsWith(expectedPrefix)) throw new Error('Preview front door or divider mismatch.');
+          if (!preview.endsWith(original)) throw new Error('Original README body was not preserved exactly.');
+          if (receipt.original_body_preserved_exactly !== true) throw new Error('Receipt preservation flag is not true.');
+          if (receipt.output !== 'README.migrated.preview.md') throw new Error('Unexpected output path.');
+
+          console.log('preview_front_door_verified=true');
+          console.log('original_body_preserved_exactly=true');
+          NODE
+
+      - name: Publish receipt summary
+        run: |
+          {
+            echo '## Root README Preview Receipt'
+            echo
+            echo '```json'
+            cat readme-migration-receipt.json
+            echo '```'
+            echo
+            echo '`--write-root` was not run. The repository root README was not modified.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload preview receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: root-readme-preview-receipt
+          path: |
+            README.migrated.preview.md
+            readme-migration-receipt.json
+          if-no-files-found: error
+          retention-days: 7
