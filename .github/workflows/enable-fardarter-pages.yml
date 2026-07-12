@@ -1,0 +1,23 @@
+name: Enable Fardarter GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  enable-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable GitHub Pages with workflow builds
+        env:
+          GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/enable-fardarter-pages.mjs
+
+      - name: Record next step
+        run: echo "Pages enabled. Run the Publish Fardarter Startup Site workflow next."
