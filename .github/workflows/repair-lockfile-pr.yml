@@ -1,0 +1,68 @@
+name: Repair package lock in draft PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  repair:
+    if: github.event.pull_request.head.ref == 'jp/ci-lockfile-repair-v3' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repair branch
+        uses: actions/checkout@v4
+        with:
+          ref: jp/ci-lockfile-repair-v3
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Regenerate package lock
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Verify PostgreSQL lock entries
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          const root = lock.packages?.[''];
+          const result = {
+            rootPg: root?.dependencies?.pg,
+            rootTypesPg: root?.devDependencies?.['@types/pg'],
+            pgPackage: lock.packages?.['node_modules/pg']?.version,
+            typesPgPackage: lock.packages?.['node_modules/@types/pg']?.version,
+          };
+          console.log(result);
+          if (!result.rootPg || !result.rootTypesPg || !result.pgPackage || !result.typesPgPackage) process.exit(1);
+          NODE
+
+      - name: Verify clean install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Run GRIPLOOM verifier
+        run: npm run griploom:verify
+
+      - name: Build application
+        run: npm run build
+
+      - name: Commit lockfile and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git rm .github/workflows/repair-lockfile-pr.yml
+          git commit -m "Regenerate package lock from current manifest"
+          git push origin HEAD:jp/ci-lockfile-repair-v3
