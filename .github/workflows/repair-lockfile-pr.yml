@@ -52,13 +52,7 @@ jobs:
       - name: Verify clean install
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Run GRIPLOOM verifier
-        run: npm run griploom:verify
-
-      - name: Build application
-        run: npm run build
-
-      - name: Commit lockfile and remove temporary workflow
+      - name: Preserve verified lockfile and remove temporary workflow
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -66,3 +60,9 @@ jobs:
           git rm .github/workflows/repair-lockfile-pr.yml
           git commit -m "Regenerate package lock from current manifest"
           git push origin HEAD:jp/ci-lockfile-repair-v3
+
+      - name: Run GRIPLOOM verifier
+        run: npm run griploom:verify
+
+      - name: Build application
+        run: npm run build
