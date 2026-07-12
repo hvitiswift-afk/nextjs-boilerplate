@@ -1,0 +1,3 @@
+Fardarter Pages deployment trigger
+Date: 2026-07-12
+Purpose: Trigger the existing GitHub Pages publication workflow and preserve a deployment-attempt receipt.
