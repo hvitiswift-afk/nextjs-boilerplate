@@ -69,3 +69,5 @@ jobs:
           fi
           git commit -m "Regenerate package lock from current manifest"
           git push origin HEAD:jp/ci-lockfile-repair-v3
+
+# trigger: 2026-07-12
