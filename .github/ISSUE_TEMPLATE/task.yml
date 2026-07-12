@@ -1,0 +1,54 @@
+name: JP controlled task
+description: Define a reviewable repository task with boundaries and receipts.
+title: "[Task] "
+body:
+  - type: input
+    id: lane
+    attributes:
+      label: Lane
+      description: Name the affected system or repository lane.
+    validations:
+      required: true
+  - type: textarea
+    id: target
+    attributes:
+      label: Exact target and desired change
+      description: Identify the files, component, workflow, issue, or pull request and the intended result.
+    validations:
+      required: true
+  - type: dropdown
+    id: classification
+    attributes:
+      label: Classification
+      options:
+        - Public-safe
+        - Private canonical
+        - Mixed; boundary review required
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance checks
+      description: List the checks or evidence that will prove completion.
+    validations:
+      required: true
+  - type: textarea
+    id: gate
+    attributes:
+      label: External-action gate
+      description: Identify any settings, secrets, deployment, publication, billing, domain, outreach, submission, payment, or credential action that must remain separately approved.
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback and receipt
+      description: State the rollback path and the receipt that must be preserved.
+    validations:
+      required: true
+  - type: checkboxes
+    id: approval
+    attributes:
+      label: Control confirmation
+      options:
+        - label: I understand that issue creation and repository preparation do not authorize merge or external execution.
+          required: true
