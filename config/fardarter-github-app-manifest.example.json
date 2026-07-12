@@ -1,0 +1,18 @@
+{
+  "name": "Fardarter Pages Operator",
+  "url": "https://hvitiswift-afk.github.io/nextjs-boilerplate/",
+  "hook_attributes": {
+    "url": "https://example.invalid/github/webhook",
+    "active": false
+  },
+  "redirect_url": "https://example.invalid/github/app-created",
+  "public": false,
+  "default_permissions": {
+    "metadata": "read",
+    "contents": "read",
+    "actions": "write",
+    "administration": "write",
+    "pages": "write"
+  },
+  "default_events": []
+}
