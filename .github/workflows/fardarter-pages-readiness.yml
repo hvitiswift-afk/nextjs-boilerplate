@@ -1,0 +1,26 @@
+name: Verify Fardarter Pages Readiness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'config/fardarter-pages-readiness.json'
+      - 'config/fardarter-github-app-manifest.example.json'
+      - 'docs/FARDARTER-GITHUB-APP-PERMISSION-PACKET.md'
+      - 'docs/FARDARTER-OAUTH-CONNECTOR-PACKET.md'
+      - 'scripts/verify-fardarter-pages-readiness.mjs'
+      - '.github/workflows/enable-fardarter-pages.yml'
+      - '.github/workflows/fardarter-pages.yml'
+      - 'fardarter-startup/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify repository-side readiness
+        run: node scripts/verify-fardarter-pages-readiness.mjs
