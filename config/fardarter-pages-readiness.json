@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "repository": "hvitiswift-afk/nextjs-boilerplate",
+  "site_path": "fardarter-startup",
+  "expected_live_url": "https://hvitiswift-afk.github.io/nextjs-boilerplate/",
+  "routes": ["github_app", "oauth"],
+  "enable_workflow": ".github/workflows/enable-fardarter-pages.yml",
+  "publish_workflow": ".github/workflows/fardarter-pages.yml",
+  "receipt_issue": 102,
+  "status": "external_authorization_required"
+}
