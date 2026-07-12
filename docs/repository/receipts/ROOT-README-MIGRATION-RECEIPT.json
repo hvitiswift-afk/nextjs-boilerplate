@@ -1,0 +1,15 @@
+{
+  "source_front_door": "README.front-door.md",
+  "source_root_readme": "README.md",
+  "preview_output": "README.migrated.preview.md",
+  "original_readme_sha256": "02232b4f4e08993d6028a91a6679d0aef2565564a924d241ce14feb09610b340",
+  "migrated_readme_sha256": "1a8ee40719bccd0d1e1be64588c4c70c56369c1f87c93acf14df661175a8cb64",
+  "original_bytes": 15381,
+  "migrated_bytes": 16656,
+  "original_body_preserved_exactly": true,
+  "output": "README.md",
+  "authorized_by": "JP",
+  "authorization_scope": "root README replacement only; final PR merge separately gated",
+  "workflow_run_id": "29201390920",
+  "head_sha_before_commit": "532eecdb283ebda4827d8aac9b456fdba8ee0a6a"
+}
