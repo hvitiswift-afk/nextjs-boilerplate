@@ -5,6 +5,8 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
   enable-pages:
@@ -13,11 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Enable GitHub Pages with workflow builds
-        env:
-          GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: node scripts/enable-fardarter-pages.mjs
+      - name: Enable and configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v6
+        with:
+          enablement: true
+          token: ${{ secrets.GH_ADMIN_TOKEN }}
 
-      - name: Record next step
-        run: echo "Pages enabled. Run the Publish Fardarter Startup Site workflow next."
+      - name: Record enablement receipt
+        run: |
+          echo "base_url=${{ steps.pages.outputs.base_url }}"
+          echo "origin=${{ steps.pages.outputs.origin }}"
+          echo "base_path=${{ steps.pages.outputs.base_path }}"
+          echo "Pages is configured. Run Publish Fardarter Startup Site next."
