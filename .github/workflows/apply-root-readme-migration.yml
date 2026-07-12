@@ -1,0 +1,59 @@
+name: Apply Authorized Root README Migration
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - README.md
+      - README.front-door.md
+      - scripts/prepare-root-readme-migration.mjs
+      - .github/workflows/apply-root-readme-migration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'jp/root-readme-migration' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: jp/root-readme-migration
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Apply authorized root migration
+        run: node scripts/prepare-root-readme-migration.mjs --write-root | tee /tmp/root-readme-migration-receipt.json
+
+      - name: Verify exact approved result
+        run: |
+          test "$(sha256sum README.md | cut -d' ' -f1)" = "1a8ee40719bccd0d1e1be64588c4c70c56369c1f87c93acf14df661175a8cb64"
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
+          const receipt = JSON.parse(await readFile('/tmp/root-readme-migration-receipt.json', 'utf8'));
+          if (receipt.original_readme_sha256 !== '02232b4f4e08993d6028a91a6679d0aef2565564a924d241ce14feb09610b340') throw new Error('Original README hash mismatch.');
+          if (receipt.migrated_readme_sha256 !== '1a8ee40719bccd0d1e1be64588c4c70c56369c1f87c93acf14df661175a8cb64') throw new Error('Migrated README hash mismatch.');
+          if (receipt.original_bytes !== 15381 || receipt.migrated_bytes !== 16656) throw new Error('Byte-count mismatch.');
+          if (receipt.original_body_preserved_exactly !== true) throw new Error('Preservation invariant failed.');
+          receipt.authorized_by = 'JP';
+          receipt.authorization_scope = 'root README replacement only; final PR merge separately gated';
+          receipt.workflow_run_id = process.env.GITHUB_RUN_ID;
+          receipt.head_sha_before_commit = process.env.GITHUB_SHA;
+          await mkdir('docs/repository/receipts', { recursive: true });
+          await writeFile('docs/repository/receipts/ROOT-README-MIGRATION-RECEIPT.json', `${JSON.stringify(receipt, null, 2)}\n`, 'utf8');
+          await rm('.github/workflows/apply-root-readme-migration.yml');
+          NODE
+
+      - name: Commit authorized migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md docs/repository/receipts/ROOT-README-MIGRATION-RECEIPT.json .github/workflows/apply-root-readme-migration.yml
+          git commit -m "Apply authorized root README migration [skip ci]"
+          git push origin HEAD:jp/root-readme-migration
