@@ -5,6 +5,7 @@ const requiredFiles = [
   "lib/service-bridge-policy.ts",
   "lib/service-bridge-receipts.ts",
   "lib/service-bridge-events.ts",
+  "lib/service-bridge-orchestration.ts",
   "app/service-bridge/page.tsx",
   "app/service-bridge/nexus/page.tsx",
   "app/service-bridge/policy/page.tsx",
@@ -65,6 +66,7 @@ const domain = read("lib/service-bridge.ts");
 const policy = read("lib/service-bridge-policy.ts");
 const receipts = read("lib/service-bridge-receipts.ts");
 const events = read("lib/service-bridge-events.ts");
+const orchestration = read("lib/service-bridge-orchestration.ts");
 const page = read("app/service-bridge/page.tsx");
 const nexus = read("app/service-bridge/nexus/page.tsx");
 const policyConsole = read("app/service-bridge/policy/page.tsx");
@@ -78,6 +80,8 @@ const manifest = read("app/api/service-bridge/manifest/route.ts");
 const health = read("app/api/service-bridge/health/route.ts");
 const openapi = read("app/api/service-bridge/openapi/route.ts");
 const validate = read("app/api/service-bridge/validate/route.ts");
+const singleRoute = read("app/api/service-bridge/orchestrate/route.ts");
+const batchRoute = read("app/api/service-bridge/orchestrate-batch/route.ts");
 const smoke = read("scripts/smoke-service-bridge-api.mjs");
 const workflow = read(".github/workflows/service-bridge-verify.yml");
 
@@ -99,6 +103,11 @@ const checks = [
   [openapi.includes('"x-orchestration-modes"') && openapi.includes('"x-integrity-limitations"'), "OpenAPI extensions are incomplete"],
   [validate.includes("validateMission(mission)"), "Validation endpoint must use the shared validator"],
   [policy.includes('"ALLOW_PREPARE"') && policy.includes('"HOLD_FOR_APPROVAL"') && policy.includes('"BLOCK"'), "Policy decision set is incomplete"],
+  [orchestration.includes("export function orchestrateMission") && orchestration.includes("export function summarizeOrchestrations"), "Canonical orchestration engine is incomplete"],
+  [orchestration.includes('orchestrationModes = ["single", "batch"]'), "Canonical orchestration modes are missing"],
+  [orchestration.includes("receiptDigest: receipt.integrity.digest"), "Canonical orchestration receipt digest alias is missing"],
+  [singleRoute.includes('from "@/lib/service-bridge-orchestration"') && singleRoute.includes("orchestrateMission(mission)"), "Single orchestration route must use the canonical engine"],
+  [batchRoute.includes('from "@/lib/service-bridge-orchestration"') && batchRoute.includes("missions.map(orchestrateMission)") && batchRoute.includes("summarizeOrchestrations(results)"), "Batch orchestration route must use the canonical engine"],
   [receipts.includes('algorithm: "SHA-256"') && receipts.includes("sorted-json-v1"), "Receipt integrity contract is incomplete"],
   [receipts.includes("signature: null") && receipts.includes("notary: null"), "Receipt limitations must remain explicit"],
   [events.includes("previousDigest") && events.includes("EVENT_DIGEST_MISMATCH") && events.includes("PREVIOUS_DIGEST_MISMATCH"), "Event-chain verification is incomplete"],
@@ -111,6 +120,8 @@ const checks = [
   [status.includes("/api/service-bridge/health") && status.includes("/api/service-bridge/receipt"), "Status console must use health and receipt APIs"],
   [receiptConsole.includes("/api/service-bridge/receipt/mission") && receiptConsole.includes("/api/service-bridge/receipt/verify"), "Receipt console contract is incomplete"],
   [eventConsole.includes("/api/service-bridge/events/append") && eventConsole.includes("/api/service-bridge/events/verify"), "Event console contract is incomplete"],
+  [smoke.includes("single and batch prepare parity") && smoke.includes("single and batch receipt parity"), "Smoke suite must verify shared-engine parity"],
+  [smoke.includes("batch orchestration limit enforced") && smoke.includes("batch orchestration average readiness"), "Smoke suite must verify batch summary and limits"],
   [smoke.includes("high-risk policy blocks") && smoke.includes("blocked planning denied"), "Smoke suite must test policy boundaries"],
   [smoke.includes("receipt tamper detected") && smoke.includes("event-chain tamper detected"), "Smoke suite must test integrity tampering"],
   [workflow.includes("Live API smoke test") && workflow.includes("service-bridge:smoke"), "CI must run live API smoke tests"],
@@ -126,7 +137,7 @@ if (failures.length) {
 
 console.log("SERVICE BRIDGE CONTRACT: PASS");
 console.log(`Verified ${requiredFiles.length} files, ${requiredServices.length} services, ${requiredMissionStates.length} mission states, and ${requiredEndpoints.length} endpoints.`);
-console.log("Orchestration modes: single + batch.");
+console.log("Canonical orchestration engine: single + batch parity enforced.");
 console.log("Policy outcomes: prepare + hold + block.");
 console.log("Receipt integrity: SHA-256 sorted-json-v1.");
 console.log("Event-chain integrity: content and ordering verified.");
