@@ -5,8 +5,8 @@ import { missionStates, serviceRegistry } from "@/lib/service-bridge";
 export function GET() {
   return NextResponse.json({
     system: "JP / Hviti Service Bridge",
-    version: 14,
-    mode: "local-first-with-orchestration-integrity-recovery-resolution-gated-persistence-and-explicit-rollback",
+    version: 15,
+    mode: "local-first-with-orchestration-integrity-recovery-reversible-persistence-and-chained-lifecycle-journaling",
     missionStates,
     services: serviceRegistry,
     limits: {
@@ -26,7 +26,7 @@ export function GET() {
       externalActionCompleted: false,
     },
     recovery: {
-      stages: ["event-chain", "verify", "project", "reconcile", "resolve-authority", "plan-persistence", "explicit-local-write", "plan-rollback", "explicit-local-restore"],
+      stages: ["event-chain", "verify", "project", "reconcile", "resolve-authority", "plan-persistence", "explicit-local-write", "plan-rollback", "explicit-local-restore", "append-lifecycle-entry", "verify-lifecycle-journal"],
       authorities: ["snapshot", "projection", "manual"],
       planningConfirmationPattern: "PERSIST <mission-id>",
       applyConfirmationPattern: "APPLY LOCAL <mission-id>",
@@ -37,6 +37,21 @@ export function GET() {
       automaticRollbackAllowed: false,
       localPersistenceOnly: true,
       localRollbackOnly: true,
+      externalActionCompleted: false,
+    },
+    lifecycleJournal: {
+      schema: "jp-hviti-service-bridge-lifecycle-entry/v1",
+      entryTypes: ["RESOLUTION_CREATED", "PERSISTENCE_PLANNED", "LOCAL_PERSISTENCE_APPLIED", "ROLLBACK_PLANNED", "LOCAL_ROLLBACK_APPLIED"],
+      digestAlgorithm: "SHA-256",
+      canonicalization: "sorted-json-v1",
+      missionScoped: true,
+      orderedByPreviousDigest: true,
+      tamperDetection: true,
+      trustedTimestamp: false,
+      signed: false,
+      notarized: false,
+      blockchain: false,
+      externalActionProof: false,
       externalActionCompleted: false,
     },
     endpoints: {
@@ -60,6 +75,7 @@ export function GET() {
       resolveAuthority: "/api/service-bridge/events/resolve",
       planPersistence: "/api/service-bridge/events/persist",
       planRollback: "/api/service-bridge/events/rollback",
+      lifecycleJournal: "/api/service-bridge/lifecycle",
       application: "/service-bridge",
       nexus: "/service-bridge/nexus",
       operatorConsole: "/service-bridge/control",
@@ -71,6 +87,7 @@ export function GET() {
       resolutionConsole: "/service-bridge/resolve",
       persistenceConsole: "/service-bridge/persist",
       rollbackConsole: "/service-bridge/rollback",
+      lifecycleConsole: "/service-bridge/lifecycle",
       statusConsole: "/service-bridge/status",
       receiptConsole: "/service-bridge/receipts",
       eventConsole: "/service-bridge/events",
