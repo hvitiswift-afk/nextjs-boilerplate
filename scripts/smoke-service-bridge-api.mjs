@@ -19,6 +19,21 @@ const mission = {
   updatedAt: new Date().toISOString(),
 };
 
+const approvalMission = {
+  ...mission,
+  id: "XYZ-SMOKE-APPROVAL",
+  title: "Prepare application submission",
+  action: "Apply after final user approval",
+  state: "awaiting-approval",
+};
+
+const blockedMission = {
+  ...mission,
+  id: "XYZ-SMOKE-BLOCK",
+  title: "Use bank account secret",
+  action: "Transfer using bank account credentials",
+};
+
 const checks = [];
 
 async function request(path, init) {
@@ -33,29 +48,66 @@ function check(name, passed, detail) {
   console.log(`${passed ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`);
 }
 
+const postMission = (path, payload = mission) => request(path, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify(payload),
+});
+
 const manifest = await request("/api/service-bridge/manifest");
 check("manifest responds", manifest.response.ok, `status ${manifest.response.status}`);
-check("manifest version", manifest.body?.version >= 8, `version ${manifest.body?.version}`);
+check("manifest version", manifest.body?.version >= 10, `version ${manifest.body?.version}`);
 check("manifest approval boundary", manifest.body?.approvalLaw?.externalActionsRequireExplicitApproval === true);
+check("manifest orchestration stages", manifest.body?.orchestration?.stages?.join(",") === "validate,policy,route,receipt,next-action");
 
 const openapi = await request("/api/service-bridge/openapi");
 check("OpenAPI responds", openapi.response.ok, `status ${openapi.response.status}`);
+check("OpenAPI version", openapi.body?.info?.version === "10.0.0", `version ${openapi.body?.info?.version}`);
+check("OpenAPI documents policy", Boolean(openapi.body?.paths?.["/api/service-bridge/policy/evaluate"]));
+check("OpenAPI documents orchestration", Boolean(openapi.body?.paths?.["/api/service-bridge/orchestrate"]));
 check("OpenAPI documents events", Boolean(openapi.body?.paths?.["/api/service-bridge/events/verify"]));
 
 const health = await request("/api/service-bridge/health");
 check("health responds", health.response.ok, `status ${health.response.status}`);
 check("health external boundary", health.body?.externalActionCompleted === false);
 
-const validation = await request("/api/service-bridge/validate", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(mission) });
+const validation = await postMission("/api/service-bridge/validate");
 check("single validation responds", validation.response.ok, `status ${validation.response.status}`);
 check("single validation readiness", validation.body?.readiness === 100, `readiness ${validation.body?.readiness}`);
 check("single validation external boundary", validation.body?.externalActionCompleted === false);
+
+const preparePolicy = await postMission("/api/service-bridge/policy/evaluate");
+check("prepare policy responds", preparePolicy.response.ok, `status ${preparePolicy.response.status}`);
+check("prepare policy allows preparation", preparePolicy.body?.decision === "ALLOW_PREPARE", `decision ${preparePolicy.body?.decision}`);
+check("prepare policy external boundary", preparePolicy.body?.externalActionCompleted === false);
+
+const approvalPolicy = await postMission("/api/service-bridge/policy/evaluate", approvalMission);
+check("approval policy holds", approvalPolicy.body?.decision === "HOLD_FOR_APPROVAL", `decision ${approvalPolicy.body?.decision}`);
+
+const blockedPolicy = await postMission("/api/service-bridge/policy/evaluate", blockedMission);
+check("high-risk policy blocks", blockedPolicy.body?.decision === "BLOCK", `decision ${blockedPolicy.body?.decision}`);
+
+const orchestration = await postMission("/api/service-bridge/orchestrate");
+check("orchestration responds", orchestration.response.ok, `status ${orchestration.response.status}`);
+check("orchestration readiness", orchestration.body?.readiness === 100, `readiness ${orchestration.body?.readiness}`);
+check("orchestration policy", orchestration.body?.policy?.decision === "ALLOW_PREPARE", `decision ${orchestration.body?.policy?.decision}`);
+check("orchestration planning allowed", orchestration.body?.route?.planningAllowed === true);
+check("orchestration receipt digest", /^[a-f0-9]{64}$/.test(orchestration.body?.receipt?.integrity?.digest || ""));
+check("orchestration external boundary", orchestration.body?.externalActionCompleted === false);
+
+const approvalOrchestration = await postMission("/api/service-bridge/orchestrate", approvalMission);
+check("approval orchestration holds", approvalOrchestration.body?.policy?.decision === "HOLD_FOR_APPROVAL");
+check("approval route opening denied", approvalOrchestration.body?.route?.openingAllowed === false);
+
+const blockedOrchestration = await postMission("/api/service-bridge/orchestrate", blockedMission);
+check("blocked orchestration blocks", blockedOrchestration.body?.policy?.decision === "BLOCK");
+check("blocked planning denied", blockedOrchestration.body?.route?.planningAllowed === false);
 
 const batch = await request("/api/service-bridge/validate-batch", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ missions: [mission] }) });
 check("batch validation responds", batch.response.ok, `status ${batch.response.status}`);
 check("batch count", batch.body?.summary?.total === 1, `total ${batch.body?.summary?.total}`);
 
-const plan = await request("/api/service-bridge/plan", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(mission) });
+const plan = await postMission("/api/service-bridge/plan");
 check("plan responds", plan.response.ok, `status ${plan.response.status}`);
 check("plan has route", typeof plan.body?.route === "string" && plan.body.route.includes("indeed.com"));
 check("plan external boundary", plan.body?.externalActionCompleted === false);
@@ -69,7 +121,7 @@ const systemReceipt = await request("/api/service-bridge/receipt");
 check("system receipt responds", systemReceipt.response.ok, `status ${systemReceipt.response.status}`);
 check("system receipt external boundary", systemReceipt.body?.externalActionCompleted === false);
 
-const missionReceipt = await request("/api/service-bridge/receipt/mission", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(mission) });
+const missionReceipt = await postMission("/api/service-bridge/receipt/mission");
 check("mission receipt responds", missionReceipt.response.ok, `status ${missionReceipt.response.status}`);
 check("mission receipt SHA-256 digest", /^[a-f0-9]{64}$/.test(missionReceipt.body?.integrity?.digest || ""));
 
