@@ -9,6 +9,7 @@ on:
       - "app/api/service-bridge/**"
       - "lib/service-bridge.ts"
       - "scripts/check-service-bridge-contract.mjs"
+      - "scripts/smoke-service-bridge-api.mjs"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/service-bridge-verify.yml"
@@ -20,6 +21,7 @@ on:
       - "app/api/service-bridge/**"
       - "lib/service-bridge.ts"
       - "scripts/check-service-bridge-contract.mjs"
+      - "scripts/smoke-service-bridge-api.mjs"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/service-bridge-verify.yml"
@@ -76,6 +78,59 @@ jobs:
       - name: Build Next.js application
         run: npm run build
 
+      - name: Archive production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: service-bridge-next-build-${{ github.sha }}
+          path: .next
+          include-hidden-files: true
+          retention-days: 3
+
+  smoke:
+    name: Live API smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download production build
+        uses: actions/download-artifact@v4
+        with:
+          name: service-bridge-next-build-${{ github.sha }}
+          path: .next
+
+      - name: Start production server
+        run: |
+          nohup npm start > service-bridge-server.log 2>&1 &
+          echo $! > service-bridge-server.pid
+
+      - name: Wait for health endpoint
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/api/service-bridge/health > /dev/null; then
+              echo "Service Bridge is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat service-bridge-server.log
+          exit 1
+
+      - name: Run end-to-end API smoke tests
+        run: npm run service-bridge:smoke | tee service-bridge-smoke.txt
+
       - name: Write verification receipt
         run: |
           mkdir -p artifacts
@@ -86,13 +141,25 @@ jobs:
           Run: $GITHUB_RUN_ID
           Contract: PASS
           Production build: PASS
+          Live server health: PASS
+          API smoke suite: PASS
           External-action boundary: PRESERVED
           Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
           EOF
+          cp service-bridge-smoke.txt artifacts/
+          cp service-bridge-server.log artifacts/
 
-      - name: Upload verification receipt
+      - name: Stop production server
+        if: always()
+        run: |
+          if [ -f service-bridge-server.pid ]; then
+            kill "$(cat service-bridge-server.pid)" || true
+          fi
+
+      - name: Upload verification receipt and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: service-bridge-verification-${{ github.sha }}
-          path: artifacts/service-bridge-verification.txt
+          path: artifacts
           retention-days: 30
