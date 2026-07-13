@@ -5,8 +5,8 @@ import { missionStates, serviceRegistry } from "@/lib/service-bridge";
 export function GET() {
   return NextResponse.json({
     system: "JP / Hviti Service Bridge",
-    version: 13,
-    mode: "local-first-with-orchestration-integrity-recovery-resolution-and-gated-persistence",
+    version: 14,
+    mode: "local-first-with-orchestration-integrity-recovery-resolution-gated-persistence-and-explicit-rollback",
     missionStates,
     services: serviceRegistry,
     limits: {
@@ -26,13 +26,17 @@ export function GET() {
       externalActionCompleted: false,
     },
     recovery: {
-      stages: ["event-chain", "verify", "project", "reconcile", "resolve-authority", "plan-persistence", "explicit-local-write"],
+      stages: ["event-chain", "verify", "project", "reconcile", "resolve-authority", "plan-persistence", "explicit-local-write", "plan-rollback", "explicit-local-restore"],
       authorities: ["snapshot", "projection", "manual"],
       planningConfirmationPattern: "PERSIST <mission-id>",
       applyConfirmationPattern: "APPLY LOCAL <mission-id>",
+      rollbackPlanningConfirmationPattern: "ROLLBACK LOCAL <mission-id>",
+      rollbackApplyConfirmationPattern: "APPLY ROLLBACK <mission-id>",
       silentOverwriteAllowed: false,
       automaticMutationAllowed: false,
+      automaticRollbackAllowed: false,
       localPersistenceOnly: true,
+      localRollbackOnly: true,
       externalActionCompleted: false,
     },
     endpoints: {
@@ -55,6 +59,7 @@ export function GET() {
       reconcileSnapshot: "/api/service-bridge/events/reconcile",
       resolveAuthority: "/api/service-bridge/events/resolve",
       planPersistence: "/api/service-bridge/events/persist",
+      planRollback: "/api/service-bridge/events/rollback",
       application: "/service-bridge",
       nexus: "/service-bridge/nexus",
       operatorConsole: "/service-bridge/control",
@@ -65,6 +70,7 @@ export function GET() {
       reconciliationConsole: "/service-bridge/reconcile",
       resolutionConsole: "/service-bridge/resolve",
       persistenceConsole: "/service-bridge/persist",
+      rollbackConsole: "/service-bridge/rollback",
       statusConsole: "/service-bridge/status",
       receiptConsole: "/service-bridge/receipts",
       eventConsole: "/service-bridge/events",
