@@ -24,6 +24,7 @@
     "vercel:token:check": "node scripts/check-vercel-token-env.mjs",
     "service-bridge:check": "node scripts/check-service-bridge-contract.mjs",
     "service-bridge:smoke": "node scripts/smoke-service-bridge-api.mjs",
+    "service-bridge:smoke:recovery": "node scripts/smoke-service-bridge-recovery.mjs",
     "service-bridge:verify": "npm run service-bridge:check && npm run build",
     "griploom:checks": "npm run security:secrets:check && npm run griploom:id:check && npm run griploom:screenplay:check && npm run griploom:ml:check && npm run griploom:tick:check && npm run griploom:launch:check && npm run griploom:launch:print:check && npm run griploom:science:check && npm run f-wad:check && npm run griploom:checks:index",
     "griploom:verify": "node scripts/verify-griploom-build.mjs"
