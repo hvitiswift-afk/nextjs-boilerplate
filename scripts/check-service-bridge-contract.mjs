@@ -8,6 +8,8 @@ const requiredFiles = [
   "lib/service-bridge-orchestration.ts",
   "lib/service-bridge-projection.ts",
   "lib/service-bridge-reconciliation.ts",
+  "lib/service-bridge-resolution.ts",
+  "lib/service-bridge-persistence.ts",
   "app/service-bridge/page.tsx",
   "app/service-bridge/nexus/page.tsx",
   "app/service-bridge/policy/page.tsx",
@@ -15,6 +17,8 @@ const requiredFiles = [
   "app/service-bridge/orchestrate-batch/page.tsx",
   "app/service-bridge/projection/page.tsx",
   "app/service-bridge/reconcile/page.tsx",
+  "app/service-bridge/resolve/page.tsx",
+  "app/service-bridge/persist/page.tsx",
   "app/service-bridge/control/page.tsx",
   "app/service-bridge/status/page.tsx",
   "app/service-bridge/receipts/page.tsx",
@@ -36,8 +40,11 @@ const requiredFiles = [
   "app/api/service-bridge/events/verify/route.ts",
   "app/api/service-bridge/events/project/route.ts",
   "app/api/service-bridge/events/reconcile/route.ts",
+  "app/api/service-bridge/events/resolve/route.ts",
+  "app/api/service-bridge/events/persist/route.ts",
   "scripts/smoke-service-bridge-api.mjs",
   "scripts/smoke-service-bridge-recovery.mjs",
+  "scripts/smoke-service-bridge-persistence.mjs",
   ".github/workflows/service-bridge-verify.yml",
 ];
 
@@ -61,6 +68,8 @@ const requiredEndpoints = [
   "/api/service-bridge/events/verify",
   "/api/service-bridge/events/project",
   "/api/service-bridge/events/reconcile",
+  "/api/service-bridge/events/resolve",
+  "/api/service-bridge/events/persist",
 ];
 
 const failures = [];
@@ -78,19 +87,15 @@ const events = read("lib/service-bridge-events.ts");
 const orchestration = read("lib/service-bridge-orchestration.ts");
 const projection = read("lib/service-bridge-projection.ts");
 const reconciliation = read("lib/service-bridge-reconciliation.ts");
+const resolution = read("lib/service-bridge-resolution.ts");
+const persistence = read("lib/service-bridge-persistence.ts");
 const manifest = read("app/api/service-bridge/manifest/route.ts");
 const openapi = read("app/api/service-bridge/openapi/route.ts");
-const health = read("app/api/service-bridge/health/route.ts");
-const validate = read("app/api/service-bridge/validate/route.ts");
-const singleRoute = read("app/api/service-bridge/orchestrate/route.ts");
-const batchRoute = read("app/api/service-bridge/orchestrate-batch/route.ts");
-const projectRoute = read("app/api/service-bridge/events/project/route.ts");
-const reconcileRoute = read("app/api/service-bridge/events/reconcile/route.ts");
-const nexus = read("app/service-bridge/nexus/page.tsx");
-const projectionConsole = read("app/service-bridge/projection/page.tsx");
-const reconciliationConsole = read("app/service-bridge/reconcile/page.tsx");
-const smoke = read("scripts/smoke-service-bridge-api.mjs");
-const recoverySmoke = read("scripts/smoke-service-bridge-recovery.mjs");
+const resolveRoute = read("app/api/service-bridge/events/resolve/route.ts");
+const persistRoute = read("app/api/service-bridge/events/persist/route.ts");
+const resolveConsole = read("app/service-bridge/resolve/page.tsx");
+const persistConsole = read("app/service-bridge/persist/page.tsx");
+const persistenceSmoke = read("scripts/smoke-service-bridge-persistence.mjs");
 const workflow = read(".github/workflows/service-bridge-verify.yml");
 
 for (const state of requiredMissionStates) if (!domain.includes(`"${state}"`)) failures.push(`Missing mission state: ${state}`);
@@ -102,31 +107,33 @@ for (const endpoint of requiredEndpoints) {
 
 const checks = [
   [domain.includes("externalActionCompleted: false"), "Domain must force externalActionCompleted=false"],
-  [manifest.includes("version: 12"), "Manifest version must be 12"],
-  [manifest.includes("silentOverwriteAllowed: false"), "Manifest must disallow silent overwrite"],
-  [manifest.includes('stages: ["event-chain", "verify", "project", "reconcile", "explicit-authority-decision"]'), "Recovery stages are incomplete"],
-  [openapi.includes('version: "12.0.0"'), "OpenAPI version must be 12.0.0"],
-  [openapi.includes('"x-recovery-stages"') && openapi.includes('"x-silent-overwrite-allowed": false'), "OpenAPI recovery extensions are incomplete"],
-  [health.includes("externalActionCompleted: false"), "Health external-action boundary is missing"],
-  [validate.includes("validateMission(mission)"), "Validation endpoint must use shared validation"],
+  [manifest.includes("version: 13"), "Manifest version must be 13"],
+  [manifest.includes("automaticMutationAllowed: false"), "Manifest must disallow automatic mutation"],
+  [manifest.includes("localPersistenceOnly: true"), "Manifest must restrict persistence to local storage"],
+  [manifest.includes('authorities: ["snapshot", "projection", "manual"]'), "Manifest authority options are incomplete"],
+  [manifest.includes('planningConfirmationPattern: "PERSIST <mission-id>"'), "Planning confirmation pattern is missing"],
+  [manifest.includes('applyConfirmationPattern: "APPLY LOCAL <mission-id>"'), "Local apply confirmation pattern is missing"],
+  [openapi.includes('version: "13.0.0"'), "OpenAPI version must be 13.0.0"],
+  [openapi.includes('"x-automatic-mutation-allowed": false'), "OpenAPI must disallow automatic mutation"],
+  [openapi.includes('"x-external-persistence-allowed": false'), "OpenAPI must disallow external persistence"],
+  [openapi.includes('"x-authority-options"'), "OpenAPI authority options are missing"],
   [policy.includes('"ALLOW_PREPARE"') && policy.includes('"HOLD_FOR_APPROVAL"') && policy.includes('"BLOCK"'), "Policy outcomes are incomplete"],
   [orchestration.includes("orchestrateMission") && orchestration.includes("summarizeOrchestrations"), "Canonical orchestration engine is incomplete"],
-  [singleRoute.includes("orchestrateMission(mission)"), "Single orchestration route must use canonical engine"],
-  [batchRoute.includes("missions.map(orchestrateMission)") && batchRoute.includes("summarizeOrchestrations(results)"), "Batch orchestration route must use canonical engine"],
   [receipts.includes('algorithm: "SHA-256"') && receipts.includes("sorted-json-v1"), "Receipt integrity contract is incomplete"],
-  [events.includes("previousDigest") && events.includes("EVENT_DIGEST_MISMATCH") && events.includes("PREVIOUS_DIGEST_MISMATCH"), "Event verification is incomplete"],
-  [projection.includes("projectMissionFromEvents") && projection.includes("verifyEventChain(events)"), "Projection engine must verify event chains"],
-  [projection.includes("MISSION_ID_MISMATCH") && projection.includes("externalActionCompleted: false"), "Projection safeguards are incomplete"],
-  [reconciliation.includes("reconcileMissionSnapshot") && reconciliation.includes("differences"), "Reconciliation engine is incomplete"],
-  [reconciliation.includes("explicitly choose") && reconciliation.includes("externalActionCompleted: false"), "Reconciliation authority boundary is incomplete"],
-  [projectRoute.includes("projectMissionFromEvents(events)") && projectRoute.includes("status: projection.chainValid ? 200 : 422"), "Projection endpoint contract is incomplete"],
-  [reconcileRoute.includes("reconcileMissionSnapshot(snapshot, events)") && reconcileRoute.includes("status: result.consistent ? 200 : 409"), "Reconciliation endpoint contract is incomplete"],
-  [nexus.includes("Service Bridge Nexus"), "Nexus route is missing"],
-  [projectionConsole.includes("/api/service-bridge/events/project"), "Projection console must use projection API"],
-  [reconciliationConsole.includes("/api/service-bridge/events/reconcile"), "Reconciliation console must use reconciliation API"],
-  [smoke.includes("batch orchestration limit enforced"), "Primary smoke suite must test batch limits"],
-  [recoverySmoke.includes("reconciliation conflict returns 409") && recoverySmoke.includes("tampered projection rejected"), "Recovery smoke suite must test conflicts and tampering"],
-  [workflow.includes("service-bridge:smoke:recovery") && workflow.includes("Silent overwrite: DISALLOWED"), "CI must run and receipt recovery verification"],
+  [events.includes("EVENT_DIGEST_MISMATCH") && events.includes("PREVIOUS_DIGEST_MISMATCH"), "Event verification is incomplete"],
+  [projection.includes("projectMissionFromEvents") && projection.includes("verifyEventChain(events)"), "Projection engine is incomplete"],
+  [reconciliation.includes("reconcileMissionSnapshot") && reconciliation.includes("explicitly choose"), "Reconciliation engine is incomplete"],
+  [resolution.includes("createReconciliationResolution") && resolution.includes("requiresExplicitPersistence: true"), "Resolution engine is incomplete"],
+  [resolution.includes('"snapshot" | "projection" | "manual"'), "Resolution authority types are incomplete"],
+  [resolution.includes("mutationApplied: false") && resolution.includes("externalActionCompleted: false"), "Resolution boundaries are incomplete"],
+  [persistence.includes("createPersistencePlan") && persistence.includes("expectedConfirmation"), "Persistence planning engine is incomplete"],
+  [persistence.includes("localPersistenceAllowed: true") && persistence.includes("externalPersistenceAllowed: false"), "Persistence boundaries are incomplete"],
+  [persistRoute.includes("createPersistencePlan") && persistRoute.includes("confirmation"), "Persistence endpoint is incomplete"],
+  [resolveRoute.includes("createReconciliationResolution") && resolveRoute.includes("authority"), "Resolution endpoint is incomplete"],
+  [resolveConsole.includes("/api/service-bridge/events/resolve"), "Resolution console must use resolution API"],
+  [persistConsole.includes("/api/service-bridge/events/persist") && persistConsole.includes("APPLY LOCAL"), "Persistence console must enforce two-step confirmation"],
+  [persistenceSmoke.includes("persistence rejects wrong confirmation") && persistenceSmoke.includes("manual authority requires state"), "Persistence smoke suite must verify confirmation and manual authority"],
+  [workflow.includes("service-bridge:smoke:persistence") && workflow.includes("External persistence: DISALLOWED"), "CI must run and receipt persistence verification"],
 ];
 
 for (const [passed, message] of checks) if (!passed) failures.push(message);
@@ -140,6 +147,8 @@ if (failures.length) {
 console.log("SERVICE BRIDGE CONTRACT: PASS");
 console.log(`Verified ${requiredFiles.length} files, ${requiredServices.length} services, ${requiredMissionStates.length} mission states, and ${requiredEndpoints.length} endpoints.`);
 console.log("Operational pipeline: validated.");
-console.log("Recovery pipeline: verified projection + explicit reconciliation.");
-console.log("Silent overwrite: disallowed.");
+console.log("Recovery pipeline: verified through explicit authority resolution.");
+console.log("Persistence pipeline: exact confirmation + local-only write gate.");
+console.log("Automatic mutation: disallowed.");
+console.log("External persistence: disallowed.");
 console.log("External-action boundary: preserved.");
