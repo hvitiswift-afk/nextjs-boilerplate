@@ -2,9 +2,14 @@ import { readFile } from "node:fs/promises";
 
 const requiredFiles = [
   "lib/service-bridge.ts",
+  "lib/service-bridge-policy.ts",
   "lib/service-bridge-receipts.ts",
   "lib/service-bridge-events.ts",
   "app/service-bridge/page.tsx",
+  "app/service-bridge/nexus/page.tsx",
+  "app/service-bridge/policy/page.tsx",
+  "app/service-bridge/orchestrate/page.tsx",
+  "app/service-bridge/orchestrate-batch/page.tsx",
   "app/service-bridge/control/page.tsx",
   "app/service-bridge/status/page.tsx",
   "app/service-bridge/receipts/page.tsx",
@@ -14,6 +19,9 @@ const requiredFiles = [
   "app/api/service-bridge/openapi/route.ts",
   "app/api/service-bridge/validate/route.ts",
   "app/api/service-bridge/validate-batch/route.ts",
+  "app/api/service-bridge/policy/evaluate/route.ts",
+  "app/api/service-bridge/orchestrate/route.ts",
+  "app/api/service-bridge/orchestrate-batch/route.ts",
   "app/api/service-bridge/plan/route.ts",
   "app/api/service-bridge/queue/route.ts",
   "app/api/service-bridge/receipt/route.ts",
@@ -33,6 +41,9 @@ const requiredEndpoints = [
   "/api/service-bridge/openapi",
   "/api/service-bridge/validate",
   "/api/service-bridge/validate-batch",
+  "/api/service-bridge/policy/evaluate",
+  "/api/service-bridge/orchestrate",
+  "/api/service-bridge/orchestrate-batch",
   "/api/service-bridge/plan",
   "/api/service-bridge/queue",
   "/api/service-bridge/receipt",
@@ -44,74 +55,68 @@ const requiredEndpoints = [
 
 const failures = [];
 const files = new Map();
-
 for (const path of requiredFiles) {
-  try {
-    files.set(path, await readFile(path, "utf8"));
-  } catch (error) {
-    failures.push(`Missing required file: ${path} (${error.message})`);
-  }
+  try { files.set(path, await readFile(path, "utf8")); }
+  catch (error) { failures.push(`Missing required file: ${path} (${error.message})`); }
 }
 
-const domain = files.get("lib/service-bridge.ts") ?? "";
-const receipts = files.get("lib/service-bridge-receipts.ts") ?? "";
-const events = files.get("lib/service-bridge-events.ts") ?? "";
-const page = files.get("app/service-bridge/page.tsx") ?? "";
-const control = files.get("app/service-bridge/control/page.tsx") ?? "";
-const status = files.get("app/service-bridge/status/page.tsx") ?? "";
-const receiptConsole = files.get("app/service-bridge/receipts/page.tsx") ?? "";
-const eventConsole = files.get("app/service-bridge/events/page.tsx") ?? "";
-const manifest = files.get("app/api/service-bridge/manifest/route.ts") ?? "";
-const health = files.get("app/api/service-bridge/health/route.ts") ?? "";
-const openapi = files.get("app/api/service-bridge/openapi/route.ts") ?? "";
-const validate = files.get("app/api/service-bridge/validate/route.ts") ?? "";
-const smoke = files.get("scripts/smoke-service-bridge-api.mjs") ?? "";
-const workflow = files.get(".github/workflows/service-bridge-verify.yml") ?? "";
+const read = (path) => files.get(path) ?? "";
+const domain = read("lib/service-bridge.ts");
+const policy = read("lib/service-bridge-policy.ts");
+const receipts = read("lib/service-bridge-receipts.ts");
+const events = read("lib/service-bridge-events.ts");
+const page = read("app/service-bridge/page.tsx");
+const nexus = read("app/service-bridge/nexus/page.tsx");
+const policyConsole = read("app/service-bridge/policy/page.tsx");
+const orchestrationConsole = read("app/service-bridge/orchestrate/page.tsx");
+const batchConsole = read("app/service-bridge/orchestrate-batch/page.tsx");
+const control = read("app/service-bridge/control/page.tsx");
+const status = read("app/service-bridge/status/page.tsx");
+const receiptConsole = read("app/service-bridge/receipts/page.tsx");
+const eventConsole = read("app/service-bridge/events/page.tsx");
+const manifest = read("app/api/service-bridge/manifest/route.ts");
+const health = read("app/api/service-bridge/health/route.ts");
+const openapi = read("app/api/service-bridge/openapi/route.ts");
+const validate = read("app/api/service-bridge/validate/route.ts");
+const smoke = read("scripts/smoke-service-bridge-api.mjs");
+const workflow = read(".github/workflows/service-bridge-verify.yml");
 
-for (const state of requiredMissionStates) {
-  if (!domain.includes(`"${state}"`)) failures.push(`Missing mission state: ${state}`);
-}
-
-for (const service of requiredServices) {
-  if (!domain.includes(`name: "${service}"`)) failures.push(`Missing service definition: ${service}`);
-}
-
+for (const state of requiredMissionStates) if (!domain.includes(`"${state}"`)) failures.push(`Missing mission state: ${state}`);
+for (const service of requiredServices) if (!domain.includes(`name: "${service}"`)) failures.push(`Missing service definition: ${service}`);
 for (const endpoint of requiredEndpoints) {
   if (!manifest.includes(endpoint)) failures.push(`Manifest missing endpoint: ${endpoint}`);
   if (!openapi.includes(endpoint)) failures.push(`OpenAPI missing endpoint: ${endpoint}`);
 }
 
-const contractChecks = [
-  [domain.includes("externalActionCompleted: false"), "Domain validation must force externalActionCompleted=false"],
-  [domain.includes("validateMission"), "Domain validation function is missing"],
-  [domain.includes("getLaunchUrl"), "Launch URL generator is missing"],
-  [manifest.includes("version: 8"), "Manifest version must be at least 8"],
-  [manifest.includes("externalActionsRequireExplicitApproval: true"), "Manifest approval law is missing"],
-  [manifest.includes("externalActionCompletedByManifest: false"), "Manifest must not claim external execution"],
-  [health.includes("status: healthy ? \"healthy\" : \"degraded\""), "Health endpoint must distinguish healthy and degraded states"],
-  [health.includes("externalActionCompleted: false"), "Health endpoint must preserve external-action boundary"],
-  [openapi.includes('version: "8.0.0"'), "OpenAPI version must match the current contract"],
-  [openapi.includes('"x-integrity-limitations"'), "OpenAPI must publish integrity limitations"],
-  [validate.includes("validateMission(mission)"), "Validation endpoint is not using the shared validator"],
-  [receipts.includes('algorithm: "SHA-256"'), "Receipt integrity algorithm must be SHA-256"],
-  [receipts.includes("sorted-json-v1"), "Receipt canonicalization contract is missing"],
+const checks = [
+  [domain.includes("externalActionCompleted: false"), "Domain must force externalActionCompleted=false"],
+  [domain.includes("validateMission") && domain.includes("getLaunchUrl"), "Shared validation or route generation is missing"],
+  [manifest.includes("version: 11"), "Manifest version must be 11"],
+  [manifest.includes('modes: ["single", "batch"]'), "Manifest must publish single and batch orchestration"],
+  [manifest.includes("externalActionsRequireExplicitApproval: true") && manifest.includes("externalActionCompletedByManifest: false"), "Manifest approval law is incomplete"],
+  [health.includes('status: healthy ? "healthy" : "degraded"') && health.includes("externalActionCompleted: false"), "Health contract is incomplete"],
+  [openapi.includes('version: "11.0.0"'), "OpenAPI version must be 11.0.0"],
+  [openapi.includes('"x-orchestration-modes"') && openapi.includes('"x-integrity-limitations"'), "OpenAPI extensions are incomplete"],
+  [validate.includes("validateMission(mission)"), "Validation endpoint must use the shared validator"],
+  [policy.includes('"ALLOW_PREPARE"') && policy.includes('"HOLD_FOR_APPROVAL"') && policy.includes('"BLOCK"'), "Policy decision set is incomplete"],
+  [receipts.includes('algorithm: "SHA-256"') && receipts.includes("sorted-json-v1"), "Receipt integrity contract is incomplete"],
   [receipts.includes("signature: null") && receipts.includes("notary: null"), "Receipt limitations must remain explicit"],
-  [events.includes("previousDigest"), "Event chain must link to the previous digest"],
-  [events.includes("EVENT_DIGEST_MISMATCH") && events.includes("PREVIOUS_DIGEST_MISMATCH"), "Event verifier must detect content and ordering changes"],
-  [page.includes("localStorage"), "Application route must preserve local-first mission continuity"],
-  [page.includes("Export JSON") && page.includes("Import JSON"), "Application route must support portable mission data"],
-  [page.includes("Launch route"), "Application route must expose controlled service launchers"],
+  [events.includes("previousDigest") && events.includes("EVENT_DIGEST_MISMATCH") && events.includes("PREVIOUS_DIGEST_MISMATCH"), "Event-chain verification is incomplete"],
+  [page.includes("localStorage") && page.includes("Export JSON") && page.includes("Import JSON") && page.includes("Launch route"), "Mission editor contract is incomplete"],
+  [nexus.includes("Service Bridge Nexus") && nexus.includes("Batch Orchestration"), "Nexus must publish all operational rails"],
+  [policyConsole.includes("/api/service-bridge/policy/evaluate"), "Policy console must use policy API"],
+  [orchestrationConsole.includes("/api/service-bridge/orchestrate"), "Orchestration console must use orchestration API"],
+  [batchConsole.includes("/api/service-bridge/orchestrate-batch"), "Batch console must use batch orchestration API"],
   [control.includes("/api/service-bridge/queue") && control.includes("/api/service-bridge/plan"), "Control console must use queue and plan APIs"],
   [status.includes("/api/service-bridge/health") && status.includes("/api/service-bridge/receipt"), "Status console must use health and receipt APIs"],
-  [receiptConsole.includes("/api/service-bridge/receipt/mission") && receiptConsole.includes("/api/service-bridge/receipt/verify"), "Receipt console must generate and verify receipts"],
-  [eventConsole.includes("/api/service-bridge/events/append") && eventConsole.includes("/api/service-bridge/events/verify"), "Event console must append and verify event chains"],
-  [smoke.includes("receipt tamper detected") && smoke.includes("event-chain tamper detected"), "Smoke suite must test tamper detection"],
-  [workflow.includes("Live API smoke test") && workflow.includes("service-bridge:smoke"), "CI must run the live smoke suite"],
+  [receiptConsole.includes("/api/service-bridge/receipt/mission") && receiptConsole.includes("/api/service-bridge/receipt/verify"), "Receipt console contract is incomplete"],
+  [eventConsole.includes("/api/service-bridge/events/append") && eventConsole.includes("/api/service-bridge/events/verify"), "Event console contract is incomplete"],
+  [smoke.includes("high-risk policy blocks") && smoke.includes("blocked planning denied"), "Smoke suite must test policy boundaries"],
+  [smoke.includes("receipt tamper detected") && smoke.includes("event-chain tamper detected"), "Smoke suite must test integrity tampering"],
+  [workflow.includes("Live API smoke test") && workflow.includes("service-bridge:smoke"), "CI must run live API smoke tests"],
 ];
 
-for (const [passed, message] of contractChecks) {
-  if (!passed) failures.push(message);
-}
+for (const [passed, message] of checks) if (!passed) failures.push(message);
 
 if (failures.length) {
   console.error("SERVICE BRIDGE CONTRACT: FAIL");
@@ -121,6 +126,8 @@ if (failures.length) {
 
 console.log("SERVICE BRIDGE CONTRACT: PASS");
 console.log(`Verified ${requiredFiles.length} files, ${requiredServices.length} services, ${requiredMissionStates.length} mission states, and ${requiredEndpoints.length} endpoints.`);
+console.log("Orchestration modes: single + batch.");
+console.log("Policy outcomes: prepare + hold + block.");
 console.log("Receipt integrity: SHA-256 sorted-json-v1.");
 console.log("Event-chain integrity: content and ordering verified.");
 console.log("External-action boundary: preserved.");
