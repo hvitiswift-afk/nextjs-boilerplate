@@ -1,0 +1,98 @@
+name: Service Bridge Verify
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "app/service-bridge/**"
+      - "app/api/service-bridge/**"
+      - "lib/service-bridge.ts"
+      - "scripts/check-service-bridge-contract.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/service-bridge-verify.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "app/service-bridge/**"
+      - "app/api/service-bridge/**"
+      - "lib/service-bridge.ts"
+      - "scripts/check-service-bridge-contract.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/service-bridge-verify.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: service-bridge-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Contract and boundary checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Service Bridge contract
+        run: npm run service-bridge:check
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: contract
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js application
+        run: npm run build
+
+      - name: Write verification receipt
+        run: |
+          mkdir -p artifacts
+          cat > artifacts/service-bridge-verification.txt <<EOF
+          JP / Hviti Service Bridge Verification Receipt
+          Commit: $GITHUB_SHA
+          Ref: $GITHUB_REF
+          Run: $GITHUB_RUN_ID
+          Contract: PASS
+          Production build: PASS
+          External-action boundary: PRESERVED
+          Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          EOF
+
+      - name: Upload verification receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: service-bridge-verification-${{ github.sha }}
+          path: artifacts/service-bridge-verification.txt
+          retention-days: 30
