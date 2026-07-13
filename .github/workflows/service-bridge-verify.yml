@@ -76,7 +76,7 @@ jobs:
           retention-days: 3
 
   smoke:
-    name: Live API, recovery, and persistence smoke tests
+    name: Live API, recovery, persistence, and rollback tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: build
@@ -116,6 +116,8 @@ jobs:
         run: npm run service-bridge:smoke:recovery | tee service-bridge-recovery-smoke.txt
       - name: Run persistence smoke tests
         run: npm run service-bridge:smoke:persistence | tee service-bridge-persistence-smoke.txt
+      - name: Run rollback smoke tests
+        run: npm run service-bridge:smoke:rollback | tee service-bridge-rollback-smoke.txt
       - name: Write verification receipt
         run: |
           mkdir -p artifacts
@@ -130,15 +132,19 @@ jobs:
           API smoke suite: PASS
           Recovery smoke suite: PASS
           Persistence smoke suite: PASS
+          Rollback smoke suite: PASS
           Automatic mutation: DISALLOWED
+          Automatic rollback: DISALLOWED
           Silent overwrite: DISALLOWED
           External persistence: DISALLOWED
+          External rollback: DISALLOWED
           External-action boundary: PRESERVED
           Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
           EOF
           cp service-bridge-smoke.txt artifacts/
           cp service-bridge-recovery-smoke.txt artifacts/
           cp service-bridge-persistence-smoke.txt artifacts/
+          cp service-bridge-rollback-smoke.txt artifacts/
           cp service-bridge-server.log artifacts/
       - name: Stop production server
         if: always()
