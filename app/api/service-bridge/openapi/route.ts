@@ -7,8 +7,8 @@ export function GET() {
     openapi: "3.1.0",
     info: {
       title: "JP / Hviti Service Bridge API",
-      version: "12.0.0",
-      description: "Local-first orchestration, integrity, projection, reconciliation, and recovery with explicit approval boundaries.",
+      version: "13.0.0",
+      description: "Local-first orchestration, recovery, explicit authority resolution, and gated local persistence with no automatic external action.",
     },
     servers: [{ url: "/" }],
     paths: {
@@ -27,7 +27,9 @@ export function GET() {
       "/api/service-bridge/events/append": { post: { summary: "Append event", requestBody: jsonBody({ $ref: "#/components/schemas/EventAppendRequest" }), responses: { "200": { description: "Event" } } } },
       "/api/service-bridge/events/verify": { post: { summary: "Verify event chain", requestBody: jsonBody({ $ref: "#/components/schemas/EventChain" }), responses: { "200": { description: "Valid" }, "422": { description: "Broken" } } } },
       "/api/service-bridge/events/project": { post: { summary: "Project mission state from event chain", requestBody: jsonBody({ $ref: "#/components/schemas/EventChain" }), responses: { "200": { description: "Projection" }, "422": { description: "Invalid chain" } } } },
-      "/api/service-bridge/events/reconcile": { post: { summary: "Reconcile snapshot with projected history", requestBody: jsonBody({ type: "object", required: ["snapshot", "events"], properties: { snapshot: { $ref: "#/components/schemas/Mission" }, events: { type: "array", items: { $ref: "#/components/schemas/ChainEvent" } } } }), responses: { "200": { description: "Consistent" }, "409": { description: "Conflict" } } } },
+      "/api/service-bridge/events/reconcile": { post: { summary: "Reconcile snapshot with projected history", requestBody: jsonBody({ $ref: "#/components/schemas/ReconciliationRequest" }), responses: { "200": { description: "Consistent" }, "409": { description: "Conflict" } } } },
+      "/api/service-bridge/events/resolve": { post: { summary: "Create an explicit authority resolution packet", requestBody: jsonBody({ $ref: "#/components/schemas/ResolutionRequest" }), responses: { "200": { description: "Resolution packet" }, "400": { description: "Invalid authority or missing reason" } } } },
+      "/api/service-bridge/events/persist": { post: { summary: "Create a gated local persistence plan", requestBody: jsonBody({ $ref: "#/components/schemas/PersistenceRequest" }), responses: { "200": { description: "Persistence plan" }, "400": { description: "Invalid resolution or confirmation" } } } },
       "/api/service-bridge/openapi": { get: { summary: "Read this document", responses: { "200": { description: "OpenAPI" } } } },
     },
     components: { schemas: {
@@ -38,12 +40,20 @@ export function GET() {
       ChainEvent: { type: "object", required: ["id", "missionId", "type", "occurredAt", "actor", "data", "previousDigest", "digest"] },
       EventAppendRequest: { type: "object", required: ["missionId", "type", "actor"] },
       EventChain: { type: "object", required: ["events"], properties: { events: { type: "array", items: { $ref: "#/components/schemas/ChainEvent" } } } },
+      ReconciliationRequest: { type: "object", required: ["snapshot", "events"], properties: { snapshot: { $ref: "#/components/schemas/Mission" }, events: { type: "array", items: { $ref: "#/components/schemas/ChainEvent" } } } },
+      ResolutionRequest: { type: "object", required: ["snapshot", "events", "authority", "actor", "reason"], properties: { snapshot: { $ref: "#/components/schemas/Mission" }, events: { type: "array", items: { $ref: "#/components/schemas/ChainEvent" } }, authority: { type: "string", enum: ["snapshot", "projection", "manual"] }, actor: { type: "string" }, reason: { type: "string" }, manualState: { type: "object" } } },
+      ResolutionPacket: { type: "object", required: ["schema", "missionId", "authority", "actor", "reason", "resolvedState", "mutationApplied", "requiresExplicitPersistence", "externalActionCompleted"], properties: { schema: { const: "jp-hviti-service-bridge-resolution/v1" }, missionId: { type: "string" }, authority: { type: "string", enum: ["snapshot", "projection", "manual"] }, actor: { type: "string" }, reason: { type: "string" }, resolvedState: { type: "object" }, mutationApplied: { const: false }, requiresExplicitPersistence: { const: true }, externalActionCompleted: { const: false } } },
+      PersistenceRequest: { type: "object", required: ["resolution", "currentMissions", "confirmation"], properties: { resolution: { $ref: "#/components/schemas/ResolutionPacket" }, currentMissions: { type: "array", items: { $ref: "#/components/schemas/Mission" } }, confirmation: { type: "string", pattern: "^PERSIST .+$" } } },
     } },
     "x-jp-hviti-approval-law": { externalActionsRequireExplicitApproval: true, externalActionCompletedByApi: false },
     "x-orchestration-stages": ["validate", "policy", "route", "receipt", "next-action"],
     "x-orchestration-modes": ["single", "batch"],
-    "x-recovery-stages": ["event-chain", "verify", "project", "reconcile", "explicit-authority-decision"],
+    "x-recovery-stages": ["event-chain", "verify", "project", "reconcile", "resolve-authority", "plan-persistence", "explicit-local-write"],
+    "x-authority-options": ["snapshot", "projection", "manual"],
+    "x-persistence-confirmations": ["PERSIST <mission-id>", "APPLY LOCAL <mission-id>"],
     "x-silent-overwrite-allowed": false,
+    "x-automatic-mutation-allowed": false,
+    "x-external-persistence-allowed": false,
     "x-integrity-limitations": { signed: false, notarized: false, blockchain: false, authoritativeTimestamp: false, externalActionProof: false },
   });
 }
