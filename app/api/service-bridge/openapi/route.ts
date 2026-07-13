@@ -10,48 +10,26 @@ export function GET() {
     openapi: "3.1.0",
     info: {
       title: "JP / Hviti Service Bridge API",
-      version: "8.0.0",
+      version: "10.0.0",
       description:
-        "Local-first mission validation, planning, queue prioritization, health, deterministic receipts, and chained event integrity. External actions always remain user-controlled.",
+        "Local-first mission orchestration with validation, policy, planning, queue prioritization, health, deterministic receipts, and chained event integrity. External actions remain user-controlled.",
     },
     servers: [{ url: "/" }],
     paths: {
-      "/api/service-bridge/manifest": {
-        get: { summary: "Read the Service Bridge manifest", responses: { "200": { description: "Manifest" } } },
-      },
-      "/api/service-bridge/health": {
-        get: { summary: "Read runtime health and capabilities", responses: { "200": { description: "Healthy" }, "503": { description: "Degraded" } } },
-      },
-      "/api/service-bridge/receipt": {
-        get: { summary: "Read the consolidated system receipt", responses: { "200": { description: "System receipt" } } },
-      },
-      "/api/service-bridge/validate": {
-        post: { summary: "Validate one mission", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Validation result" }, "400": { description: "Invalid payload" } } },
-      },
-      "/api/service-bridge/validate-batch": {
-        post: { summary: "Validate up to 100 missions", requestBody: jsonBody({ type: "array", maxItems: 100, items: { $ref: "#/components/schemas/Mission" } }), responses: { "200": { description: "Batch result" }, "413": { description: "Batch too large" } } },
-      },
-      "/api/service-bridge/plan": {
-        post: { summary: "Generate a controlled route plan", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Route plan" }, "422": { description: "Mission requires completion" } } },
-      },
-      "/api/service-bridge/queue": {
-        post: { summary: "Analyze and prioritize up to 250 missions", requestBody: jsonBody({ type: "array", maxItems: 250, items: { $ref: "#/components/schemas/Mission" } }), responses: { "200": { description: "Ranked mission queue" }, "413": { description: "Queue too large" } } },
-      },
-      "/api/service-bridge/receipt/mission": {
-        post: { summary: "Create a deterministic mission content-integrity receipt", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Valid mission receipt" }, "422": { description: "Receipt created for incomplete mission" } } },
-      },
-      "/api/service-bridge/receipt/verify": {
-        post: { summary: "Verify a mission receipt digest", requestBody: jsonBody({ $ref: "#/components/schemas/MissionReceipt" }), responses: { "200": { description: "Digest valid" }, "422": { description: "Digest mismatch" } } },
-      },
-      "/api/service-bridge/events/append": {
-        post: { summary: "Append a genesis or continuation event", requestBody: jsonBody({ $ref: "#/components/schemas/EventAppendRequest" }), responses: { "200": { description: "Event created" }, "400": { description: "Invalid event" } } },
-      },
-      "/api/service-bridge/events/verify": {
-        post: { summary: "Verify event content and previous-digest ordering", requestBody: jsonBody({ type: "object", required: ["events"], properties: { events: { type: "array", items: { $ref: "#/components/schemas/ChainEvent" } } } }), responses: { "200": { description: "Chain valid" }, "422": { description: "Chain changed or broken" } } },
-      },
-      "/api/service-bridge/openapi": {
-        get: { summary: "Read this OpenAPI document", responses: { "200": { description: "OpenAPI 3.1 document" } } },
-      },
+      "/api/service-bridge/manifest": { get: { summary: "Read the Service Bridge manifest", responses: { "200": { description: "Manifest" } } } },
+      "/api/service-bridge/health": { get: { summary: "Read runtime health and capabilities", responses: { "200": { description: "Healthy" }, "503": { description: "Degraded" } } } },
+      "/api/service-bridge/receipt": { get: { summary: "Read the consolidated system receipt", responses: { "200": { description: "System receipt" } } } },
+      "/api/service-bridge/validate": { post: { summary: "Validate one mission", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Validation result" }, "400": { description: "Invalid payload" } } } },
+      "/api/service-bridge/validate-batch": { post: { summary: "Validate up to 100 missions", requestBody: jsonBody({ type: "array", maxItems: 100, items: { $ref: "#/components/schemas/Mission" } }), responses: { "200": { description: "Batch result" }, "413": { description: "Batch too large" } } } },
+      "/api/service-bridge/policy/evaluate": { post: { summary: "Evaluate mission policy before planning or route opening", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Policy decision" }, "400": { description: "Invalid payload" } } } },
+      "/api/service-bridge/orchestrate": { post: { summary: "Run validation, policy, route, receipt, and next-action orchestration", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Complete orchestration result" }, "422": { description: "Mission incomplete" } } } },
+      "/api/service-bridge/plan": { post: { summary: "Generate a controlled route plan", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Route plan" }, "422": { description: "Mission requires completion" } } } },
+      "/api/service-bridge/queue": { post: { summary: "Analyze and prioritize up to 250 missions", requestBody: jsonBody({ type: "array", maxItems: 250, items: { $ref: "#/components/schemas/Mission" } }), responses: { "200": { description: "Ranked mission queue" }, "413": { description: "Queue too large" } } } },
+      "/api/service-bridge/receipt/mission": { post: { summary: "Create a deterministic mission content-integrity receipt", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Valid mission receipt" }, "422": { description: "Receipt created for incomplete mission" } } } },
+      "/api/service-bridge/receipt/verify": { post: { summary: "Verify a mission receipt digest", requestBody: jsonBody({ $ref: "#/components/schemas/MissionReceipt" }), responses: { "200": { description: "Digest valid" }, "422": { description: "Digest mismatch" } } } },
+      "/api/service-bridge/events/append": { post: { summary: "Append a genesis or continuation event", requestBody: jsonBody({ $ref: "#/components/schemas/EventAppendRequest" }), responses: { "200": { description: "Event created" }, "400": { description: "Invalid event" } } } },
+      "/api/service-bridge/events/verify": { post: { summary: "Verify event content and previous-digest ordering", requestBody: jsonBody({ type: "object", required: ["events"], properties: { events: { type: "array", items: { $ref: "#/components/schemas/ChainEvent" } } } }), responses: { "200": { description: "Chain valid" }, "422": { description: "Chain changed or broken" } } } },
+      "/api/service-bridge/openapi": { get: { summary: "Read this OpenAPI document", responses: { "200": { description: "OpenAPI 3.1 document" } } } },
     },
     components: {
       schemas: {
@@ -62,6 +40,18 @@ export function GET() {
             id: { type: "string" }, title: { type: "string" }, service: { type: "string" }, target: { type: "string" }, action: { type: "string" }, owner: { type: "string" },
             state: { type: "string", enum: ["draft", "preflight", "awaiting-approval", "ready", "verified", "closed"] },
             priority: { type: "integer", minimum: 1, maximum: 10 }, budget: { type: "string" }, permission: { type: "string" }, evidence: { type: "string" }, fallback: { type: "string" }, next: { type: "string" }, query: { type: "string" }, location: { type: "string" }, updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+        PolicyEvaluation: {
+          type: "object",
+          required: ["decision", "reasons", "requiredApprovals", "safeguards", "nextAction", "externalActionCompleted"],
+          properties: {
+            decision: { type: "string", enum: ["ALLOW_PREPARE", "HOLD_FOR_APPROVAL", "BLOCK"] },
+            reasons: { type: "array", items: { type: "string" } },
+            requiredApprovals: { type: "array", items: { type: "string" } },
+            safeguards: { type: "array", items: { type: "string" } },
+            nextAction: { type: "string" },
+            externalActionCompleted: { const: false },
           },
         },
         MissionReceipt: {
@@ -86,16 +76,8 @@ export function GET() {
         },
       },
     },
-    "x-jp-hviti-approval-law": {
-      externalActionsRequireExplicitApproval: true,
-      externalActionCompletedByApi: false,
-    },
-    "x-integrity-limitations": {
-      signed: false,
-      notarized: false,
-      blockchain: false,
-      authoritativeTimestamp: false,
-      externalActionProof: false,
-    },
+    "x-jp-hviti-approval-law": { externalActionsRequireExplicitApproval: true, externalActionCompletedByApi: false },
+    "x-orchestration-stages": ["validate", "policy", "route", "receipt", "next-action"],
+    "x-integrity-limitations": { signed: false, notarized: false, blockchain: false, authoritativeTimestamp: false, externalActionProof: false },
   });
 }
