@@ -24,11 +24,7 @@ const checks = [];
 async function request(path, init) {
   const response = await fetch(`${baseUrl}${path}`, init);
   let body;
-  try {
-    body = await response.json();
-  } catch {
-    body = null;
-  }
+  try { body = await response.json(); } catch { body = null; }
   return { response, body };
 }
 
@@ -39,53 +35,68 @@ function check(name, passed, detail) {
 
 const manifest = await request("/api/service-bridge/manifest");
 check("manifest responds", manifest.response.ok, `status ${manifest.response.status}`);
+check("manifest version", manifest.body?.version >= 8, `version ${manifest.body?.version}`);
 check("manifest approval boundary", manifest.body?.approvalLaw?.externalActionsRequireExplicitApproval === true);
+
+const openapi = await request("/api/service-bridge/openapi");
+check("OpenAPI responds", openapi.response.ok, `status ${openapi.response.status}`);
+check("OpenAPI documents events", Boolean(openapi.body?.paths?.["/api/service-bridge/events/verify"]));
 
 const health = await request("/api/service-bridge/health");
 check("health responds", health.response.ok, `status ${health.response.status}`);
 check("health external boundary", health.body?.externalActionCompleted === false);
 
-const validation = await request("/api/service-bridge/validate", {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify(mission),
-});
+const validation = await request("/api/service-bridge/validate", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(mission) });
 check("single validation responds", validation.response.ok, `status ${validation.response.status}`);
 check("single validation readiness", validation.body?.readiness === 100, `readiness ${validation.body?.readiness}`);
 check("single validation external boundary", validation.body?.externalActionCompleted === false);
 
-const batch = await request("/api/service-bridge/validate-batch", {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ missions: [mission] }),
-});
+const batch = await request("/api/service-bridge/validate-batch", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ missions: [mission] }) });
 check("batch validation responds", batch.response.ok, `status ${batch.response.status}`);
 check("batch count", batch.body?.summary?.total === 1, `total ${batch.body?.summary?.total}`);
 
-const plan = await request("/api/service-bridge/plan", {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify(mission),
-});
+const plan = await request("/api/service-bridge/plan", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(mission) });
 check("plan responds", plan.response.ok, `status ${plan.response.status}`);
 check("plan has route", typeof plan.body?.route === "string" && plan.body.route.includes("indeed.com"));
 check("plan external boundary", plan.body?.externalActionCompleted === false);
 
-const queue = await request("/api/service-bridge/queue", {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ missions: [mission] }),
-});
+const queue = await request("/api/service-bridge/queue", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ missions: [mission] }) });
 check("queue responds", queue.response.ok, `status ${queue.response.status}`);
 check("queue ranks mission", queue.body?.nextMissionId === mission.id, `next ${queue.body?.nextMissionId}`);
 check("queue external boundary", queue.body?.externalActionCompleted === false);
 
-const receipt = await request("/api/service-bridge/receipt");
-check("receipt responds", receipt.response.ok, `status ${receipt.response.status}`);
-check("receipt external boundary", receipt.body?.externalActionCompleted === false);
+const systemReceipt = await request("/api/service-bridge/receipt");
+check("system receipt responds", systemReceipt.response.ok, `status ${systemReceipt.response.status}`);
+check("system receipt external boundary", systemReceipt.body?.externalActionCompleted === false);
+
+const missionReceipt = await request("/api/service-bridge/receipt/mission", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(mission) });
+check("mission receipt responds", missionReceipt.response.ok, `status ${missionReceipt.response.status}`);
+check("mission receipt SHA-256 digest", /^[a-f0-9]{64}$/.test(missionReceipt.body?.integrity?.digest || ""));
+
+const validReceipt = await request("/api/service-bridge/receipt/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(missionReceipt.body) });
+check("mission receipt verifies", validReceipt.response.ok && validReceipt.body?.valid === true, `status ${validReceipt.response.status}`);
+
+const changedReceiptPayload = structuredClone(missionReceipt.body);
+changedReceiptPayload.mission.title = "Tampered title";
+const changedReceipt = await request("/api/service-bridge/receipt/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(changedReceiptPayload) });
+check("receipt tamper detected", changedReceipt.response.status === 422 && changedReceipt.body?.valid === false, `status ${changedReceipt.response.status}`);
+
+const genesis = await request("/api/service-bridge/events/append", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ missionId: mission.id, type: "MISSION_CREATED", actor: "JP", data: { title: mission.title } }) });
+check("genesis event created", genesis.response.ok, `status ${genesis.response.status}`);
+
+const continuation = await request("/api/service-bridge/events/append", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ missionId: mission.id, type: "APPROVAL_RECORDED", actor: "JP", data: { permission: mission.permission }, previousEvent: genesis.body?.event }) });
+check("continuation event created", continuation.response.ok, `status ${continuation.response.status}`);
+
+const validChain = await request("/api/service-bridge/events/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ events: [genesis.body?.event, continuation.body?.event] }) });
+check("event chain verifies", validChain.response.ok && validChain.body?.valid === true, `status ${validChain.response.status}`);
+check("event chain external boundary", validChain.body?.externalActionCompleted === false);
+
+const changedChainEvents = structuredClone([genesis.body?.event, continuation.body?.event]);
+changedChainEvents[0].data.title = "Changed event title";
+const changedChain = await request("/api/service-bridge/events/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ events: changedChainEvents }) });
+check("event-chain tamper detected", changedChain.response.status === 422 && changedChain.body?.valid === false, `status ${changedChain.response.status}`);
 
 const failed = checks.filter((item) => !item.passed);
-
 console.log("\nJP / Hviti Service Bridge Smoke Receipt");
 console.log(`Base URL: ${baseUrl}`);
 console.log(`Checks: ${checks.length}`);
@@ -93,5 +104,4 @@ console.log(`Passed: ${checks.length - failed.length}`);
 console.log(`Failed: ${failed.length}`);
 console.log(`Generated: ${new Date().toISOString()}`);
 console.log("External-action boundary: PRESERVED");
-
 if (failed.length) process.exit(1);
