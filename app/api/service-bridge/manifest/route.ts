@@ -5,8 +5,8 @@ import { missionStates, serviceRegistry } from "@/lib/service-bridge";
 export function GET() {
   return NextResponse.json({
     system: "JP / Hviti Service Bridge",
-    version: 6,
-    mode: "local-first-with-validation-planning-prioritization-health-and-openapi",
+    version: 7,
+    mode: "local-first-with-validation-planning-prioritization-health-receipts-and-openapi",
     missionStates,
     services: serviceRegistry,
     limits: {
@@ -30,6 +30,7 @@ export function GET() {
     endpoints: {
       manifest: "/api/service-bridge/manifest",
       health: "/api/service-bridge/health",
+      receipt: "/api/service-bridge/receipt",
       openapi: "/api/service-bridge/openapi",
       validate: "/api/service-bridge/validate",
       validateBatch: "/api/service-bridge/validate-batch",
@@ -37,6 +38,7 @@ export function GET() {
       queue: "/api/service-bridge/queue",
       application: "/service-bridge",
       operatorConsole: "/service-bridge/control",
+      statusConsole: "/service-bridge/status",
     },
     examples: {
       sampleMissionQueue: "/examples/service-bridge/sample-missions.json",
