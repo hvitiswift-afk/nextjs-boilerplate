@@ -5,10 +5,13 @@ import { missionStates, serviceRegistry } from "@/lib/service-bridge";
 export function GET() {
   return NextResponse.json({
     system: "JP / Hviti Service Bridge",
-    version: 3,
-    mode: "local-first-with-server-validation",
+    version: 4,
+    mode: "local-first-with-server-validation-and-route-planning",
     missionStates,
     services: serviceRegistry,
+    limits: {
+      batchValidationMaximum: 100,
+    },
     approvalLaw: {
       externalActionsRequireExplicitApproval: true,
       externalActionCompletedByManifest: false,
@@ -26,6 +29,8 @@ export function GET() {
     endpoints: {
       manifest: "/api/service-bridge/manifest",
       validate: "/api/service-bridge/validate",
+      validateBatch: "/api/service-bridge/validate-batch",
+      plan: "/api/service-bridge/plan",
       application: "/service-bridge",
     },
   });
