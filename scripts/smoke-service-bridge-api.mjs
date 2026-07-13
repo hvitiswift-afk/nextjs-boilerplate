@@ -56,15 +56,17 @@ const postMission = (path, payload = mission) => request(path, {
 
 const manifest = await request("/api/service-bridge/manifest");
 check("manifest responds", manifest.response.ok, `status ${manifest.response.status}`);
-check("manifest version", manifest.body?.version >= 10, `version ${manifest.body?.version}`);
+check("manifest version", manifest.body?.version >= 11, `version ${manifest.body?.version}`);
 check("manifest approval boundary", manifest.body?.approvalLaw?.externalActionsRequireExplicitApproval === true);
 check("manifest orchestration stages", manifest.body?.orchestration?.stages?.join(",") === "validate,policy,route,receipt,next-action");
+check("manifest orchestration modes", manifest.body?.orchestration?.modes?.join(",") === "single,batch");
 
 const openapi = await request("/api/service-bridge/openapi");
 check("OpenAPI responds", openapi.response.ok, `status ${openapi.response.status}`);
-check("OpenAPI version", openapi.body?.info?.version === "10.0.0", `version ${openapi.body?.info?.version}`);
+check("OpenAPI version", openapi.body?.info?.version === "11.0.0", `version ${openapi.body?.info?.version}`);
 check("OpenAPI documents policy", Boolean(openapi.body?.paths?.["/api/service-bridge/policy/evaluate"]));
 check("OpenAPI documents orchestration", Boolean(openapi.body?.paths?.["/api/service-bridge/orchestrate"]));
+check("OpenAPI documents batch orchestration", Boolean(openapi.body?.paths?.["/api/service-bridge/orchestrate-batch"]));
 check("OpenAPI documents events", Boolean(openapi.body?.paths?.["/api/service-bridge/events/verify"]));
 
 const health = await request("/api/service-bridge/health");
@@ -93,6 +95,7 @@ check("orchestration readiness", orchestration.body?.readiness === 100, `readine
 check("orchestration policy", orchestration.body?.policy?.decision === "ALLOW_PREPARE", `decision ${orchestration.body?.policy?.decision}`);
 check("orchestration planning allowed", orchestration.body?.route?.planningAllowed === true);
 check("orchestration receipt digest", /^[a-f0-9]{64}$/.test(orchestration.body?.receipt?.integrity?.digest || ""));
+check("orchestration digest alias parity", orchestration.body?.receiptDigest === orchestration.body?.receipt?.integrity?.digest);
 check("orchestration external boundary", orchestration.body?.externalActionCompleted === false);
 
 const approvalOrchestration = await postMission("/api/service-bridge/orchestrate", approvalMission);
@@ -102,6 +105,28 @@ check("approval route opening denied", approvalOrchestration.body?.route?.openin
 const blockedOrchestration = await postMission("/api/service-bridge/orchestrate", blockedMission);
 check("blocked orchestration blocks", blockedOrchestration.body?.policy?.decision === "BLOCK");
 check("blocked planning denied", blockedOrchestration.body?.route?.planningAllowed === false);
+
+const batchOrchestration = await request("/api/service-bridge/orchestrate-batch", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ missions: [mission, approvalMission, blockedMission] }),
+});
+check("batch orchestration responds", batchOrchestration.response.ok, `status ${batchOrchestration.response.status}`);
+check("batch orchestration total", batchOrchestration.body?.summary?.total === 3, `total ${batchOrchestration.body?.summary?.total}`);
+check("batch orchestration prepare count", batchOrchestration.body?.summary?.prepare === 1, `prepare ${batchOrchestration.body?.summary?.prepare}`);
+check("batch orchestration hold count", batchOrchestration.body?.summary?.hold === 1, `hold ${batchOrchestration.body?.summary?.hold}`);
+check("batch orchestration blocked count", batchOrchestration.body?.summary?.blocked === 1, `blocked ${batchOrchestration.body?.summary?.blocked}`);
+check("batch orchestration average readiness", batchOrchestration.body?.summary?.averageReadiness === 100, `average ${batchOrchestration.body?.summary?.averageReadiness}`);
+check("single and batch prepare parity", batchOrchestration.body?.results?.[0]?.policy?.decision === orchestration.body?.policy?.decision);
+check("single and batch receipt parity", batchOrchestration.body?.results?.[0]?.receiptDigest === orchestration.body?.receiptDigest);
+check("batch orchestration external boundary", batchOrchestration.body?.externalActionCompleted === false);
+
+const oversizedBatch = await request("/api/service-bridge/orchestrate-batch", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ missions: Array.from({ length: 101 }, (_, index) => ({ ...mission, id: `XYZ-OVER-${index}` })) }),
+});
+check("batch orchestration limit enforced", oversizedBatch.response.status === 413, `status ${oversizedBatch.response.status}`);
 
 const batch = await request("/api/service-bridge/validate-batch", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ missions: [mission] }) });
 check("batch validation responds", batch.response.ok, `status ${batch.response.status}`);
