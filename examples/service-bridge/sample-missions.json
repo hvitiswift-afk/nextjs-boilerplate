@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "purpose": "Sample JP / Hviti Service Bridge mission queue for local import and API testing.",
+  "missions": [
+    {
+      "id": "XYZ-JOB-001",
+      "title": "Find CAD Designer roles",
+      "service": "Indeed",
+      "target": "CAD Designer III roles near Grand Rapids",
+      "action": "Search and prepare a shortlist for review",
+      "owner": "JP",
+      "state": "preflight",
+      "priority": 10,
+      "budget": "No application fee",
+      "permission": "User review required before any application",
+      "evidence": "Job URL, employer, pay range, and application status",
+      "fallback": "LinkedIn or direct employer career pages",
+      "next": "Review shortlist",
+      "query": "CAD Designer III",
+      "location": "Grand Rapids, Michigan",
+      "updatedAt": "2026-07-13T00:00:00.000Z"
+    },
+    {
+      "id": "XYZ-RIDE-001",
+      "title": "Plan interview transportation",
+      "service": "Uber",
+      "target": "Reliable round-trip transportation to an interview",
+      "action": "Prepare pickup, destination, timing, and fare ceiling",
+      "owner": "JP",
+      "state": "awaiting-approval",
+      "priority": 9,
+      "budget": "$70 round trip maximum",
+      "permission": "User must approve fare and book the ride",
+      "evidence": "Ride receipt and arrival confirmation",
+      "fallback": "Lyft, public transit, or a trusted driver",
+      "next": "Confirm interview address and time",
+      "query": "",
+      "location": "Grand Rapids, Michigan",
+      "updatedAt": "2026-07-13T00:00:00.000Z"
+    },
+    {
+      "id": "XYZ-FOOD-001",
+      "title": "Plan food for a work session",
+      "service": "Grubhub",
+      "target": "Affordable meal delivery during a focused work block",
+      "action": "Search meal options within the budget and dietary constraints",
+      "owner": "JP",
+      "state": "draft",
+      "priority": 5,
+      "budget": "$20 maximum",
+      "permission": "User must approve restaurant, total, and order",
+      "evidence": "Order receipt",
+      "fallback": "Pickup or grocery option",
+      "next": "Choose meal window",
+      "query": "affordable dinner",
+      "location": "Grand Rapids, Michigan",
+      "updatedAt": "2026-07-13T00:00:00.000Z"
+    }
+  ],
+  "externalActionCompleted": false
+}
