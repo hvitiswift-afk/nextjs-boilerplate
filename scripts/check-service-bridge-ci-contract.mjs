@@ -6,6 +6,7 @@ const runner = await readFile("scripts/run-service-bridge-smoke-all.mjs", "utf8"
 const architectureContract = await readFile("scripts/check-service-bridge-contract.mjs", "utf8");
 const runtimeContract = await readFile("scripts/check-service-bridge-runtime-contract.mjs", "utf8");
 const catalog = await readFile("lib/service-bridge-contract-catalog.ts", "utf8");
+const polystructureSmoke = await readFile("scripts/smoke-service-bridge-polystructure.mjs", "utf8");
 
 const failures = [];
 const requireCheck = (passed, message) => {
@@ -15,12 +16,14 @@ const requireCheck = (passed, message) => {
 requireCheck(packageJson.includes('"service-bridge:check:all"'), "Combined contract command is missing.");
 requireCheck(packageJson.includes('"service-bridge:smoke:all"'), "Unified smoke command is missing.");
 requireCheck(packageJson.includes('"service-bridge:smoke:deployment"'), "Deployment smoke command is missing.");
+requireCheck(packageJson.includes('"service-bridge:smoke:polystructure"'), "Polystructure smoke command is missing.");
 requireCheck(packageJson.includes('"service-bridge:deployment:verify"'), "Public deployment verification command is missing.");
 requireCheck(packageJson.includes('"service-bridge:verify": "npm run service-bridge:check:all && npm run build"'), "Verify command must run all contracts before build.");
 
 requireCheck(workflow.includes("npm run service-bridge:check:all"), "CI must run the combined contract command.");
 requireCheck(workflow.includes("npm run service-bridge:smoke:all"), "CI must run the unified smoke command.");
-requireCheck(workflow.includes("Smoke suites completed: 8/8"), "CI receipt must record eight completed smoke suites.");
+requireCheck(workflow.includes("Smoke suites completed: 9/9"), "CI receipt must record nine completed smoke suites.");
+requireCheck(workflow.includes("Polystructure v19 smoke suite: PASS"), "CI receipt must record polystructure smoke status.");
 requireCheck(workflow.includes("Contract catalog version: 19"), "CI receipt must record contract catalog version 19.");
 requireCheck(workflow.includes("Architecture contract: PASS"), "CI receipt must record architecture contract status.");
 requireCheck(workflow.includes("Runtime metadata contract: PASS"), "CI receipt must record runtime contract status.");
@@ -38,11 +41,16 @@ const suitePaths = [
   "scripts/smoke-service-bridge-lifecycle-projection.mjs",
   "scripts/smoke-service-bridge-lifecycle-apply.mjs",
   "scripts/smoke-service-bridge-deployment.mjs",
+  "scripts/smoke-service-bridge-polystructure.mjs",
 ];
 for (const path of suitePaths) {
   requireCheck(runner.includes(path), `Unified smoke runner missing suite: ${path}`);
 }
 
+requireCheck(polystructureSmoke.includes("release verifies"), "Polystructure smoke must verify the release capsule.");
+requireCheck(polystructureSmoke.includes("Merkle proof verifies"), "Polystructure smoke must verify a Merkle inclusion proof.");
+requireCheck(polystructureSmoke.includes("bundle verifies"), "Polystructure smoke must verify the bundle.");
+requireCheck(polystructureSmoke.includes("identity verifies"), "Polystructure smoke must verify the barcode identity payload.");
 requireCheck(runner.includes("if (!passed)"), "Unified smoke runner must stop after a failed suite.");
 requireCheck(runner.includes("externalActionCompleted: false"), "Unified smoke receipt must preserve externalActionCompleted=false.");
 requireCheck(runner.includes("automaticProjectionMutationAllowed: false"), "Unified smoke receipt must prohibit automatic projection mutation.");
@@ -61,6 +69,6 @@ if (failures.length) {
 console.log("SERVICE BRIDGE CI CONTRACT: PASS");
 console.log("Contract rail: architecture + runtime metadata + CI structure, version 19.");
 console.log("Build rail: production Next.js build.");
-console.log("Smoke rail: unified fail-fast runner with 8 suites.");
-console.log("Contract catalog rail: source and live endpoint verification.");
+console.log("Smoke rail: unified fail-fast runner with 9 suites.");
+console.log("Polystructure rail: identity + bundle + Merkle + release verification.");
 console.log("Automatic deployment and external action: disallowed.");
