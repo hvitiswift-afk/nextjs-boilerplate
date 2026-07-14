@@ -7,7 +7,7 @@ on:
       - "app/service-bridge/**"
       - "app/api/service-bridge/**"
       - "lib/service-bridge*.ts"
-      - "scripts/check-service-bridge-contract.mjs"
+      - "scripts/check-service-bridge-*.mjs"
       - "scripts/smoke-service-bridge-*.mjs"
       - "package.json"
       - "package-lock.json"
@@ -18,7 +18,7 @@ on:
       - "app/service-bridge/**"
       - "app/api/service-bridge/**"
       - "lib/service-bridge*.ts"
-      - "scripts/check-service-bridge-contract.mjs"
+      - "scripts/check-service-bridge-*.mjs"
       - "scripts/smoke-service-bridge-*.mjs"
       - "package.json"
       - "package-lock.json"
@@ -34,7 +34,7 @@ concurrency:
 
 jobs:
   contract:
-    name: Contract and boundary checks
+    name: Architecture and runtime contract checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -47,8 +47,10 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Verify Service Bridge contract
+      - name: Verify Service Bridge architecture contract
         run: npm run service-bridge:check
+      - name: Verify Service Bridge runtime metadata contract
+        run: npm run service-bridge:check:runtime
 
   build:
     name: Production build
@@ -132,7 +134,8 @@ jobs:
           Commit: $GITHUB_SHA
           Ref: $GITHUB_REF
           Run: $GITHUB_RUN_ID
-          Contract: PASS
+          Architecture contract: PASS
+          Runtime metadata contract: PASS
           Production build: PASS
           Live server health: PASS
           API smoke suite: PASS
