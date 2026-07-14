@@ -76,7 +76,7 @@ jobs:
           retention-days: 3
 
   smoke:
-    name: Live API, recovery, persistence, rollback, lifecycle, and projection tests
+    name: Live Service Bridge lifecycle and recovery verification
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: build
@@ -122,6 +122,8 @@ jobs:
         run: npm run service-bridge:smoke:lifecycle | tee service-bridge-lifecycle-smoke.txt
       - name: Run lifecycle projection smoke tests
         run: npm run service-bridge:smoke:lifecycle-projection | tee service-bridge-lifecycle-projection-smoke.txt
+      - name: Run lifecycle apply smoke tests
+        run: npm run service-bridge:smoke:lifecycle-apply | tee service-bridge-lifecycle-apply-smoke.txt
       - name: Write verification receipt
         run: |
           mkdir -p artifacts
@@ -139,9 +141,11 @@ jobs:
           Rollback smoke suite: PASS
           Lifecycle smoke suite: PASS
           Lifecycle projection smoke suite: PASS
+          Lifecycle apply smoke suite: PASS
           Automatic mutation: DISALLOWED
           Automatic rollback: DISALLOWED
-          Projection mutation: DISALLOWED
+          Projection mutation permission: EXPLICIT
+          Automatic projection mutation: DISALLOWED
           Silent overwrite: DISALLOWED
           External persistence: DISALLOWED
           External rollback: DISALLOWED
@@ -155,6 +159,7 @@ jobs:
           cp service-bridge-rollback-smoke.txt artifacts/
           cp service-bridge-lifecycle-smoke.txt artifacts/
           cp service-bridge-lifecycle-projection-smoke.txt artifacts/
+          cp service-bridge-lifecycle-apply-smoke.txt artifacts/
           cp service-bridge-server.log artifacts/
       - name: Stop production server
         if: always()
