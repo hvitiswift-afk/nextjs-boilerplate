@@ -1,0 +1,4 @@
+# JP / Hviti Service Bridge cron example
+# Review and replace /absolute/path before installing manually with crontab.
+# Runs every day at 02:15 local system time.
+15 2 * * * cd /absolute/path/to/nextjs-boilerplate && /usr/bin/env bash scheduler/service-bridge-verify.sh >> logs/service-bridge-cron.log 2>&1
