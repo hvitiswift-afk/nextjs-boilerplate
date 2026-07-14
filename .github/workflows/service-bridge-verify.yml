@@ -40,7 +40,7 @@ concurrency:
 
 jobs:
   contract:
-    name: Architecture, runtime, and CI contract checks
+    name: Contract catalog v19 and runtime checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -55,6 +55,8 @@ jobs:
         run: npm ci
       - name: Verify all Service Bridge contracts
         run: npm run service-bridge:check:all
+      - name: Verify v19 contract catalog endpoint source
+        run: test -f app/api/service-bridge/contracts/route.ts
 
   build:
     name: Production build
@@ -118,6 +120,8 @@ jobs:
           exit 1
       - name: Run unified Service Bridge smoke suite
         run: npm run service-bridge:smoke:all | tee service-bridge-unified-smoke.txt
+      - name: Verify contract catalog live
+        run: curl --fail --silent http://127.0.0.1:3000/api/service-bridge/contracts > artifacts-contracts.json
       - name: Write verification receipt
         run: |
           mkdir -p artifacts
@@ -126,36 +130,23 @@ jobs:
           Commit: $GITHUB_SHA
           Ref: $GITHUB_REF
           Run: $GITHUB_RUN_ID
+          Contract catalog version: 19
           Architecture contract: PASS
           Runtime metadata contract: PASS
           CI contract: PASS
           Production build: PASS
           Live server health: PASS
+          Contract catalog live: PASS
           Unified smoke runner: PASS
           Smoke suites completed: 8/8
-          API smoke suite: PASS
-          Recovery smoke suite: PASS
-          Persistence smoke suite: PASS
-          Rollback smoke suite: PASS
-          Lifecycle smoke suite: PASS
-          Lifecycle projection smoke suite: PASS
-          Lifecycle apply smoke suite: PASS
-          Deployment smoke suite: PASS
-          Automatic mutation: DISALLOWED
-          Automatic rollback: DISALLOWED
-          Projection mutation permission: EXPLICIT
-          Automatic projection mutation: DISALLOWED
           Automatic deployment: DISALLOWED
           Public deployment verified: NO
-          Silent overwrite: DISALLOWED
-          External persistence: DISALLOWED
-          External rollback: DISALLOWED
-          Trusted timestamp claim: NONE
           External-action boundary: PRESERVED
           Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
           EOF
           cp service-bridge-unified-smoke.txt artifacts/
           cp service-bridge-server.log artifacts/
+          cp artifacts-contracts.json artifacts/
       - name: Stop production server
         if: always()
         run: |
