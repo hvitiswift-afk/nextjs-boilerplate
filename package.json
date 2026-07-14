@@ -34,6 +34,7 @@
     "service-bridge:smoke:lifecycle-projection": "node scripts/smoke-service-bridge-lifecycle-projection.mjs",
     "service-bridge:smoke:lifecycle-apply": "node scripts/smoke-service-bridge-lifecycle-apply.mjs",
     "service-bridge:smoke:deployment": "node scripts/smoke-service-bridge-deployment.mjs",
+    "service-bridge:smoke:polystructure": "node scripts/smoke-service-bridge-polystructure.mjs",
     "service-bridge:smoke:all": "node scripts/run-service-bridge-smoke-all.mjs",
     "service-bridge:deployment:verify": "node scripts/verify-service-bridge-deployment.mjs",
     "service-bridge:verify": "npm run service-bridge:check:all && npm run build",
