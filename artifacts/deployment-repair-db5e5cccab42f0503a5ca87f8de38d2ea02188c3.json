@@ -1,0 +1,47 @@
+{
+  "schema": "jp-hviti-service-bridge-deployment-repair-plan/v1",
+  "plannedAt": "2026-07-13T00:00:00.000Z",
+  "commitSha": "db5e5cccab42f0503a5ca87f8de38d2ea02188c3",
+  "confirmation": "PLAN DEPLOYMENT REPAIR db5e5cccab42f0503a5ca87f8de38d2ea02188c3",
+  "strategy": "bridge-to-netlify",
+  "reason": "Observed Vercel deployment statuses were blocked, so the safest non-destructive repair route is to prepare an alternate provider bridge while preserving Vercel repair as a secondary option.",
+  "providers": [
+    {
+      "provider": "vercel",
+      "configured": true,
+      "deploymentVerified": false,
+      "blocked": true,
+      "detail": "Repository status reported blocked Vercel deployments."
+    },
+    {
+      "provider": "netlify",
+      "configured": false,
+      "deploymentVerified": false,
+      "blocked": null,
+      "detail": "Alternate bridge provider selected for preparation."
+    }
+  ],
+  "steps": [
+    "Create or repair a Netlify project linked to hvitiswift-afk/nextjs-boilerplate.",
+    "Use the production main branch and exact target commit db5e5cccab42f0503a5ca87f8de38d2ea02188c3.",
+    "Configure the supported Next.js runtime and provider-managed environment values.",
+    "Deploy without placing secrets in source control.",
+    "Verify the public URL, /api/service-bridge/health, /api/service-bridge/manifest, and /api/service-bridge/openapi.",
+    "Record provider deployment ID, commit SHA, verified URL, and verification timestamp only after successful checks."
+  ],
+  "execution": {
+    "repairPlanCreated": true,
+    "providerAuthorizationRequired": true,
+    "automaticDeploymentAllowed": false,
+    "providerMutationApplied": false,
+    "deploymentCompleted": false,
+    "publicUrlVerified": false
+  },
+  "boundaries": {
+    "repositoryCommitEqualsDeploymentSuccess": false,
+    "ciSuccessEqualsDeploymentSuccess": false,
+    "buildSuccessEqualsDeploymentSuccess": false,
+    "externalActionCompleted": false
+  },
+  "externalActionCompleted": false
+}
