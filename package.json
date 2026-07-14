@@ -33,7 +33,9 @@
     "service-bridge:smoke:lifecycle": "node scripts/smoke-service-bridge-lifecycle.mjs",
     "service-bridge:smoke:lifecycle-projection": "node scripts/smoke-service-bridge-lifecycle-projection.mjs",
     "service-bridge:smoke:lifecycle-apply": "node scripts/smoke-service-bridge-lifecycle-apply.mjs",
+    "service-bridge:smoke:deployment": "node scripts/smoke-service-bridge-deployment.mjs",
     "service-bridge:smoke:all": "node scripts/run-service-bridge-smoke-all.mjs",
+    "service-bridge:deployment:verify": "node scripts/verify-service-bridge-deployment.mjs",
     "service-bridge:verify": "npm run service-bridge:check:all && npm run build",
     "griploom:checks": "npm run security:secrets:check && npm run griploom:id:check && npm run griploom:screenplay:check && npm run griploom:ml:check && npm run griploom:tick:check && npm run griploom:launch:check && npm run griploom:launch:print:check && npm run griploom:science:check && npm run f-wad:check && npm run griploom:checks:index",
     "griploom:verify": "node scripts/verify-griploom-build.mjs"
