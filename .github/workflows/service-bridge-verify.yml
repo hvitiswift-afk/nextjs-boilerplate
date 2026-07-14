@@ -36,7 +36,7 @@ concurrency:
 
 jobs:
   contract:
-    name: Architecture and runtime contract checks
+    name: Architecture, runtime, and CI contract checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -124,6 +124,7 @@ jobs:
           Run: $GITHUB_RUN_ID
           Architecture contract: PASS
           Runtime metadata contract: PASS
+          CI contract: PASS
           Production build: PASS
           Live server health: PASS
           Unified smoke runner: PASS
