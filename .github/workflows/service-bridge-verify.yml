@@ -9,6 +9,7 @@ on:
       - "lib/service-bridge*.ts"
       - "scripts/check-service-bridge-*.mjs"
       - "scripts/smoke-service-bridge-*.mjs"
+      - "scripts/run-service-bridge-smoke-all.mjs"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/service-bridge-verify.yml"
@@ -20,6 +21,7 @@ on:
       - "lib/service-bridge*.ts"
       - "scripts/check-service-bridge-*.mjs"
       - "scripts/smoke-service-bridge-*.mjs"
+      - "scripts/run-service-bridge-smoke-all.mjs"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/service-bridge-verify.yml"
@@ -47,10 +49,8 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Verify Service Bridge architecture contract
-        run: npm run service-bridge:check
-      - name: Verify Service Bridge runtime metadata contract
-        run: npm run service-bridge:check:runtime
+      - name: Verify all Service Bridge contracts
+        run: npm run service-bridge:check:all
 
   build:
     name: Production build
@@ -78,7 +78,7 @@ jobs:
           retention-days: 3
 
   smoke:
-    name: Live Service Bridge lifecycle and recovery verification
+    name: Unified live Service Bridge verification
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: build
@@ -112,20 +112,8 @@ jobs:
           done
           cat service-bridge-server.log
           exit 1
-      - name: Run end-to-end API smoke tests
-        run: npm run service-bridge:smoke | tee service-bridge-smoke.txt
-      - name: Run recovery smoke tests
-        run: npm run service-bridge:smoke:recovery | tee service-bridge-recovery-smoke.txt
-      - name: Run persistence smoke tests
-        run: npm run service-bridge:smoke:persistence | tee service-bridge-persistence-smoke.txt
-      - name: Run rollback smoke tests
-        run: npm run service-bridge:smoke:rollback | tee service-bridge-rollback-smoke.txt
-      - name: Run lifecycle smoke tests
-        run: npm run service-bridge:smoke:lifecycle | tee service-bridge-lifecycle-smoke.txt
-      - name: Run lifecycle projection smoke tests
-        run: npm run service-bridge:smoke:lifecycle-projection | tee service-bridge-lifecycle-projection-smoke.txt
-      - name: Run lifecycle apply smoke tests
-        run: npm run service-bridge:smoke:lifecycle-apply | tee service-bridge-lifecycle-apply-smoke.txt
+      - name: Run unified Service Bridge smoke suite
+        run: npm run service-bridge:smoke:all | tee service-bridge-unified-smoke.txt
       - name: Write verification receipt
         run: |
           mkdir -p artifacts
@@ -138,6 +126,8 @@ jobs:
           Runtime metadata contract: PASS
           Production build: PASS
           Live server health: PASS
+          Unified smoke runner: PASS
+          Smoke suites completed: 7/7
           API smoke suite: PASS
           Recovery smoke suite: PASS
           Persistence smoke suite: PASS
@@ -156,13 +146,7 @@ jobs:
           External-action boundary: PRESERVED
           Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
           EOF
-          cp service-bridge-smoke.txt artifacts/
-          cp service-bridge-recovery-smoke.txt artifacts/
-          cp service-bridge-persistence-smoke.txt artifacts/
-          cp service-bridge-rollback-smoke.txt artifacts/
-          cp service-bridge-lifecycle-smoke.txt artifacts/
-          cp service-bridge-lifecycle-projection-smoke.txt artifacts/
-          cp service-bridge-lifecycle-apply-smoke.txt artifacts/
+          cp service-bridge-unified-smoke.txt artifacts/
           cp service-bridge-server.log artifacts/
       - name: Stop production server
         if: always()
