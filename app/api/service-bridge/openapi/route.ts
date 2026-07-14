@@ -1,81 +1,72 @@
 import { NextResponse } from "next/server";
 
-const jsonBody = (schema: Record<string, unknown>) => ({ required: true, content: { "application/json": { schema } } });
+import {
+  SERVICE_BRIDGE_CONTRACT_VERSION,
+  serviceBridgeContracts,
+} from "@/lib/service-bridge-contract-catalog";
+
+function operation(summary: string, controlled: boolean) {
+  return {
+    summary,
+    responses: {
+      "200": { description: "Successful response" },
+      "400": { description: "Invalid request or confirmation" },
+    },
+    "x-controlled-action": controlled,
+    "x-external-action-completed": false,
+  };
+}
 
 export function GET() {
+  const paths = Object.fromEntries(
+    serviceBridgeContracts.map((contract) => [
+      contract.path,
+      Object.fromEntries(
+        contract.methods.map((method) => [
+          method.toLowerCase(),
+          operation(`${contract.id} (${contract.schema})`, contract.controlled),
+        ]),
+      ),
+    ]),
+  );
+
   return NextResponse.json({
     openapi: "3.1.0",
     info: {
       title: "JP / Hviti Service Bridge API",
-      version: "17.0.0",
-      description: "Local-first orchestration, reversible recovery, mission-scoped lifecycle journaling, explicitly confirmed local projection application, deployment readiness, repair planning, and independent public deployment verification.",
+      version: `${SERVICE_BRIDGE_CONTRACT_VERSION}.0.0`,
+      description:
+        "Contract-driven local-first orchestration, recovery, deployment planning, polyglot routing, signal planning, polystructure identity, integrity proofs, and release preparation.",
     },
     servers: [{ url: "/" }],
-    paths: {
-      "/api/service-bridge/manifest": { get: { summary: "Read the manifest", responses: { "200": { description: "Manifest" } } } },
-      "/api/service-bridge/health": { get: { summary: "Read health", responses: { "200": { description: "Healthy" }, "503": { description: "Degraded" } } } },
-      "/api/service-bridge/validate": { post: { summary: "Validate one mission", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Validation" } } } },
-      "/api/service-bridge/validate-batch": { post: { summary: "Validate mission batch", requestBody: jsonBody({ $ref: "#/components/schemas/MissionBatch" }), responses: { "200": { description: "Batch validation" }, "413": { description: "Too large" } } } },
-      "/api/service-bridge/policy/evaluate": { post: { summary: "Evaluate policy", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Policy decision" } } } },
-      "/api/service-bridge/orchestrate": { post: { summary: "Orchestrate one mission", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Orchestration" }, "422": { description: "Incomplete" } } } },
-      "/api/service-bridge/orchestrate-batch": { post: { summary: "Orchestrate mission batch", requestBody: jsonBody({ $ref: "#/components/schemas/MissionBatch" }), responses: { "200": { description: "Batch orchestration" }, "413": { description: "Too large" } } } },
-      "/api/service-bridge/plan": { post: { summary: "Generate route plan", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Plan" }, "422": { description: "Incomplete" } } } },
-      "/api/service-bridge/queue": { post: { summary: "Prioritize queue", requestBody: jsonBody({ $ref: "#/components/schemas/MissionQueue" }), responses: { "200": { description: "Queue" }, "413": { description: "Too large" } } } },
-      "/api/service-bridge/receipt": { get: { summary: "Read system receipt", responses: { "200": { description: "Receipt" } } } },
-      "/api/service-bridge/receipt/mission": { post: { summary: "Create mission receipt", requestBody: jsonBody({ $ref: "#/components/schemas/Mission" }), responses: { "200": { description: "Receipt" }, "422": { description: "Incomplete" } } } },
-      "/api/service-bridge/receipt/verify": { post: { summary: "Verify receipt", requestBody: jsonBody({ $ref: "#/components/schemas/MissionReceipt" }), responses: { "200": { description: "Valid" }, "422": { description: "Mismatch" } } } },
-      "/api/service-bridge/events/append": { post: { summary: "Append event", requestBody: jsonBody({ $ref: "#/components/schemas/EventAppendRequest" }), responses: { "200": { description: "Event" } } } },
-      "/api/service-bridge/events/verify": { post: { summary: "Verify event chain", requestBody: jsonBody({ $ref: "#/components/schemas/EventChain" }), responses: { "200": { description: "Valid" }, "422": { description: "Broken" } } } },
-      "/api/service-bridge/events/project": { post: { summary: "Project mission state from event chain", requestBody: jsonBody({ $ref: "#/components/schemas/EventChain" }), responses: { "200": { description: "Projection" }, "422": { description: "Invalid chain" } } } },
-      "/api/service-bridge/events/reconcile": { post: { summary: "Reconcile snapshot with projected history", requestBody: jsonBody({ $ref: "#/components/schemas/ReconciliationRequest" }), responses: { "200": { description: "Consistent" }, "409": { description: "Conflict" } } } },
-      "/api/service-bridge/events/resolve": { post: { summary: "Create an explicit authority resolution packet", requestBody: jsonBody({ $ref: "#/components/schemas/ResolutionRequest" }), responses: { "200": { description: "Resolution packet" }, "400": { description: "Invalid authority or missing reason" } } } },
-      "/api/service-bridge/events/persist": { post: { summary: "Create a gated local persistence plan", requestBody: jsonBody({ $ref: "#/components/schemas/PersistenceRequest" }), responses: { "200": { description: "Persistence plan" }, "400": { description: "Invalid resolution or confirmation" } } } },
-      "/api/service-bridge/events/rollback": { post: { summary: "Create a gated local rollback plan", requestBody: jsonBody({ $ref: "#/components/schemas/RollbackRequest" }), responses: { "200": { description: "Rollback plan" }, "400": { description: "Invalid receipt or confirmation" } } } },
-      "/api/service-bridge/lifecycle": { post: { summary: "Append or verify a mission lifecycle journal", requestBody: jsonBody({ oneOf: [{ $ref: "#/components/schemas/LifecycleAppendRequest" }, { $ref: "#/components/schemas/LifecycleVerifyRequest" }] }), responses: { "200": { description: "Entry or valid verification" }, "400": { description: "Invalid payload" }, "422": { description: "Broken lifecycle journal" } } } },
-      "/api/service-bridge/lifecycle/project": { post: { summary: "Project derived lifecycle state from a journal", requestBody: jsonBody({ $ref: "#/components/schemas/LifecycleProjectionRequest" }), responses: { "200": { description: "Valid lifecycle projection" }, "400": { description: "Invalid payload" }, "422": { description: "Invalid lifecycle chain with diagnostic projection" } } } },
-      "/api/service-bridge/lifecycle/apply": { post: { summary: "Create an explicitly confirmed local lifecycle projection apply plan", requestBody: jsonBody({ $ref: "#/components/schemas/LifecycleApplyRequest" }), responses: { "200": { description: "Projection apply plan" }, "400": { description: "Invalid projection, mission, or confirmation" } } } },
-      "/api/service-bridge/deployment": { get: { summary: "Read deployment readiness without claiming deployment success", parameters: [{ name: "commit", in: "query", required: false, schema: { type: "string" } }], responses: { "200": { description: "Deployment readiness report" } } } },
-      "/api/service-bridge/deployment/repair": { post: { summary: "Create an explicitly confirmed deployment repair plan", requestBody: jsonBody({ $ref: "#/components/schemas/DeploymentRepairRequest" }), responses: { "200": { description: "Deployment repair plan" }, "400": { description: "Invalid provider snapshot, strategy, commit, or confirmation" } } } },
-      "/api/service-bridge/openapi": { get: { summary: "Read this document", responses: { "200": { description: "OpenAPI" } } } },
+    paths,
+    components: {
+      schemas: {
+        ExternalActionBoundary: {
+          type: "object",
+          properties: {
+            externalActionCompleted: { const: false },
+          },
+          required: ["externalActionCompleted"],
+        },
+      },
     },
-    components: { schemas: {
-      Mission: { type: "object", required: ["id", "title", "service", "target", "action", "owner", "state", "priority", "permission", "evidence", "fallback"], properties: { id: { type: "string" }, state: { enum: ["draft", "preflight", "awaiting-approval", "ready", "verified", "closed"] } } },
-      MissionBatch: { type: "object", required: ["missions"], properties: { missions: { type: "array", items: { $ref: "#/components/schemas/Mission" } } } },
-      MissionQueue: { type: "object", required: ["missions"], properties: { missions: { type: "array", items: { $ref: "#/components/schemas/Mission" } } } },
-      MissionReceipt: { type: "object" },
-      ChainEvent: { type: "object", required: ["id", "missionId", "type", "occurredAt", "actor", "data", "previousDigest", "digest"] },
-      EventAppendRequest: { type: "object", required: ["missionId", "type", "actor"] },
-      EventChain: { type: "object", required: ["events"], properties: { events: { type: "array", items: { $ref: "#/components/schemas/ChainEvent" } } } },
-      ReconciliationRequest: { type: "object", required: ["snapshot", "events"] },
-      ResolutionRequest: { type: "object", required: ["snapshot", "events", "authority", "actor", "reason"] },
-      ResolutionPacket: { type: "object", required: ["schema", "missionId", "authority", "resolvedState", "mutationApplied", "requiresExplicitPersistence", "externalActionCompleted"] },
-      PersistenceRequest: { type: "object", required: ["resolution", "currentMissions", "confirmation"] },
-      LocalPersistenceReceipt: { type: "object", required: ["schema", "missionId", "storageKey", "previousMission", "nextMission", "localMutationApplied", "externalPersistenceApplied", "externalActionCompleted"] },
-      RollbackRequest: { type: "object", required: ["receipt", "currentMissions", "confirmation"] },
-      LifecycleEntry: { type: "object", required: ["schema", "id", "missionId", "type", "recordedAt", "actor", "data", "previousDigest", "digest", "externalActionCompleted"], properties: { schema: { const: "jp-hviti-service-bridge-lifecycle-entry/v1" }, type: { enum: ["RESOLUTION_CREATED", "PERSISTENCE_PLANNED", "LOCAL_PERSISTENCE_APPLIED", "ROLLBACK_PLANNED", "LOCAL_ROLLBACK_APPLIED"] }, previousDigest: { type: ["string", "null"] }, digest: { type: "string" }, externalActionCompleted: { const: false } } },
-      LifecycleAppendRequest: { type: "object", required: ["operation", "missionId", "type", "actor", "data"], properties: { operation: { const: "append" }, previousEntry: { oneOf: [{ $ref: "#/components/schemas/LifecycleEntry" }, { type: "null" }] } } },
-      LifecycleVerifyRequest: { type: "object", required: ["operation", "entries"], properties: { operation: { const: "verify" }, entries: { type: "array", items: { $ref: "#/components/schemas/LifecycleEntry" } } } },
-      LifecycleProjectionRequest: { type: "object", required: ["entries"], properties: { entries: { type: "array", items: { $ref: "#/components/schemas/LifecycleEntry" } } } },
-      LifecycleProjection: { type: "object", required: ["schema", "missionId", "journalValid", "state", "externalActionCompleted"], properties: { schema: { const: "jp-hviti-service-bridge-lifecycle-projection/v1" }, journalValid: { type: "boolean" }, state: { type: "object", required: ["persisted", "rolledBack", "unresolvedPlan"] }, externalActionCompleted: { const: false } } },
-      LifecycleApplyRequest: { type: "object", required: ["projection", "currentMissions", "projectedMission", "confirmation"], properties: { projection: { $ref: "#/components/schemas/LifecycleProjection" }, currentMissions: { type: "array", items: { $ref: "#/components/schemas/Mission" } }, projectedMission: { $ref: "#/components/schemas/Mission" }, confirmation: { type: "string", pattern: "^APPLY PROJECTION .+" } } },
-      LifecycleApplyPlan: { type: "object", required: ["schema", "missionId", "previousMission", "nextMission", "nextMissions", "projectionMutationAllowed", "projectionMutationApplied", "explicitConfirmationRequired", "localPersistenceAllowed", "externalPersistenceAllowed", "externalActionCompleted"], properties: { schema: { const: "jp-hviti-service-bridge-lifecycle-projection-apply-plan/v1" }, projectionMutationAllowed: { const: true }, projectionMutationApplied: { const: false }, explicitConfirmationRequired: { const: true }, localPersistenceAllowed: { const: true }, externalPersistenceAllowed: { const: false }, externalActionCompleted: { const: false } } },
-      DeploymentProviderStatus: { type: "object", required: ["provider", "configured", "deploymentVerified", "blocked", "detail"], properties: { provider: { enum: ["vercel", "netlify", "other"] }, configured: { type: "boolean" }, deploymentVerified: { type: "boolean" }, blocked: { type: ["boolean", "null"] }, detail: { type: "string" } } },
-      DeploymentReadiness: { type: "object", required: ["schema", "providers", "summary", "boundaries", "externalActionCompleted"], properties: { schema: { const: "jp-hviti-service-bridge-deployment-readiness/v1" }, providers: { type: "array", items: { $ref: "#/components/schemas/DeploymentProviderStatus" } }, summary: { type: "object", required: ["providerCount", "verifiedProviderCount", "blockedProviderCount", "publicDeploymentVerified", "productionUrlVerified"] }, externalActionCompleted: { const: false } } },
-      DeploymentRepairRequest: { type: "object", required: ["commitSha", "providers", "confirmation"], properties: { commitSha: { type: "string", minLength: 1 }, providers: { type: "array", minItems: 1, items: { $ref: "#/components/schemas/DeploymentProviderStatus" } }, preferredStrategy: { enum: ["repair-vercel-account", "repair-vercel-project", "bridge-to-netlify", "bridge-to-other-provider", "verify-existing-deployment"] }, confirmation: { type: "string", pattern: "^PLAN DEPLOYMENT REPAIR .+" } } },
-      DeploymentRepairPlan: { type: "object", required: ["schema", "commitSha", "strategy", "steps", "execution", "boundaries", "externalActionCompleted"], properties: { schema: { const: "jp-hviti-service-bridge-deployment-repair-plan/v1" }, strategy: { enum: ["repair-vercel-account", "repair-vercel-project", "bridge-to-netlify", "bridge-to-other-provider", "verify-existing-deployment"] }, execution: { type: "object", required: ["automaticDeploymentAllowed", "requiresProviderAuthorization", "requiresIndependentUrlVerification", "repairApplied", "deploymentCompleted"] }, externalActionCompleted: { const: false } } },
-    } },
-    "x-jp-hviti-approval-law": { externalActionsRequireExplicitApproval: true, externalActionCompletedByApi: false },
-    "x-recovery-stages": ["event-chain", "verify", "project", "reconcile", "resolve-authority", "plan-persistence", "explicit-local-write", "plan-rollback", "explicit-local-restore", "append-lifecycle-entry", "verify-lifecycle-journal", "project-lifecycle", "plan-projection-apply", "explicit-projection-commit", "assess-deployment", "plan-deployment-repair", "verify-public-deployment"],
-    "x-lifecycle-journal": { missionScoped: true, orderedByPreviousDigest: true, digestAlgorithm: "SHA-256", canonicalization: "sorted-json-v1", trustedTimestamp: false, signed: false, notarized: false, blockchain: false, externalActionProof: false },
-    "x-lifecycle-projection": { readOnly: true, invalidJournalStatus: 422, derivesPersistedState: true, derivesRollbackState: true, detectsUnresolvedPlans: true },
-    "x-lifecycle-projection-apply": { explicitLocalMutationAllowed: true, automaticMutationAllowed: false, planningConfirmationPattern: "APPLY PROJECTION <mission-id>", commitConfirmationPattern: "COMMIT PROJECTION <mission-id>", externalPersistenceAllowed: false },
-    "x-deployment-bridge": { readinessSchema: "jp-hviti-service-bridge-deployment-readiness/v1", repairPlanSchema: "jp-hviti-service-bridge-deployment-repair-plan/v1", publicVerificationSchema: "jp-hviti-service-bridge-public-deployment-verification/v1", repairConfirmationPattern: "PLAN DEPLOYMENT REPAIR <commit-sha>", automaticDeploymentAllowed: false, providerAuthorizationRequired: true, independentPublicUrlVerificationRequired: true, publicDeploymentVerifiedByApi: false },
-    "x-silent-overwrite-allowed": false,
-    "x-automatic-mutation-allowed": false,
-    "x-automatic-rollback-allowed": false,
+    "x-contract-version": SERVICE_BRIDGE_CONTRACT_VERSION,
+    "x-contract-count": serviceBridgeContracts.length,
+    "x-lifecycle-projection-apply": {
+      explicitLocalMutationAllowed: true,
+      automaticMutationAllowed: false,
+      planningConfirmationPattern: "APPLY PROJECTION <mission-id>",
+      commitConfirmationPattern: "COMMIT PROJECTION <mission-id>",
+      externalPersistenceAllowed: false,
+    },
+    "x-deployment-bridge": {
+      automaticDeploymentAllowed: false,
+      providerAuthorizationRequired: true,
+      independentPublicUrlVerificationRequired: true,
+    },
     "x-automatic-deployment-allowed": false,
     "x-public-deployment-verified": false,
-    "x-external-persistence-allowed": false,
-    "x-external-rollback-allowed": false,
+    "x-external-action-completed": false,
   });
 }
