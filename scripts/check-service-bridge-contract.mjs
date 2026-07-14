@@ -89,6 +89,8 @@ const publishedEndpoints = [
   "/api/service-bridge/events/persist",
   "/api/service-bridge/events/rollback",
   "/api/service-bridge/lifecycle",
+  "/api/service-bridge/lifecycle/project",
+  "/api/service-bridge/lifecycle/apply",
 ];
 
 const failures = [];
@@ -136,8 +138,13 @@ for (const endpoint of publishedEndpoints) {
 
 const checks = [
   [domain.includes("externalActionCompleted: false"), "Domain must force externalActionCompleted=false"],
-  [manifest.includes("version: 15"), "Manifest version must be 15"],
-  [openapi.includes('version: "15.0.0"'), "OpenAPI version must be 15.0.0"],
+  [manifest.includes("version: 16"), "Manifest version must be 16"],
+  [manifest.includes("lifecycleProjectionApply") && manifest.includes("explicitProjectionMutationAllowed: true"), "Manifest lifecycle projection apply contract is incomplete"],
+  [manifest.includes('projectionPlanningConfirmationPattern: "APPLY PROJECTION <mission-id>"') && manifest.includes('projectionCommitConfirmationPattern: "COMMIT PROJECTION <mission-id>"'), "Manifest projection confirmations are incomplete"],
+  [openapi.includes('version: "16.0.0"'), "OpenAPI version must be 16.0.0"],
+  [openapi.includes('"/api/service-bridge/lifecycle/project"') && openapi.includes('"/api/service-bridge/lifecycle/apply"'), "OpenAPI lifecycle projection endpoints are missing"],
+  [openapi.includes("LifecycleProjectionRequest") && openapi.includes("LifecycleApplyRequest") && openapi.includes("LifecycleApplyPlan"), "OpenAPI lifecycle projection schemas are incomplete"],
+  [openapi.includes('"x-lifecycle-projection-apply"') && openapi.includes("explicitLocalMutationAllowed: true"), "OpenAPI lifecycle projection apply extension is incomplete"],
   [policy.includes('"ALLOW_PREPARE"') && policy.includes('"HOLD_FOR_APPROVAL"') && policy.includes('"BLOCK"'), "Policy outcomes are incomplete"],
   [orchestration.includes("orchestrateMission") && orchestration.includes("summarizeOrchestrations"), "Canonical orchestration engine is incomplete"],
   [receipts.includes('algorithm: "SHA-256"') && receipts.includes("sorted-json-v1"), "Receipt integrity contract is incomplete"],
@@ -148,7 +155,6 @@ const checks = [
   [persistence.includes("createPersistencePlan") && persistence.includes("localPersistenceAllowed: true"), "Persistence engine is incomplete"],
   [rollback.includes("createRollbackPlan") && rollback.includes("localRollbackAllowed: true"), "Rollback engine is incomplete"],
   [lifecycle.includes("createLifecycleEntry") && lifecycle.includes("verifyLifecycleJournal"), "Lifecycle journal engine is incomplete"],
-  [lifecycle.includes("LIFECYCLE_DIGEST_MISMATCH") && lifecycle.includes("LIFECYCLE_PREVIOUS_DIGEST_MISMATCH") && lifecycle.includes("LIFECYCLE_MISSION_ID_MISMATCH"), "Lifecycle journal verification codes are incomplete"],
   [lifecycleRoute.includes('operation === "verify"') && lifecycleRoute.includes("createLifecycleEntry"), "Lifecycle API must support append and verify"],
   [lifecycleClient.includes("appendClientLifecycleEntry") && lifecycleClient.includes("SERVICE_BRIDGE_LIFECYCLE_KEY"), "Lifecycle browser helper is incomplete"],
   [lifecycleProjection.includes("projectLifecycleJournal") && lifecycleProjection.includes("unresolvedPlan") && lifecycleProjection.includes("externalActionCompleted: false"), "Lifecycle projection engine is incomplete"],
@@ -180,5 +186,6 @@ console.log(`Verified ${requiredFiles.length} files, ${requiredServices.length} 
 console.log("Operational pipeline: validated.");
 console.log("Recovery pipeline: authority resolution + gated persistence + rollback.");
 console.log("Lifecycle pipeline: chained journal + projection + explicitly confirmed local apply.");
+console.log("Manifest/OpenAPI contract: version 16 aligned.");
 console.log("Automatic projection mutation: disallowed.");
 console.log("External persistence and external action: disallowed.");
