@@ -37,6 +37,8 @@ const endpoints = [
   "/api/service-bridge/lifecycle",
   "/api/service-bridge/lifecycle/project",
   "/api/service-bridge/lifecycle/apply",
+  "/api/service-bridge/deployment",
+  "/api/service-bridge/deployment/repair",
 ];
 
 export function GET() {
@@ -57,7 +59,7 @@ export function GET() {
   return NextResponse.json(
     {
       system: "JP / Hviti Service Bridge",
-      version: 16,
+      version: 17,
       checkedAt: new Date().toISOString(),
       status: healthy ? "healthy" : "degraded",
       checks: {
@@ -69,8 +71,13 @@ export function GET() {
         lifecycleJournalAvailable: true,
         lifecycleProjectionAvailable: true,
         lifecycleProjectionApplyAvailable: true,
+        deploymentReadinessAvailable: true,
+        deploymentRepairPlanningAvailable: true,
+        publicDeploymentVerificationAvailable: true,
         explicitProjectionMutationAllowed: true,
         automaticProjectionMutationAllowed: false,
+        automaticDeploymentAllowed: false,
+        publicDeploymentVerifiedByHealthCheck: false,
         externalPersistenceAllowed: false,
         explicitApprovalBoundary: true,
         externalActionCompletedByHealthCheck: false,
@@ -85,6 +92,10 @@ export function GET() {
           "explicit-local-projection-apply",
           "reversible-local-persistence",
           "local-rollback",
+          "deployment-readiness",
+          "deployment-repair-planning",
+          "public-deployment-verification",
+          "netlify-bridge-preparation",
         ]),
       ).sort(),
       endpoints,
