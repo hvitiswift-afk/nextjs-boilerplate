@@ -10,6 +10,8 @@ on:
       - "scripts/check-service-bridge-*.mjs"
       - "scripts/smoke-service-bridge-*.mjs"
       - "scripts/run-service-bridge-smoke-all.mjs"
+      - "scripts/verify-service-bridge-deployment.mjs"
+      - "netlify.toml"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/service-bridge-verify.yml"
@@ -22,6 +24,8 @@ on:
       - "scripts/check-service-bridge-*.mjs"
       - "scripts/smoke-service-bridge-*.mjs"
       - "scripts/run-service-bridge-smoke-all.mjs"
+      - "scripts/verify-service-bridge-deployment.mjs"
+      - "netlify.toml"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/service-bridge-verify.yml"
@@ -128,7 +132,7 @@ jobs:
           Production build: PASS
           Live server health: PASS
           Unified smoke runner: PASS
-          Smoke suites completed: 7/7
+          Smoke suites completed: 8/8
           API smoke suite: PASS
           Recovery smoke suite: PASS
           Persistence smoke suite: PASS
@@ -136,10 +140,13 @@ jobs:
           Lifecycle smoke suite: PASS
           Lifecycle projection smoke suite: PASS
           Lifecycle apply smoke suite: PASS
+          Deployment smoke suite: PASS
           Automatic mutation: DISALLOWED
           Automatic rollback: DISALLOWED
           Projection mutation permission: EXPLICIT
           Automatic projection mutation: DISALLOWED
+          Automatic deployment: DISALLOWED
+          Public deployment verified: NO
           Silent overwrite: DISALLOWED
           External persistence: DISALLOWED
           External rollback: DISALLOWED
