@@ -8,6 +8,7 @@ const suites = [
   ["lifecycle", "scripts/smoke-service-bridge-lifecycle.mjs"],
   ["lifecycle-projection", "scripts/smoke-service-bridge-lifecycle-projection.mjs"],
   ["lifecycle-apply", "scripts/smoke-service-bridge-lifecycle-apply.mjs"],
+  ["deployment", "scripts/smoke-service-bridge-deployment.mjs"],
 ];
 
 const receipt = [];
@@ -63,7 +64,9 @@ console.log(JSON.stringify({
   automaticMutationAllowed: false,
   automaticRollbackAllowed: false,
   automaticProjectionMutationAllowed: false,
+  automaticDeploymentAllowed: false,
   externalPersistenceAllowed: false,
+  publicDeploymentVerified: false,
   externalActionCompleted: false,
 }, null, 2));
 
