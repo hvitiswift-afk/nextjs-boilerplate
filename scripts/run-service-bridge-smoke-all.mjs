@@ -9,6 +9,7 @@ const suites = [
   ["lifecycle-projection", "scripts/smoke-service-bridge-lifecycle-projection.mjs"],
   ["lifecycle-apply", "scripts/smoke-service-bridge-lifecycle-apply.mjs"],
   ["deployment", "scripts/smoke-service-bridge-deployment.mjs"],
+  ["polystructure-v19", "scripts/smoke-service-bridge-polystructure.mjs"],
 ];
 
 const receipt = [];
@@ -54,8 +55,9 @@ for (const [name, path] of suites) {
 
 console.log("\nJP / Hviti Service Bridge Unified Smoke Receipt");
 console.log(JSON.stringify({
-  schema: "jp-hviti-service-bridge-unified-smoke-receipt/v1",
+  schema: "jp-hviti-service-bridge-unified-smoke-receipt/v2",
   generatedAt: new Date().toISOString(),
+  contractVersion: 19,
   baseUrl: process.env.SERVICE_BRIDGE_BASE_URL || "http://127.0.0.1:3000",
   suitesExpected: suites.length,
   suitesCompleted: receipt.length,
