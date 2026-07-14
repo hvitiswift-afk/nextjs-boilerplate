@@ -7,6 +7,7 @@ const files = {
   receipt: "app/api/service-bridge/receipt/route.ts",
   status: "app/service-bridge/status/page.tsx",
   nexus: "app/service-bridge/nexus/page.tsx",
+  deploymentConsole: "app/service-bridge/deployment/page.tsx",
 };
 
 const source = Object.fromEntries(
@@ -39,6 +40,8 @@ const endpoints = [
   "/api/service-bridge/lifecycle",
   "/api/service-bridge/lifecycle/project",
   "/api/service-bridge/lifecycle/apply",
+  "/api/service-bridge/deployment",
+  "/api/service-bridge/deployment/repair",
 ];
 
 const failures = [];
@@ -46,10 +49,10 @@ const requireCheck = (passed, message) => {
   if (!passed) failures.push(message);
 };
 
-requireCheck(source.manifest.includes("version: 16"), "Manifest must report version 16.");
-requireCheck(source.openapi.includes('version: "16.0.0"'), "OpenAPI must report version 16.0.0.");
-requireCheck(source.health.includes("version: 16"), "Health must report version 16.");
-requireCheck(source.receipt.includes("version: 16"), "System receipt must report version 16.");
+requireCheck(source.manifest.includes("version: 17"), "Manifest must report version 17.");
+requireCheck(source.openapi.includes('version: "17.0.0"'), "OpenAPI must report version 17.0.0.");
+requireCheck(source.health.includes("version: 17"), "Health must report version 17.");
+requireCheck(source.receipt.includes("version: 17"), "System receipt must report version 17.");
 
 for (const endpoint of endpoints) {
   requireCheck(source.manifest.includes(endpoint), `Manifest missing endpoint: ${endpoint}`);
@@ -75,10 +78,24 @@ requireCheck(source.manifest.includes('commitConfirmationPattern: "COMMIT PROJEC
 requireCheck(source.receipt.includes('planningConfirmationPattern: "APPLY PROJECTION <mission-id>"'), "Receipt planning confirmation is missing.");
 requireCheck(source.receipt.includes('commitConfirmationPattern: "COMMIT PROJECTION <mission-id>"'), "Receipt commit confirmation is missing.");
 
+requireCheck(source.manifest.includes('deploymentRepairConfirmationPattern: "PLAN DEPLOYMENT REPAIR <commit-sha>"'), "Manifest deployment repair confirmation is missing.");
+requireCheck(source.receipt.includes('repairConfirmationPattern: "PLAN DEPLOYMENT REPAIR <commit-sha>"'), "Receipt deployment repair confirmation is missing.");
+requireCheck(source.openapi.includes('"x-deployment-bridge"'), "OpenAPI deployment bridge extension is missing.");
+requireCheck(source.manifest.includes("automaticDeploymentAllowed: false"), "Manifest must disallow automatic deployment.");
+requireCheck(source.health.includes("automaticDeploymentAllowed: false"), "Health must disallow automatic deployment.");
+requireCheck(source.receipt.includes("automaticDeploymentAllowed: false"), "Receipt must disallow automatic deployment.");
+requireCheck(source.openapi.includes('"x-automatic-deployment-allowed": false'), "OpenAPI must disallow automatic deployment.");
+requireCheck(source.manifest.includes("publicDeploymentVerifiedByManifest: false"), "Manifest must not claim public deployment verification.");
+requireCheck(source.health.includes("publicDeploymentVerifiedByHealthCheck: false"), "Health must not claim public deployment verification.");
+requireCheck(source.receipt.includes("publicDeploymentVerifiedByReceipt: false"), "Receipt must not claim public deployment verification.");
+requireCheck(source.openapi.includes('"x-public-deployment-verified": false'), "OpenAPI must not claim public deployment verification.");
+
 requireCheck(source.status.includes("Explicit projection mutation"), "Status console must surface projection mutation permission.");
 requireCheck(source.status.includes("Projection apply gates"), "Status console must surface projection apply gates.");
 requireCheck(source.nexus.includes("Projection Apply"), "Nexus must publish the projection apply rail.");
 requireCheck(source.nexus.includes("Lifecycle Projection"), "Nexus must publish the lifecycle projection rail.");
+requireCheck(source.deploymentConsole.includes("Deployment Bridge Repair"), "Deployment console must publish the repair surface.");
+requireCheck(source.deploymentConsole.includes("PLAN DEPLOYMENT REPAIR"), "Deployment console must enforce exact repair confirmation.");
 
 if (failures.length) {
   console.error("SERVICE BRIDGE RUNTIME CONTRACT: FAIL");
@@ -87,8 +104,10 @@ if (failures.length) {
 }
 
 console.log("SERVICE BRIDGE RUNTIME CONTRACT: PASS");
-console.log(`Version surfaces aligned: manifest 16, OpenAPI 16.0.0, health 16, receipt 16.`);
+console.log("Version surfaces aligned: manifest 17, OpenAPI 17.0.0, health 17, receipt 17.");
 console.log(`Endpoint surfaces aligned: ${endpoints.length}.`);
 console.log("Projection mutation permission: explicit local only.");
 console.log("Automatic projection mutation: disallowed.");
+console.log("Deployment repair: explicit planning only.");
+console.log("Automatic deployment and public deployment claims: disallowed.");
 console.log("External persistence and external action: disallowed.");
