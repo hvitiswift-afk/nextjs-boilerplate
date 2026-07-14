@@ -1,0 +1,75 @@
+name: Service Bridge Scheduled Runner
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/service-bridge-scheduled.yml"
+      - "scheduler/**"
+      - "scripts/check-service-bridge-*.mjs"
+      - "lib/service-bridge*.ts"
+      - "app/api/service-bridge/**"
+      - "package.json"
+      - "package-lock.json"
+  schedule:
+    - cron: "15 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: service-bridge-scheduled-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bash-runner:
+    name: Bash verification runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Validate Bash and Slurm scripts
+        run: |
+          bash -n scheduler/service-bridge-verify.sh
+          bash -n scheduler/service-bridge-verify.sbatch
+      - name: Run approved Bash verification
+        env:
+          SERVICE_BRIDGE_ROOT: ${{ github.workspace }}
+        run: bash scheduler/service-bridge-verify.sh
+      - name: Write scheduler receipt
+        if: always()
+        run: |
+          mkdir -p artifacts
+          cat > artifacts/service-bridge-scheduler-receipt.txt <<EOF
+          JP / Hviti Service Bridge Scheduler Receipt
+          Commit: $GITHUB_SHA
+          Run: $GITHUB_RUN_ID
+          Trigger: $GITHUB_EVENT_NAME
+          Bash runner requested: YES
+          GitHub cron configured: YES
+          Slurm script syntax checked: YES
+          Slurm cluster submission performed: NO
+          External action completed outside GitHub: NO
+          Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          EOF
+      - name: Collect logs
+        if: always()
+        run: |
+          mkdir -p artifacts/logs
+          if [ -d logs ]; then cp -R logs/. artifacts/logs/; fi
+      - name: Upload scheduler receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: service-bridge-scheduler-${{ github.sha }}
+          path: artifacts
+          retention-days: 30
