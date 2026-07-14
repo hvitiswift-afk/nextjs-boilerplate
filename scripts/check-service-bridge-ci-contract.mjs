@@ -13,15 +13,20 @@ const requireCheck = (passed, message) => {
 
 requireCheck(packageJson.includes('"service-bridge:check:all"'), "Combined contract command is missing.");
 requireCheck(packageJson.includes('"service-bridge:smoke:all"'), "Unified smoke command is missing.");
+requireCheck(packageJson.includes('"service-bridge:smoke:deployment"'), "Deployment smoke command is missing.");
+requireCheck(packageJson.includes('"service-bridge:deployment:verify"'), "Public deployment verification command is missing.");
 requireCheck(packageJson.includes('"service-bridge:verify": "npm run service-bridge:check:all && npm run build"'), "Verify command must run all contracts before build.");
 
 requireCheck(workflow.includes("npm run service-bridge:check:all"), "CI must run the combined contract command.");
 requireCheck(workflow.includes("npm run service-bridge:smoke:all"), "CI must run the unified smoke command.");
-requireCheck(workflow.includes("Smoke suites completed: 7/7"), "CI receipt must record seven completed smoke suites.");
+requireCheck(workflow.includes("Smoke suites completed: 8/8"), "CI receipt must record eight completed smoke suites.");
+requireCheck(workflow.includes("Deployment smoke suite: PASS"), "CI receipt must record deployment smoke status.");
 requireCheck(workflow.includes("Architecture contract: PASS"), "CI receipt must record architecture contract status.");
 requireCheck(workflow.includes("Runtime metadata contract: PASS"), "CI receipt must record runtime contract status.");
 requireCheck(workflow.includes("Projection mutation permission: EXPLICIT"), "CI receipt must record projection mutation permission.");
 requireCheck(workflow.includes("Automatic projection mutation: DISALLOWED"), "CI receipt must prohibit automatic projection mutation.");
+requireCheck(workflow.includes("Automatic deployment: DISALLOWED"), "CI receipt must prohibit automatic deployment.");
+requireCheck(workflow.includes("Public deployment verified: NO"), "CI receipt must avoid claiming public deployment verification.");
 requireCheck(workflow.includes("External persistence: DISALLOWED"), "CI receipt must prohibit external persistence.");
 requireCheck(workflow.includes("External-action boundary: PRESERVED"), "CI receipt must preserve the external-action boundary.");
 
@@ -33,6 +38,7 @@ const suitePaths = [
   "scripts/smoke-service-bridge-lifecycle.mjs",
   "scripts/smoke-service-bridge-lifecycle-projection.mjs",
   "scripts/smoke-service-bridge-lifecycle-apply.mjs",
+  "scripts/smoke-service-bridge-deployment.mjs",
 ];
 for (const path of suitePaths) {
   requireCheck(runner.includes(path), `Unified smoke runner missing suite: ${path}`);
@@ -41,6 +47,8 @@ for (const path of suitePaths) {
 requireCheck(runner.includes("if (!passed)"), "Unified smoke runner must stop after a failed suite.");
 requireCheck(runner.includes("externalActionCompleted: false"), "Unified smoke receipt must preserve externalActionCompleted=false.");
 requireCheck(runner.includes("automaticProjectionMutationAllowed: false"), "Unified smoke receipt must prohibit automatic projection mutation.");
+requireCheck(runner.includes("automaticDeploymentAllowed: false"), "Unified smoke receipt must prohibit automatic deployment.");
+requireCheck(runner.includes("publicDeploymentVerified: false"), "Unified smoke receipt must not claim public deployment verification.");
 requireCheck(architectureContract.includes("Manifest/OpenAPI contract: version 16 aligned."), "Architecture contract must remain version 16 aligned.");
 requireCheck(runtimeContract.includes("SERVICE BRIDGE RUNTIME CONTRACT: PASS"), "Runtime metadata contract completion receipt is missing.");
 
@@ -51,8 +59,9 @@ if (failures.length) {
 }
 
 console.log("SERVICE BRIDGE CI CONTRACT: PASS");
-console.log("Contract rail: architecture + runtime metadata.");
+console.log("Contract rail: architecture + runtime metadata + CI structure.");
 console.log("Build rail: production Next.js build.");
-console.log("Smoke rail: unified fail-fast runner with 7 suites.");
+console.log("Smoke rail: unified fail-fast runner with 8 suites.");
+console.log("Deployment rail: repair planning + readiness verification, no automatic deploy.");
 console.log("Projection mutation: explicit local only.");
 console.log("External persistence and external action: disallowed.");
