@@ -1,0 +1,132 @@
+name: Netlify Deploy Workaround
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_id:
+        description: "Existing Netlify site ID (leave blank to create a new site)"
+        required: false
+        type: string
+      site_name:
+        description: "New Netlify site name when site_id is blank"
+        required: false
+        default: "jp-hviti-service-bridge"
+        type: string
+      production:
+        description: "Deploy to production"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      INPUT_SITE_ID: ${{ inputs.site_id }}
+      INPUT_SITE_NAME: ${{ inputs.site_name }}
+      INPUT_PRODUCTION: ${{ inputs.production }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Require Netlify token
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "Missing GitHub Actions secret NETLIFY_AUTH_TOKEN"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve or create Netlify site
+        id: site
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE_ID="$INPUT_SITE_ID"
+          if [ -z "$SITE_ID" ]; then
+            RESULT="$(npx -y netlify-cli@latest sites:create --name "$INPUT_SITE_NAME" --json)"
+            SITE_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.id || x.site_id || "")' "$RESULT")"
+            SITE_URL="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.ssl_url || x.url || "")' "$RESULT")"
+            if [ -z "$SITE_ID" ]; then
+              echo "Netlify site creation did not return a site ID."
+              echo "$RESULT"
+              exit 1
+            fi
+            echo "created=true" >> "$GITHUB_OUTPUT"
+            echo "site_url=$SITE_URL" >> "$GITHUB_OUTPUT"
+          else
+            echo "created=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "site_id=$SITE_ID" >> "$GITHUB_OUTPUT"
+          echo "NETLIFY_SITE_ID=$SITE_ID" >> "$GITHUB_ENV"
+
+      - name: Validate project
+        run: npm run service-bridge:check:all
+
+      - name: Deploy to Netlify
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          FLAGS=(deploy --build --json --site "$NETLIFY_SITE_ID")
+          if [ "$INPUT_PRODUCTION" = "true" ]; then FLAGS+=(--prod); fi
+          RESULT="$(npx -y netlify-cli@latest "${FLAGS[@]}")"
+          echo "$RESULT" > netlify-deploy-result.json
+          DEPLOY_URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync("netlify-deploy-result.json","utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.url || "")')"
+          DEPLOY_ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync("netlify-deploy-result.json","utf8")); console.log(x.deploy_id || x.id || "")')"
+          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Write deployment receipt
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          cat > artifacts/netlify-deployment-receipt.txt <<EOF
+          JP / Hviti Netlify Deployment Receipt
+          Commit: $GITHUB_SHA
+          Run: $GITHUB_RUN_ID
+          Site ID: ${{ steps.site.outputs.site_id }}
+          Site created this run: ${{ steps.site.outputs.created }}
+          Deploy ID: ${{ steps.deploy.outputs.deploy_id }}
+          Deploy URL: ${{ steps.deploy.outputs.deploy_url }}
+          Production requested: $INPUT_PRODUCTION
+          Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          EOF
+          if [ -f netlify-deploy-result.json ]; then cp netlify-deploy-result.json artifacts/; fi
+
+      - name: Upload receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-deployment-${{ github.sha }}
+          path: artifacts
+          retention-days: 30
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Netlify deployment"
+            echo "- Site ID: ${{ steps.site.outputs.site_id }}"
+            echo "- Created this run: ${{ steps.site.outputs.created }}"
+            echo "- Deploy ID: ${{ steps.deploy.outputs.deploy_id }}"
+            echo "- Deploy URL: ${{ steps.deploy.outputs.deploy_url }}"
+          } >> "$GITHUB_STEP_SUMMARY"
