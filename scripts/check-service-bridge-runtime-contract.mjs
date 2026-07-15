@@ -29,7 +29,7 @@ requireCheck(source.manifest.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "Manif
 const contractCallMatches = [...source.catalog.matchAll(/contract\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*"([^"]+)"/g)];
 const legacyPathMatches = [...source.catalog.matchAll(/path:\s*"([^"]+)"/g)];
 const endpoints = [...new Set([...contractCallMatches.map((match) => match[1]), ...legacyPathMatches.map((match) => match[1])])];
-requireCheck(endpoints.length >= 50, `Contract catalog must publish at least 50 endpoints; found ${endpoints.length}.`);
+requireCheck(endpoints.length >= 51, `Contract catalog must publish at least 51 endpoints; found ${endpoints.length}.`);
 
 requireCheck(source.manifest.includes("serviceBridgeContracts"), "Manifest must publish catalog endpoints.");
 requireCheck(source.openapi.includes("serviceBridgeContracts"), "OpenAPI must publish catalog endpoints.");
@@ -70,6 +70,7 @@ const requiredAdvancedEndpoints = [
   "/api/service-bridge/contracts",
   "/api/service-bridge/scheduler",
   "/api/service-bridge/netlify/oauth",
+  "/api/service-bridge/netlify/oauth/callback",
   "/api/service-bridge/polyglot/hypercube",
   "/api/service-bridge/polyglot/hypercube/route-plan",
   "/api/service-bridge/polyglot/polystructure",
@@ -97,7 +98,7 @@ if (failures.length) {
 console.log("SERVICE BRIDGE RUNTIME CONTRACT: PASS");
 console.log(`Version surfaces aligned through catalog version ${version}.`);
 console.log(`Catalog endpoint surfaces checked: ${endpoints.length}.`);
-console.log("Scheduler and Netlify OAuth planning routes: present.");
+console.log("Scheduler and Netlify OAuth planning and callback routes: present.");
 console.log("Projection mutation permission: explicit local only.");
 console.log("Automatic deployment and public deployment claims: disallowed.");
 console.log("Polystructure identity, bundle, Merkle, and release routes: present.");
