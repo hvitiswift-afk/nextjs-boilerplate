@@ -24,33 +24,31 @@ requireCheck(
   source.catalog.includes(`SERVICE_BRIDGE_CONTRACT_VERSION = ${version}`),
   `Contract catalog must report version ${version}.`,
 );
-requireCheck(
-  source.openapi.includes("SERVICE_BRIDGE_CONTRACT_VERSION"),
-  "OpenAPI must derive its version from the contract catalog.",
-);
-requireCheck(
-  source.health.includes("SERVICE_BRIDGE_CONTRACT_VERSION"),
-  "Health must derive its version from the contract catalog.",
-);
-requireCheck(
-  source.receipt.includes("SERVICE_BRIDGE_CONTRACT_VERSION"),
-  "Receipt must derive its version from the contract catalog.",
-);
-requireCheck(
-  source.manifest.includes("SERVICE_BRIDGE_CONTRACT_VERSION"),
-  "Manifest must derive its version from the contract catalog.",
-);
+requireCheck(source.openapi.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "OpenAPI must derive its version from the contract catalog.");
+requireCheck(source.health.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "Health must derive its version from the contract catalog.");
+requireCheck(source.receipt.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "Receipt must derive its version from the contract catalog.");
+requireCheck(source.manifest.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "Manifest must derive its version from the contract catalog.");
 
-const contractPathMatches = [...source.catalog.matchAll(/path:\s*"([^"]+)"/g)];
-const endpoints = [...new Set(contractPathMatches.map((match) => match[1]))];
-requireCheck(endpoints.length >= 28, "Contract catalog must publish at least 28 endpoints.");
+const contractCallMatches = [
+  ...source.catalog.matchAll(
+    /contract\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*"([^"]+)"/g,
+  ),
+];
+const legacyPathMatches = [...source.catalog.matchAll(/path:\s*"([^"]+)"/g)];
+const endpoints = [
+  ...new Set([
+    ...contractCallMatches.map((match) => match[1]),
+    ...legacyPathMatches.map((match) => match[1]),
+  ]),
+];
+requireCheck(endpoints.length >= 48, `Contract catalog must publish at least 48 endpoints; found ${endpoints.length}.`);
+
+requireCheck(source.manifest.includes("serviceBridgeContracts"), "Manifest must publish catalog endpoints.");
+requireCheck(source.openapi.includes("serviceBridgeContracts"), "OpenAPI must publish catalog endpoints.");
+requireCheck(source.health.includes("serviceBridgeContracts"), "Health must publish catalog endpoints.");
+requireCheck(source.receipt.includes("serviceBridgeContracts"), "Receipt must publish catalog endpoints.");
 
 for (const endpoint of endpoints) {
-  requireCheck(source.manifest.includes("serviceBridgeContracts"), "Manifest must publish catalog endpoints.");
-  requireCheck(source.openapi.includes("serviceBridgeContracts"), "OpenAPI must publish catalog endpoints.");
-  requireCheck(source.health.includes("serviceBridgeContracts"), "Health must publish catalog endpoints.");
-  requireCheck(source.receipt.includes("serviceBridgeContracts"), "Receipt must publish catalog endpoints.");
-
   const routePath = `${endpoint.replace(/^\//, "app/")}/route.ts`;
   try {
     await access(routePath);
