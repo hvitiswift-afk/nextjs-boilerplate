@@ -4,6 +4,8 @@ export type ContractDomain =
   | "core"
   | "recovery"
   | "deployment"
+  | "scheduler"
+  | "integration"
   | "polyglot"
   | "signal"
   | "polystructure"
@@ -67,6 +69,8 @@ export const serviceBridgeContracts: ServiceBridgeContract[] = [
 
   contract("deployment", "deployment", "/api/service-bridge/deployment", ["GET", "POST"], "jp-hviti-service-bridge-deployment-readiness/v1", true),
   contract("deployment-repair", "deployment", "/api/service-bridge/deployment/repair", ["GET", "POST"], "jp-hviti-service-bridge-deployment-repair-plan/v1", true),
+  contract("scheduler", "scheduler", "/api/service-bridge/scheduler", ["GET", "POST"], "jp-hviti-service-bridge-scheduler-plan/v1", true),
+  contract("netlify-oauth", "integration", "/api/service-bridge/netlify/oauth", ["GET", "POST"], "jp-hviti-netlify-oauth-plan/v1", true),
 
   contract("polyglot", "polyglot", "/api/service-bridge/polyglot", ["GET", "POST"], "jp-hviti-service-bridge-polyglot-plan/v2"),
   contract("language-universe", "polyglot", "/api/service-bridge/polyglot/universe", ["GET", "POST"], "jp-hviti-service-bridge-language-universe-route/v1"),
