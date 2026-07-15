@@ -20,28 +20,16 @@ const requireCheck = (passed, message) => {
   if (!passed) failures.push(message);
 };
 
-requireCheck(
-  source.catalog.includes(`SERVICE_BRIDGE_CONTRACT_VERSION = ${version}`),
-  `Contract catalog must report version ${version}.`,
-);
+requireCheck(source.catalog.includes(`SERVICE_BRIDGE_CONTRACT_VERSION = ${version}`), `Contract catalog must report version ${version}.`);
 requireCheck(source.openapi.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "OpenAPI must derive its version from the contract catalog.");
 requireCheck(source.health.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "Health must derive its version from the contract catalog.");
 requireCheck(source.receipt.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "Receipt must derive its version from the contract catalog.");
 requireCheck(source.manifest.includes("SERVICE_BRIDGE_CONTRACT_VERSION"), "Manifest must derive its version from the contract catalog.");
 
-const contractCallMatches = [
-  ...source.catalog.matchAll(
-    /contract\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*"([^"]+)"/g,
-  ),
-];
+const contractCallMatches = [...source.catalog.matchAll(/contract\(\s*"[^"]+"\s*,\s*"[^"]+"\s*,\s*"([^"]+)"/g)];
 const legacyPathMatches = [...source.catalog.matchAll(/path:\s*"([^"]+)"/g)];
-const endpoints = [
-  ...new Set([
-    ...contractCallMatches.map((match) => match[1]),
-    ...legacyPathMatches.map((match) => match[1]),
-  ]),
-];
-requireCheck(endpoints.length >= 48, `Contract catalog must publish at least 48 endpoints; found ${endpoints.length}.`);
+const endpoints = [...new Set([...contractCallMatches.map((match) => match[1]), ...legacyPathMatches.map((match) => match[1])])];
+requireCheck(endpoints.length >= 50, `Contract catalog must publish at least 50 endpoints; found ${endpoints.length}.`);
 
 requireCheck(source.manifest.includes("serviceBridgeContracts"), "Manifest must publish catalog endpoints.");
 requireCheck(source.openapi.includes("serviceBridgeContracts"), "OpenAPI must publish catalog endpoints.");
@@ -58,10 +46,7 @@ for (const endpoint of endpoints) {
 }
 
 for (const [name, text] of Object.entries(source)) {
-  requireCheck(
-    text.includes("externalActionCompleted") || name === "openapi",
-    `${name} must preserve the external-action boundary.`,
-  );
+  requireCheck(text.includes("externalActionCompleted") || name === "openapi", `${name} must preserve the external-action boundary.`);
 }
 
 requireCheck(source.manifest.includes("explicitProjectionMutationAllowed: true"), "Manifest must explicitly allow confirmed local projection mutation.");
@@ -83,6 +68,8 @@ requireCheck(source.openapi.includes('"x-public-deployment-verified": false'), "
 
 const requiredAdvancedEndpoints = [
   "/api/service-bridge/contracts",
+  "/api/service-bridge/scheduler",
+  "/api/service-bridge/netlify/oauth",
   "/api/service-bridge/polyglot/hypercube",
   "/api/service-bridge/polyglot/hypercube/route-plan",
   "/api/service-bridge/polyglot/polystructure",
@@ -110,6 +97,7 @@ if (failures.length) {
 console.log("SERVICE BRIDGE RUNTIME CONTRACT: PASS");
 console.log(`Version surfaces aligned through catalog version ${version}.`);
 console.log(`Catalog endpoint surfaces checked: ${endpoints.length}.`);
+console.log("Scheduler and Netlify OAuth planning routes: present.");
 console.log("Projection mutation permission: explicit local only.");
 console.log("Automatic deployment and public deployment claims: disallowed.");
 console.log("Polystructure identity, bundle, Merkle, and release routes: present.");
