@@ -1,0 +1,29 @@
+{
+  "repository": "hvitiswift-afk/nextjs-boilerplate",
+  "pull_request": 118,
+  "head_sha": "798d29f9f377cebeefe92712233cec3285241ce9",
+  "workflow": "Imperatus Review",
+  "run_id": 29701516150,
+  "status": "completed",
+  "conclusion": "success",
+  "verified_scope": [
+    "TypeScript compile",
+    "required public files",
+    "six MCP tools",
+    "SIMULATED_ONLY and live_sms=false markers",
+    "exactly five positive and three negative tests",
+    "phone-number and token-pattern scan"
+  ],
+  "root_workflows": {
+    "Build Check": "failure",
+    "GRIPLOOM Verify": "failure"
+  },
+  "root_failure_classification": "SEPARATE_REPOSITORY_SCOPE_REQUIRES_REVIEW",
+  "truth_boundary": {
+    "merged": false,
+    "deployed": false,
+    "remote_mcp_verified": false,
+    "build_week_submitted": false,
+    "live_sms": false
+  }
+}

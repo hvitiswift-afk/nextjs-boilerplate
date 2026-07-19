@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { Beam } from "@/lib/griploom/types";
-import { scoreBeam } from "@/lib/ml/griploom-ml";
-import { goblinCheckBeam } from "@/lib/ml/goblin-ml";
-import { blackletterGate } from "@/lib/blackletter/gate";
-import { meshScorecard } from "@/lib/griploom/mesh";
-import { vitality, VitalityInput } from "@/lib/griploom/vitality";
+import type { Beam } from "../../../../lib/griploom/types";
+import { scoreBeam } from "../../../../lib/ml/griploom-ml";
+import { goblinCheckBeam } from "../../../../lib/ml/goblin-ml";
+import { blackletterGate } from "../../../../lib/blackletter/gate";
+import { meshScorecard } from "../../../../lib/griploom/mesh";
+import { vitality, type VitalityInput } from "../../../../lib/griploom/vitality";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -19,20 +19,20 @@ export async function POST(req: Request) {
       sourceCount: beam.sharedProductions?.length ?? 0,
       highConfidenceSource: beam.confidence >= 0.95,
       goblinFlags: goblin.flags,
-      claimLevel: 2
+      claimLevel: 2,
     });
 
     return {
       beam,
       griploom,
       goblin,
-      blackletter
+      blackletter,
     };
   });
 
   const mesh = meshScorecard({
     nodeCount: nodeCount || beams.length * 2,
-    beams
+    beams,
   });
 
   const field = vitalityInput ? vitality(vitalityInput) : null;
@@ -42,6 +42,6 @@ export async function POST(req: Request) {
     rule: "GRIPLOOM ranks. GOBLIN challenges. BLACKLETTER permits.",
     mesh,
     field,
-    results
+    results,
   });
 }

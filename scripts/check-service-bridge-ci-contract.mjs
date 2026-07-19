@@ -57,7 +57,11 @@ requireCheck(runner.includes("automaticProjectionMutationAllowed: false"), "Unif
 requireCheck(runner.includes("automaticDeploymentAllowed: false"), "Unified smoke receipt must prohibit automatic deployment.");
 requireCheck(runner.includes("publicDeploymentVerified: false"), "Unified smoke receipt must not claim public deployment verification.");
 requireCheck(architectureContract.includes("version 19 catalog-aligned"), "Architecture contract must be version 19 catalog-aligned.");
-requireCheck(runtimeContract.includes("Version surfaces aligned through catalog version 19"), "Runtime metadata contract must be version 19 aligned.");
+requireCheck(
+  runtimeContract.includes("const version = 19") &&
+    runtimeContract.includes("Version surfaces aligned through catalog version ${version}"),
+  "Runtime metadata contract must be version 19 aligned.",
+);
 requireCheck(catalog.includes("SERVICE_BRIDGE_CONTRACT_VERSION = 19"), "Contract catalog must report version 19.");
 
 if (failures.length) {

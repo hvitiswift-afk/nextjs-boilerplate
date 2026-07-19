@@ -1,0 +1,14 @@
+{
+  "name": "jp-live-sms-imperatus-mcp-review",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "check": "node scripts/check-review.mjs",
+    "verify": "npm run build && npm run check"
+  },
+  "devDependencies": {
+    "@netlify/functions": "latest",
+    "typescript": "latest"
+  }
+}
