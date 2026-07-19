@@ -42,7 +42,7 @@ jobs:
             echo "Exit code: $code"
             echo
             echo '```text'
-            grep -E "(Error:|error TS|Failed to compile|Build failed|Module not found|Type error|ReferenceError|SyntaxError|⨯|ELIFECYCLE|ERR!)" build-full.log | tail -n 120 | sed -E 's#(https?://)[^ ]+#\1[redacted-url]#g' | sed -E 's#([A-Za-z0-9_]*(TOKEN|SECRET|KEY|PASSWORD)[A-Za-z0-9_]*)=[^ ]+#\1=[redacted]#g'
+            grep -E -B 5 -A 12 "(Error:|error TS|Failed to compile|Build failed|Module not found|Type error|ReferenceError|SyntaxError|⨯|ELIFECYCLE|ERR!)" build-full.log | tail -n 220 | sed -E 's#(https?://)[^ ]+#\1[redacted-url]#g' | sed -E 's#([A-Za-z0-9_]*(TOKEN|SECRET|KEY|PASSWORD)[A-Za-z0-9_]*)=[^ ]+#\1=[redacted]#g'
             echo '```'
           } > docs/ROOT-BUILD-DIAGNOSTIC.md
           rm -f build-full.log
@@ -53,5 +53,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/ROOT-BUILD-DIAGNOSTIC.md
-          git commit -m "Capture root build diagnostic" || exit 0
+          git commit -m "Refresh root build diagnostic" || exit 0
           git push origin HEAD:imperatus-build-week-v117
