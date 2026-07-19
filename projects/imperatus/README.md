@@ -31,6 +31,12 @@ PREPARED
 
 Negative cases cover wrong-recipient substitution, stale or replayed authorization, duplicate execution, prompt injection, and unsupported delivery claims.
 
+## Verification
+
+The dedicated **Imperatus Review** workflow completed successfully for commit `798d29f9f377cebeefe92712233cec3285241ce9` in run `29701516150`.
+
+That success verifies the isolated project scope only. The wider repository Build Check and GRIPLOOM Verify workflows still require separate repair or classification. The project is not merged, deployed, remotely verified, or submitted to Build Week or the ChatGPT app directory.
+
 ## Local development
 
 ```bash
