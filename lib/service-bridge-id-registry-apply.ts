@@ -13,7 +13,7 @@ export type LocalRegistryRecord = {
   externalActionCompleted: false;
 };
 
-function canonical(value: unknown) {
+function canonical(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonical);
   if (value && typeof value === "object") {
     return Object.fromEntries(
