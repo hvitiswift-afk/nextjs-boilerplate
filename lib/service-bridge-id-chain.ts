@@ -13,7 +13,7 @@ export type PolystructureIdChainEntry = {
   externalActionCompleted: false;
 };
 
-function canonical(entry: Omit<PolystructureIdChainEntry, "digest">) {
+function canonical(entry: Omit<PolystructureIdChainEntry, "digest">): string {
   return JSON.stringify({
     actor: entry.actor,
     compactId: entry.compactId,
