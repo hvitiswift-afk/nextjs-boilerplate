@@ -1,6 +1,12 @@
 name: Imperatus Remote Verify
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/imperatus-remote-verify.yml"
+      - "projects/imperatus/**"
   workflow_dispatch:
   schedule:
     - cron: "17 * * * *"
