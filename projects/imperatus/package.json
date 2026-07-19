@@ -1,0 +1,12 @@
+{
+  "name": "jp-live-sms-imperatus-mcp-review",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo static-and-functions-ready"
+  },
+  "devDependencies": {
+    "@netlify/functions": "latest",
+    "typescript": "latest"
+  }
+}
