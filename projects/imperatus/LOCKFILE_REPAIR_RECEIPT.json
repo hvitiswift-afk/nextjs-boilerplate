@@ -9,7 +9,11 @@
     "pg",
     "@types/pg"
   ],
-  "one_time_workflow_removed": true,
+  "evidence": {
+    "package_lock_sha": "ccc2b7fe3bd4f32c9721c5b812caca3bd6367894",
+    "root_lock_now_matches_declared_dependencies": true,
+    "one_time_workflow_removed": true
+  },
   "current_truth_boundary": {
     "pr_merged": false,
     "netlify_deployed": false,
