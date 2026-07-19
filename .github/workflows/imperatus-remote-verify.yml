@@ -1,0 +1,113 @@
+name: Imperatus Remote Verify
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      IMPERATUS_BASE_URL: https://jp-fire-system.netlify.app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify public pages and MCP endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/imperatus-remote
+
+          request() {
+            local name="$1"
+            local method="$2"
+            local url="$3"
+            local body="${4:-}"
+            local out="artifacts/imperatus-remote/${name}.json"
+            local headers="artifacts/imperatus-remote/${name}.headers.txt"
+            local code
+
+            if [[ "$method" == "GET" ]]; then
+              code=$(curl --silent --show-error --location --max-time 20 \
+                --dump-header "$headers" --output "$out" \
+                --write-out "%{http_code}" "$url")
+            else
+              code=$(curl --silent --show-error --location --max-time 20 \
+                --request "$method" --header "content-type: application/json" \
+                --data "$body" --dump-header "$headers" --output "$out" \
+                --write-out "%{http_code}" "$url")
+            fi
+
+            printf '%s\n' "$code" > "artifacts/imperatus-remote/${name}.status.txt"
+            [[ "$code" =~ ^2[0-9][0-9]$ ]]
+          }
+
+          request homepage GET "$IMPERATUS_BASE_URL/"
+          request privacy GET "$IMPERATUS_BASE_URL/privacy.html"
+          request terms GET "$IMPERATUS_BASE_URL/terms.html"
+          request support GET "$IMPERATUS_BASE_URL/support.html"
+          request descriptor GET "$IMPERATUS_BASE_URL/mcp"
+          request initialize POST "$IMPERATUS_BASE_URL/mcp" '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
+          request tools-list POST "$IMPERATUS_BASE_URL/mcp" '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('artifacts/imperatus-remote')
+          descriptor = json.loads((root/'descriptor.json').read_text())
+          initialize = json.loads((root/'initialize.json').read_text())
+          tools = json.loads((root/'tools-list.json').read_text())
+
+          assert descriptor.get('live_sms') is False
+          assert descriptor.get('mode') == 'SIMULATED_ONLY'
+          assert initialize.get('result', {}).get('serverInfo', {}).get('name') == 'jp-live-sms-imperatus-review'
+          listed = tools.get('result', {}).get('tools', [])
+          names = [tool.get('name') for tool in listed]
+          expected = [
+              'sms_prepare', 'sms_preview', 'sms_authorize',
+              'sms_send_simulated', 'sms_status', 'sms_cancel'
+          ]
+          assert names == expected, (names, expected)
+
+          receipt = {
+              'suite': 'imperatus-remote-preflight-v1',
+              'result': 'PASS',
+              'base_url': 'https://jp-fire-system.netlify.app',
+              'checks': {
+                  'homepage': True,
+                  'privacy': True,
+                  'terms': True,
+                  'support': True,
+                  'descriptor': True,
+                  'initialize': True,
+                  'tools_list': True,
+                  'tool_count': len(names),
+                  'live_sms': False,
+                  'mode': 'SIMULATED_ONLY'
+              }
+          }
+          (root/'preflight-receipt.json').write_text(json.dumps(receipt, indent=2))
+          PY
+
+      - name: Run remote 5 positive and 3 negative cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          python projects/imperatus/scripts/remote-review.py \
+            --base-url "$IMPERATUS_BASE_URL" \
+            --output artifacts/imperatus-remote/remote-review-receipt.json
+
+      - name: Upload verification receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: imperatus-remote-verification
+          path: artifacts/imperatus-remote
+          if-no-files-found: error
