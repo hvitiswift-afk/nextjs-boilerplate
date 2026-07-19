@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - imperatus-build-week-v117
-    paths:
-      - ".github/workflows/diagnose-root-build.yml"
+    paths-ignore:
+      - "docs/ROOT-BUILD-DIAGNOSTIC.md"
   workflow_dispatch:
 
 permissions:
