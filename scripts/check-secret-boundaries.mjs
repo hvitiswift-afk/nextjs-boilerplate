@@ -45,17 +45,18 @@ function walk(dir) {
 
 const suspiciousPatterns = [
   {
-    name: "hardcoded Vercel bearer token",
-    pattern: /authorization\s*:\s*[`'"]Bearer\s+(?!\$\{?token\}?|\$VERCEL_TOKEN|process\.env\.VERCEL_TOKEN)[^`'"\s]+/i
+    name: "hardcoded bearer token",
+    pattern:
+      /authorization\s*:\s*[`'"]Bearer\s+(?!\$\{[A-Za-z_][A-Za-z0-9_]*\}|\$[A-Za-z_][A-Za-z0-9_]*|process\.env\.[A-Za-z_][A-Za-z0-9_]*)[^`'"\s]+/i,
   },
   {
     name: "committed VERCEL_TOKEN assignment",
-    pattern: /VERCEL_TOKEN\s*=\s*(?!["']?(your-token-here|paste-token-here|\$\{?VERCEL_TOKEN\}?)["']?\s*$)["']?[A-Za-z0-9_\-]{20,}["']?/m
+    pattern: /VERCEL_TOKEN\s*=\s*(?!["']?(your-token-here|paste-token-here|\$\{?VERCEL_TOKEN\}?)?["']?\s*$)["']?[A-Za-z0-9_\-]{20,}["']?/m,
   },
   {
     name: "committed generic API token assignment",
-    pattern: /(API_TOKEN|ACCESS_TOKEN|AUTH_TOKEN)\s*=\s*["']?[A-Za-z0-9_\-]{24,}["']?/m
-  }
+    pattern: /(API_TOKEN|ACCESS_TOKEN|AUTH_TOKEN)\s*=\s*["']?[A-Za-z0-9_\-]{24,}["']?/m,
+  },
 ];
 
 const violations = [];
@@ -73,9 +74,15 @@ for (const file of walk(root)) {
 
 assert(violations.length === 0, `secret boundary violations found:\n${violations.join("\n")}`);
 
-console.log(JSON.stringify({
-  id: "check-secret-boundaries",
-  status: "passed",
-  required_gitignore_rules: requiredGitignoreRules,
-  token_printed: false
-}, null, 2));
+console.log(
+  JSON.stringify(
+    {
+      id: "check-secret-boundaries",
+      status: "passed",
+      required_gitignore_rules: requiredGitignoreRules,
+      token_printed: false,
+    },
+    null,
+    2,
+  ),
+);
