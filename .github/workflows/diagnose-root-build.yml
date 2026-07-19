@@ -6,6 +6,8 @@ on:
       - imperatus-build-week-v117
     paths-ignore:
       - "docs/ROOT-BUILD-DIAGNOSTIC.md"
+      - "docs/GRIPLOOM-DIAGNOSTIC.md"
+      - "docs/SERVICE-BRIDGE-DIAGNOSTIC.md"
   workflow_dispatch:
 
 permissions:
@@ -30,28 +32,58 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Capture sanitized build failure
+      - name: Capture sanitized diagnostics
         shell: bash
         run: |
           set +e
           npm run build > build-full.log 2>&1
-          code=$?
+          build_code=$?
+          npm run griploom:verify > griploom-full.log 2>&1
+          griploom_code=$?
+          npm run service-bridge:verify > service-full.log 2>&1
+          service_code=$?
+
+          sanitize() {
+            sed -E 's#(https?://)[^ ]+#\1[redacted-url]#g' | sed -E 's#([A-Za-z0-9_]*(TOKEN|SECRET|KEY|PASSWORD)[A-Za-z0-9_]*)=[^ ]+#\1=[redacted]#g'
+          }
+
           {
             echo "# Root Build Diagnostic"
             echo
-            echo "Exit code: $code"
+            echo "Exit code: $build_code"
             echo
             echo '```text'
-            grep -E -B 5 -A 12 "(Error:|error TS|Failed to compile|Build failed|Module not found|Type error|ReferenceError|SyntaxError|⨯|ELIFECYCLE|ERR!)" build-full.log | tail -n 220 | sed -E 's#(https?://)[^ ]+#\1[redacted-url]#g' | sed -E 's#([A-Za-z0-9_]*(TOKEN|SECRET|KEY|PASSWORD)[A-Za-z0-9_]*)=[^ ]+#\1=[redacted]#g'
+            grep -E -B 5 -A 12 "(Error:|error TS|Failed to compile|Build failed|Module not found|Type error|ReferenceError|SyntaxError|⨯|ELIFECYCLE|ERR!)" build-full.log | tail -n 220 | sanitize
             echo '```'
           } > docs/ROOT-BUILD-DIAGNOSTIC.md
-          rm -f build-full.log
+
+          {
+            echo "# GRIPLOOM Diagnostic"
+            echo
+            echo "Exit code: $griploom_code"
+            echo
+            echo '```text'
+            tail -n 220 griploom-full.log | sanitize
+            echo '```'
+          } > docs/GRIPLOOM-DIAGNOSTIC.md
+
+          {
+            echo "# Service Bridge Diagnostic"
+            echo
+            echo "Exit code: $service_code"
+            echo
+            echo '```text'
+            tail -n 220 service-full.log | sanitize
+            echo '```'
+          } > docs/SERVICE-BRIDGE-DIAGNOSTIC.md
+
+          rm -f build-full.log griploom-full.log service-full.log
           exit 0
 
-      - name: Commit diagnostic
+      - name: Commit diagnostics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/ROOT-BUILD-DIAGNOSTIC.md
-          git commit -m "Refresh root build diagnostic" || exit 0
+          git add docs/ROOT-BUILD-DIAGNOSTIC.md docs/GRIPLOOM-DIAGNOSTIC.md docs/SERVICE-BRIDGE-DIAGNOSTIC.md
+          git commit -m "Refresh repository diagnostics" || exit 0
           git push origin HEAD:imperatus-build-week-v117
