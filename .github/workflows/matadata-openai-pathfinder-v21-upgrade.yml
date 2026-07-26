@@ -39,6 +39,25 @@ jobs:
             mv "$file.clean" "$file"
           done
 
+      - name: Stabilize deterministic gzip across Python versions
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/matadata-pathfinder/v2/upgrade/apply_v21.py')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace('import hashlib\n', 'import hashlib\nimport io\n', 1)
+          old = '        compressed = gzip.compress(new_source, compresslevel=9, mtime=0)\n        encoded = base64.b64encode(compressed)'
+          new = '''        buffer = io.BytesIO()
+          with gzip.GzipFile(filename="", mode="wb", fileobj=buffer, compresslevel=9, mtime=0) as archive:
+              archive.write(new_source)
+          compressed = buffer.getvalue()
+          encoded = base64.b64encode(compressed)'''
+          if old not in text:
+              raise SystemExit('Deterministic gzip patch target was not found.')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
       - name: Apply and validate the checksum-locked acknowledgment repair
         shell: bash
         run: |
