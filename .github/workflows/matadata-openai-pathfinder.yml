@@ -1,4 +1,4 @@
-name: MATADATA Pathfinder Source Inspection
+name: MATADATA OpenAI Form Pathfinder
 
 on:
   pull_request:
@@ -9,22 +9,26 @@ permissions:
   contents: read
 
 concurrency:
-  group: matadata-openai-pathfinder-inspect
+  group: matadata-openai-pathfinder-public-once
   cancel-in-progress: true
 
 jobs:
-  inspect-runner:
+  submit-once:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 65
     steps:
       - name: Check out isolated Pathfinder branch
         uses: actions/checkout@v4
 
-      - name: Reconstruct Pathfinder source without opening the form
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore and repair tap Pathfinder
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p pathfinder-source
           cat \
             tools/matadata-pathfinder/tap-chunks/tap.b64.00 \
             tools/matadata-pathfinder/tap-chunks/tap.b64.01 \
@@ -33,16 +37,146 @@ jobs:
             tools/matadata-pathfinder/tap-chunks/tap.b64.04a \
             tools/matadata-pathfinder/tap-chunks/tap.b64.04b \
             tools/matadata-pathfinder/tap-chunks/tap.b64.04c \
-            | base64 --decode \
-            | gzip --decompress \
-            > pathfinder-source/matadata-tap-submit.cjs
-          node --check pathfinder-source/matadata-tap-submit.cjs
-          sha256sum pathfinder-source/matadata-tap-submit.cjs > pathfinder-source/SHA256SUMS.txt
+            > /tmp/matadata-tap-submit.cjs.gz.b64
+          base64 --decode /tmp/matadata-tap-submit.cjs.gz.b64 > /tmp/matadata-tap-submit.cjs.gz
+          gzip --test /tmp/matadata-tap-submit.cjs.gz
+          gzip --decompress --stdout /tmp/matadata-tap-submit.cjs.gz > /tmp/matadata-tap-submit.cjs
+          python tools/matadata-pathfinder/runtime-minfix.py /tmp/matadata-tap-submit.cjs
+          node --check /tmp/matadata-tap-submit.cjs
+          echo 'Repaired Pathfinder checksum:'
+          sha256sum /tmp/matadata-tap-submit.cjs
 
-      - name: Upload reconstructed source for repair
+      - name: Install isolated browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pathfinder-node /tmp/ms-playwright
+          cd /tmp/pathfinder-node
+          npm init -y >/dev/null
+          PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright npm install --no-audit --no-fund playwright@1.55.0
+          PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright npx playwright install --with-deps chromium
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb
+          curl --fail --location --silent --show-error \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            --output /tmp/cloudflared
+          chmod +x /tmp/cloudflared
+
+      - name: Start secure tap interface and browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pathfinder-session pathfinder-artifacts /tmp/pathfinder-live
+          TOKEN="$(openssl rand -hex 24)"
+          printf '%s' "$TOKEN" > /tmp/pathfinder-live/token
+
+          RUNNER_TRACKING_ID='' nohup Xvfb :99 -screen 0 1280x900x24 -ac -noreset \
+            >/tmp/pathfinder-live/xvfb.log 2>&1 &
+          sleep 2
+
+          RUNNER_TRACKING_ID='' DISPLAY=:99 \
+          PATHFINDER_TOKEN="$TOKEN" \
+          PATHFINDER_PORT='6080' \
+          PATHFINDER_READY_FILE='/tmp/matadata-pathfinder-ready' \
+          PATHFINDER_ARTIFACT_DIR="$GITHUB_WORKSPACE/pathfinder-artifacts" \
+          PATHFINDER_TERMINAL_HOLD_MS='90000' \
+          PLAYWRIGHT_MODULE='/tmp/pathfinder-node/node_modules/playwright' \
+          PLAYWRIGHT_BROWSERS_PATH='/tmp/ms-playwright' \
+          nohup node /tmp/matadata-tap-submit.cjs \
+            >/tmp/pathfinder-live/pathfinder.log 2>&1 &
+          echo $! > /tmp/pathfinder-live/pathfinder.pid
+
+          for _ in $(seq 1 90); do
+            if [[ -f /tmp/matadata-pathfinder-ready ]]; then break; fi
+            if ! kill -0 "$(cat /tmp/pathfinder-live/pathfinder.pid)" 2>/dev/null; then
+              cat /tmp/pathfinder-live/pathfinder.log
+              exit 1
+            fi
+            sleep 1
+          done
+          test -f /tmp/matadata-pathfinder-ready
+
+          RUNNER_TRACKING_ID='' nohup /tmp/cloudflared tunnel --no-autoupdate \
+            --url http://127.0.0.1:6080 \
+            >/tmp/pathfinder-live/cloudflared.log 2>&1 &
+
+          TUNNEL_URL=''
+          for _ in $(seq 1 90); do
+            TUNNEL_URL="$(grep -Eo 'https://[-a-z0-9]+\.trycloudflare\.com' /tmp/pathfinder-live/cloudflared.log | head -n1 || true)"
+            if [[ -n "$TUNNEL_URL" ]]; then break; fi
+            sleep 1
+          done
+          if [[ -z "$TUNNEL_URL" ]]; then
+            cat /tmp/pathfinder-live/cloudflared.log
+            exit 1
+          fi
+
+          python - "$TUNNEL_URL" "$TOKEN" <<'PY'
+          import json, sys
+          from datetime import datetime, timedelta, timezone
+          url, token = sys.argv[1:]
+          payload = {
+              "status": "LIVE_HUMAN_VERIFICATION_AND_ACKNOWLEDGMENT",
+              "url": f"{url}/?token={token}",
+              "purpose": "JP completes OpenAI human verification and personally checks the applicant acknowledgment. Radio fills the reviewed non-confidential proposal and submits exactly once.",
+              "interaction_limits": [
+                  "Taps are forwarded only during OpenAI human verification.",
+                  "After form fill, scroll if needed and tap the applicant acknowledgment checkbox or acknowledgment row.",
+                  "Direct taps on Submit are blocked; Pathfinder performs the sole authorized submit click after validation."
+              ],
+              "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=50)).isoformat(),
+          }
+          with open('pathfinder-session/session.json', 'w', encoding='utf-8') as fh:
+              json.dump(payload, fh, indent=2)
+          PY
+
+      - name: Publish private live tap-session handoff
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-pathfinder-source
-          path: pathfinder-source
+          name: matadata-pathfinder-live-session
+          path: pathfinder-session/session.json
           if-no-files-found: error
           retention-days: 1
+
+      - name: Await human steps and one-time submission
+        shell: bash
+        run: |
+          set -euo pipefail
+          PID="$(cat /tmp/pathfinder-live/pathfinder.pid)"
+          for _ in $(seq 1 660); do
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 5
+          done
+          if kill -0 "$PID" 2>/dev/null; then
+            echo 'Pathfinder exceeded the interaction window.'
+            exit 1
+          fi
+          cat /tmp/pathfinder-live/pathfinder.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('pathfinder-artifacts/receipt.json')
+          if not p.exists():
+              raise SystemExit('No Pathfinder receipt was produced.')
+          receipt = json.loads(p.read_text(encoding='utf-8'))
+          print(json.dumps(receipt, indent=2))
+          if receipt.get('status') != 'SUBMITTED' or receipt.get('submitClicks') != 1:
+              raise SystemExit('Submission was not confirmed exactly once.')
+          PY
+
+      - name: Preserve Pathfinder receipt, screenshots, and logs
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p pathfinder-artifacts/logs
+          cp /tmp/pathfinder-live/pathfinder.log pathfinder-artifacts/logs/ 2>/dev/null || true
+          cp /tmp/pathfinder-live/cloudflared.log pathfinder-artifacts/logs/ 2>/dev/null || true
+          cp /tmp/pathfinder-live/xvfb.log pathfinder-artifacts/logs/ 2>/dev/null || true
+
+      - name: Upload Pathfinder receipt and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-openai-pathfinder-receipt
+          path: pathfinder-artifacts
+          if-no-files-found: warn
+          retention-days: 30
