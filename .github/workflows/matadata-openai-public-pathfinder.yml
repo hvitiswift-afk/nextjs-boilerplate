@@ -13,15 +13,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  submit-once:
+  pathfinder:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
-      PRIVATE_REPO: hvitiswift-afk/Norstein-Bekkler
-      PRIVATE_COMMIT: ba6f4bfa12489c5e355f8f7342ebfffd3970c242
-      PRIVATE_PATH: secure/matadata-openai-application.json.gz.b64
-      PRIVATE_B64_SHA256: 0cd744a1777b2506a601c98ce06957163d47895d1b797fc3e297861f3c484700
+      KEY_DIR: /tmp/matadata-pathfinder-key
+      WORK_DIR: /tmp/matadata-openai-pathfinder
+      ENCRYPTED_PAYLOAD: secure/matadata-openai-application.cms.b64
       APPLICATION_SHA256: 277ef6d685470a024fca4f51ff2eb9e67901dc4dd3eaab285e70efbde0c4a8d1
     steps:
       - name: Check out isolated Pathfinder branch
@@ -32,55 +30,116 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Require authorized private-repository credential
+      - name: Restore PR-scoped one-use private key
+        id: key-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/matadata-pathfinder-key
+          key: matadata-openai-pathfinder-pr-${{ github.event.pull_request.number }}-v1
+
+      - name: Bootstrap one-use encryption key
+        if: steps.key-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          if [ -z "$GH_ADMIN_TOKEN" ]; then
-            echo "Missing repository secret GH_ADMIN_TOKEN"
-            exit 1
+          set -euo pipefail
+          mkdir -p "$KEY_DIR" "$WORK_DIR/pathfinder-artifacts"
+          openssl req -x509 -newkey rsa:3072 -sha256 -nodes \
+            -keyout "$KEY_DIR/private.pem" \
+            -out "$KEY_DIR/certificate.pem" \
+            -days 2 \
+            -subj "/CN=MATADATA OpenAI Pathfinder PR ${{ github.event.pull_request.number }}"
+          chmod 600 "$KEY_DIR/private.pem"
+          sha256sum "$KEY_DIR/certificate.pem" > "$KEY_DIR/certificate.sha256"
+          cat > "$WORK_DIR/pathfinder-artifacts/receipt.json" <<JSON
+          {
+            "status": "KEY_BOOTSTRAPPED_NO_SUBMISSION",
+            "pullRequest": ${{ github.event.pull_request.number }},
+            "generatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "submitClicks": 0,
+            "note": "No OpenAI form was opened in this bootstrap phase."
+          }
+          JSON
+
+      - name: Save PR-scoped one-use private key
+        if: steps.key-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/matadata-pathfinder-key
+          key: matadata-openai-pathfinder-pr-${{ github.event.pull_request.number }}-v1
+
+      - name: Upload public encryption certificate
+        if: steps.key-cache.outputs.cache-hit != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-public-certificate
+          path: |
+            /tmp/matadata-pathfinder-key/certificate.pem
+            /tmp/matadata-pathfinder-key/certificate.sha256
+          if-no-files-found: error
+          retention-days: 2
+
+      - name: Detect encrypted payload
+        id: payload
+        shell: bash
+        run: |
+          if [ -f "$ENCRYPTED_PAYLOAD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install isolated browser runtime
+      - name: Record waiting state
+        if: steps.key-cache.outputs.cache-hit == 'true' && steps.payload.outputs.ready != 'true'
         shell: bash
         run: |
-          mkdir -p /tmp/matadata-openai-pathfinder
-          cd /tmp/matadata-openai-pathfinder
+          mkdir -p "$WORK_DIR/pathfinder-artifacts"
+          cat > "$WORK_DIR/pathfinder-artifacts/receipt.json" <<JSON
+          {
+            "status": "WAITING_FOR_ENCRYPTED_PAYLOAD_NO_SUBMISSION",
+            "pullRequest": ${{ github.event.pull_request.number }},
+            "recordedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "submitClicks": 0
+          }
+          JSON
+
+      - name: Install isolated browser runtime
+        if: steps.key-cache.outputs.cache-hit == 'true' && steps.payload.outputs.ready == 'true'
+        shell: bash
+        run: |
+          mkdir -p "$WORK_DIR"
+          cd "$WORK_DIR"
           npm init -y >/dev/null
           npm install --no-save --package-lock=false playwright
           npx playwright install --with-deps chromium
           cp "$GITHUB_WORKSPACE/tools/matadata-pathfinder/submit-public.mjs" submit.mjs
           node --check submit.mjs
 
-      - name: Restore private application payload from pinned commit
+      - name: Decrypt and verify private application payload
+        if: steps.key-cache.outputs.cache-hit == 'true' && steps.payload.outputs.ready == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          cd /tmp/matadata-openai-pathfinder
-          curl --fail --silent --show-error --location \
-            -H "Authorization: Bearer $GH_ADMIN_TOKEN" \
-            -H "Accept: application/vnd.github.raw+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/$PRIVATE_REPO/contents/$PRIVATE_PATH?ref=$PRIVATE_COMMIT" \
-            --output application.json.gz.b64
-          ACTUAL_B64_SHA="$(sha256sum application.json.gz.b64 | awk '{print $1}')"
-          if [ "$ACTUAL_B64_SHA" != "$PRIVATE_B64_SHA256" ]; then
-            echo "Private payload transport integrity check failed"
-            exit 1
-          fi
-          base64 --decode application.json.gz.b64 | gzip --decompress > application.json
+          cd "$WORK_DIR"
+          base64 --decode "$GITHUB_WORKSPACE/$ENCRYPTED_PAYLOAD" > application.cms
+          openssl cms -decrypt -binary -inform DER \
+            -in application.cms \
+            -recip "$KEY_DIR/certificate.pem" \
+            -inkey "$KEY_DIR/private.pem" \
+            -out application.json
           ACTUAL_APPLICATION_SHA="$(sha256sum application.json | awk '{print $1}')"
           if [ "$ACTUAL_APPLICATION_SHA" != "$APPLICATION_SHA256" ]; then
             echo "Application payload integrity check failed"
             exit 1
           fi
-          rm -f application.json.gz.b64
-          echo "PATHFINDER_APPLICATION_PATH=/tmp/matadata-openai-pathfinder/application.json" >> "$GITHUB_ENV"
-          echo "Private application payload restored from a pinned commit and verified without publication."
+          rm -f application.cms
+          echo "PATHFINDER_APPLICATION_PATH=$WORK_DIR/application.json" >> "$GITHUB_ENV"
+          echo "Encrypted application payload decrypted and verified only inside the temporary runner."
 
       - name: Submit through OpenAI public form exactly once
+        if: steps.key-cache.outputs.cache-hit == 'true' && steps.payload.outputs.ready == 'true'
         shell: bash
         run: |
-          cd /tmp/matadata-openai-pathfinder
+          cd "$WORK_DIR"
           node submit.mjs
 
       - name: Upload redacted Pathfinder receipt
