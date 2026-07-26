@@ -1,0 +1,312 @@
+name: MATADATA OpenAI Form Pathfinder V2
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Run the offline preflight only, or start the authorized live submission session.
+        required: true
+        default: preflight
+        type: choice
+        options:
+          - preflight
+          - submit
+      authorization_phrase:
+        description: Required for submit mode. Enter JP-AUTHORIZED-ONE-SUBMIT exactly.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: matadata-openai-cybersecurity-grant-v1
+  cancel-in-progress: false
+
+env:
+  RUNNER_SHA256: f2839e50dbf2e7c2dad64a6e227555c4b9f5c9b29ff45e073a92026e4a561811
+  SUBMISSION_ID: matadata-openai-cybersecurity-grant-v1
+  LOCK_ARTIFACT_NAME: matadata-openai-submission-lock-v1
+
+jobs:
+  preflight:
+    name: Offline safety and integrity preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out the staged Pathfinder branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Reconstruct and verify the reviewed runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/matadata-v2 pathfinder-preflight
+          cat tools/matadata-pathfinder/v2/runner.b64.* > /tmp/matadata-v2/runner.cjs.gz.b64
+          base64 --decode /tmp/matadata-v2/runner.cjs.gz.b64 > /tmp/matadata-v2/runner.cjs.gz
+          gzip --test /tmp/matadata-v2/runner.cjs.gz
+          gzip --decompress --stdout /tmp/matadata-v2/runner.cjs.gz > /tmp/matadata-v2/runner.cjs
+          echo "$RUNNER_SHA256  /tmp/matadata-v2/runner.cjs" | sha256sum --check
+          node --check /tmp/matadata-v2/runner.cjs
+          sha256sum /tmp/matadata-v2/runner.cjs /tmp/matadata-v2/runner.cjs.gz /tmp/matadata-v2/runner.cjs.gz.b64 > pathfinder-preflight/SHA256SUMS.txt
+
+      - name: Run policy and proposal self-tests without opening the form
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'module.exports={chromium:{}};\n' > /tmp/matadata-v2/mock-playwright.cjs
+          PATHFINDER_SELF_TEST='1' \
+          PATHFINDER_TOKEN='offline-preflight-token-000000000000' \
+          PATHFINDER_ARTIFACT_DIR="$GITHUB_WORKSPACE/pathfinder-preflight" \
+          PATHFINDER_SUBMISSION_ID="$SUBMISSION_ID" \
+          PLAYWRIGHT_MODULE='/tmp/matadata-v2/mock-playwright.cjs' \
+          node /tmp/matadata-v2/runner.cjs
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('pathfinder-preflight/selftest.json').read_text(encoding='utf-8'))
+          if not result.get('passed'):
+              raise SystemExit('Pathfinder V2 self-test failed.')
+          if result.get('submissionId') != 'matadata-openai-cybersecurity-grant-v1':
+              raise SystemExit('Unexpected submission ID.')
+          print(json.dumps(result, indent=2))
+          PY
+
+      - name: Upload preflight evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v2-preflight
+          path: pathfinder-preflight
+          if-no-files-found: error
+          retention-days: 30
+
+  submit-once:
+    name: Authorized human-gated submission
+    needs: preflight
+    if: >-
+      needs.preflight.result == 'success' &&
+      (
+        (github.event_name == 'workflow_dispatch' && inputs.mode == 'submit' && inputs.authorization_phrase == 'JP-AUTHORIZED-ONE-SUBMIT') ||
+        (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.changes.title.from && startsWith(github.event.pull_request.title, '[EXECUTE MATADATA]'))
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - name: Refuse a second confirmed submission
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const name = process.env.LOCK_ARTIFACT_NAME;
+            const response = await github.rest.actions.listArtifactsForRepo({ owner, repo, name, per_page: 100 });
+            const active = response.data.artifacts.filter((artifact) => !artifact.expired);
+            if (active.length > 0) {
+              core.setFailed(`A confirmed-submission lock artifact named ${name} already exists. No browser session was started.`);
+            }
+
+      - name: Check out the staged Pathfinder branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Reconstruct and verify the reviewed runner again
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/matadata-v2
+          cat tools/matadata-pathfinder/v2/runner.b64.* > /tmp/matadata-v2/runner.cjs.gz.b64
+          base64 --decode /tmp/matadata-v2/runner.cjs.gz.b64 > /tmp/matadata-v2/runner.cjs.gz
+          gzip --test /tmp/matadata-v2/runner.cjs.gz
+          gzip --decompress --stdout /tmp/matadata-v2/runner.cjs.gz > /tmp/matadata-v2/runner.cjs
+          echo "$RUNNER_SHA256  /tmp/matadata-v2/runner.cjs" | sha256sum --check
+          node --check /tmp/matadata-v2/runner.cjs
+
+      - name: Install the isolated browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pathfinder-node /tmp/ms-playwright
+          cd /tmp/pathfinder-node
+          npm init -y >/dev/null
+          PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright npm install --no-audit --no-fund playwright@1.55.0
+          PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright npx playwright install --with-deps chromium
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb
+          curl --fail --location --silent --show-error \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            --output /tmp/cloudflared
+          chmod +x /tmp/cloudflared
+          /tmp/cloudflared version
+
+      - name: Start the hardened tap interface and official form browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pathfinder-session pathfinder-artifacts pathfinder-lock /tmp/pathfinder-live
+          TOKEN="$(openssl rand -hex 24)"
+          printf '%s' "$TOKEN" > /tmp/pathfinder-live/token
+
+          RUNNER_TRACKING_ID='' nohup Xvfb :99 -screen 0 1280x900x24 -ac -noreset \
+            >/tmp/pathfinder-live/xvfb.log 2>&1 &
+          sleep 2
+
+          RUNNER_TRACKING_ID='' DISPLAY=:99 \
+          PATHFINDER_TOKEN="$TOKEN" \
+          PATHFINDER_PORT='6080' \
+          PATHFINDER_READY_FILE='/tmp/matadata-pathfinder-ready' \
+          PATHFINDER_ARTIFACT_DIR="$GITHUB_WORKSPACE/pathfinder-artifacts" \
+          PATHFINDER_TERMINAL_HOLD_MS='60000' \
+          PATHFINDER_SESSION_TTL_MS='3000000' \
+          PATHFINDER_SUBMISSION_ID="$SUBMISSION_ID" \
+          PLAYWRIGHT_MODULE='/tmp/pathfinder-node/node_modules/playwright' \
+          PLAYWRIGHT_BROWSERS_PATH='/tmp/ms-playwright' \
+          nohup node /tmp/matadata-v2/runner.cjs \
+            >/tmp/pathfinder-live/pathfinder.log 2>&1 &
+          echo $! > /tmp/pathfinder-live/pathfinder.pid
+
+          for _ in $(seq 1 90); do
+            if [[ -f /tmp/matadata-pathfinder-ready ]]; then break; fi
+            if ! kill -0 "$(cat /tmp/pathfinder-live/pathfinder.pid)" 2>/dev/null; then
+              cat /tmp/pathfinder-live/pathfinder.log
+              exit 1
+            fi
+            sleep 1
+          done
+          test -f /tmp/matadata-pathfinder-ready
+
+          RUNNER_TRACKING_ID='' nohup /tmp/cloudflared tunnel --protocol http2 --no-autoupdate \
+            --url http://127.0.0.1:6080 \
+            >/tmp/pathfinder-live/cloudflared.log 2>&1 &
+
+          TUNNEL_URL=''
+          for _ in $(seq 1 90); do
+            TUNNEL_URL="$(grep -Eo 'https://[-a-z0-9]+\.trycloudflare\.com' /tmp/pathfinder-live/cloudflared.log | head -n1 || true)"
+            if [[ -n "$TUNNEL_URL" ]]; then break; fi
+            sleep 1
+          done
+          if [[ -z "$TUNNEL_URL" ]]; then
+            cat /tmp/pathfinder-live/cloudflared.log
+            exit 1
+          fi
+
+          HEALTHY=''
+          for _ in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 10 "$TUNNEL_URL/health?token=$TOKEN" >/tmp/pathfinder-live/health.json; then
+              HEALTHY='yes'
+              break
+            fi
+            sleep 2
+          done
+          if [[ "$HEALTHY" != 'yes' ]]; then
+            cat /tmp/pathfinder-live/cloudflared.log
+            exit 1
+          fi
+
+          python - "$TUNNEL_URL" "$TOKEN" <<'PY'
+          import json, os, sys
+          from datetime import datetime, timedelta, timezone
+          url, token = sys.argv[1:]
+          payload = {
+              'status': 'LIVE_HUMAN_VERIFICATION_AND_ACKNOWLEDGMENT',
+              'runner_version': '2.0.0',
+              'submission_id': 'matadata-openai-cybersecurity-grant-v1',
+              'url': f'{url}/?token={token}',
+              'purpose': 'JP completes OpenAI human verification and personally checks the applicant acknowledgment. Radio fills the reviewed non-confidential proposal and submits exactly once.',
+              'interaction_limits': [
+                  'Revision-checked taps are accepted only for the detected human-verification or acknowledgment step.',
+                  'Direct taps on Submit are blocked.',
+                  'The runner requires positive confirmation evidence and never makes a second submit click.'
+              ],
+              'run_id': os.environ.get('GITHUB_RUN_ID'),
+              'run_attempt': os.environ.get('GITHUB_RUN_ATTEMPT'),
+              'expires_at': (datetime.now(timezone.utc) + timedelta(minutes=50)).isoformat(),
+          }
+          with open('pathfinder-session/session.json', 'w', encoding='utf-8') as fh:
+              json.dump(payload, fh, indent=2)
+          PY
+
+      - name: Publish the private live-session handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v2-live-session
+          path: pathfinder-session/session.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Await the human steps and exactly one confirmed submission
+        shell: bash
+        run: |
+          set -euo pipefail
+          PID="$(cat /tmp/pathfinder-live/pathfinder.pid)"
+          for _ in $(seq 1 720); do
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 5
+          done
+          if kill -0 "$PID" 2>/dev/null; then
+            kill -TERM "$PID" 2>/dev/null || true
+            echo 'Pathfinder exceeded the live interaction window.'
+            exit 1
+          fi
+          cat /tmp/pathfinder-live/pathfinder.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          receipt_path = Path('pathfinder-artifacts/receipt.json')
+          if not receipt_path.exists():
+              raise SystemExit('No Pathfinder receipt was produced.')
+          receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
+          print(json.dumps(receipt, indent=2))
+          if receipt.get('status') != 'SUBMITTED' or receipt.get('submitClicks') != 1:
+              raise SystemExit('Submission was not positively confirmed exactly once.')
+          lock = {
+              'status': 'SUBMITTED',
+              'submissionId': receipt.get('submissionId'),
+              'runnerVersion': receipt.get('runnerVersion'),
+              'timestamp': receipt.get('timestamp'),
+              'applicationSha256': receipt.get('applicationSha256'),
+              'confirmationText': receipt.get('confirmationText'),
+              'confirmationEvidence': receipt.get('confirmationEvidence'),
+              'submitClicks': receipt.get('submitClicks'),
+          }
+          Path('pathfinder-lock/submission-lock.json').write_text(json.dumps(lock, indent=2), encoding='utf-8')
+          PY
+
+      - name: Preserve runner and tunnel diagnostics
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p pathfinder-artifacts/logs
+          cp /tmp/pathfinder-live/pathfinder.log pathfinder-artifacts/logs/ 2>/dev/null || true
+          cp /tmp/pathfinder-live/cloudflared.log pathfinder-artifacts/logs/ 2>/dev/null || true
+          cp /tmp/pathfinder-live/xvfb.log pathfinder-artifacts/logs/ 2>/dev/null || true
+          cp /tmp/pathfinder-live/health.json pathfinder-artifacts/logs/ 2>/dev/null || true
+
+      - name: Upload the receipt, schema, hashes, screenshots, and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-openai-pathfinder-v2-receipt
+          path: pathfinder-artifacts
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish the cross-run confirmed-submission lock
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-openai-submission-lock-v1
+          path: pathfinder-lock/submission-lock.json
+          if-no-files-found: error
+          retention-days: 90

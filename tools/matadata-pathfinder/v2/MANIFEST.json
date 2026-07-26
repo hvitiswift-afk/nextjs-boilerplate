@@ -1,0 +1,26 @@
+{
+  "name": "MATADATA OpenAI Form Pathfinder V2",
+  "version": "2.0.0",
+  "status": "STAGED_NOT_EXECUTED",
+  "submission_id": "matadata-openai-cybersecurity-grant-v1",
+  "runner_sha256": "f2839e50dbf2e7c2dad64a6e227555c4b9f5c9b29ff45e073a92026e4a561811",
+  "gzip_sha256": "897b67d6bb4f997582483f2f755563792ab7cdf4825e93b00a55f99d172f6198",
+  "base64_sha256": "b35e524ed8bd7c1df53e3e5dd2bd25be892292682bcd86d0d8fcf7c2405cd75a",
+  "application_sha256": "6ca7dd6f4ca13f04923a48896e51badeb7967f1fbde6b686a4b1759d90cfe340",
+  "chunk_sizes_bytes": [5000, 5000, 5000, 5000, 3172],
+  "self_test": {
+    "passed": true,
+    "expected_field_specs": 14,
+    "proposal_words": 902,
+    "problem_statement_words": 147,
+    "direct_submit_taps_blocked": true,
+    "positive_confirmation_required": true,
+    "exactly_once_lock": true
+  },
+  "human_only_steps": [
+    "CAPTCHA or human verification",
+    "identity or signature if requested",
+    "applicant acknowledgment"
+  ],
+  "live_execution": false
+}
