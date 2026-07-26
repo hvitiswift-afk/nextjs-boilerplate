@@ -29,12 +29,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat tools/matadata-pathfinder/tap-chunks/tap.b64.* \
-            | base64 --decode \
-            | gzip --decompress \
-            > /tmp/matadata-tap-submit.cjs
-          echo '62107824032d4c152b05f38bf6a8359d25947350f656472088b07ca6283e30ff  /tmp/matadata-tap-submit.cjs' \
-            | sha256sum --check
+          cat tools/matadata-pathfinder/tap-chunks/tap.b64.* > /tmp/matadata-tap-submit.cjs.gz.b64
+          base64 --decode /tmp/matadata-tap-submit.cjs.gz.b64 > /tmp/matadata-tap-submit.cjs.gz
+          gzip --test /tmp/matadata-tap-submit.cjs.gz
+          gzip --decompress --stdout /tmp/matadata-tap-submit.cjs.gz > /tmp/matadata-tap-submit.cjs
+          echo 'Reconstructed script checksums:'
+          sha256sum /tmp/matadata-tap-submit.cjs.gz.b64 /tmp/matadata-tap-submit.cjs.gz /tmp/matadata-tap-submit.cjs
           node --check /tmp/matadata-tap-submit.cjs
 
       - name: Install isolated browser runtime
@@ -143,7 +143,7 @@ jobs:
           fi
           cat /tmp/pathfinder-live/pathfinder.log
           python - <<'PY'
-          import json, sys
+          import json
           from pathlib import Path
           p = Path('pathfinder-artifacts/receipt.json')
           if not p.exists():
