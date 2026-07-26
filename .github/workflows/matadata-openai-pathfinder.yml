@@ -10,12 +10,12 @@ permissions:
 
 concurrency:
   group: matadata-openai-pathfinder-public-once
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   submit-once:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 65
     steps:
       - name: Check out isolated Pathfinder branch
         uses: actions/checkout@v4
@@ -25,61 +25,73 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Restore, extend, and check reviewed Pathfinder script
+      - name: Restore and verify tap Pathfinder
+        shell: bash
         run: |
-          cat tools/matadata-pathfinder/chunks/submit.b64.* | base64 --decode | gzip --decompress > tools/matadata-pathfinder/.runtime-submit.mjs
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('tools/matadata-pathfinder/.runtime-submit.mjs')
-          s = p.read_text(encoding='utf-8')
-          replacements = {
-              '150_000': '2_700_000',
-              '150000': '2700000',
-              '150 * 1000': '2700 * 1000',
-              '150*1000': '2700*1000',
-          }
-          for old, new in replacements.items():
-              s = s.replace(old, new)
-          p.write_text(s, encoding='utf-8')
-          PY
-          node --check tools/matadata-pathfinder/.runtime-submit.mjs
+          set -euo pipefail
+          cat tools/matadata-pathfinder/tap-chunks/tap.b64.* \
+            | base64 --decode \
+            | gzip --decompress \
+            > /tmp/matadata-tap-submit.cjs
+          echo '62107824032d4c152b05f38bf6a8359d25947350f656472088b07ca6283e30ff  /tmp/matadata-tap-submit.cjs' \
+            | sha256sum --check
+          node --check /tmp/matadata-tap-submit.cjs
 
-      - name: Install browser and human-takeover runtime
+      - name: Install isolated browser runtime
+        shell: bash
         run: |
-          npm install --no-save --package-lock=false playwright@1.55.0
-          npx playwright install --with-deps chromium
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb x11vnc fluxbox novnc websockify
+          set -euo pipefail
+          mkdir -p /tmp/pathfinder-node /tmp/ms-playwright
+          cd /tmp/pathfinder-node
+          npm init -y >/dev/null
+          PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright npm install --no-audit --no-fund playwright@1.55.0
+          PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright npx playwright install --with-deps chromium
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb
           curl --fail --location --silent --show-error \
             https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
             --output /tmp/cloudflared
           chmod +x /tmp/cloudflared
 
-      - name: Start password-protected live browser bridge
+      - name: Start secure tap interface and browser
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p pathfinder-session /tmp/pathfinder-live
-          SESSION_PASSWORD="$(openssl rand -hex 8)"
-          printf '%s' "$SESSION_PASSWORD" > /tmp/pathfinder-live/session-password
-          x11vnc -storepasswd "$SESSION_PASSWORD" /tmp/pathfinder-live/x11vnc.pass >/dev/null
+          mkdir -p pathfinder-session pathfinder-artifacts /tmp/pathfinder-live
+          TOKEN="$(openssl rand -hex 24)"
+          printf '%s' "$TOKEN" > /tmp/pathfinder-live/token
 
-          RUNNER_TRACKING_ID='' nohup Xvfb :99 -screen 0 1440x1100x24 -ac -noreset \
+          RUNNER_TRACKING_ID='' nohup Xvfb :99 -screen 0 1280x900x24 -ac -noreset \
             >/tmp/pathfinder-live/xvfb.log 2>&1 &
           sleep 2
-          RUNNER_TRACKING_ID='' DISPLAY=:99 nohup fluxbox \
-            >/tmp/pathfinder-live/fluxbox.log 2>&1 &
-          RUNNER_TRACKING_ID='' nohup x11vnc -display :99 -forever -shared \
-            -rfbauth /tmp/pathfinder-live/x11vnc.pass -rfbport 5900 \
-            >/tmp/pathfinder-live/x11vnc.log 2>&1 &
-          RUNNER_TRACKING_ID='' nohup websockify --web=/usr/share/novnc/ 6080 localhost:5900 \
-            >/tmp/pathfinder-live/novnc.log 2>&1 &
+
+          RUNNER_TRACKING_ID='' DISPLAY=:99 \
+          PATHFINDER_TOKEN="$TOKEN" \
+          PATHFINDER_PORT='6080' \
+          PATHFINDER_READY_FILE='/tmp/matadata-pathfinder-ready' \
+          PATHFINDER_ARTIFACT_DIR="$GITHUB_WORKSPACE/pathfinder-artifacts" \
+          PATHFINDER_TERMINAL_HOLD_MS='90000' \
+          PLAYWRIGHT_MODULE='/tmp/pathfinder-node/node_modules/playwright' \
+          PLAYWRIGHT_BROWSERS_PATH='/tmp/ms-playwright' \
+          nohup node /tmp/matadata-tap-submit.cjs \
+            >/tmp/pathfinder-live/pathfinder.log 2>&1 &
+          echo $! > /tmp/pathfinder-live/pathfinder.pid
+
+          for _ in $(seq 1 90); do
+            if [[ -f /tmp/matadata-pathfinder-ready ]]; then break; fi
+            if ! kill -0 "$(cat /tmp/pathfinder-live/pathfinder.pid)" 2>/dev/null; then
+              cat /tmp/pathfinder-live/pathfinder.log
+              exit 1
+            fi
+            sleep 1
+          done
+          test -f /tmp/matadata-pathfinder-ready
+
           RUNNER_TRACKING_ID='' nohup /tmp/cloudflared tunnel --no-autoupdate \
             --url http://127.0.0.1:6080 \
             >/tmp/pathfinder-live/cloudflared.log 2>&1 &
 
           TUNNEL_URL=''
-          for _ in $(seq 1 60); do
+          for _ in $(seq 1 90); do
             TUNNEL_URL="$(grep -Eo 'https://[-a-z0-9]+\.trycloudflare\.com' /tmp/pathfinder-live/cloudflared.log | head -n1 || true)"
             if [[ -n "$TUNNEL_URL" ]]; then break; fi
             sleep 1
@@ -89,23 +101,26 @@ jobs:
             exit 1
           fi
 
-          python - "$TUNNEL_URL" "$SESSION_PASSWORD" <<'PY'
+          python - "$TUNNEL_URL" "$TOKEN" <<'PY'
           import json, sys
           from datetime import datetime, timedelta, timezone
-          url, password = sys.argv[1:]
+          url, token = sys.argv[1:]
           payload = {
-              "status": "LIVE_HUMAN_VERIFICATION_SESSION",
-              "url": f"{url}/vnc.html?autoconnect=1&resize=scale&path=websockify",
-              "lite_url": f"{url}/vnc_lite.html?autoconnect=1&resize=scale&path=websockify",
-              "password": password,
-              "purpose": "Human completion of OpenAI Cloudflare verification only; automation resumes afterward.",
-              "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=45)).isoformat(),
+              "status": "LIVE_HUMAN_VERIFICATION_AND_ACKNOWLEDGMENT",
+              "url": f"{url}/?token={token}",
+              "purpose": "JP completes OpenAI human verification and personally checks the applicant acknowledgment. Radio fills the reviewed non-confidential proposal and submits exactly once.",
+              "interaction_limits": [
+                  "Taps are forwarded only during OpenAI human verification.",
+                  "After form fill, taps are accepted only near the applicant acknowledgment checkbox.",
+                  "The interface cannot directly tap Submit; Pathfinder performs the sole authorized submit click after validation."
+              ],
+              "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=50)).isoformat(),
           }
           with open('pathfinder-session/session.json', 'w', encoding='utf-8') as fh:
               json.dump(payload, fh, indent=2)
           PY
 
-      - name: Publish private live-session handoff artifact
+      - name: Publish private live tap-session handoff
         uses: actions/upload-artifact@v4
         with:
           name: matadata-pathfinder-live-session
@@ -113,12 +128,40 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-      - name: Await human verification, fill application, and submit once
-        env:
-          DISPLAY: ':99'
-          PATHFINDER_INTERACTIVE: '1'
-          PATHFINDER_INTERACTIVE_WAIT_MS: '2700000'
-        run: node tools/matadata-pathfinder/.runtime-submit.mjs
+      - name: Await human steps and one-time submission
+        shell: bash
+        run: |
+          set -euo pipefail
+          PID="$(cat /tmp/pathfinder-live/pathfinder.pid)"
+          for _ in $(seq 1 660); do
+            if ! kill -0 "$PID" 2>/dev/null; then break; fi
+            sleep 5
+          done
+          if kill -0 "$PID" 2>/dev/null; then
+            echo 'Pathfinder exceeded the interaction window.'
+            exit 1
+          fi
+          cat /tmp/pathfinder-live/pathfinder.log
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          p = Path('pathfinder-artifacts/receipt.json')
+          if not p.exists():
+              raise SystemExit('No Pathfinder receipt was produced.')
+          receipt = json.loads(p.read_text(encoding='utf-8'))
+          print(json.dumps(receipt, indent=2))
+          if receipt.get('status') != 'SUBMITTED' or receipt.get('submitClicks') != 1:
+              raise SystemExit('Submission was not confirmed exactly once.')
+          PY
+
+      - name: Preserve Pathfinder receipt, screenshots, and logs
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p pathfinder-artifacts/logs
+          cp /tmp/pathfinder-live/pathfinder.log pathfinder-artifacts/logs/ 2>/dev/null || true
+          cp /tmp/pathfinder-live/cloudflared.log pathfinder-artifacts/logs/ 2>/dev/null || true
+          cp /tmp/pathfinder-live/xvfb.log pathfinder-artifacts/logs/ 2>/dev/null || true
 
       - name: Upload Pathfinder receipt and screenshots
         if: always()
