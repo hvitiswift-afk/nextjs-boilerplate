@@ -3,7 +3,7 @@ name: MATADATA OpenAI Form Pathfinder
 on:
   pull_request:
     branches: [main]
-    types: [opened]
+    types: [opened, synchronize]
 
 permissions:
   contents: read
@@ -27,8 +27,8 @@ jobs:
 
       - name: Restore and check reviewed Pathfinder script
         run: |
-          base64 --decode tools/matadata-pathfinder/submit.mjs.gz.b64 | gzip --decompress > /tmp/matadata-openai-pathfinder.mjs
-          node --check /tmp/matadata-openai-pathfinder.mjs
+          base64 --decode tools/matadata-pathfinder/submit.mjs.gz.b64 | gzip --decompress > tools/matadata-pathfinder/.runtime-submit.mjs
+          node --check tools/matadata-pathfinder/.runtime-submit.mjs
 
       - name: Install browser runtime
         run: |
@@ -36,7 +36,7 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Submit through OpenAI public form exactly once
-        run: node /tmp/matadata-openai-pathfinder.mjs
+        run: node tools/matadata-pathfinder/.runtime-submit.mjs
 
       - name: Upload Pathfinder receipt and screenshots
         if: always()
