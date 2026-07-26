@@ -1,0 +1,86 @@
+name: MATADATA OpenAI Public Pathfinder
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matadata-openai-public-pathfinder-once
+  cancel-in-progress: false
+
+jobs:
+  submit-once:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: e139cc17-6a7a-4538-9971-6ed13d23bbcc
+    steps:
+      - name: Check out isolated Pathfinder branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Require authorized Netlify credential
+        shell: bash
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "Missing repository secret NETLIFY_AUTH_TOKEN"
+            exit 1
+          fi
+
+      - name: Install isolated browser and Netlify clients
+        shell: bash
+        run: |
+          mkdir -p /tmp/matadata-openai-pathfinder
+          cd /tmp/matadata-openai-pathfinder
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false netlify-cli@latest playwright
+          npx playwright install --with-deps chromium
+          cp "$GITHUB_WORKSPACE/tools/matadata-pathfinder/submit-public.mjs" submit.mjs
+          node --check submit.mjs
+
+      - name: Retrieve private application payload from authorized Netlify storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/matadata-openai-pathfinder
+          PART_1="$(npx netlify env:get MATADATA_OPENAI_APPLICATION_PART_1 --site "$NETLIFY_SITE_ID" --context dev --scope builds --auth "$NETLIFY_AUTH_TOKEN")"
+          PART_2="$(npx netlify env:get MATADATA_OPENAI_APPLICATION_PART_2 --site "$NETLIFY_SITE_ID" --context dev --scope builds --auth "$NETLIFY_AUTH_TOKEN")"
+          EXPECTED_SHA="$(npx netlify env:get MATADATA_OPENAI_APPLICATION_SHA256 --site "$NETLIFY_SITE_ID" --context dev --scope builds --auth "$NETLIFY_AUTH_TOKEN")"
+          echo "::add-mask::$PART_1"
+          echo "::add-mask::$PART_2"
+          if [ -z "$PART_1" ] || [ -z "$PART_2" ] || [ -z "$EXPECTED_SHA" ]; then
+            echo "One or more Pathfinder payload values could not be retrieved"
+            exit 1
+          fi
+          printf '%s%s' "$PART_1" "$PART_2" | base64 --decode | gzip --decompress > application.json
+          ACTUAL_SHA="$(sha256sum application.json | awk '{print $1}')"
+          if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
+            echo "Application payload integrity check failed"
+            exit 1
+          fi
+          echo "PATHFINDER_APPLICATION_PATH=/tmp/matadata-openai-pathfinder/application.json" >> "$GITHUB_ENV"
+          echo "Application payload restored and verified without publication."
+
+      - name: Submit through OpenAI public form exactly once
+        shell: bash
+        run: |
+          cd /tmp/matadata-openai-pathfinder
+          node submit.mjs
+
+      - name: Upload redacted Pathfinder receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-openai-public-pathfinder-receipt
+          path: /tmp/matadata-openai-pathfinder/pathfinder-artifacts
+          if-no-files-found: warn
+          retention-days: 30
