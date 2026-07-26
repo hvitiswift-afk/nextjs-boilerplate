@@ -30,6 +30,15 @@ jobs:
       - name: Ensure patch utility is available
         run: command -v patch || (sudo apt-get update -qq && sudo apt-get install -y patch)
 
+      - name: Normalize transport-only whitespace in encoded chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in tools/matadata-pathfinder/v2/runner.b64.* tools/matadata-pathfinder/v2/upgrade/v21.patch.b64.*; do
+            tr -d '[:space:]' < "$file" > "$file.clean"
+            mv "$file.clean" "$file"
+          done
+
       - name: Apply and validate the checksum-locked acknowledgment repair
         shell: bash
         run: |
