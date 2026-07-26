@@ -1,4 +1,4 @@
-# MATADATA OpenAI Pathfinder V2
+# MATADATA OpenAI Pathfinder V2.1
 
 This directory stages the reviewed, non-confidential MATADATA Cybersecurity Grant Program submission runner for a future authorized attempt.
 
@@ -12,12 +12,16 @@ This directory stages the reviewed, non-confidential MATADATA Cybersecurity Gran
 - If one click occurs but confirmation is uncertain, the runner stops and will not click again.
 - A confirmed-submission artifact prevents later runs from submitting the same application again.
 
+## Acknowledgment control
+
+V2.1 does not depend on OpenAI's visual checkbox loading correctly inside the remote screenshot. It extracts the current acknowledgment text from the official form and displays that text in a dedicated Pathfinder panel. JP must personally check the panel and press **Record my acknowledgment and continue**. The runner then checks and positively verifies the real underlying OpenAI control before submission. If the text changes, the screenshot revision is stale, or the underlying control cannot be verified, submission remains blocked.
+
 ## Integrity
 
 Reviewed runner SHA-256:
 
 ```text
-f2839e50dbf2e7c2dad64a6e227555c4b9f5c9b29ff45e073a92026e4a561811
+738ccace37392a064eb37bd1b360a292199cb1bad94b0a656e899f03d43ab13c
 ```
 
 Application content SHA-256:
@@ -26,7 +30,7 @@ Application content SHA-256:
 6ca7dd6f4ca13f04923a48896e51badeb7967f1fbde6b686a4b1759d90cfe340
 ```
 
-The five `runner.b64.*` files concatenate into a base64-encoded gzip stream. The workflow reconstructs the reviewed runner, verifies its checksum, checks JavaScript syntax, and runs policy/proposal self-tests before any live browser can start.
+The six `runner.b64.*` files concatenate into a base64-encoded deterministic gzip stream. The workflow reconstructs the reviewed runner, verifies its checksum, checks JavaScript syntax, and runs policy/proposal self-tests before any live browser can start.
 
 ## Normal use
 

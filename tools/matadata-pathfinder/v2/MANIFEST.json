@@ -1,13 +1,13 @@
 {
-  "name": "MATADATA OpenAI Form Pathfinder V2",
-  "version": "2.0.0",
+  "name": "MATADATA OpenAI Form Pathfinder V2.1",
+  "version": "2.1.0",
   "status": "STAGED_NOT_EXECUTED",
   "submission_id": "matadata-openai-cybersecurity-grant-v1",
-  "runner_sha256": "f2839e50dbf2e7c2dad64a6e227555c4b9f5c9b29ff45e073a92026e4a561811",
-  "gzip_sha256": "897b67d6bb4f997582483f2f755563792ab7cdf4825e93b00a55f99d172f6198",
-  "base64_sha256": "b35e524ed8bd7c1df53e3e5dd2bd25be892292682bcd86d0d8fcf7c2405cd75a",
+  "runner_sha256": "738ccace37392a064eb37bd1b360a292199cb1bad94b0a656e899f03d43ab13c",
+  "gzip_sha256": "cead533070b44e4782e9863584cde0e4d5384d81c9f11361a1090bf5524d2952",
+  "base64_sha256": "0a1cf699c1b94300edc58e5cefdf754ee1450d9ef6877a7217a08a5fcb9d0d88",
   "application_sha256": "6ca7dd6f4ca13f04923a48896e51badeb7967f1fbde6b686a4b1759d90cfe340",
-  "chunk_sizes_bytes": [5000, 5000, 5000, 5000, 3172],
+  "chunk_sizes_bytes": [5000, 5000, 5000, 5000, 5000, 2864],
   "self_test": {
     "passed": true,
     "expected_field_specs": 14,
@@ -15,7 +15,18 @@
     "problem_statement_words": 147,
     "direct_submit_taps_blocked": true,
     "positive_confirmation_required": true,
-    "exactly_once_lock": true
+    "exactly_once_lock": true,
+    "acknowledgment_proxy_panel": true,
+    "acknowledgment_proxy_endpoint": true,
+    "acknowledgment_text_validation": true,
+    "personal_affirmation_submit_precondition": true
+  },
+  "acknowledgment_flow": {
+    "source": "Current text extracted from the official OpenAI form DOM",
+    "personal_action": "JP checks the dedicated panel and presses Record my acknowledgment and continue",
+    "underlying_control_verification_required": true,
+    "stale_revision_rejected": true,
+    "direct_submit_taps_blocked": true
   },
   "human_only_steps": [
     "CAPTCHA or human verification",

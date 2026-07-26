@@ -1,4 +1,4 @@
-name: MATADATA OpenAI Form Pathfinder V2
+name: MATADATA OpenAI Form Pathfinder V2.1
 
 on:
   pull_request:
@@ -28,7 +28,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  RUNNER_SHA256: f2839e50dbf2e7c2dad64a6e227555c4b9f5c9b29ff45e073a92026e4a561811
+  RUNNER_SHA256: 738ccace37392a064eb37bd1b360a292199cb1bad94b0a656e899f03d43ab13c
   SUBMISSION_ID: matadata-openai-cybersecurity-grant-v1
   LOCK_ARTIFACT_NAME: matadata-openai-submission-lock-v1
 
@@ -75,7 +75,9 @@ jobs:
           from pathlib import Path
           result = json.loads(Path('pathfinder-preflight/selftest.json').read_text(encoding='utf-8'))
           if not result.get('passed'):
-              raise SystemExit('Pathfinder V2 self-test failed.')
+              raise SystemExit('Pathfinder V2.1 self-test failed.')
+          if result.get('runnerVersion') != '2.1.0':
+              raise SystemExit('Unexpected Pathfinder runner version.')
           if result.get('submissionId') != 'matadata-openai-cybersecurity-grant-v1':
               raise SystemExit('Unexpected submission ID.')
           print(json.dumps(result, indent=2))
@@ -84,7 +86,7 @@ jobs:
       - name: Upload preflight evidence
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-pathfinder-v2-preflight
+          name: matadata-pathfinder-v21-preflight
           path: pathfinder-preflight
           if-no-files-found: error
           retention-days: 30
@@ -150,7 +152,7 @@ jobs:
           chmod +x /tmp/cloudflared
           /tmp/cloudflared version
 
-      - name: Start the hardened tap interface and official form browser
+      - name: Start the hardened acknowledgment interface and official form browser
         shell: bash
         run: |
           set -euo pipefail
@@ -220,13 +222,15 @@ jobs:
           url, token = sys.argv[1:]
           payload = {
               'status': 'LIVE_HUMAN_VERIFICATION_AND_ACKNOWLEDGMENT',
-              'runner_version': '2.0.0',
+              'runner_version': '2.1.0',
               'submission_id': 'matadata-openai-cybersecurity-grant-v1',
               'url': f'{url}/?token={token}',
-              'purpose': 'JP completes OpenAI human verification and personally checks the applicant acknowledgment. Radio fills the reviewed non-confidential proposal and submits exactly once.',
+              'purpose': 'JP completes OpenAI human verification and personally records the applicant acknowledgment in the dedicated Pathfinder panel. Radio fills the reviewed non-confidential proposal and submits exactly once.',
               'interaction_limits': [
-                  'Revision-checked taps are accepted only for the detected human-verification or acknowledgment step.',
+                  'Revision-checked taps are accepted only for the detected human-verification step.',
+                  'The acknowledgment is shown in a dedicated panel and requires JP to check it and press Record my acknowledgment and continue.',
                   'Direct taps on Submit are blocked.',
+                  'The runner positively verifies the underlying OpenAI acknowledgment control before submission.',
                   'The runner requires positive confirmation evidence and never makes a second submit click.'
               ],
               'run_id': os.environ.get('GITHUB_RUN_ID'),
@@ -240,7 +244,7 @@ jobs:
       - name: Publish the private live-session handoff
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-pathfinder-v2-live-session
+          name: matadata-pathfinder-v21-live-session
           path: pathfinder-session/session.json
           if-no-files-found: error
           retention-days: 1
@@ -270,12 +274,18 @@ jobs:
           print(json.dumps(receipt, indent=2))
           if receipt.get('status') != 'SUBMITTED' or receipt.get('submitClicks') != 1:
               raise SystemExit('Submission was not positively confirmed exactly once.')
+          if receipt.get('runnerVersion') != '2.1.0':
+              raise SystemExit('Unexpected runner version in submission receipt.')
+          if receipt.get('personalAcknowledgmentAffirmed') is not True:
+              raise SystemExit('Personal applicant acknowledgment was not recorded.')
           lock = {
               'status': 'SUBMITTED',
               'submissionId': receipt.get('submissionId'),
               'runnerVersion': receipt.get('runnerVersion'),
               'timestamp': receipt.get('timestamp'),
               'applicationSha256': receipt.get('applicationSha256'),
+              'acknowledgmentTextSha256': receipt.get('acknowledgmentTextSha256'),
+              'personalAcknowledgmentAffirmed': receipt.get('personalAcknowledgmentAffirmed'),
               'confirmationText': receipt.get('confirmationText'),
               'confirmationEvidence': receipt.get('confirmationEvidence'),
               'submitClicks': receipt.get('submitClicks'),
@@ -297,7 +307,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-openai-pathfinder-v2-receipt
+          name: matadata-openai-pathfinder-v21-receipt
           path: pathfinder-artifacts
           if-no-files-found: warn
           retention-days: 30
