@@ -133,29 +133,21 @@ async function fillVisible(page, selector, value, fieldName) {
   }
 }
 
-async function checkAcknowledgment(page) {
+async function confirmAcknowledgmentNotice(page) {
   const legalText = await pageText(page);
-  if (!/applicant acknowledges|obligation of exclusivity|sole discretion/i.test(legalText)) {
-    throw new Error('OpenAI applicant acknowledgment text was not present');
+  const noticePresent = /applicant acknowledges|obligation of exclusivity|sole discretion/i.test(legalText);
+  if (!noticePresent) {
+    throw new Error('OpenAI applicant acknowledgment notice was not present');
   }
 
-  const exact = page.locator('input[name="mkto_email_operational_opt_in"]:visible').first();
-  if (await visible(exact)) {
-    if (!(await exact.isChecked())) await exact.check();
-    return exact.isChecked();
-  }
-
-  const checkboxes = page.locator('input[type="checkbox"]:visible');
-  if ((await checkboxes.count()) === 1) {
-    const only = checkboxes.first();
-    if (!(await only.isChecked())) await only.check();
-    return only.isChecked();
-  }
-
-  throw new Error('Could not identify the applicant acknowledgment checkbox');
+  // The live form presents the acknowledgment as displayed notice text. It
+  // does not expose a visible legal-consent checkbox. A similarly named hidden
+  // operational field is intentionally left untouched.
+  const visibleCheckboxCount = await page.locator('input[type="checkbox"]:visible').count();
+  return { noticePresent, visibleCheckboxCount };
 }
 
-async function validateFields(page, consentChecked) {
+async function validateFields(page, acknowledgmentNoticePresent) {
   const required = [
     ['input[name="FirstName"]', 'first name'],
     ['input[name="LastName"]', 'last name'],
@@ -179,8 +171,8 @@ async function validateFields(page, consentChecked) {
     if (!String(value).trim()) missing.push({ field: name, reason: 'empty' });
   }
 
-  if (!consentChecked) {
-    missing.push({ field: 'applicant acknowledgment', reason: 'not checked' });
+  if (!acknowledgmentNoticePresent) {
+    missing.push({ field: 'applicant acknowledgment notice', reason: 'not present' });
   }
 
   return missing;
@@ -260,13 +252,13 @@ try {
     await fillVisible(page, selector, value, fieldName);
   }
 
-  const consentChecked = await checkAcknowledgment(page);
+  const acknowledgment = await confirmAcknowledgmentNotice(page);
   await page.waitForTimeout(500);
   await saveAuditMetadata(page, '02-before-submit');
 
-  const missing = await validateFields(page, consentChecked);
+  const missing = await validateFields(page, acknowledgment.noticePresent);
   if (missing.length) {
-    await writeReceipt({ status: 'REQUIRED_FIELDS_EMPTY', requiredEmpty: missing, consentChecked, submitClicks: 0 });
+    await writeReceipt({ status: 'REQUIRED_FIELDS_EMPTY', requiredEmpty: missing, acknowledgmentNoticePresent: acknowledgment.noticePresent, visibleAcknowledgmentCheckboxCount: acknowledgment.visibleCheckboxCount, submitClicks: 0 });
     throw new Error(`Required visible fields were not ready: ${JSON.stringify(missing)}`);
   }
 
@@ -284,7 +276,8 @@ try {
   await submitButton.click();
   await writeReceipt({
     status: 'SUBMIT_CLICKED',
-    consentChecked,
+    acknowledgmentNoticePresent: acknowledgment.noticePresent,
+    visibleAcknowledgmentCheckboxCount: acknowledgment.visibleCheckboxCount,
     startUrl,
     submitClicks: 1,
   });
@@ -315,7 +308,8 @@ try {
       submittedAt: new Date().toISOString(),
       endUrl: finalUrl,
       title: await page.title(),
-      consentChecked,
+      acknowledgmentNoticePresent: acknowledgment.noticePresent,
+      visibleAcknowledgmentCheckboxCount: acknowledgment.visibleCheckboxCount,
       confirmationEvidence: {
         successText,
         successUrl,
@@ -328,7 +322,8 @@ try {
       status: 'VALIDATION_ERROR_AFTER_SUBMIT',
       endUrl: finalUrl,
       title: await page.title(),
-      consentChecked,
+      acknowledgmentNoticePresent: acknowledgment.noticePresent,
+      visibleAcknowledgmentCheckboxCount: acknowledgment.visibleCheckboxCount,
       visibleInvalid,
       bodyExcerpt: compact(finalText),
     });
@@ -340,7 +335,8 @@ try {
         : 'SUBMISSION_UNCERTAIN',
       endUrl: finalUrl,
       title: await page.title(),
-      consentChecked,
+      acknowledgmentNoticePresent: acknowledgment.noticePresent,
+      visibleAcknowledgmentCheckboxCount: acknowledgment.visibleCheckboxCount,
       challengePresent: postSubmitChallenge,
       bodyExcerpt: compact(finalText),
     });
