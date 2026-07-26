@@ -1,0 +1,42 @@
+name: MATADATA Pathfinder V2.2 Source Staging
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matadata-pathfinder-v22-source
+  cancel-in-progress: true
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct V2.1 source without opening OpenAI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pathfinder-v22-source
+          cat tools/matadata-pathfinder/v2/runner.b64.* \
+            | base64 --decode \
+            | gzip --decompress \
+            > pathfinder-v22-source/matadata-pathfinder-v21.cjs
+          echo '738ccace37392a064eb37bd1b360a292199cb1bad94b0a656e899f03d43ab13c  pathfinder-v22-source/matadata-pathfinder-v21.cjs' \
+            | sha256sum --check
+          node --check pathfinder-v22-source/matadata-pathfinder-v21.cjs
+          sha256sum pathfinder-v22-source/matadata-pathfinder-v21.cjs > pathfinder-v22-source/SHA256SUMS.txt
+
+      - name: Upload V2.1 source for V2.2 hardening
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v22-source
+          path: pathfinder-v22-source
+          if-no-files-found: error
+          retention-days: 1
