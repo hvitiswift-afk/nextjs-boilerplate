@@ -178,6 +178,86 @@ async function validateFields(page, acknowledgmentNoticePresent) {
   return missing;
 }
 
+async function readSubmitState(submitButton) {
+  return submitButton.evaluate((button) => {
+    const form = button.closest('form');
+    const controls = form ? Array.from(form.querySelectorAll('input, textarea, select')) : [];
+    const invalid = controls
+      .filter((control) => !control.validity.valid)
+      .map((control) => ({
+        name: control.getAttribute('name'),
+        id: control.id || null,
+        type: control.getAttribute('type'),
+        required: control.hasAttribute('required'),
+        valueLength: String(control.value || '').length,
+        validationMessage: control.validationMessage || null,
+      }));
+    const turnstile = controls
+      .filter((control) => /turnstile/i.test(control.getAttribute('name') || ''))
+      .map((control) => String(control.value || '').length);
+
+    return {
+      disabled: button.disabled,
+      dataDisabled: button.getAttribute('data-disabled'),
+      formFound: Boolean(form),
+      formValid: form ? form.checkValidity() : null,
+      invalid,
+      turnstileResponseLengths: turnstile,
+    };
+  });
+}
+
+async function waitForSubmitEnabled(page, submitButton) {
+  let state = await readSubmitState(submitButton);
+  await fs.writeFile(
+    path.join(ARTIFACT_DIR, '02-submit-state.json'),
+    JSON.stringify(state, null, 2),
+    'utf8',
+  );
+
+  if (state.formValid === false) {
+    await writeReceipt({
+      status: 'FORM_INVALID_BEFORE_SUBMIT',
+      submitClicks: 0,
+      submitState: state,
+    });
+    throw new Error('OpenAI form remained natively invalid after field validation');
+  }
+
+  if (!state.disabled && (await submitButton.isEnabled().catch(() => false))) return state;
+
+  await writeReceipt({
+    status: 'WAITING_FOR_HUMAN_VERIFICATION_TO_ENABLE_SUBMIT',
+    submitClicks: 0,
+    submitState: state,
+    note: 'The form is populated and valid, but OpenAI has not enabled Submit. A human may complete the provider verification in the temporary remote browser. The runner will not solve or bypass it.',
+  });
+
+  const deadline = Date.now() + HUMAN_WINDOW_MS;
+  while (Date.now() < deadline) {
+    state = await readSubmitState(submitButton);
+    if (!state.disabled && (await submitButton.isEnabled().catch(() => false))) {
+      await writeReceipt({
+        status: 'SUBMIT_ENABLED_AFTER_HUMAN_VERIFICATION',
+        submitClicks: 0,
+        submitState: state,
+      });
+      return state;
+    }
+    await page.waitForTimeout(1000);
+  }
+
+  await saveAuditMetadata(page, 'human-submit-window-expired');
+  await writeReceipt({
+    status: 'HUMAN_VERIFICATION_REQUIRED_BEFORE_SUBMIT',
+    submitClicks: 0,
+    submitState: state,
+    endUrl: page.url(),
+    title: await page.title(),
+  });
+  throw new Error('HUMAN_VERIFICATION_REQUIRED_BEFORE_SUBMIT');
+}
+
 if (wordCount(application.proposal) > 3000) {
   throw new Error('Project proposal exceeds OpenAI’s 3,000-word limit');
 }
@@ -272,14 +352,16 @@ try {
     throw new Error('Visible OpenAI Submit button was not found');
   }
 
-  receipt.submitClicks = 1;
+  const enabledSubmitState = await waitForSubmitEnabled(page, submitButton);
   await submitButton.click();
+  receipt.submitClicks = 1;
   await writeReceipt({
     status: 'SUBMIT_CLICKED',
     acknowledgmentNoticePresent: acknowledgment.noticePresent,
     visibleAcknowledgmentCheckboxCount: acknowledgment.visibleCheckboxCount,
     startUrl,
     submitClicks: 1,
+    submitState: enabledSubmitState,
   });
 
   await Promise.race([
@@ -346,7 +428,7 @@ try {
   const message = error instanceof Error ? error.message : String(error);
   console.error(error instanceof Error ? error.stack || error.message : String(error));
 
-  if (receipt.submitClicks === 0 && !['HUMAN_VERIFICATION_REQUIRED', 'REQUIRED_FIELDS_EMPTY'].includes(receipt.status)) {
+  if (receipt.submitClicks === 0 && ['STARTED', 'FORM_VISIBLE'].includes(receipt.status)) {
     await writeReceipt({ status: 'FAILED_BEFORE_SUBMIT', submitClicks: 0, error: message });
   } else {
     await writeReceipt({ error: message });
