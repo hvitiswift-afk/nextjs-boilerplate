@@ -29,7 +29,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat tools/matadata-pathfinder/tap-chunks/tap.b64.* > /tmp/matadata-tap-submit.cjs.gz.b64
+          cat \
+            tools/matadata-pathfinder/tap-chunks/tap.b64.00 \
+            tools/matadata-pathfinder/tap-chunks/tap.b64.01 \
+            tools/matadata-pathfinder/tap-chunks/tap.b64.02 \
+            tools/matadata-pathfinder/tap-chunks/tap.b64.03 \
+            tools/matadata-pathfinder/tap-chunks/tap.b64.04a \
+            tools/matadata-pathfinder/tap-chunks/tap.b64.04b \
+            tools/matadata-pathfinder/tap-chunks/tap.b64.04c \
+            > /tmp/matadata-tap-submit.cjs.gz.b64
           base64 --decode /tmp/matadata-tap-submit.cjs.gz.b64 > /tmp/matadata-tap-submit.cjs.gz
           gzip --test /tmp/matadata-tap-submit.cjs.gz
           gzip --decompress --stdout /tmp/matadata-tap-submit.cjs.gz > /tmp/matadata-tap-submit.cjs
