@@ -1,48 +1,14 @@
 name: MATADATA OpenAI Form Pathfinder
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: matadata-openai-pathfinder-public-once
-  cancel-in-progress: false
-
 jobs:
-  submit-once:
+  dormant-during-two-file-update:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - name: Check out isolated Pathfinder branch
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Restore and check reviewed Pathfinder script
-        run: |
-          base64 --decode tools/matadata-pathfinder/submit.mjs.gz.b64 | gzip --decompress > tools/matadata-pathfinder/.runtime-submit.mjs
-          node --check tools/matadata-pathfinder/.runtime-submit.mjs
-
-      - name: Install browser runtime
-        run: |
-          npm install --no-save --package-lock=false playwright@1.55.0
-          npx playwright install --with-deps chromium
-
-      - name: Submit through OpenAI public form exactly once
-        run: node tools/matadata-pathfinder/.runtime-submit.mjs
-
-      - name: Upload Pathfinder receipt and screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: matadata-openai-pathfinder-receipt
-          path: pathfinder-artifacts
-          if-no-files-found: warn
-          retention-days: 30
+      - run: echo dormant
