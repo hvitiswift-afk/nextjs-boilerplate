@@ -1,14 +1,114 @@
 name: MATADATA OpenAI Form Pathfinder
 
 on:
-  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
 
 permissions:
   contents: read
 
+concurrency:
+  group: matadata-openai-pathfinder-public-once
+  cancel-in-progress: false
+
 jobs:
-  dormant-during-chunked-runner-upload:
-    if: ${{ false }}
+  submit-once:
     runs-on: ubuntu-latest
+    timeout-minutes: 70
     steps:
-      - run: echo dormant
+      - name: Check out isolated Pathfinder branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore and check reviewed Pathfinder script
+        run: |
+          cat tools/matadata-pathfinder/chunks/submit.b64.* | base64 --decode | gzip --decompress > tools/matadata-pathfinder/.runtime-submit.mjs
+          node --check tools/matadata-pathfinder/.runtime-submit.mjs
+
+      - name: Install browser and human-takeover runtime
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb x11vnc fluxbox novnc websockify
+          curl --fail --location --silent --show-error \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            --output /tmp/cloudflared
+          chmod +x /tmp/cloudflared
+
+      - name: Start password-protected live browser bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pathfinder-session /tmp/pathfinder-live
+          SESSION_PASSWORD="$(openssl rand -hex 10)"
+          printf '%s' "$SESSION_PASSWORD" > /tmp/pathfinder-live/session-password
+          x11vnc -storepasswd "$SESSION_PASSWORD" /tmp/pathfinder-live/x11vnc.pass >/dev/null
+
+          RUNNER_TRACKING_ID='' nohup Xvfb :99 -screen 0 1440x1100x24 -ac -noreset \
+            >/tmp/pathfinder-live/xvfb.log 2>&1 &
+          sleep 2
+          RUNNER_TRACKING_ID='' DISPLAY=:99 nohup fluxbox \
+            >/tmp/pathfinder-live/fluxbox.log 2>&1 &
+          RUNNER_TRACKING_ID='' nohup x11vnc -display :99 -forever -shared \
+            -rfbauth /tmp/pathfinder-live/x11vnc.pass -rfbport 5900 \
+            >/tmp/pathfinder-live/x11vnc.log 2>&1 &
+          RUNNER_TRACKING_ID='' nohup websockify --web=/usr/share/novnc/ 6080 localhost:5900 \
+            >/tmp/pathfinder-live/novnc.log 2>&1 &
+          RUNNER_TRACKING_ID='' nohup /tmp/cloudflared tunnel --no-autoupdate \
+            --url http://127.0.0.1:6080 \
+            >/tmp/pathfinder-live/cloudflared.log 2>&1 &
+
+          TUNNEL_URL=''
+          for _ in $(seq 1 60); do
+            TUNNEL_URL="$(grep -Eo 'https://[-a-z0-9]+\.trycloudflare\.com' /tmp/pathfinder-live/cloudflared.log | head -n1 || true)"
+            if [[ -n "$TUNNEL_URL" ]]; then break; fi
+            sleep 1
+          done
+          if [[ -z "$TUNNEL_URL" ]]; then
+            cat /tmp/pathfinder-live/cloudflared.log
+            exit 1
+          fi
+
+          python - "$TUNNEL_URL" "$SESSION_PASSWORD" <<'PY'
+          import json, sys
+          from datetime import datetime, timedelta, timezone
+          url, password = sys.argv[1:]
+          payload = {
+              "status": "LIVE_HUMAN_VERIFICATION_SESSION",
+              "url": f"{url}/vnc.html?autoconnect=1&resize=scale",
+              "password": password,
+              "purpose": "Human completion of OpenAI Cloudflare verification only; automation resumes afterward.",
+              "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=60)).isoformat(),
+          }
+          with open('pathfinder-session/session.json', 'w', encoding='utf-8') as fh:
+              json.dump(payload, fh, indent=2)
+          PY
+
+      - name: Publish private live-session handoff artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-live-session
+          path: pathfinder-session/session.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Await human verification, fill application, and submit once
+        env:
+          DISPLAY: ':99'
+          PATHFINDER_INTERACTIVE: '1'
+        run: node tools/matadata-pathfinder/.runtime-submit.mjs
+
+      - name: Upload Pathfinder receipt and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-openai-pathfinder-receipt
+          path: pathfinder-artifacts
+          if-no-files-found: warn
+          retention-days: 30
