@@ -3,7 +3,7 @@ name: MATADATA OpenAI Public Pathfinder
 on:
   pull_request:
     branches: [main]
-    types: [opened]
+    types: [opened, synchronize]
 
 permissions:
   contents: read
@@ -17,8 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      NETLIFY_SITE_ID: e139cc17-6a7a-4538-9971-6ed13d23bbcc
+      GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+      PRIVATE_REPO: hvitiswift-afk/Norstein-Bekkler
+      PRIVATE_COMMIT: ba6f4bfa12489c5e355f8f7342ebfffd3970c242
+      PRIVATE_PATH: secure/matadata-openai-application.json.gz.b64
+      PRIVATE_B64_SHA256: 0cd744a1777b2506a601c98ce06957163d47895d1b797fc3e297861f3c484700
+      APPLICATION_SHA256: 277ef6d685470a024fca4f51ff2eb9e67901dc4dd3eaab285e70efbde0c4a8d1
     steps:
       - name: Check out isolated Pathfinder branch
         uses: actions/checkout@v4
@@ -28,47 +32,50 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Require authorized Netlify credential
+      - name: Require authorized private-repository credential
         shell: bash
         run: |
-          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
-            echo "Missing repository secret NETLIFY_AUTH_TOKEN"
+          if [ -z "$GH_ADMIN_TOKEN" ]; then
+            echo "Missing repository secret GH_ADMIN_TOKEN"
             exit 1
           fi
 
-      - name: Install isolated browser and Netlify clients
+      - name: Install isolated browser runtime
         shell: bash
         run: |
           mkdir -p /tmp/matadata-openai-pathfinder
           cd /tmp/matadata-openai-pathfinder
           npm init -y >/dev/null
-          npm install --no-save --package-lock=false netlify-cli@latest playwright
+          npm install --no-save --package-lock=false playwright
           npx playwright install --with-deps chromium
           cp "$GITHUB_WORKSPACE/tools/matadata-pathfinder/submit-public.mjs" submit.mjs
           node --check submit.mjs
 
-      - name: Retrieve private application payload from authorized Netlify storage
+      - name: Restore private application payload from pinned commit
         shell: bash
         run: |
           set -euo pipefail
           cd /tmp/matadata-openai-pathfinder
-          PART_1="$(npx netlify env:get MATADATA_OPENAI_APPLICATION_PART_1 --site "$NETLIFY_SITE_ID" --context dev --scope builds --auth "$NETLIFY_AUTH_TOKEN")"
-          PART_2="$(npx netlify env:get MATADATA_OPENAI_APPLICATION_PART_2 --site "$NETLIFY_SITE_ID" --context dev --scope builds --auth "$NETLIFY_AUTH_TOKEN")"
-          EXPECTED_SHA="$(npx netlify env:get MATADATA_OPENAI_APPLICATION_SHA256 --site "$NETLIFY_SITE_ID" --context dev --scope builds --auth "$NETLIFY_AUTH_TOKEN")"
-          echo "::add-mask::$PART_1"
-          echo "::add-mask::$PART_2"
-          if [ -z "$PART_1" ] || [ -z "$PART_2" ] || [ -z "$EXPECTED_SHA" ]; then
-            echo "One or more Pathfinder payload values could not be retrieved"
+          curl --fail --silent --show-error --location \
+            -H "Authorization: Bearer $GH_ADMIN_TOKEN" \
+            -H "Accept: application/vnd.github.raw+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$PRIVATE_REPO/contents/$PRIVATE_PATH?ref=$PRIVATE_COMMIT" \
+            --output application.json.gz.b64
+          ACTUAL_B64_SHA="$(sha256sum application.json.gz.b64 | awk '{print $1}')"
+          if [ "$ACTUAL_B64_SHA" != "$PRIVATE_B64_SHA256" ]; then
+            echo "Private payload transport integrity check failed"
             exit 1
           fi
-          printf '%s%s' "$PART_1" "$PART_2" | base64 --decode | gzip --decompress > application.json
-          ACTUAL_SHA="$(sha256sum application.json | awk '{print $1}')"
-          if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
+          base64 --decode application.json.gz.b64 | gzip --decompress > application.json
+          ACTUAL_APPLICATION_SHA="$(sha256sum application.json | awk '{print $1}')"
+          if [ "$ACTUAL_APPLICATION_SHA" != "$APPLICATION_SHA256" ]; then
             echo "Application payload integrity check failed"
             exit 1
           fi
+          rm -f application.json.gz.b64
           echo "PATHFINDER_APPLICATION_PATH=/tmp/matadata-openai-pathfinder/application.json" >> "$GITHUB_ENV"
-          echo "Application payload restored and verified without publication."
+          echo "Private application payload restored from a pinned commit and verified without publication."
 
       - name: Submit through OpenAI public form exactly once
         shell: bash
