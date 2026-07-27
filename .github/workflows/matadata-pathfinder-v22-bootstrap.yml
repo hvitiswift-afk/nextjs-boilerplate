@@ -1,0 +1,70 @@
+name: MATADATA Pathfinder V2.2 Bootstrap
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matadata-pathfinder-v22-bootstrap
+  cancel-in-progress: true
+
+jobs:
+  materialize-reviewed-v22:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'agent/matadata-openai-pathfinder-v2-2-clean'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out the staged V2.2 branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Materialize checksum-locked workflow and binary runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/matadata-pathfinder/v2.2 .github/workflows
+
+          cat tools/matadata-pathfinder/v2.2/transport/runner.b64.* \
+            | tr -d '[:space:]' \
+            | base64 --decode \
+            > tools/matadata-pathfinder/v2.2/runner.cjs.gz
+          echo 'c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103  tools/matadata-pathfinder/v2.2/runner.cjs.gz' \
+            | sha256sum --check
+          gzip --test tools/matadata-pathfinder/v2.2/runner.cjs.gz
+          gzip --decompress --stdout tools/matadata-pathfinder/v2.2/runner.cjs.gz > /tmp/matadata-pathfinder-v22.cjs
+          echo '01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab  /tmp/matadata-pathfinder-v22.cjs' \
+            | sha256sum --check
+          node --check /tmp/matadata-pathfinder-v22.cjs
+
+          cat tools/matadata-pathfinder/v2.2/transport/workflow.b64.* \
+            | tr -d '[:space:]' \
+            | base64 --decode \
+            > .github/workflows/matadata-openai-pathfinder-v22.yml
+          echo '34247c64cd73c6ffb9fd53d4eb8910ac06dabd61264f8e8cca32c84b7bbb21ca  .github/workflows/matadata-openai-pathfinder-v22.yml' \
+            | sha256sum --check
+
+      - name: Remove one-time transport and bootstrap files
+        shell: bash
+        run: |
+          rm -rf tools/matadata-pathfinder/v2.2/transport
+          rm -f .github/workflows/matadata-pathfinder-v22-bootstrap.yml
+
+      - name: Commit the clean staged V2.2 implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Materialize hardened MATADATA Pathfinder V2.2'
+          git push origin HEAD:${{ github.head_ref }}
