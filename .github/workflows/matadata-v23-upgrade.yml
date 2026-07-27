@@ -27,7 +27,9 @@ jobs:
 
       - name: Apply fail-closed field and acknowledgment upgrade
         shell: bash
-        run: python -u tools/matadata-pathfinder/v23/upgrade.py | tee /tmp/matadata-v23-upgrade.log
+        run: |
+          set -o pipefail
+          python -u tools/matadata-pathfinder/v23/upgrade.py 2>&1 | tee /tmp/matadata-v23-upgrade.log
 
       - name: Preserve upgrade diagnostics
         if: always()
