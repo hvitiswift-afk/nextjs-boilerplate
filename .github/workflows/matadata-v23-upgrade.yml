@@ -51,19 +51,17 @@ jobs:
               raise SystemExit('regex_once patch target was not found exactly once.')
           text = text.replace(old_regex, new_regex, 1)
 
-          old_workflow = '''        workflow = WORKFLOW.read_text(encoding="utf-8")
-          workflow = workflow.replace(OLD_PACKAGE_SHA, package_sha).replace(OLD_RUNNER_SHA, runner_sha).replace(OLD_APPLICATION_SHA, application_sha).replace(OLD_VERSION, NEW_VERSION)
-          WORKFLOW.write_text(workflow, encoding="utf-8")'''
-          new_workflow = '''        (PART_DIR / "V23_WORKFLOW_UPDATE.json").write_text(json.dumps({
+          old_write = '        WORKFLOW.write_text(workflow, encoding="utf-8")'
+          new_write = '''        (PART_DIR / "V23_WORKFLOW_UPDATE.json").write_text(json.dumps({
               "fromVersion": OLD_VERSION,
               "toVersion": NEW_VERSION,
               "packageSha256": package_sha,
               "runnerSha256": runner_sha,
               "applicationSha256": application_sha
           }, indent=2) + "\\n", encoding="utf-8")'''
-          if text.count(old_workflow) != 1:
-              raise SystemExit('workflow-update isolation target was not found exactly once.')
-          path.write_text(text.replace(old_workflow, new_workflow, 1), encoding='utf-8')
+          if text.count(old_write) != 1:
+              raise SystemExit('workflow-write isolation target was not found exactly once.')
+          path.write_text(text.replace(old_write, new_write, 1), encoding='utf-8')
           PY
 
       - name: Apply fail-closed field and acknowledgment upgrade
