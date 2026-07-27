@@ -48,11 +48,12 @@ jobs:
           {
             echo 'MATADATA Pathfinder V2.4 package diagnostics'
             echo "commit=$GITHUB_SHA"
-            echo 'package file:'
-            wc -c tools/matadata-pathfinder/v22/package.tar.gz
-            sha256sum tools/matadata-pathfinder/v22/package.tar.gz
+            echo 'package part sizes:'
+            wc -c tools/matadata-pathfinder/v22/package.part.*
+            echo 'package part sha256:'
+            sha256sum tools/matadata-pathfinder/v22/package.part.*
           } | tee pathfinder-preflight/package-diagnostics.txt
-          cp tools/matadata-pathfinder/v22/package.tar.gz /tmp/matadata-v24/package.tar.gz
+          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v24/package.tar.gz
           {
             echo "expected_package_sha256=$PACKAGE_SHA256"
             echo -n 'actual_package_sha256='
@@ -132,7 +133,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/matadata-v24
-          cp tools/matadata-pathfinder/v22/package.tar.gz /tmp/matadata-v24/package.tar.gz
+          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v24/package.tar.gz
           echo "$PACKAGE_SHA256  /tmp/matadata-v24/package.tar.gz" | sha256sum --check
           tar -xzf /tmp/matadata-v24/package.tar.gz -C /tmp/matadata-v24
           bash /tmp/matadata-v24/scripts/preflight.sh "$GITHUB_WORKSPACE/pathfinder-preflight-live"
