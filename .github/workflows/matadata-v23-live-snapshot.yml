@@ -1,0 +1,124 @@
+name: MATADATA V2.3 Live Error Snapshot
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: matadata-v23-live-error-snapshot
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    if: github.head_ref == 'agent/matadata-openai-pathfinder-v2-2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN_ID: '30234618654'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the active session handoff without exposing its token
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/live-session /tmp/live-snapshot
+          artifact_id="$(gh api \
+            "/repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.name == "matadata-pathfinder-v23-live-session") | .id' | head -n1)"
+          test -n "$artifact_id"
+          gh api -H 'Accept: application/vnd.github+json' \
+            "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
+            > /tmp/live-session/session.zip
+          unzip -q /tmp/live-session/session.zip -d /tmp/live-session/content
+          find /tmp/live-session/content -type f -maxdepth 3 -print
+
+      - name: Fetch and sanitize the current Pathfinder page
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/live-session/url.txt
+          import json
+          from pathlib import Path
+          candidates = list(Path('/tmp/live-session/content').rglob('*.json'))
+          if not candidates:
+              raise SystemExit('No session JSON found.')
+          payload = json.loads(candidates[0].read_text(encoding='utf-8'))
+          for key in ('primary_url', 'url', 'primaryUrl'):
+              if payload.get(key):
+                  print(payload[key])
+                  break
+          else:
+              raise SystemExit(f'No primary URL in session payload keys: {sorted(payload)}')
+          PY
+          url="$(cat /tmp/live-session/url.txt)"
+          curl --fail --location --silent --show-error --max-time 25 \
+            --cookie-jar /tmp/live-session/cookies.txt \
+            --cookie /tmp/live-session/cookies.txt \
+            --dump-header /tmp/live-session/headers.txt \
+            "$url" > /tmp/live-session/page.html
+
+          python - <<'PY'
+          from html import unescape
+          from pathlib import Path
+          import json, re
+
+          html = Path('/tmp/live-session/page.html').read_text(encoding='utf-8', errors='replace')
+          text = re.sub(r'<script\b[^>]*>.*?</script>', ' ', html, flags=re.I|re.S)
+          text = re.sub(r'<style\b[^>]*>.*?</style>', ' ', text, flags=re.I|re.S)
+          text = re.sub(r'<[^>]+>', '\n', text)
+          text = unescape(text)
+          lines = [re.sub(r'\s+', ' ', line).strip() for line in text.splitlines()]
+          lines = [line for line in lines if line]
+          keywords = re.compile(r'error|failed|timeout|status|phase|message|acknowledg|submit|validation|field|revision|connected|session', re.I)
+          selected = []
+          for line in lines:
+              if keywords.search(line):
+                  selected.append(line)
+          if not selected:
+              selected = lines[:120]
+
+          endpoints = sorted(set(re.findall(r"(?:fetch|XMLHttpRequest|EventSource)[^\n]{0,180}?[\'\"](/[^\'\"? ]+)", html, flags=re.I)))
+          endpoints += sorted(set(re.findall(r"[\'\"](/(?:api|status|state|health|snapshot|screen|image|refresh)[^\'\" ]*)[\'\"]", html, flags=re.I)))
+          endpoints = sorted(set(endpoints))
+
+          def redact(value: str) -> str:
+              value = re.sub(r'https://[-a-z0-9]+\.trycloudflare\.com', 'https://<redacted>.trycloudflare.com', value, flags=re.I)
+              value = re.sub(r'(?i)(token=)[A-Za-z0-9]+', r'\1<redacted>', value)
+              value = re.sub(r'\b[0-9a-fA-F]{24,}\b', '<redacted-hex>', value)
+              value = re.sub(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', '<redacted-email>', value)
+              return value
+
+          report = [
+              'MATADATA V2.3 live page snapshot',
+              'Source run: 30234618654',
+              '',
+              'VISIBLE STATUS TEXT:',
+              *[redact(line) for line in selected[:220]],
+              '',
+              'DISCOVERED RELATIVE ENDPOINTS:',
+              *[redact(item) for item in endpoints[:100]],
+          ]
+          Path('/tmp/live-snapshot/page-snapshot.txt').write_text('\n'.join(report) + '\n', encoding='utf-8')
+          Path('/tmp/live-snapshot/html-sha256.txt').write_text(__import__('hashlib').sha256(html.encode()).hexdigest() + '\n', encoding='utf-8')
+          PY
+
+          sed -E \
+            -e 's#https://[-a-z0-9]+\.trycloudflare\.com#https://<redacted>.trycloudflare.com#g' \
+            -e 's/(token=)[A-Za-z0-9]+/\1<redacted>/Ig' \
+            -e 's/\b[0-9a-fA-F]{24,}\b/<redacted-hex>/g' \
+            /tmp/live-session/headers.txt > /tmp/live-snapshot/response-headers.txt
+
+      - name: Upload the sanitized snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-v23-live-error-snapshot
+          path: /tmp/live-snapshot
+          if-no-files-found: error
+          retention-days: 1
