@@ -1,0 +1,85 @@
+name: MATADATA V2.2 Browser Process Diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matadata-v22-process-diagnostic
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'agent/matadata-openai-pathfinder-v2-2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Reconstruct and verify package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/matadata-v22
+          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v22/package.tar.gz
+          echo 'f24a9cab7980e8d43a6be642e16500828952d89c1285af4cfff2ed363e078d11  /tmp/matadata-v22/package.tar.gz' | sha256sum --check
+          tar -xzf /tmp/matadata-v22/package.tar.gz -C /tmp/matadata-v22
+          bash /tmp/matadata-v22/scripts/preflight.sh "$GITHUB_WORKSPACE/pathfinder-preflight-process-diagnostic"
+
+      - name: Install browser runtime
+        run: bash /tmp/matadata-v22/scripts/install-runtime.sh
+
+      - name: Reproduce startup and build redacted process report
+        shell: bash
+        run: |
+          set +e
+          timeout 150 bash /tmp/matadata-v22/scripts/start-live.sh
+          code=$?
+          set -e
+          mkdir -p tools/matadata-pathfinder/v22/process-diagnostic
+          report=tools/matadata-pathfinder/v22/process-diagnostic/PROCESS_REPORT.txt
+          {
+            echo "start_live_exit=$code"
+            echo '--- /tmp/pathfinder-live inventory ---'
+            find /tmp/pathfinder-live -maxdepth 1 -type f -printf '%f %s bytes\n' 2>/dev/null | sort || true
+            echo '--- processes ---'
+            ps -ef | grep -E 'Xvfb|runner.cjs|cloudflared' | grep -v grep || true
+            for file in xvfb.log pathfinder.log tunnel-warnings.log cloudflared-primary.log cloudflared-backup.log; do
+              echo "--- $file filtered tail ---"
+              if [[ -f "/tmp/pathfinder-live/$file" ]]; then
+                grep -Ei 'error|exception|fail|timeout|ready|launch|browser|page|origin|captcha|verification|form|listen|EADDR|ENOENT|module|closed|crash|playwright|chrom' "/tmp/pathfinder-live/$file" | tail -n 160 || true
+              else
+                echo '<missing>'
+              fi
+            done
+          } | sed -E \
+              -e 's#https://[-a-z0-9]+\.trycloudflare\.com#https://<redacted>.trycloudflare.com#g' \
+              -e 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/<redacted-email>/g' \
+              -e 's/\b[0-9a-fA-F]{24,}\b/<redacted-hex>/g' \
+              > "$report"
+          if [[ -f /tmp/pathfinder-live/pathfinder.pid ]]; then
+            kill -TERM "$(cat /tmp/pathfinder-live/pathfinder.pid)" 2>/dev/null || true
+          fi
+          for pidfile in /tmp/pathfinder-live/cloudflared-*.pid; do
+            [[ -f "$pidfile" ]] && kill -TERM "$(cat "$pidfile")" 2>/dev/null || true
+          done
+
+      - name: Remove one-time diagnostic and commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/matadata-v22-process-diagnostic.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Capture redacted MATADATA V2.2 browser process diagnostic'
+          git push origin HEAD:${{ github.head_ref }}
