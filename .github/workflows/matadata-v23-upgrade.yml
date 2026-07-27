@@ -25,28 +25,56 @@ jobs:
           fetch-depth: 1
           show-progress: false
 
-      - name: Make literal replacement blocks regex-safe
+      - name: Detect whether the package is already upgraded
+        id: guard
+        shell: bash
+        run: |
+          if [[ -f tools/matadata-pathfinder/v22/V23_UPGRADE_RECEIPT.json ]]; then
+            echo 'needed=false' >> "$GITHUB_OUTPUT"
+            echo 'V2.3 package already exists; no upgrade mutation will run.'
+          else
+            echo 'needed=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Make the fail-closed upgrade transport-safe
+        if: steps.guard.outputs.needed == 'true'
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           path = Path('tools/matadata-pathfinder/v23/upgrade.py')
           text = path.read_text(encoding='utf-8')
-          old = 'updated, count = re.subn(pattern, replacement, text, count=1, flags=flags)'
-          new = 'updated, count = re.subn(pattern, lambda _match: replacement, text, count=1, flags=flags)'
-          if text.count(old) != 1:
+
+          old_regex = 'updated, count = re.subn(pattern, replacement, text, count=1, flags=flags)'
+          new_regex = 'updated, count = re.subn(pattern, lambda _match: replacement, text, count=1, flags=flags)'
+          if text.count(old_regex) != 1:
               raise SystemExit('regex_once patch target was not found exactly once.')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          text = text.replace(old_regex, new_regex, 1)
+
+          old_workflow = '''        workflow = WORKFLOW.read_text(encoding="utf-8")
+          workflow = workflow.replace(OLD_PACKAGE_SHA, package_sha).replace(OLD_RUNNER_SHA, runner_sha).replace(OLD_APPLICATION_SHA, application_sha).replace(OLD_VERSION, NEW_VERSION)
+          WORKFLOW.write_text(workflow, encoding="utf-8")'''
+          new_workflow = '''        (PART_DIR / "V23_WORKFLOW_UPDATE.json").write_text(json.dumps({
+              "fromVersion": OLD_VERSION,
+              "toVersion": NEW_VERSION,
+              "packageSha256": package_sha,
+              "runnerSha256": runner_sha,
+              "applicationSha256": application_sha
+          }, indent=2) + "\\n", encoding="utf-8")'''
+          if text.count(old_workflow) != 1:
+              raise SystemExit('workflow-update isolation target was not found exactly once.')
+          path.write_text(text.replace(old_workflow, new_workflow, 1), encoding='utf-8')
           PY
 
       - name: Apply fail-closed field and acknowledgment upgrade
+        if: steps.guard.outputs.needed == 'true'
         shell: bash
         run: |
           set -o pipefail
           python -u tools/matadata-pathfinder/v23/upgrade.py 2>&1 | tee /tmp/matadata-v23-upgrade.log
 
       - name: Preserve upgrade diagnostics
-        if: always()
+        if: always() && steps.guard.outputs.needed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: matadata-pathfinder-v23-upgrade-diagnostics
@@ -54,26 +82,26 @@ jobs:
           if-no-files-found: warn
           retention-days: 1
 
-      - name: Remove one-time upgrade machinery and commit V2.3
+      - name: Commit the checksum-verified V2.3 package without workflow mutation
+        if: steps.guard.outputs.needed == 'true'
         shell: bash
         run: |
           set -o pipefail
           {
             rm -rf tools/matadata-pathfinder/v23
-            rm -f .github/workflows/matadata-v23-upgrade.yml
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add -A
+            git add -A tools/matadata-pathfinder/v22 tools/matadata-pathfinder/v23
             git status --short
             git diff --cached --stat
-            git commit -m 'Upgrade MATADATA Pathfinder to V2.3 stable field contract'
+            git commit -m 'Upgrade MATADATA Pathfinder package to V2.3 stable field contract'
             git fetch origin "${GITHUB_HEAD_REF}"
             git rebase "origin/${GITHUB_HEAD_REF}"
             git push origin "HEAD:${GITHUB_HEAD_REF}"
           } 2>&1 | tee /tmp/matadata-v23-commit.log
 
       - name: Preserve commit diagnostics
-        if: always()
+        if: always() && steps.guard.outputs.needed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: matadata-pathfinder-v23-commit-diagnostics
