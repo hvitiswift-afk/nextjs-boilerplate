@@ -1,0 +1,58 @@
+name: MATADATA Pathfinder V2.6 Upgrade
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matadata-v26-upgrade
+  cancel-in-progress: true
+
+jobs:
+  upgrade:
+    if: github.head_ref == 'agent/matadata-openai-pathfinder-v2-2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Check out the staged Pathfinder branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Ensure patch utility is available
+        shell: bash
+        run: command -v patch || (sudo apt-get update -qq && sudo apt-get install -y patch)
+
+      - name: Apply and verify the V2.6 disabled-submit recovery
+        shell: bash
+        run: |
+          set -o pipefail
+          python -u tools/matadata-pathfinder/v26/upgrade.py 2>&1 | tee /tmp/matadata-v26-upgrade.log
+
+      - name: Preserve upgrade diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v26-upgrade-diagnostics
+          path: /tmp/matadata-v26-upgrade.log
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Remove one-time upgrade workflow and commit V2.6
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/matadata-v26-upgrade.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git status --short
+          git diff --cached --stat
+          git commit -m 'Upgrade MATADATA Pathfinder to V2.6 Marketo readiness recovery'
+          git push origin HEAD:${{ github.head_ref }}
