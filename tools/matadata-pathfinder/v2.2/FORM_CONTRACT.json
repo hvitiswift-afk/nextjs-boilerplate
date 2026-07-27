@@ -1,0 +1,28 @@
+{
+  "contract_version": "2026-07-26.1",
+  "source": "OpenAI Cybersecurity Grant Program form captured during the V2.1 diagnostic run",
+  "runner_version": "2.2.0",
+  "unique_application_fields": 13,
+  "fields": [
+    {"key":"firstName","name":"FirstName","tag":"input","required":true},
+    {"key":"lastName","name":"LastName","tag":"input","required":true},
+    {"key":"email","name":"Email","tag":"input","required":true},
+    {"key":"company","name":"Company","tag":"input","required":false},
+    {"key":"role","name":"Title","tag":"input","required":true},
+    {"key":"linkedin","name":"mkto_linkedin_url_form_fill","tag":"input","required":true},
+    {"key":"personnel","name":"mkto_cybersecurity_grant_stakeholders","tag":"textarea","required":false},
+    {"key":"additionalNotes","name":"mkto_cybersecurity_grant_notes","tag":"textarea","required":false},
+    {"key":"projectTitle","name":"mkto_cybersecurity_grant_project_title","tag":"input","required":true,"note":"The helper text 'One descriptive sentence' belongs to this same control."},
+    {"key":"proposal","name":"mkto_cybersecurity_grant_project_summary","tag":"textarea","required":true},
+    {"key":"problem","name":"mkto_cybersecurity_grant_problem_statement","tag":"textarea","required":false},
+    {"key":"timeline","name":"mkto_cybersecurity_grant_project_roadmap","tag":"textarea","required":true},
+    {"key":"funding","name":"mkto_cybersecurity_grant_funds_usage","tag":"textarea","required":true}
+  ],
+  "acknowledgment": {
+    "captured_presentation": "official-terms-text-only",
+    "captured_separate_control": false,
+    "personal_affirmation_required": true,
+    "text_stability_checks": 3,
+    "underlying_control_required_when_present": true
+  }
+}
