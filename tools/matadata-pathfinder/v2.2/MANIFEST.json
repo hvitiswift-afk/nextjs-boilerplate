@@ -1,0 +1,46 @@
+{
+  "name": "MATADATA OpenAI Form Pathfinder V2.2",
+  "version": "2.2.0",
+  "status": "STAGED_NOT_EXECUTED",
+  "submission_id": "matadata-openai-cybersecurity-grant-v1",
+  "runner_sha256": "01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab",
+  "gzip_sha256": "c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103",
+  "application_sha256": "fda0c9e4f432b330fda80a08f7ee423da16672b1f06afba84e5cb8795d63fb03",
+  "field_contract": {
+    "expected_unique_fields": 13,
+    "stable_name_first": true,
+    "fresh_resolution_per_attempt": true,
+    "full_value_verification": true,
+    "bounded_repair_pass": true,
+    "duplicate_identity_rejected": true,
+    "project_title_is_single_field": true
+  },
+  "acknowledgment": {
+    "personal_affirmation_required": true,
+    "interactive_control_supported": true,
+    "official_terms_text_only_supported": true,
+    "stable_text_samples": 3,
+    "presentation_change_blocks_submit": true
+  },
+  "connection": {
+    "primary_and_fallback_tunnels": true,
+    "cookie_reconnect_after_url_cleanup": true,
+    "external_health_check_required": true
+  },
+  "tests": {
+    "static_self_test_passed_locally": true,
+    "dynamic_dom_rerender_test_required_in_ci": true,
+    "rerender_after_field_index": 8,
+    "direct_submit_taps_blocked": true,
+    "positive_confirmation_required": true,
+    "exactly_once_lock": true
+  },
+  "human_only_steps": [
+    "CAPTCHA or human verification",
+    "identity or signature if requested",
+    "applicant acknowledgment"
+  ],
+  "live_execution": false,
+  "gzip_bytes": 25305,
+  "transport": "single deterministic binary gzip blob"
+}
