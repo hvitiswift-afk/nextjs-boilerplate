@@ -59,6 +59,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          git diff --cached --check
+          git status --short
+          git diff --cached --stat
           git commit -m 'Upgrade MATADATA Pathfinder to V2.5 terminal-formatting gate'
           git push origin HEAD:${{ github.head_ref }}
