@@ -6,7 +6,8 @@ on:
     types: [synchronize]
 
 permissions:
-  contents: read
+  contents: write
+  actions: read
 
 concurrency:
   group: matadata-v26-upgrade
@@ -16,7 +17,9 @@ jobs:
   upgrade:
     if: github.head_ref == 'agent/matadata-openai-pathfinder-v2-2'
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Check out the staged Pathfinder branch
         uses: actions/checkout@v4
@@ -35,47 +38,174 @@ jobs:
           set -o pipefail
           python -u tools/matadata-pathfinder/v26/upgrade.py 2>&1 | tee /tmp/matadata-v26-upgrade.log
 
-      - name: Package the verified generated V2.6 repository delta
+      - name: Validate the generated repository state
         shell: bash
         run: |
           set -euo pipefail
-          root=/tmp/matadata-v26-generated
-          rm -rf "$root"
-          mkdir -p "$root/.github/workflows" "$root/tools/matadata-pathfinder/v22"
-          cp .github/workflows/matadata-openai-pathfinder-v22.yml "$root/.github/workflows/"
-          cp tools/matadata-pathfinder/v22/package.part.* "$root/tools/matadata-pathfinder/v22/"
-          cp tools/matadata-pathfinder/v22/README.md "$root/tools/matadata-pathfinder/v22/"
-          cp tools/matadata-pathfinder/v22/MANIFEST.json "$root/tools/matadata-pathfinder/v22/"
-          cp tools/matadata-pathfinder/v22/V26_UPGRADE_RECEIPT.json "$root/tools/matadata-pathfinder/v22/"
-          cat > "$root/DELETE_PATHS.txt" <<'EOF'
-          .github/workflows/matadata-v25-submit-disabled-snapshot.yml
-          .github/workflows/matadata-v25-source-export.yml
-          .github/workflows/matadata-v25-high-screen.yml
-          .github/workflows/matadata-v26-upgrade.yml
-          tools/matadata-pathfinder/v26/upgrade.py
-          tools/matadata-pathfinder/v26/patch/v26.patch.gz.b64.00
-          tools/matadata-pathfinder/v26/patch/v26.patch.gz.b64.01
-          tools/matadata-pathfinder/v26/patch/v26.patch.gz.b64.02
-          EOF
-          find "$root" -type f -print0 | sort -z | xargs -0 sha256sum > "$root/GENERATED_SHA256SUMS.txt"
-          tar -C "$root" -czf /tmp/matadata-v26-generated.tar.gz .
-          sha256sum /tmp/matadata-v26-generated.tar.gz > /tmp/matadata-v26-generated.tar.gz.sha256
+          rm -f .github/workflows/matadata-v26-upgrade.yml
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, re, subprocess
 
-      - name: Preserve upgrade diagnostics
+          status = subprocess.check_output(['git', 'status', '--porcelain=v1', '-z'])
+          records = [item for item in status.decode('utf-8', errors='strict').split('\0') if item]
+          changed = []
+          for record in records:
+              if len(record) < 4:
+                  raise SystemExit(f'Malformed git status record: {record!r}')
+              code, path = record[:2], record[3:]
+              if code[0] in {'R', 'C'}:
+                  raise SystemExit(f'Unexpected rename/copy in generated state: {record!r}')
+              changed.append({'code': code, 'path': path})
+
+          allowed_exact = {
+              '.github/workflows/matadata-openai-pathfinder-v22.yml',
+              '.github/workflows/matadata-v25-submit-disabled-snapshot.yml',
+              '.github/workflows/matadata-v25-source-export.yml',
+              '.github/workflows/matadata-v25-high-screen.yml',
+              '.github/workflows/matadata-v26-upgrade.yml',
+              'tools/matadata-pathfinder/v22/README.md',
+              'tools/matadata-pathfinder/v22/MANIFEST.json',
+              'tools/matadata-pathfinder/v22/V26_UPGRADE_RECEIPT.json',
+          }
+          allowed_prefixes = (
+              'tools/matadata-pathfinder/v22/package.part.',
+              'tools/matadata-pathfinder/v26/',
+          )
+          unexpected = [item for item in changed if item['path'] not in allowed_exact and not item['path'].startswith(allowed_prefixes)]
+          if unexpected:
+              raise SystemExit(f'Unexpected generated paths: {unexpected}')
+
+          required_present = {
+              '.github/workflows/matadata-openai-pathfinder-v22.yml',
+              '.github/workflows/matadata-v26-upgrade.yml',
+              'tools/matadata-pathfinder/v22/README.md',
+              'tools/matadata-pathfinder/v22/MANIFEST.json',
+              'tools/matadata-pathfinder/v22/V26_UPGRADE_RECEIPT.json',
+          }
+          changed_paths = {item['path'] for item in changed}
+          missing = sorted(required_present - changed_paths)
+          if missing:
+              raise SystemExit(f'Required generated changes are missing: {missing}')
+
+          parts = sorted(Path('tools/matadata-pathfinder/v22').glob('package.part.*'))
+          if not parts:
+              raise SystemExit('No generated V2.6 package parts found.')
+          package = b''.join(path.read_bytes() for path in parts)
+          package_sha = hashlib.sha256(package).hexdigest()
+          workflow = Path('.github/workflows/matadata-openai-pathfinder-v22.yml').read_text(encoding='utf-8')
+          match = re.search(r'^\s*PACKAGE_SHA256:\s*([0-9a-f]{64})\s*$', workflow, flags=re.M)
+          if not match or match.group(1) != package_sha:
+              raise SystemExit(f'Generated package/workflow checksum mismatch: {package_sha}')
+
+          receipt = json.loads(Path('tools/matadata-pathfinder/v22/V26_UPGRADE_RECEIPT.json').read_text(encoding='utf-8'))
+          if receipt.get('runnerVersion') != '2.6.0' or receipt.get('status') != 'UPGRADED_STAGED_NOT_EXECUTED':
+              raise SystemExit('V2.6 upgrade receipt is not in the required staged state.')
+          if receipt.get('selfTest', {}).get('passed') is not True or receipt.get('liveExecution') is not False:
+              raise SystemExit('V2.6 receipt does not record a passed offline self-test.')
+          if receipt.get('repair', {}).get('sourceSubmitClicks') != 0:
+              raise SystemExit('Source attempt did not record zero submit clicks.')
+
+          report = {
+              'changed': changed,
+              'packageSha256': package_sha,
+              'packageBytes': len(package),
+              'packageParts': [path.name for path in parts],
+              'runnerVersion': receipt.get('runnerVersion'),
+              'selfTestPassed': True,
+              'liveExecution': False,
+          }
+          Path('/tmp/matadata-v26-generated-state.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(report, indent=2))
+          PY
+
+      - name: Commit the verified V2.6 delta atomically through the Git data API
+        shell: bash
+        env:
+          BRANCH: ${{ github.head_ref }}
+          EXPECTED_BASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import base64, json, os, subprocess, urllib.error, urllib.parse, urllib.request
+
+          token = os.environ['GH_TOKEN']
+          repository = os.environ['GITHUB_REPOSITORY']
+          branch = os.environ['BRANCH']
+          expected_base = os.environ['EXPECTED_BASE_SHA']
+          api_root = f'https://api.github.com/repos/{repository}'
+
+          def api(method, path, payload=None):
+              data = None if payload is None else json.dumps(payload).encode('utf-8')
+              request = urllib.request.Request(
+                  api_root + path,
+                  data=data,
+                  method=method,
+                  headers={
+                      'Authorization': f'Bearer {token}',
+                      'Accept': 'application/vnd.github+json',
+                      'X-GitHub-Api-Version': '2022-11-28',
+                      'User-Agent': 'matadata-pathfinder-v26-upgrade',
+                      'Content-Type': 'application/json',
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=60) as response:
+                      raw = response.read()
+                      return json.loads(raw) if raw else None
+              except urllib.error.HTTPError as exc:
+                  body = exc.read().decode('utf-8', errors='replace')
+                  raise SystemExit(f'GitHub API {method} {path} failed: HTTP {exc.code}: {body}')
+
+          ref = api('GET', f'/git/ref/heads/{urllib.parse.quote(branch, safe="")}')
+          base_sha = ref['object']['sha']
+          if base_sha != expected_base:
+              raise SystemExit(f'Branch moved during V2.6 generation: expected {expected_base}, found {base_sha}.')
+          base_commit = api('GET', f'/git/commits/{base_sha}')
+          base_tree = base_commit['tree']['sha']
+
+          raw_status = subprocess.check_output(['git', 'status', '--porcelain=v1', '-z']).decode('utf-8')
+          records = [item for item in raw_status.split('\0') if item]
+          entries = []
+          for record in records:
+              code, path = record[:2], record[3:]
+              if code[0] in {'R', 'C'}:
+                  raise SystemExit(f'Unexpected rename/copy while committing: {record!r}')
+              if 'D' in code:
+                  entries.append({'path': path, 'mode': '100644', 'type': 'blob', 'sha': None})
+                  continue
+              file_path = Path(path)
+              if not file_path.is_file():
+                  raise SystemExit(f'Changed path is not a file: {path}')
+              blob = api('POST', '/git/blobs', {
+                  'content': base64.b64encode(file_path.read_bytes()).decode('ascii'),
+                  'encoding': 'base64',
+              })
+              entries.append({'path': path, 'mode': '100644', 'type': 'blob', 'sha': blob['sha']})
+
+          if not entries:
+              raise SystemExit('No V2.6 repository changes were available to commit.')
+          tree = api('POST', '/git/trees', {'base_tree': base_tree, 'tree': entries})
+          commit = api('POST', '/git/commits', {
+              'message': 'Upgrade MATADATA Pathfinder to V2.6 Marketo readiness recovery',
+              'tree': tree['sha'],
+              'parents': [base_sha],
+          })
+          api('PATCH', f'/git/refs/heads/{urllib.parse.quote(branch, safe="")}', {
+              'sha': commit['sha'],
+              'force': False,
+          })
+          print(json.dumps({'status': 'COMMITTED', 'commitSha': commit['sha'], 'baseSha': base_sha, 'entryCount': len(entries)}, indent=2))
+          PY
+
+      - name: Preserve V2.6 upgrade evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-pathfinder-v26-upgrade-diagnostics
-          path: /tmp/matadata-v26-upgrade.log
-          if-no-files-found: warn
-          retention-days: 1
-
-      - name: Upload the verified generated V2.6 delta
-        uses: actions/upload-artifact@v4
-        with:
-          name: matadata-pathfinder-v26-generated
+          name: matadata-pathfinder-v26-upgrade-evidence
           path: |
-            /tmp/matadata-v26-generated.tar.gz
-            /tmp/matadata-v26-generated.tar.gz.sha256
-          if-no-files-found: error
+            /tmp/matadata-v26-upgrade.log
+            /tmp/matadata-v26-generated-state.json
+          if-no-files-found: warn
           retention-days: 1
