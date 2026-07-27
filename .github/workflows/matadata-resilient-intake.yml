@@ -45,17 +45,16 @@ jobs:
       - name: Run stable-schema, rerender, acknowledgment, idempotency, and receipt checks
         shell: bash
         run: |
-          set -o pipefail
-          mkdir -p artifacts
-          npm run intake:check 2>&1 | tee artifacts/matadata-resilient-intake-check.txt
-          cp artifacts/matadata-resilient-intake-check.txt artifacts/matadata-resilient-intake-check.json
-          node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("artifacts/matadata-resilient-intake-check.json","utf8")); if(r.status!=="PASS") process.exit(1); console.log(`verified ${r.uniqueFieldCount} stable fields; receipt head ${r.receiptChain.head}`)'
+          set -euo pipefail
+          mkdir -p artifacts/matadata-intake
+          node scripts/check-resilient-intake.mjs | tee artifacts/matadata-intake/verification-receipt.json
+          node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("artifacts/matadata-intake/verification-receipt.json","utf8")); if(r.status!=="PASS") process.exit(1); console.log(`verified ${r.uniqueFieldCount} stable fields; receipt head ${r.receiptChain.head}`)'
 
-      - name: Upload verification receipt or failure diagnostics
+      - name: Upload verification receipt
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: matadata-resilient-intake-receipt
-          path: artifacts
+          path: artifacts/matadata-intake/verification-receipt.json
           if-no-files-found: error
           retention-days: 30
