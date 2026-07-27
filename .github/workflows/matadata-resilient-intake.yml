@@ -1,0 +1,59 @@
+name: MATADATA Resilient Intake
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/intake/**"
+      - "scripts/check-resilient-intake.mjs"
+      - "docs/matadata/**"
+      - "examples/matadata-resilient-intake.sample.json"
+      - "package.json"
+      - ".github/workflows/matadata-resilient-intake.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "lib/intake/**"
+      - "scripts/check-resilient-intake.mjs"
+      - "docs/matadata/**"
+      - "examples/matadata-resilient-intake.sample.json"
+      - "package.json"
+      - ".github/workflows/matadata-resilient-intake.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matadata-resilient-intake-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run stable-schema, rerender, acknowledgment, idempotency, and receipt checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          npm run intake:check | tee artifacts/matadata-resilient-intake-check.json
+          node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("artifacts/matadata-resilient-intake-check.json","utf8")); if(r.status!=="PASS") process.exit(1); console.log(`verified ${r.uniqueFieldCount} stable fields; receipt head ${r.receiptChain.head}`)'
+
+      - name: Upload verification receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-resilient-intake-receipt
+          path: artifacts/matadata-resilient-intake-check.json
+          if-no-files-found: error
+          retention-days: 30
