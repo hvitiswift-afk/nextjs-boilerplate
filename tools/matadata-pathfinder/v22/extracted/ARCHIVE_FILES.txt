@@ -1,0 +1,10 @@
+/tmp/matadata-v22/FAILURE_MATRIX.md
+/tmp/matadata-v22/MANIFEST.json
+/tmp/matadata-v22/README.md
+/tmp/matadata-v22/package.tar.gz
+/tmp/matadata-v22/runner.cjs.gz
+/tmp/matadata-v22/scripts/collect-logs.sh
+/tmp/matadata-v22/scripts/install-runtime.sh
+/tmp/matadata-v22/scripts/preflight.sh
+/tmp/matadata-v22/scripts/start-live.sh
+/tmp/matadata-v22/scripts/wait-and-validate.sh

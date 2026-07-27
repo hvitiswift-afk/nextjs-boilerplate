@@ -1,0 +1,6 @@
+8df9af41ae4f8c5b60b4ea548f645ce65800756a77ef2312b14ca7ece67d0b0b  tools/matadata-pathfinder/v22/extracted/ARCHIVE_FILES.txt
+f4c7e3d88a1dbeca6b6a84abbd8dcc3d9517b1dd95e902724705185477d378c9  tools/matadata-pathfinder/v22/extracted/collect-logs.sh
+0a6bc0756dcf3de5d94708b583fd6529b4a747c2f2c5581a30167e317063d3fa  tools/matadata-pathfinder/v22/extracted/install-runtime.sh
+400c2923a4d67831e05090507382354303e7b77c1f3e22395afc9f5026d37fbe  tools/matadata-pathfinder/v22/extracted/preflight.sh
+9aeeca586a7857e1e792668fbc4caf5c8310acc35a935e1e65886c6b4b43b9c0  tools/matadata-pathfinder/v22/extracted/start-live.sh
+c79f2b31308cd03543997aaf9ede3476b632f5ed99bb2dfbbb76330d4778d049  tools/matadata-pathfinder/v22/extracted/wait-and-validate.sh
