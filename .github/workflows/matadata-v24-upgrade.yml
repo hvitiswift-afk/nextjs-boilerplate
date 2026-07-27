@@ -6,7 +6,7 @@ on:
     types: [synchronize]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: matadata-v24-upgrade
@@ -31,6 +31,18 @@ jobs:
           set -o pipefail
           python -u tools/matadata-pathfinder/v24/upgrade.py 2>&1 | tee /tmp/matadata-v24-upgrade.log
 
+      - name: Package the verified generated V2.4 files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/matadata-v24-generated/.github/workflows
+          mkdir -p /tmp/matadata-v24-generated/tools/matadata-pathfinder/v22
+          cp .github/workflows/matadata-openai-pathfinder-v22.yml /tmp/matadata-v24-generated/.github/workflows/
+          cp tools/matadata-pathfinder/v22/package.part.* /tmp/matadata-v24-generated/tools/matadata-pathfinder/v22/
+          cp tools/matadata-pathfinder/v22/V24_UPGRADE_RECEIPT.json /tmp/matadata-v24-generated/tools/matadata-pathfinder/v22/
+          tar -C /tmp/matadata-v24-generated -czf /tmp/matadata-v24-generated.tar.gz .
+          sha256sum /tmp/matadata-v24-generated.tar.gz > /tmp/matadata-v24-generated.tar.gz.sha256
+
       - name: Preserve upgrade diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -40,16 +52,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 1
 
-      - name: Remove one-time upgrade machinery and commit V2.4
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf tools/matadata-pathfinder/v24
-          rm -f .github/workflows/matadata-v24-upgrade.yml
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          git status --short
-          git diff --cached --stat
-          git commit -m 'Upgrade MATADATA Pathfinder to V2.4 canonical textarea verification'
-          git push origin HEAD:${{ github.head_ref }}
+      - name: Upload verified generated V2.4 files
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v24-generated
+          path: |
+            /tmp/matadata-v24-generated.tar.gz
+            /tmp/matadata-v24-generated.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1
