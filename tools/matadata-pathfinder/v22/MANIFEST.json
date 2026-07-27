@@ -1,0 +1,42 @@
+{
+  "name": "MATADATA OpenAI Form Pathfinder V2.2",
+  "version": "2.2.0",
+  "status": "STAGED_NOT_EXECUTED",
+  "submission_id": "matadata-openai-cybersecurity-grant-v1",
+  "package_sha256": "f24a9cab7980e8d43a6be642e16500828952d89c1285af4cfff2ed363e078d11",
+  "runner_sha256": "d7fabf86cd9aa63644e9d09c5c0d2201b205503c2a0072502ee7cd1644faaf2b",
+  "runner_gzip_sha256": "de80921a0504210abf6f553a64f2cb8b71fb4a5a76d06cf2e10a36d246beed8d",
+  "application_sha256": "6ca7dd6f4ca13f04923a48896e51badeb7967f1fbde6b686a4b1759d90cfe340",
+  "package_parts_bytes": [8192, 8192, 8192, 8192, 3464],
+  "source_bytes": 97989,
+  "runner_gzip_bytes": 26938,
+  "expected_field_specs": 14,
+  "proposal_words": 902,
+  "problem_statement_words": 147,
+  "features": {
+    "dual_health_checked_tunnels": true,
+    "low_bandwidth_mobile_profile": true,
+    "conditional_screenshot_downloads": true,
+    "cookie_based_same_browser_reconnect": true,
+    "screen_token_stale_tap_guard": true,
+    "commit_bound_execution_authorization": true,
+    "trusted_openai_origin_gate": true,
+    "form_schema_digest": true,
+    "acknowledgment_proxy_panel": true,
+    "acknowledgment_three_sample_stability": true,
+    "candidate_submission_response_classifier": true,
+    "tamper_evident_event_chain": true,
+    "browser_and_page_watchdog": true,
+    "atomic_local_submit_lock": true,
+    "cross_run_confirmed_submission_lock": true,
+    "positive_confirmation_required": true,
+    "no_retry_after_ambiguous_click": true
+  },
+  "human_only_steps": [
+    "CAPTCHA or human verification",
+    "identity or signature if requested",
+    "applicant acknowledgment"
+  ],
+  "live_execution": false,
+  "package_transport": "five binary parts reconstructed into deterministic tar.gz"
+}
