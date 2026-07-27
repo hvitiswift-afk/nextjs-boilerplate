@@ -1,0 +1,98 @@
+name: MATADATA V2.2 Runner Field Logic Inspection
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matadata-v22-runner-inspect
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    if: github.head_ref == 'agent/matadata-openai-pathfinder-v2-2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Reconstruct reviewed runner and extract locator logic only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/matadata-v22 tools/matadata-pathfinder/v22/runner-inspection
+          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v22/package.tar.gz
+          echo 'f24a9cab7980e8d43a6be642e16500828952d89c1285af4cfff2ed363e078d11  /tmp/matadata-v22/package.tar.gz' | sha256sum --check
+          tar -xzf /tmp/matadata-v22/package.tar.gz -C /tmp/matadata-v22
+          gzip --decompress --stdout /tmp/matadata-v22/runner.cjs.gz > /tmp/matadata-v22/runner.cjs
+          echo 'd7fabf86cd9aa63644e9d09c5c0d2201b205503c2a0072502ee7cd1644faaf2b  /tmp/matadata-v22/runner.cjs' | sha256sum --check
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          src = Path('/tmp/matadata-v22/runner.cjs').read_text(encoding='utf-8')
+          lines = src.splitlines()
+          patterns = [
+              r'data-pathfinder-id',
+              r'fieldSpecs',
+              r'preflightFields',
+              r'fillOneField',
+              r'fillApplication',
+              r'locateField',
+              r'resolveField',
+              r'projectTitle',
+              r'acknowledgment',
+          ]
+          matches = []
+          for i, line in enumerate(lines):
+              if any(re.search(p, line, re.I) for p in patterns):
+                  matches.append(i)
+
+          ranges = []
+          for i in matches:
+              start = max(0, i - 45)
+              end = min(len(lines), i + 70)
+              if ranges and start <= ranges[-1][1] + 10:
+                  ranges[-1] = (ranges[-1][0], max(ranges[-1][1], end))
+              else:
+                  ranges.append((start, end))
+
+          out = []
+          out.append('MATADATA V2.2 runner field-logic inspection')
+          out.append('Runner SHA-256: d7fabf86cd9aa63644e9d09c5c0d2201b205503c2a0072502ee7cd1644faaf2b')
+          out.append('Application values and contact data are redacted below.')
+          out.append('')
+          for n, (start, end) in enumerate(ranges, 1):
+              out.append(f'===== RANGE {n}: lines {start+1}-{end} =====')
+              for idx in range(start, end):
+                  text = lines[idx]
+                  text = re.sub(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', '<redacted-email>', text)
+                  text = re.sub(r'https?://[^\s\'"`]+', '<redacted-url>', text)
+                  if any(key in text for key in ['proposal:', 'problem:', 'timeline:', 'funding:', 'additionalNotes:', 'personnel:']):
+                      text = re.sub(r'(:\s*)([`\'\"])(.*)', r'\1<redacted-application-value>', text)
+                  out.append(f'{idx+1:05d}: {text}')
+              out.append('')
+
+          target = Path('tools/matadata-pathfinder/v22/runner-inspection/RUNNER_FIELD_LOGIC.txt')
+          target.write_text('\n'.join(out), encoding='utf-8')
+          PY
+
+      - name: Remove one-time inspection workflow and commit redacted logic
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/matadata-v22-runner-inspect.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Inspect redacted MATADATA V2.2 field locator logic'
+          git push origin HEAD:${{ github.head_ref }}
