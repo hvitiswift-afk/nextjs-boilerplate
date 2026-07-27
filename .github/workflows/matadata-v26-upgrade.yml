@@ -6,7 +6,7 @@ on:
     types: [synchronize]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: matadata-v26-upgrade
@@ -35,6 +35,32 @@ jobs:
           set -o pipefail
           python -u tools/matadata-pathfinder/v26/upgrade.py 2>&1 | tee /tmp/matadata-v26-upgrade.log
 
+      - name: Package the verified generated V2.6 repository delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=/tmp/matadata-v26-generated
+          rm -rf "$root"
+          mkdir -p "$root/.github/workflows" "$root/tools/matadata-pathfinder/v22"
+          cp .github/workflows/matadata-openai-pathfinder-v22.yml "$root/.github/workflows/"
+          cp tools/matadata-pathfinder/v22/package.part.* "$root/tools/matadata-pathfinder/v22/"
+          cp tools/matadata-pathfinder/v22/README.md "$root/tools/matadata-pathfinder/v22/"
+          cp tools/matadata-pathfinder/v22/MANIFEST.json "$root/tools/matadata-pathfinder/v22/"
+          cp tools/matadata-pathfinder/v22/V26_UPGRADE_RECEIPT.json "$root/tools/matadata-pathfinder/v22/"
+          cat > "$root/DELETE_PATHS.txt" <<'EOF'
+          .github/workflows/matadata-v25-submit-disabled-snapshot.yml
+          .github/workflows/matadata-v25-source-export.yml
+          .github/workflows/matadata-v25-high-screen.yml
+          .github/workflows/matadata-v26-upgrade.yml
+          tools/matadata-pathfinder/v26/upgrade.py
+          tools/matadata-pathfinder/v26/patch/v26.patch.gz.b64.00
+          tools/matadata-pathfinder/v26/patch/v26.patch.gz.b64.01
+          tools/matadata-pathfinder/v26/patch/v26.patch.gz.b64.02
+          EOF
+          find "$root" -type f -print0 | sort -z | xargs -0 sha256sum > "$root/GENERATED_SHA256SUMS.txt"
+          tar -C "$root" -czf /tmp/matadata-v26-generated.tar.gz .
+          sha256sum /tmp/matadata-v26-generated.tar.gz > /tmp/matadata-v26-generated.tar.gz.sha256
+
       - name: Preserve upgrade diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -44,15 +70,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 1
 
-      - name: Remove one-time upgrade workflow and commit V2.6
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -f .github/workflows/matadata-v26-upgrade.yml
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          git status --short
-          git diff --cached --stat
-          git commit -m 'Upgrade MATADATA Pathfinder to V2.6 Marketo readiness recovery'
-          git push origin HEAD:${{ github.head_ref }}
+      - name: Upload the verified generated V2.6 delta
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v26-generated
+          path: |
+            /tmp/matadata-v26-generated.tar.gz
+            /tmp/matadata-v26-generated.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1
