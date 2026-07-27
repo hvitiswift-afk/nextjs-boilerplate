@@ -1,0 +1,46 @@
+{
+  "product": "MATADATA Resilient Intake Baseline",
+  "contractVersion": "matadata-intake/1.0.0",
+  "trustedOrigins": [
+    "https://intake.example.test"
+  ],
+  "acknowledgment": {
+    "supportedModes": [
+      "interactive-control",
+      "terms-on-submit"
+    ],
+    "personalActionRequired": true,
+    "textDigestMustRemainStable": true
+  },
+  "submission": {
+    "serverIssuedIdempotencyKeyRequired": true,
+    "maximumSubmissionActionsPerKey": 1,
+    "positiveConfirmationSignals": [
+      "confirmation text",
+      "application controls disappeared",
+      "reference ID"
+    ],
+    "unknownOutcomePolicy": "SUBMISSION_STATUS_UNKNOWN_NO_RETRY"
+  },
+  "fieldContract": {
+    "stableIdentity": "name",
+    "resolveAfreshAfterRerender": true,
+    "duplicateBindingsRejected": true,
+    "fullValueVerification": true,
+    "textareaNormalization": {
+      "lineEndings": "CRLF and CR normalize to LF",
+      "singleTerminalFormattingCharacter": [
+        "LF",
+        "SPACE",
+        "NBSP",
+        "ZERO_WIDTH_SPACE"
+      ],
+      "substantiveDifferencesRejected": true
+    }
+  },
+  "receipt": {
+    "tamperEvident": true,
+    "algorithm": "sha256(stable-json(event))",
+    "privacyBoundary": "store field lengths and digests rather than proposal bodies"
+  }
+}
