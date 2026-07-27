@@ -78,11 +78,11 @@ jobs:
                   text = re.sub(r'https?://[^\s\'"`]+', '<redacted-url>', text)
                   if any(key in text for key in ['proposal:', 'problem:', 'timeline:', 'funding:', 'additionalNotes:', 'personnel:']):
                       text = re.sub(r'(:\s*)([`\'\"])(.*)', r'\1<redacted-application-value>', text)
-                  out.append(f'{idx+1:05d}: {text}')
+                  out.append(f'{idx+1:05d}: {text.rstrip()}')
               out.append('')
 
           target = Path('tools/matadata-pathfinder/v22/runner-inspection/RUNNER_FIELD_LOGIC.txt')
-          target.write_text('\n'.join(out), encoding='utf-8')
+          target.write_text('\n'.join(out).rstrip() + '\n', encoding='utf-8')
           PY
 
       - name: Remove one-time inspection workflow and commit redacted logic
