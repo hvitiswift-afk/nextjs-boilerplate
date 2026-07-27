@@ -25,6 +25,20 @@ jobs:
           fetch-depth: 1
           show-progress: false
 
+      - name: Make literal replacement blocks regex-safe
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/matadata-pathfinder/v23/upgrade.py')
+          text = path.read_text(encoding='utf-8')
+          old = 'updated, count = re.subn(pattern, replacement, text, count=1, flags=flags)'
+          new = 'updated, count = re.subn(pattern, lambda _match: replacement, text, count=1, flags=flags)'
+          if text.count(old) != 1:
+              raise SystemExit('regex_once patch target was not found exactly once.')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
       - name: Apply fail-closed field and acknowledgment upgrade
         shell: bash
         run: |
