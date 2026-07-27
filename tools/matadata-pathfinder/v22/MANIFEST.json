@@ -7,7 +7,15 @@
   "runner_sha256": "d7fabf86cd9aa63644e9d09c5c0d2201b205503c2a0072502ee7cd1644faaf2b",
   "runner_gzip_sha256": "de80921a0504210abf6f553a64f2cb8b71fb4a5a76d06cf2e10a36d246beed8d",
   "application_sha256": "6ca7dd6f4ca13f04923a48896e51badeb7967f1fbde6b686a4b1759d90cfe340",
-  "package_parts_bytes": [8192, 8192, 8192, 8192, 3464],
+  "logical_package_segments_bytes": [8192, 8192, 8192, 8192, 3464],
+  "transport_parts": [
+    {"name": "package.part.00a", "bytes": 4096, "sha256": "83b5ba963dcda05fb7d8c3d06f72a77c87624ae8c3292b96f68fd82da0fdafaf"},
+    {"name": "package.part.00b", "bytes": 4096, "sha256": "f8225f43f9e188ede99d8c5e4dfa922adcdb9d5ef20ed5e8dc053fa83e6e7795"},
+    {"name": "package.part.01", "bytes": 8192, "sha256": "11865db9324ad0ca9866a27cbd309bb09b62b553829dcc4892b617cf8c71c166"},
+    {"name": "package.part.02", "bytes": 8192, "sha256": "6eb7fbefb017a5c50e49edbf2f0e9c0ae94bccdd31847d3ebec2504feebee303"},
+    {"name": "package.part.03", "bytes": 8192, "sha256": "e8acc763388f021a12925de1a56180c30e2143e542527d806bf41e3ee1333c3d"},
+    {"name": "package.part.04", "bytes": 3464, "sha256": "54360d902c92f89a28c821ed10f6a9cdd2d0f3f948e6f541ee20cbd9958de834"}
+  ],
   "source_bytes": 97989,
   "runner_gzip_bytes": 26938,
   "expected_field_specs": 14,
@@ -38,5 +46,5 @@
     "applicant acknowledgment"
   ],
   "live_execution": false,
-  "package_transport": "five binary parts reconstructed into deterministic tar.gz"
+  "package_transport": "five logical segments stored as six independently hashed binary files; segment 00 is split into 00a and 00b"
 }

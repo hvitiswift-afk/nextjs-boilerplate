@@ -54,4 +54,4 @@ Runner gzip SHA-256: de80921a0504210abf6f553a64f2cb8b71fb4a5a76d06cf2e10a36d246b
 Application SHA-256: 6ca7dd6f4ca13f04923a48896e51badeb7967f1fbde6b686a4b1759d90cfe340
 ```
 
-The five binary package parts reconstruct one deterministic archive containing the checksum-locked runner, preflight logic, live-session scripts, operating notes, manifest, and failure/recovery matrix.
+Five logical package segments reconstruct one deterministic archive containing the checksum-locked runner, preflight logic, live-session scripts, operating notes, manifest, and failure/recovery matrix. For safer repository transport, logical segment `00` is stored as two independently hashed 4,096-byte files (`package.part.00a` and `package.part.00b`), so the branch contains six physical package files in total.
