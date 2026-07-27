@@ -53,7 +53,14 @@ jobs:
             status=1
           fi
 
-          cat tools/matadata-pathfinder/v2.2/transport/workflow.b64.* \
+          cat \
+            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00a \
+            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00b \
+            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00c \
+            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00d \
+            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00e \
+            tools/matadata-pathfinder/v2.2/transport/workflow.b64.01 \
+            tools/matadata-pathfinder/v2.2/transport/workflow.b64.02 \
             | tr -d '[:space:]' \
             | base64 --decode \
             > .github/workflows/matadata-openai-pathfinder-v22.yml
@@ -71,9 +78,9 @@ jobs:
             echo 'RUNNER TRANSPORT CHUNKS'
             wc -c tools/matadata-pathfinder/v2.2/transport/runner.b64.*
             sha256sum tools/matadata-pathfinder/v2.2/transport/runner.b64.*
-            echo 'WORKFLOW TRANSPORT CHUNKS'
-            wc -c tools/matadata-pathfinder/v2.2/transport/workflow.b64.*
-            sha256sum tools/matadata-pathfinder/v2.2/transport/workflow.b64.*
+            echo 'WORKFLOW TRANSPORT PARTS'
+            wc -c tools/matadata-pathfinder/v2.2/transport/workflow.b64.00? tools/matadata-pathfinder/v2.2/transport/workflow.b64.01 tools/matadata-pathfinder/v2.2/transport/workflow.b64.02
+            sha256sum tools/matadata-pathfinder/v2.2/transport/workflow.b64.00? tools/matadata-pathfinder/v2.2/transport/workflow.b64.01 tools/matadata-pathfinder/v2.2/transport/workflow.b64.02
           } | tee /tmp/matadata-v22/bootstrap-diagnostics.txt
 
           exit "$status"
