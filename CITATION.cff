@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: >-
+  If this work, its regression findings, or its human-gated exactly-once
+  workflow patterns inform your project, please cite the software and
+  acknowledge Justin Lee Rackham (JP) / MATADATA.
+title: "MATADATA Pathfinder: Human-Gated, Exactly-Once Submission Reliability"
+type: software
+version: 2.6.0
+date-released: 2026-07-27
+authors:
+  - family-names: Rackham
+    given-names: Justin Lee
+    alias: JP
+repository-code: "https://github.com/hvitiswift-afk/nextjs-boilerplate"
+url: "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/123"
+abstract: >-
+  MATADATA Pathfinder is an independent, fail-closed workflow for
+  human-verification-preserving form reliability. The project developed
+  rerender-safe field resolution, semantic acknowledgment handling,
+  canonical textarea verification, mobile failover, exactly-once execution,
+  positive confirmation, and tamper-evident receipts. ChatGPT, using the
+  assistant persona Radio, provided AI-assisted engineering and documentation
+  under JP's direction; OpenAI affiliation or endorsement is not implied.
+keywords:
+  - human-in-the-loop
+  - exactly-once execution
+  - form reliability
+  - cybersecurity
+  - safety gates
+  - tamper-evident receipts
+  - accessibility
+  - mobile failover
+  - MATADATA
+preferred-citation:
+  type: software
+  title: "MATADATA Pathfinder: Human-Gated, Exactly-Once Submission Reliability"
+  version: 2.6.0
+  date-released: 2026-07-27
+  authors:
+    - family-names: Rackham
+      given-names: Justin Lee
+      alias: JP
+  repository-code: "https://github.com/hvitiswift-afk/nextjs-boilerplate"
