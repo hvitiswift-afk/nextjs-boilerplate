@@ -57,12 +57,26 @@ jobs:
       - name: Remove one-time upgrade machinery and commit V2.3
         shell: bash
         run: |
-          set -euo pipefail
-          rm -rf tools/matadata-pathfinder/v23
-          rm -f .github/workflows/matadata-v23-upgrade.yml
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          git diff --cached --check
-          git commit -m 'Upgrade MATADATA Pathfinder to V2.3 stable field contract'
-          git push origin HEAD:${{ github.head_ref }}
+          set -o pipefail
+          {
+            rm -rf tools/matadata-pathfinder/v23
+            rm -f .github/workflows/matadata-v23-upgrade.yml
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add -A
+            git status --short
+            git diff --cached --stat
+            git commit -m 'Upgrade MATADATA Pathfinder to V2.3 stable field contract'
+            git fetch origin "${GITHUB_HEAD_REF}"
+            git rebase "origin/${GITHUB_HEAD_REF}"
+            git push origin "HEAD:${GITHUB_HEAD_REF}"
+          } 2>&1 | tee /tmp/matadata-v23-commit.log
+
+      - name: Preserve commit diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v23-commit-diagnostics
+          path: /tmp/matadata-v23-commit.log
+          if-no-files-found: warn
+          retention-days: 1
