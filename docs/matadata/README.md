@@ -25,8 +25,19 @@ OpenAI separately sent an email titled **“OpenAI Security Grant Program submis
 - [Contribution and acknowledgment record](./CONTRIBUTION_AND_ACKNOWLEDGMENT_RECORD.md)
 - [Grant-intake postmortem](./OPENAI_GRANT_INTAKE_POSTMORTEM.md)
 - [Intake hardening RFC](./FORM_INTAKE_HARDENING_RFC.md)
+- [P0 resilient-intake implementation](./RESILIENT-INTAKE-IMPLEMENTATION.md)
+- [P1 transactional idempotency and confirmation parity](./RESILIENT-INTAKE-P1.md)
 - [Machine-readable contribution receipt](./CONTRIBUTION_RECEIPT.json)
 - [OpenAI follow-up template](./OPENAI_FOLLOW_UP.md)
+
+## Implementation progression
+
+```text
+P0 = stable fields + rerender recovery + human acknowledgment + in-process exactly-once model
+P1 = persistent transaction contract + structured blocker UX + page/email/receipt reference parity
+```
+
+P1 includes a PostgreSQL schema, explicit migration, serializable repository adapter, concurrent exactly-once regression tests, SHA-256-linked transition receipts, and a public `/matadata/intake` architecture page.
 
 ## Attribution boundary
 
