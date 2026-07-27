@@ -1,0 +1,88 @@
+{
+  "schema_version": "matadata.contribution-receipt.v1",
+  "record_status": "USER_AUTHORED_ACKNOWLEDGMENT_REQUEST",
+  "project": "MATADATA Defensive Authorization Ledger",
+  "applicant": {
+    "name": "Justin Lee Rackham",
+    "preferred_name": "JP",
+    "roles": [
+      "project owner",
+      "proposal author",
+      "applicant",
+      "human verifier",
+      "applicant acknowledgment authority",
+      "process-feedback source"
+    ]
+  },
+  "assistance": {
+    "mode": "AI-assisted workflow development",
+    "scope": [
+      "drafting",
+      "test planning",
+      "browser workflow engineering",
+      "failure analysis",
+      "receipt generation"
+    ],
+    "human_only_actions_preserved": true
+  },
+  "submission": {
+    "program": "OpenAI Cybersecurity Grant Program",
+    "form_origin": "https://openai.com",
+    "submitted_at": "2026-07-27T07:01:06Z",
+    "status": "SUBMITTED",
+    "submit_actions": 1,
+    "confirmation_text": "Thank you",
+    "confirmation_signals": [
+      "confirmation text observed",
+      "application controls disappeared",
+      "OpenAI confirmation email received"
+    ],
+    "runner_version": "2.6.0",
+    "application_sha256": "54a4f19763f3d5ac2cbddc57d946f30fe4a7cd3938908c570443c5996120812a",
+    "receipt_archive_sha256": "b5397211b08e277b858547388c34de87e82aeaffaf8f0fad16557a47b691d136",
+    "duplicate_prevention_lock_created": true
+  },
+  "support_context": {
+    "case_numbers": [
+      "12175485",
+      "11764089"
+    ],
+    "public_form_recognized_as_authoritative_intake": true
+  },
+  "process_findings": [
+    "dynamic rerenders invalidate ephemeral locators",
+    "field contracts must map unique controls rather than helper text",
+    "acknowledgment semantics must distinguish interactive control from official terms text",
+    "textarea comparison needs narrowly bounded canonicalization",
+    "visual button state can diverge from authoritative form-library state",
+    "exactly-once submission requires in-run and cross-run locks",
+    "positive confirmation should combine multiple signals",
+    "human acknowledgment can be preserved in assisted workflows",
+    "mobile human-in-the-loop sessions need reconnect and low-bandwidth paths",
+    "privacy-preserving receipts can use hashes and redacted state evidence"
+  ],
+  "requested_acknowledgment": {
+    "identify_feedback_source_as": "Justin Lee Rackham (JP)",
+    "requested_actions": [
+      "associate feedback with the grant application and support cases",
+      "acknowledge receipt of non-confidential process feedback",
+      "route findings to relevant form, accessibility, intake, and confirmation owners",
+      "advise whether an appropriate contribution or collaboration channel exists"
+    ],
+    "does_not_request": [
+      "automatic grant approval",
+      "OpenAI endorsement",
+      "employment or partnership status",
+      "guaranteed compensation",
+      "exclusive rights",
+      "recognition of an AI system as a legal contributor"
+    ]
+  },
+  "provenance_boundary": {
+    "openai_affiliation_claimed": false,
+    "openai_endorsement_claimed": false,
+    "grant_approval_claimed": false,
+    "internal_adoption_claimed": false,
+    "ip_transfer_created": false
+  }
+}
