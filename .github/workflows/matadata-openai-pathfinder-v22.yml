@@ -1,4 +1,4 @@
-name: MATADATA OpenAI Form Pathfinder V2.4
+name: MATADATA OpenAI Form Pathfinder V2.5
 
 on:
   pull_request:
@@ -22,15 +22,15 @@ permissions:
   actions: read
 
 env:
-  PACKAGE_SHA256: 3fd7760d1237ecef90db65a1ba6a5b90e6b4ad88a411626528b3ff12f4c07ea4
-  RUNNER_SHA256: 491c542b849a33c4f6caa8df24525566b07e820d6cd45eda1a47489729ae48ab
+  PACKAGE_SHA256: 78c1edc9a4b469f771a9b59742bb1c5f65acadaac2d40d2fd2af4b6a0f284358
+  RUNNER_SHA256: 6f56edf83efeaec921112c5997d751f7d8a04e810205a7928c1c249906128ab6
   APPLICATION_SHA256: 54a4f19763f3d5ac2cbddc57d946f30fe4a7cd3938908c570443c5996120812a
   SUBMISSION_ID: matadata-openai-cybersecurity-grant-v1
   LOCK_ARTIFACT_NAME: matadata-openai-submission-lock-v1
 
 jobs:
   preflight:
-    name: Offline V2.4 stable-field and acknowledgment preflight
+    name: Offline V2.5 stable-field and acknowledgment preflight
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -40,71 +40,71 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Reconstruct and verify the reviewed V2.4 package
+      - name: Reconstruct and verify the reviewed V2.5 package
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/matadata-v24 pathfinder-preflight
+          mkdir -p /tmp/matadata-v25 pathfinder-preflight
           {
-            echo 'MATADATA Pathfinder V2.4 package diagnostics'
+            echo 'MATADATA Pathfinder V2.5 package diagnostics'
             echo "commit=$GITHUB_SHA"
             echo 'package part sizes:'
             wc -c tools/matadata-pathfinder/v22/package.part.*
             echo 'package part sha256:'
             sha256sum tools/matadata-pathfinder/v22/package.part.*
           } | tee pathfinder-preflight/package-diagnostics.txt
-          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v24/package.tar.gz
+          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v25/package.tar.gz
           {
             echo "expected_package_sha256=$PACKAGE_SHA256"
             echo -n 'actual_package_sha256='
-            sha256sum /tmp/matadata-v24/package.tar.gz | awk '{print $1}'
+            sha256sum /tmp/matadata-v25/package.tar.gz | awk '{print $1}'
             echo -n 'package_bytes='
-            wc -c < /tmp/matadata-v24/package.tar.gz
+            wc -c < /tmp/matadata-v25/package.tar.gz
             echo 'archive listing:'
-            tar -tzf /tmp/matadata-v24/package.tar.gz
+            tar -tzf /tmp/matadata-v25/package.tar.gz
           } | tee -a pathfinder-preflight/package-diagnostics.txt
-          echo "$PACKAGE_SHA256  /tmp/matadata-v24/package.tar.gz" | sha256sum --check
-          tar -xzf /tmp/matadata-v24/package.tar.gz -C /tmp/matadata-v24
-          bash /tmp/matadata-v24/scripts/preflight.sh "$GITHUB_WORKSPACE/pathfinder-preflight"
+          echo "$PACKAGE_SHA256  /tmp/matadata-v25/package.tar.gz" | sha256sum --check
+          tar -xzf /tmp/matadata-v25/package.tar.gz -C /tmp/matadata-v25
+          bash /tmp/matadata-v25/scripts/preflight.sh "$GITHUB_WORKSPACE/pathfinder-preflight"
 
-      - name: Verify the V2.4 upgrade receipt matches the reviewed package
+      - name: Verify the V2.5 upgrade receipt matches the reviewed package
         shell: bash
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          receipt = json.loads(Path('tools/matadata-pathfinder/v22/V24_UPGRADE_RECEIPT.json').read_text(encoding='utf-8'))
+          receipt = json.loads(Path('tools/matadata-pathfinder/v22/V25_UPGRADE_RECEIPT.json').read_text(encoding='utf-8'))
           expected = {
-              'runnerVersion': '2.4.0',
-              'packageSha256': '3fd7760d1237ecef90db65a1ba6a5b90e6b4ad88a411626528b3ff12f4c07ea4',
-              'runnerSha256': '491c542b849a33c4f6caa8df24525566b07e820d6cd45eda1a47489729ae48ab',
+              'runnerVersion': '2.5.0',
+              'packageSha256': '78c1edc9a4b469f771a9b59742bb1c5f65acadaac2d40d2fd2af4b6a0f284358',
+              'runnerSha256': '6f56edf83efeaec921112c5997d751f7d8a04e810205a7928c1c249906128ab6',
               'applicationSha256': '54a4f19763f3d5ac2cbddc57d946f30fe4a7cd3938908c570443c5996120812a',
           }
           for key, value in expected.items():
               if receipt.get(key) != value:
-                  raise SystemExit(f'V2.4 receipt mismatch for {key}.')
+                  raise SystemExit(f'V2.5 receipt mismatch for {key}.')
           if receipt.get('selfTest', {}).get('passed') is not True or receipt.get('liveExecution') is not False:
-              raise SystemExit('V2.4 receipt does not record a passed staged preflight.')
+              raise SystemExit('V2.5 receipt does not record a passed staged preflight.')
           print(json.dumps(receipt, indent=2))
           PY
 
-      - name: Upload V2.4 preflight evidence
+      - name: Upload V2.5 preflight evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-pathfinder-v24-preflight
+          name: matadata-pathfinder-v25-preflight
           path: pathfinder-preflight
           if-no-files-found: warn
           retention-days: 30
 
   submit-once:
-    name: Authorized human-gated V2.4 submission with failover
+    name: Authorized human-gated V2.5 submission with failover
     needs: preflight
     if: >-
       needs.preflight.result == 'success' &&
       (
         (github.event_name == 'workflow_dispatch' && inputs.mode == 'submit' && inputs.authorization_phrase == format('JP-AUTHORIZED-ONE-SUBMIT:{0}', github.sha)) ||
-        (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.changes.title.from && startsWith(github.event.pull_request.title, '[EXECUTE MATADATA V2.4]') && contains(github.event.pull_request.body, format('JP-AUTHORIZED-ONE-SUBMIT:{0}', github.event.pull_request.head.sha)))
+        (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.changes.title.from && startsWith(github.event.pull_request.title, '[EXECUTE MATADATA V2.5]') && contains(github.event.pull_request.body, format('JP-AUTHORIZED-ONE-SUBMIT:{0}', github.event.pull_request.head.sha)))
       )
     concurrency:
       group: matadata-openai-cybersecurity-grant-v1
@@ -128,52 +128,52 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Reconstruct and verify the exact reviewed V2.4 package
+      - name: Reconstruct and verify the exact reviewed V2.5 package
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/matadata-v24
-          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v24/package.tar.gz
-          echo "$PACKAGE_SHA256  /tmp/matadata-v24/package.tar.gz" | sha256sum --check
-          tar -xzf /tmp/matadata-v24/package.tar.gz -C /tmp/matadata-v24
-          bash /tmp/matadata-v24/scripts/preflight.sh "$GITHUB_WORKSPACE/pathfinder-preflight-live"
+          mkdir -p /tmp/matadata-v25
+          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v25/package.tar.gz
+          echo "$PACKAGE_SHA256  /tmp/matadata-v25/package.tar.gz" | sha256sum --check
+          tar -xzf /tmp/matadata-v25/package.tar.gz -C /tmp/matadata-v25
+          bash /tmp/matadata-v25/scripts/preflight.sh "$GITHUB_WORKSPACE/pathfinder-preflight-live"
 
       - name: Install isolated browser and tunnel runtime
-        run: bash /tmp/matadata-v24/scripts/install-runtime.sh
+        run: bash /tmp/matadata-v25/scripts/install-runtime.sh
 
       - name: Stage an isolated launcher root
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf /tmp/matadata-v24-launch
-          mkdir -p /tmp/matadata-v24-launch/scripts
-          cp /tmp/matadata-v24/runner.cjs.gz /tmp/matadata-v24-launch/runner.cjs.gz
-          cp /tmp/matadata-v24/scripts/start-live.sh /tmp/matadata-v24-launch/scripts/start-live.sh
-          test "$(realpath /tmp/matadata-v24-launch/runner.cjs.gz)" != "$(realpath /tmp/matadata-v24/runner.cjs.gz)"
+          rm -rf /tmp/matadata-v25-launch
+          mkdir -p /tmp/matadata-v25-launch/scripts
+          cp /tmp/matadata-v25/runner.cjs.gz /tmp/matadata-v25-launch/runner.cjs.gz
+          cp /tmp/matadata-v25/scripts/start-live.sh /tmp/matadata-v25-launch/scripts/start-live.sh
+          test "$(realpath /tmp/matadata-v25-launch/runner.cjs.gz)" != "$(realpath /tmp/matadata-v25/runner.cjs.gz)"
 
-      - name: Start V2.4 browser, watchdog, and independent public links
-        run: bash /tmp/matadata-v24-launch/scripts/start-live.sh
+      - name: Start V2.5 browser, watchdog, and independent public links
+        run: bash /tmp/matadata-v25-launch/scripts/start-live.sh
 
-      - name: Publish the private V2.4 live-session handoff
+      - name: Publish the private V2.5 live-session handoff
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-pathfinder-v24-live-session
+          name: matadata-pathfinder-v25-live-session
           path: pathfinder-session/session.json
           if-no-files-found: error
           retention-days: 1
 
       - name: Await human-only steps and one confirmed submission
-        run: bash /tmp/matadata-v24/scripts/wait-and-validate.sh
+        run: bash /tmp/matadata-v25/scripts/wait-and-validate.sh
 
       - name: Preserve diagnostics
         if: always()
-        run: bash /tmp/matadata-v24/scripts/collect-logs.sh
+        run: bash /tmp/matadata-v25/scripts/collect-logs.sh
 
       - name: Upload receipt, event chain, screenshots, and logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-openai-pathfinder-v24-receipt
+          name: matadata-openai-pathfinder-v25-receipt
           path: pathfinder-artifacts
           if-no-files-found: warn
           retention-days: 30

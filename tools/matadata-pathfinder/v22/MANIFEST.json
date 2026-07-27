@@ -1,13 +1,13 @@
 {
-  "name": "MATADATA OpenAI Form Pathfinder V2.4",
-  "version": "2.4.0",
+  "name": "MATADATA OpenAI Form Pathfinder V2.5",
+  "version": "2.5.0",
   "status": "STAGED_NOT_EXECUTED",
   "submission_id": "matadata-openai-cybersecurity-grant-v1",
   "package_file": "package.tar.gz",
-  "package_sha256": "3fd7760d1237ecef90db65a1ba6a5b90e6b4ad88a411626528b3ff12f4c07ea4",
-  "package_bytes": 38113,
-  "runner_sha256": "491c542b849a33c4f6caa8df24525566b07e820d6cd45eda1a47489729ae48ab",
-  "runner_gzip_sha256": "6c36a3917bf109599310d7d31e17fb60696808b6062032ec7ce9345104918e35",
+  "package_sha256": "78c1edc9a4b469f771a9b59742bb1c5f65acadaac2d40d2fd2af4b6a0f284358",
+  "package_bytes": 39100,
+  "runner_sha256": "6f56edf83efeaec921112c5997d751f7d8a04e810205a7928c1c249906128ab6",
+  "runner_gzip_sha256": "75f8c1d9cedd7c968ecb6928f9332ac3d99fdd67eca594eebe75397cd179055d",
   "application_sha256": "54a4f19763f3d5ac2cbddc57d946f30fe4a7cd3938908c570443c5996120812a",
   "expected_field_specs": 13,
   "features": {
@@ -23,16 +23,20 @@
     "direct_submit_taps_blocked": true,
     "trusted_origin_required": true,
     "exactly_once_lock": true,
-    "positive_confirmation_required": true
+    "positive_confirmation_required": true,
+    "single_terminal_unicode_formatting_equivalence_for_textareas": true,
+    "terminal_code_point_diagnostics": true,
+    "internal_and_multiple_character_differences_rejected": true
   },
   "source_error_repaired": {
-    "runner_version": "2.3.0",
-    "phase": "VALIDATION_ERROR",
-    "submit_clicks": 0,
+    "sourceStatusPhase": "VALIDATION_ERROR",
+    "sourceSubmitClicks": 0,
     "field": "funding",
-    "expected_length": 960,
-    "observed_length": 961,
-    "diagnosis": "one additional terminal line break in a textarea"
+    "expectedLength": 960,
+    "observedLength": 961,
+    "v24Result": "The single-terminal-LF and CRLF rules did not classify the extra code unit.",
+    "v25Rule": "Accept exactly one terminal Unicode White_Space or Format code point for a textarea only, record its code point/category, and reject every internal or multi-character difference.",
+    "substantiveDifferencesStillBlocked": true
   },
   "live_execution": false
 }
