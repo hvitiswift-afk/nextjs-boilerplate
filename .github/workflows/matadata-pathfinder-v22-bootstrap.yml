@@ -39,7 +39,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/matadata-v22 pathfinder-validation/static pathfinder-validation/rerender
           cat tools/matadata-pathfinder/v2.2/transport/runner.b64.* \
-            | tr -d '[:space:]' \
+            | tr -cd 'A-Za-z0-9+/=' \
             | base64 --decode \
             > /tmp/matadata-v22/runner.cjs.gz
           echo "$GZIP_SHA256  /tmp/matadata-v22/runner.cjs.gz" | sha256sum --check
