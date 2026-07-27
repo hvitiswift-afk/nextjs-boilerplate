@@ -1,0 +1,59 @@
+name: MATADATA Pathfinder V2.6 Atomic Finalize
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: matadata-v26-atomic-finalize
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    if: github.head_ref == 'agent/matadata-openai-pathfinder-v2-2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BRANCH: ${{ github.head_ref }}
+      EXPECTED_BASE_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Check out the staged Pathfinder branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Ensure patch utility is available
+        shell: bash
+        run: command -v patch || (sudo apt-get update -qq && sudo apt-get install -y patch)
+
+      - name: Apply the checksum-locked V2.6 upgrade
+        shell: bash
+        run: |
+          set -o pipefail
+          python -u tools/matadata-pathfinder/v26/upgrade.py 2>&1 | tee /tmp/matadata-v26-upgrade.log
+
+      - name: Validate and commit the generated delta atomically
+        shell: bash
+        run: |
+          set -o pipefail
+          python -u tools/matadata-pathfinder/v26-finalize.py 2>&1 | tee /tmp/matadata-v26-finalize.log
+
+      - name: Preserve finalize evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v26-finalize-evidence
+          path: |
+            /tmp/matadata-v26-upgrade.log
+            /tmp/matadata-v26-finalize.log
+            /tmp/matadata-v26-finalize.json
+          if-no-files-found: warn
+          retention-days: 1
