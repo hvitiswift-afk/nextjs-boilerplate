@@ -1,0 +1,15 @@
+start_live_exit=1
+--- /tmp/pathfinder-live inventory ---
+session-id 32 bytes
+token 48 bytes
+--- processes ---
+--- xvfb.log filtered tail ---
+<missing>
+--- pathfinder.log filtered tail ---
+<missing>
+--- tunnel-warnings.log filtered tail ---
+<missing>
+--- cloudflared-primary.log filtered tail ---
+<missing>
+--- cloudflared-backup.log filtered tail ---
+<missing>

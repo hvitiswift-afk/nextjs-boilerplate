@@ -1,0 +1,2 @@
+{"sequence":1,"at":"2026-07-27T02:57:26.616Z","event":"selftest-chain-a","details":{"value":1},"previousHash":"0000000000000000000000000000000000000000000000000000000000000000","eventHash":"d9f35b22bc76fe1c6048946773b49349c084fe8ddf0e77fbdb2118d969726270"}
+{"sequence":2,"at":"2026-07-27T02:57:26.617Z","event":"selftest-chain-b","details":{"value":2},"previousHash":"d9f35b22bc76fe1c6048946773b49349c084fe8ddf0e77fbdb2118d969726270","eventHash":"152d7efed78a1482aa065bb203ac4c43d25a0fa502eaa9c5871e5bd07ca55f8e"}
