@@ -1,57 +1,38 @@
-# MATADATA OpenAI Pathfinder V2.2
+# MATADATA OpenAI Pathfinder V2.4
 
-V2.2 is a staged, non-confidential, human-gated form-assistance runner for the MATADATA Cybersecurity Grant Program application. It improves connection reliability, mobile recovery, acknowledgment verification, receipt integrity, and exactly-once execution without bypassing OpenAI’s CAPTCHA, identity, signature, applicant-acknowledgment, or other human-only controls.
+V2.4 stages a human-gated, exactly-once submission runner for the reviewed non-confidential MATADATA Cybersecurity Grant Program application.
 
-## Connection and mobile recovery
+## Human boundary
 
-- Publishes two independently created and health-checked public session links when both tunnels are available.
-- Provides normal and low-bandwidth variants of each live link.
-- Uses conditional screenshot requests (`ETag` / `304`) so unchanged screens are not downloaded repeatedly.
-- Supports low, normal, and high screenshot profiles.
-- Uses exponential reconnect backoff and browser online/offline detection.
-- Sets a secure same-site session cookie so an already-opened link can be refreshed without keeping its bearer token in the address bar.
-- Rejects taps from unknown or stale screen tokens.
+JP personally completes CAPTCHA, identity, signature, human-verification, and applicant-acknowledgment steps. Pathfinder may fill the reviewed application and perform no more than one authorized Submit click after all validation gates pass. Direct remote taps on OpenAI's Submit control are blocked.
 
-## Acknowledgment integrity
+## Repairs carried forward
 
-- Displays the current acknowledgment text extracted from the official OpenAI form in a dedicated Pathfinder panel.
-- Requires JP’s explicit personal affirmation.
-- Verifies that the displayed acknowledgment hash still matches the official form.
-- Verifies the actual underlying OpenAI acknowledgment control across three stable observations.
-- Repeats the stability check immediately before the sole authorized Submit click.
-- Records hashes, control fingerprints, and state observations rather than the full proposal text in normal audit records.
+- 13 unique application fields, resolved by stable control `name` first.
+- Every control is resolved afresh for each fill attempt and again for verification.
+- Project title and its helper text are treated as one field.
+- Every field is reverified before acknowledgment and immediately before Submit.
+- Interactive-control and official-terms-text-only acknowledgment presentations are supported.
+- JP's personal acknowledgment and three stable acknowledgment observations are required.
+- Trusted OpenAI origin checks, in-run and cross-run locks, and positive confirmation evidence remain mandatory.
 
-## Form, origin, and submission safeguards
+## V2.4 canonical textarea verification
 
-- Verifies that the top-level page remains on a trusted OpenAI HTTPS origin before filling and again before submission.
-- Captures a redacted trust-boundary snapshot and form-action digest.
-- Inventories all 14 expected application controls before entering data.
-- Stops fail-closed if expected controls disappear or browser validation remains incomplete.
-- Separates likely application submissions from analytics and unrelated POST traffic while retaining only request/response hashes, lengths, marker names, status, and content type.
-- Requires positive confirmation evidence. A URL change alone is not sufficient.
-- Maintains a tamper-evident event hash chain, browser/page heartbeat, atomic in-run submit lock, and repository-wide confirmed-submission lock.
-- Never makes a second click when the first click’s outcome is uncertain.
+The V2.3 run stopped safely after acknowledgment with `submitClicks: 0` because OpenAI returned the funding textarea with one additional terminal line break: expected length 960, observed length 961. V2.4 compares textarea values canonically:
 
-## Authorization boundary
+- exact content is accepted;
+- CRLF and CR line endings are normalized to LF;
+- one additional terminal line break is accepted for a textarea only;
+- spaces, changed words, added paragraphs, deleted text, multiple extra line breaks, and all other substantive differences remain blocking errors.
 
-JP personally completes any CAPTCHA, identity, signature, human-verification, and applicant-acknowledgment step. Pathfinder may fill the reviewed non-confidential fields and perform no more than one authorized Submit click after all gates pass.
-
-Opening or updating the V2.2 pull request runs offline preflight only. A live PR-triggered run requires both:
-
-1. a title beginning `[EXECUTE MATADATA V2.2]`; and
-2. an authorization marker bound to the exact reviewed head commit: `JP-AUTHORIZED-ONE-SUBMIT:<head SHA>`.
-
-Changing the code changes the head SHA and automatically invalidates the prior authorization marker. Manual workflow dispatch uses the same commit-bound phrase.
-
-The active V2.1 session is not modified, cancelled, or restarted by this V2.2 branch.
+The field manifest records both raw and canonical hashes, lengths, length delta, and comparison mode.
 
 ## Integrity
 
-```text
-Package SHA-256:     f24a9cab7980e8d43a6be642e16500828952d89c1285af4cfff2ed363e078d11
-Runner SHA-256:      d7fabf86cd9aa63644e9d09c5c0d2201b205503c2a0072502ee7cd1644faaf2b
-Runner gzip SHA-256: de80921a0504210abf6f553a64f2cb8b71fb4a5a76d06cf2e10a36d246beed8d
-Application SHA-256: 6ca7dd6f4ca13f04923a48896e51badeb7967f1fbde6b686a4b1759d90cfe340
-```
+- Package SHA-256: `3fd7760d1237ecef90db65a1ba6a5b90e6b4ad88a411626528b3ff12f4c07ea4`
+- Runner SHA-256: `491c542b849a33c4f6caa8df24525566b07e820d6cd45eda1a47489729ae48ab`
+- Runner gzip SHA-256: `6c36a3917bf109599310d7d31e17fb60696808b6062032ec7ce9345104918e35`
+- Application SHA-256: `54a4f19763f3d5ac2cbddc57d946f30fe4a7cd3938908c570443c5996120812a`
+- Package file: `package.tar.gz`
 
-Five logical package segments reconstruct one deterministic archive containing the checksum-locked runner, preflight logic, live-session scripts, operating notes, manifest, and failure/recovery matrix. For safer repository transport, logical segment `00` is stored as two independently hashed 4,096-byte files (`package.part.00a` and `package.part.00b`), so the branch contains six physical package files in total.
+Pull-request updates run offline preflight only. A live run requires a separate commit-bound one-submit authorization and execution-title edit.
