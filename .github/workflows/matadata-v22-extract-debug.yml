@@ -1,0 +1,49 @@
+name: MATADATA V2.2 Extract Startup Diagnostics
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matadata-v22-extract-debug
+  cancel-in-progress: true
+
+jobs:
+  extract:
+    if: github.head_ref == 'agent/matadata-openai-pathfinder-v2-2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Verify package and extract startup scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/matadata-v22 tools/matadata-pathfinder/v22/extracted
+          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v22/package.tar.gz
+          echo 'f24a9cab7980e8d43a6be642e16500828952d89c1285af4cfff2ed363e078d11  /tmp/matadata-v22/package.tar.gz' | sha256sum --check
+          tar -xzf /tmp/matadata-v22/package.tar.gz -C /tmp/matadata-v22
+          find /tmp/matadata-v22 -maxdepth 3 -type f -print | sort > tools/matadata-pathfinder/v22/extracted/ARCHIVE_FILES.txt
+          cp -a /tmp/matadata-v22/scripts/. tools/matadata-pathfinder/v22/extracted/
+          sha256sum tools/matadata-pathfinder/v22/extracted/* > tools/matadata-pathfinder/v22/extracted/SHA256SUMS.txt
+
+      - name: Remove one-time extractor and commit diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/matadata-v22-extract-debug.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Extract MATADATA V2.2 startup scripts for repair'
+          git push origin HEAD:${{ github.head_ref }}
