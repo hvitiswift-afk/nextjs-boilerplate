@@ -1,0 +1,64 @@
+name: MATADATA Resilient Intake P1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/intake/**"
+      - "infra/matadata-intake.sql"
+      - "scripts/check-resilient-intake-p1.mjs"
+      - "scripts/migrate-matadata-intake.mjs"
+      - "docs/matadata/**"
+      - "app/matadata/intake/**"
+      - "package.json"
+      - ".github/workflows/matadata-resilient-intake-p1.yml"
+  pull_request:
+    branches: [main, agent/matadata-resilient-intake-v1]
+    paths:
+      - "lib/intake/**"
+      - "infra/matadata-intake.sql"
+      - "scripts/check-resilient-intake-p1.mjs"
+      - "scripts/migrate-matadata-intake.mjs"
+      - "docs/matadata/**"
+      - "app/matadata/intake/**"
+      - "package.json"
+      - ".github/workflows/matadata-resilient-intake-p1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matadata-resilient-intake-p1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verify transactional idempotency, blocker UX, and confirmation parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/matadata-intake-p1
+          node scripts/check-resilient-intake-p1.mjs | tee artifacts/matadata-intake-p1/verification-receipt.json
+          node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("artifacts/matadata-intake-p1/verification-receipt.json","utf8")); if(r.status!=="PASS") process.exit(1); console.log(`verified ${r.persistentIdempotency.concurrentAttempts} concurrent attempts with ${r.persistentIdempotency.submitActionsCreated} submission action; reference ${r.confirmationParity.referenceId}`)'
+
+      - name: Upload P1 verification receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-resilient-intake-p1-receipt
+          path: artifacts/matadata-intake-p1
+          if-no-files-found: error
+          retention-days: 30
