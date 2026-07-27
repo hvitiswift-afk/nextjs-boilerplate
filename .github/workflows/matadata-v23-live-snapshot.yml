@@ -39,7 +39,7 @@ jobs:
           unzip -q /tmp/live-session/session.zip -d /tmp/live-session/content
           find /tmp/live-session/content -type f -maxdepth 3 -print
 
-      - name: Fetch and sanitize the current Pathfinder page
+      - name: Fetch and sanitize the current Pathfinder state
         shell: bash
         run: |
           set -euo pipefail
@@ -58,16 +58,42 @@ jobs:
               raise SystemExit(f'No primary URL in session payload keys: {sorted(payload)}')
           PY
           url="$(cat /tmp/live-session/url.txt)"
+          base="${url%%\?*}"
           curl --fail --location --silent --show-error --max-time 25 \
             --cookie-jar /tmp/live-session/cookies.txt \
             --cookie /tmp/live-session/cookies.txt \
             --dump-header /tmp/live-session/headers.txt \
             "$url" > /tmp/live-session/page.html
+          curl --fail --location --silent --show-error --max-time 25 \
+            --cookie /tmp/live-session/cookies.txt \
+            --dump-header /tmp/live-session/status-headers.txt \
+            "${base%/}/status" > /tmp/live-session/status.json
 
           python - <<'PY'
           from html import unescape
           from pathlib import Path
-          import json, re
+          import hashlib, json, re
+
+          def redact_text(value: str) -> str:
+              value = re.sub(r'https://[-a-z0-9]+\.trycloudflare\.com', 'https://<redacted>.trycloudflare.com', value, flags=re.I)
+              value = re.sub(r'(?i)(token=)[A-Za-z0-9]+', r'\1<redacted>', value)
+              value = re.sub(r'\b[0-9a-fA-F]{24,}\b', '<redacted-hex>', value)
+              value = re.sub(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', '<redacted-email>', value)
+              return value
+
+          def sanitize(value, key=''):
+              sensitive_keys = {'token', 'screenToken', 'sessionToken', 'cookie', 'email', 'linkedin', 'application', 'proposal', 'problem', 'timeline', 'funding', 'personnel', 'additionalNotes'}
+              if key in sensitive_keys:
+                  if isinstance(value, str):
+                      return f'<redacted:{key}:length={len(value)}:sha256={hashlib.sha256(value.encode()).hexdigest()}>'
+                  return f'<redacted:{key}>'
+              if isinstance(value, dict):
+                  return {k: sanitize(v, k) for k, v in value.items()}
+              if isinstance(value, list):
+                  return [sanitize(v, key) for v in value]
+              if isinstance(value, str):
+                  return redact_text(value)
+              return value
 
           html = Path('/tmp/live-session/page.html').read_text(encoding='utf-8', errors='replace')
           text = re.sub(r'<script\b[^>]*>.*?</script>', ' ', html, flags=re.I|re.S)
@@ -77,43 +103,39 @@ jobs:
           lines = [re.sub(r'\s+', ' ', line).strip() for line in text.splitlines()]
           lines = [line for line in lines if line]
           keywords = re.compile(r'error|failed|timeout|status|phase|message|acknowledg|submit|validation|field|revision|connected|session', re.I)
-          selected = []
-          for line in lines:
-              if keywords.search(line):
-                  selected.append(line)
-          if not selected:
-              selected = lines[:120]
-
+          selected = [line for line in lines if keywords.search(line)] or lines[:120]
           endpoints = sorted(set(re.findall(r"(?:fetch|XMLHttpRequest|EventSource)[^\n]{0,180}?[\'\"](/[^\'\"? ]+)", html, flags=re.I)))
           endpoints += sorted(set(re.findall(r"[\'\"](/(?:api|status|state|health|snapshot|screen|image|refresh)[^\'\" ]*)[\'\"]", html, flags=re.I)))
           endpoints = sorted(set(endpoints))
-
-          def redact(value: str) -> str:
-              value = re.sub(r'https://[-a-z0-9]+\.trycloudflare\.com', 'https://<redacted>.trycloudflare.com', value, flags=re.I)
-              value = re.sub(r'(?i)(token=)[A-Za-z0-9]+', r'\1<redacted>', value)
-              value = re.sub(r'\b[0-9a-fA-F]{24,}\b', '<redacted-hex>', value)
-              value = re.sub(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', '<redacted-email>', value)
-              return value
-
           report = [
               'MATADATA V2.3 live page snapshot',
               'Source run: 30234618654',
               '',
               'VISIBLE STATUS TEXT:',
-              *[redact(line) for line in selected[:220]],
+              *[redact_text(line) for line in selected[:220]],
               '',
               'DISCOVERED RELATIVE ENDPOINTS:',
-              *[redact(item) for item in endpoints[:100]],
+              *[redact_text(item) for item in endpoints[:100]],
           ]
           Path('/tmp/live-snapshot/page-snapshot.txt').write_text('\n'.join(report) + '\n', encoding='utf-8')
-          Path('/tmp/live-snapshot/html-sha256.txt').write_text(__import__('hashlib').sha256(html.encode()).hexdigest() + '\n', encoding='utf-8')
+          Path('/tmp/live-snapshot/html-sha256.txt').write_text(hashlib.sha256(html.encode()).hexdigest() + '\n', encoding='utf-8')
+
+          raw_status = Path('/tmp/live-session/status.json').read_text(encoding='utf-8', errors='replace')
+          try:
+              status = json.loads(raw_status)
+              sanitized = sanitize(status)
+              Path('/tmp/live-snapshot/status-snapshot.json').write_text(json.dumps(sanitized, indent=2) + '\n', encoding='utf-8')
+          except Exception as exc:
+              Path('/tmp/live-snapshot/status-snapshot.txt').write_text(redact_text(raw_status) + f'\nJSON parse error: {exc}\n', encoding='utf-8')
           PY
 
-          sed -E \
-            -e 's#https://[-a-z0-9]+\.trycloudflare\.com#https://<redacted>.trycloudflare.com#g' \
-            -e 's/(token=)[A-Za-z0-9]+/\1<redacted>/Ig' \
-            -e 's/\b[0-9a-fA-F]{24,}\b/<redacted-hex>/g' \
-            /tmp/live-session/headers.txt > /tmp/live-snapshot/response-headers.txt
+          for name in headers status-headers; do
+            sed -E \
+              -e 's#https://[-a-z0-9]+\.trycloudflare\.com#https://<redacted>.trycloudflare.com#g' \
+              -e 's/(token=)[A-Za-z0-9]+/\1<redacted>/Ig' \
+              -e 's/\b[0-9a-fA-F]{24,}\b/<redacted-hex>/g' \
+              "/tmp/live-session/${name}.txt" > "/tmp/live-snapshot/${name}.txt"
+          done
 
       - name: Upload the sanitized snapshot
         uses: actions/upload-artifact@v4
