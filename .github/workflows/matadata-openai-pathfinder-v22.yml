@@ -119,8 +119,18 @@ jobs:
       - name: Install isolated browser and tunnel runtime
         run: bash /tmp/matadata-v22/scripts/install-runtime.sh
 
+      - name: Stage an isolated launcher root
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/matadata-v22-launch
+          mkdir -p /tmp/matadata-v22-launch/scripts
+          cp /tmp/matadata-v22/runner.cjs.gz /tmp/matadata-v22-launch/runner.cjs.gz
+          cp /tmp/matadata-v22/scripts/start-live.sh /tmp/matadata-v22-launch/scripts/start-live.sh
+          test "$(realpath /tmp/matadata-v22-launch/runner.cjs.gz)" != "$(realpath /tmp/matadata-v22/runner.cjs.gz)"
+
       - name: Start browser, watchdog, and independent public links
-        run: bash /tmp/matadata-v22/scripts/start-live.sh
+        run: bash /tmp/matadata-v22-launch/scripts/start-live.sh
 
       - name: Publish the private live-session handoff
         uses: actions/upload-artifact@v4
