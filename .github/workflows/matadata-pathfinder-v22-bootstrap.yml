@@ -27,30 +27,61 @@ jobs:
           fetch-depth: 1
           show-progress: false
 
-      - name: Materialize checksum-locked workflow and binary runner
+      - name: Materialize and diagnose checksum-locked artifacts
         shell: bash
         run: |
-          set -euo pipefail
-          mkdir -p tools/matadata-pathfinder/v2.2 .github/workflows
+          set -uo pipefail
+          mkdir -p tools/matadata-pathfinder/v2.2 .github/workflows /tmp/matadata-v22
+          status=0
 
           cat tools/matadata-pathfinder/v2.2/transport/runner.b64.* \
             | tr -d '[:space:]' \
             | base64 --decode \
             > tools/matadata-pathfinder/v2.2/runner.cjs.gz
-          echo 'c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103  tools/matadata-pathfinder/v2.2/runner.cjs.gz' \
-            | sha256sum --check
-          gzip --test tools/matadata-pathfinder/v2.2/runner.cjs.gz
-          gzip --decompress --stdout tools/matadata-pathfinder/v2.2/runner.cjs.gz > /tmp/matadata-pathfinder-v22.cjs
-          echo '01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab  /tmp/matadata-pathfinder-v22.cjs' \
-            | sha256sum --check
-          node --check /tmp/matadata-pathfinder-v22.cjs
+          runner_actual="$(sha256sum tools/matadata-pathfinder/v2.2/runner.cjs.gz | awk '{print $1}')"
+          echo "runner_gzip_expected=c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103"
+          echo "runner_gzip_actual=$runner_actual"
+          if [[ "$runner_actual" != 'c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103' ]]; then status=1; fi
+
+          if gzip --test tools/matadata-pathfinder/v2.2/runner.cjs.gz; then
+            gzip --decompress --stdout tools/matadata-pathfinder/v2.2/runner.cjs.gz > /tmp/matadata-pathfinder-v22.cjs
+            source_actual="$(sha256sum /tmp/matadata-pathfinder-v22.cjs | awk '{print $1}')"
+            echo "runner_source_expected=01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab"
+            echo "runner_source_actual=$source_actual"
+            if [[ "$source_actual" != '01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab' ]]; then status=1; fi
+            node --check /tmp/matadata-pathfinder-v22.cjs || status=1
+          else
+            echo 'runner_gzip_valid=false'
+            status=1
+          fi
 
           cat tools/matadata-pathfinder/v2.2/transport/workflow.b64.* \
             | tr -d '[:space:]' \
             | base64 --decode \
             > .github/workflows/matadata-openai-pathfinder-v22.yml
-          echo '34247c64cd73c6ffb9fd53d4eb8910ac06dabd61264f8e8cca32c84b7bbb21ca  .github/workflows/matadata-openai-pathfinder-v22.yml' \
-            | sha256sum --check
+          workflow_actual="$(sha256sum .github/workflows/matadata-openai-pathfinder-v22.yml | awk '{print $1}')"
+          echo "workflow_expected=34247c64cd73c6ffb9fd53d4eb8910ac06dabd61264f8e8cca32c84b7bbb21ca"
+          echo "workflow_actual=$workflow_actual"
+          if [[ "$workflow_actual" != '34247c64cd73c6ffb9fd53d4eb8910ac06dabd61264f8e8cca32c84b7bbb21ca' ]]; then status=1; fi
+
+          {
+            echo "runner_gzip_actual=$runner_actual"
+            echo "workflow_actual=$workflow_actual"
+            if [[ -f /tmp/matadata-pathfinder-v22.cjs ]]; then sha256sum /tmp/matadata-pathfinder-v22.cjs; fi
+            wc -c tools/matadata-pathfinder/v2.2/transport/runner.b64.*
+            wc -c tools/matadata-pathfinder/v2.2/transport/workflow.b64.*
+          } > /tmp/matadata-v22/bootstrap-diagnostics.txt
+
+          exit "$status"
+
+      - name: Upload bootstrap diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matadata-pathfinder-v22-bootstrap-diagnostics
+          path: /tmp/matadata-v22/bootstrap-diagnostics.txt
+          if-no-files-found: warn
+          retention-days: 1
 
       - name: Remove one-time transport and bootstrap files
         shell: bash
