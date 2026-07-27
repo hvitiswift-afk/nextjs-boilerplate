@@ -1,0 +1,72 @@
+name: MATADATA V2.2 Tunnel Startup Diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matadata-v22-tunnel-diagnostic
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'agent/matadata-openai-pathfinder-v2-2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Reconstruct the reviewed package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/matadata-v22
+          cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v22/package.tar.gz
+          echo 'f24a9cab7980e8d43a6be642e16500828952d89c1285af4cfff2ed363e078d11  /tmp/matadata-v22/package.tar.gz' | sha256sum --check
+          tar -xzf /tmp/matadata-v22/package.tar.gz -C /tmp/matadata-v22
+          bash /tmp/matadata-v22/scripts/preflight.sh "$GITHUB_WORKSPACE/pathfinder-preflight-diagnostic"
+
+      - name: Install browser and tunnel runtime
+        run: bash /tmp/matadata-v22/scripts/install-runtime.sh
+
+      - name: Reproduce startup and retain only redacted transport diagnostics
+        shell: bash
+        run: |
+          set +e
+          timeout 240 bash /tmp/matadata-v22/scripts/start-live.sh
+          code=$?
+          set -e
+          mkdir -p tools/matadata-pathfinder/v22/tunnel-diagnostic
+          printf 'start_live_exit=%s\n' "$code" > tools/matadata-pathfinder/v22/tunnel-diagnostic/RESULT.txt
+          for file in cloudflared-primary.log cloudflared-backup.log tunnel-warnings.log healthy-urls.txt local-health.json primary-health.json backup-health.json xvfb.log; do
+            if [[ -f "/tmp/pathfinder-live/$file" ]]; then
+              sed -E 's#https://[-a-z0-9]+\.trycloudflare\.com#https://<redacted>.trycloudflare.com#g' "/tmp/pathfinder-live/$file" \
+                > "tools/matadata-pathfinder/v22/tunnel-diagnostic/$file"
+            fi
+          done
+          if [[ -f /tmp/pathfinder-live/pathfinder.pid ]]; then
+            kill -TERM "$(cat /tmp/pathfinder-live/pathfinder.pid)" 2>/dev/null || true
+          fi
+          for pidfile in /tmp/pathfinder-live/cloudflared-*.pid; do
+            [[ -f "$pidfile" ]] && kill -TERM "$(cat "$pidfile")" 2>/dev/null || true
+          done
+
+      - name: Remove one-time diagnostic workflow and commit redacted evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/matadata-v22-tunnel-diagnostic.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Capture redacted MATADATA V2.2 tunnel startup diagnostics'
+          git push origin HEAD:${{ github.head_ref }}
