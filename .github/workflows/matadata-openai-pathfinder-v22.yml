@@ -44,17 +44,35 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/matadata-v22 pathfinder-preflight
+          {
+            echo 'MATADATA Pathfinder V2.2 package diagnostics'
+            echo "commit=$GITHUB_SHA"
+            echo 'part sizes:'
+            wc -c tools/matadata-pathfinder/v22/package.part.*
+            echo 'part sha256:'
+            sha256sum tools/matadata-pathfinder/v22/package.part.*
+          } | tee pathfinder-preflight/package-diagnostics.txt
           cat tools/matadata-pathfinder/v22/package.part.* > /tmp/matadata-v22/package.tar.gz
+          {
+            echo "expected_package_sha256=$PACKAGE_SHA256"
+            echo -n 'actual_package_sha256='
+            sha256sum /tmp/matadata-v22/package.tar.gz | awk '{print $1}'
+            echo -n 'package_bytes='
+            wc -c < /tmp/matadata-v22/package.tar.gz
+            echo 'archive listing:'
+            tar -tzf /tmp/matadata-v22/package.tar.gz
+          } | tee -a pathfinder-preflight/package-diagnostics.txt
           echo "$PACKAGE_SHA256  /tmp/matadata-v22/package.tar.gz" | sha256sum --check
           tar -xzf /tmp/matadata-v22/package.tar.gz -C /tmp/matadata-v22
           bash /tmp/matadata-v22/scripts/preflight.sh "$GITHUB_WORKSPACE/pathfinder-preflight"
 
       - name: Upload V2.2 preflight evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: matadata-pathfinder-v22-preflight
           path: pathfinder-preflight
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
   submit-once:
