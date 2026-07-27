@@ -1,127 +1,167 @@
-name: MATADATA Pathfinder V2.2 Bootstrap
+name: MATADATA Pathfinder V2.2 Validation
 
 on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: matadata-pathfinder-v22-bootstrap
+  group: matadata-pathfinder-v22-validation-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  RUNNER_SHA256: 01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab
+  GZIP_SHA256: c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103
+  APPLICATION_SHA256: fda0c9e4f432b330fda80a08f7ee423da16672b1f06afba84e5cb8795d63fb03
+  SUBMISSION_ID: matadata-openai-cybersecurity-grant-v1
+
 jobs:
-  materialize-reviewed-v22:
-    if: >-
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.head_ref == 'agent/matadata-openai-pathfinder-v2-2-clean'
+  validate-v22:
+    name: Static contract and full-DOM-rerender validation
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 20
     steps:
       - name: Check out the staged V2.2 branch
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 1
-          show-progress: false
 
-      - name: Materialize and diagnose checksum-locked artifacts
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Reconstruct and verify the reviewed runner
         shell: bash
         run: |
-          set -uo pipefail
-          mkdir -p tools/matadata-pathfinder/v2.2 .github/workflows /tmp/matadata-v22
-          status=0
-
+          set -euo pipefail
+          mkdir -p /tmp/matadata-v22 pathfinder-validation/static pathfinder-validation/rerender
           cat tools/matadata-pathfinder/v2.2/transport/runner.b64.* \
             | tr -d '[:space:]' \
             | base64 --decode \
-            > tools/matadata-pathfinder/v2.2/runner.cjs.gz
-          runner_actual="$(sha256sum tools/matadata-pathfinder/v2.2/runner.cjs.gz | awk '{print $1}')"
-          if [[ "$runner_actual" != 'c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103' ]]; then status=1; fi
+            > /tmp/matadata-v22/runner.cjs.gz
+          echo "$GZIP_SHA256  /tmp/matadata-v22/runner.cjs.gz" | sha256sum --check
+          gzip --test /tmp/matadata-v22/runner.cjs.gz
+          gzip --decompress --stdout /tmp/matadata-v22/runner.cjs.gz > /tmp/matadata-v22/runner.cjs
+          echo "$RUNNER_SHA256  /tmp/matadata-v22/runner.cjs" | sha256sum --check
+          node --check /tmp/matadata-v22/runner.cjs
+          sha256sum /tmp/matadata-v22/runner.cjs /tmp/matadata-v22/runner.cjs.gz > pathfinder-validation/SHA256SUMS.txt
 
-          source_actual='unavailable'
-          runner_gzip_valid='false'
-          if gzip --test tools/matadata-pathfinder/v2.2/runner.cjs.gz; then
-            runner_gzip_valid='true'
-            gzip --decompress --stdout tools/matadata-pathfinder/v2.2/runner.cjs.gz > /tmp/matadata-pathfinder-v22.cjs
-            source_actual="$(sha256sum /tmp/matadata-pathfinder-v22.cjs | awk '{print $1}')"
-            if [[ "$source_actual" != '01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab' ]]; then status=1; fi
-            node --check /tmp/matadata-pathfinder-v22.cjs || status=1
-          else
-            status=1
-          fi
+      - name: Run static policy and proposal self-tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'module.exports={chromium:{}};\n' > /tmp/matadata-v22/mock-playwright.cjs
+          PATHFINDER_SELF_TEST='1' \
+          PATHFINDER_TOKEN='offline-static-token-000000000000' \
+          PATHFINDER_ARTIFACT_DIR="$GITHUB_WORKSPACE/pathfinder-validation/static" \
+          PATHFINDER_SUBMISSION_ID="$SUBMISSION_ID" \
+          PLAYWRIGHT_MODULE='/tmp/matadata-v22/mock-playwright.cjs' \
+          node /tmp/matadata-v22/runner.cjs
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('pathfinder-validation/static/selftest.json').read_text(encoding='utf-8'))
+          required = {
+              'field-spec-count',
+              'stable-field-names',
+              'single-project-title-field',
+              'no-ephemeral-field-tags',
+              'fresh-resolution-retries',
+              'full-value-verification',
+              'cookie-reconnect-after-url-cleanup',
+              'direct-submit-block',
+              'terms-text-only-acknowledgment',
+              'field-verification-submit-precondition',
+          }
+          tests = {item['name']: item['ok'] for item in result.get('tests', [])}
+          failed = sorted(name for name in required if tests.get(name) is not True)
+          if result.get('passed') is not True or failed:
+              raise SystemExit(f'Static V2.2 validation failed: {failed}')
+          if result.get('runnerVersion') != '2.2.0':
+              raise SystemExit('Unexpected runner version.')
+          if result.get('applicationSha256') != 'fda0c9e4f432b330fda80a08f7ee423da16672b1f06afba84e5cb8795d63fb03':
+              raise SystemExit('Application content checksum changed.')
+          print(json.dumps(result, indent=2))
+          PY
 
-          cat \
-            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00a \
-            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00b \
-            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00c \
-            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00d \
-            tools/matadata-pathfinder/v2.2/transport/workflow.b64.00e \
-            tools/matadata-pathfinder/v2.2/transport/workflow.b64.01 \
-            tools/matadata-pathfinder/v2.2/transport/workflow.b64.02 \
-            | tr -d '[:space:]' \
-            | base64 --decode \
-            > .github/workflows/matadata-openai-pathfinder-v22.yml
-          workflow_actual="$(sha256sum .github/workflows/matadata-openai-pathfinder-v22.yml | awk '{print $1}')"
-          if [[ "$workflow_actual" != '34247c64cd73c6ffb9fd53d4eb8910ac06dabd61264f8e8cca32c84b7bbb21ca' ]]; then status=1; fi
+      - name: Install isolated Playwright runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pathfinder-node /tmp/ms-playwright
+          cd /tmp/pathfinder-node
+          npm init -y >/dev/null
+          PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright npm install --no-audit --no-fund playwright@1.55.0
+          PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright npx playwright install --with-deps chromium
 
-          {
-            echo 'runner_gzip_expected=c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103'
-            echo "runner_gzip_actual=$runner_actual"
-            echo "runner_gzip_valid=$runner_gzip_valid"
-            echo 'runner_source_expected=01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab'
-            echo "runner_source_actual=$source_actual"
-            echo 'workflow_expected=34247c64cd73c6ffb9fd53d4eb8910ac06dabd61264f8e8cca32c84b7bbb21ca'
-            echo "workflow_actual=$workflow_actual"
-            echo 'RUNNER TRANSPORT CHUNKS'
-            wc -c tools/matadata-pathfinder/v2.2/transport/runner.b64.*
-            sha256sum tools/matadata-pathfinder/v2.2/transport/runner.b64.*
-            echo 'WORKFLOW TRANSPORT PARTS'
-            wc -c tools/matadata-pathfinder/v2.2/transport/workflow.b64.00? tools/matadata-pathfinder/v2.2/transport/workflow.b64.01 tools/matadata-pathfinder/v2.2/transport/workflow.b64.02
-            sha256sum tools/matadata-pathfinder/v2.2/transport/workflow.b64.00? tools/matadata-pathfinder/v2.2/transport/workflow.b64.01 tools/matadata-pathfinder/v2.2/transport/workflow.b64.02
-          } | tee /tmp/matadata-v22/bootstrap-diagnostics.txt
+      - name: Replace the entire form after field eight and prove recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATHFINDER_FIXTURE_TEST='1' \
+          PATHFINDER_TOKEN='offline-rerender-token-0000000000' \
+          PATHFINDER_ARTIFACT_DIR="$GITHUB_WORKSPACE/pathfinder-validation/rerender" \
+          PATHFINDER_SUBMISSION_ID="$SUBMISSION_ID" \
+          PLAYWRIGHT_MODULE='/tmp/pathfinder-node/node_modules/playwright' \
+          PLAYWRIGHT_BROWSERS_PATH='/tmp/ms-playwright' \
+          node /tmp/matadata-v22/runner.cjs
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('pathfinder-validation/rerender/fixture-test.json').read_text(encoding='utf-8'))
+          checks = {
+              'passed': result.get('passed') is True,
+              'fieldCount': result.get('fieldCount') == 13,
+              'uniqueIdentities': result.get('uniqueIdentities') == 13,
+              'rerenders': result.get('rerenders') == 1,
+              'noMismatches': result.get('verificationMismatches') == [],
+              'acknowledgmentMode': result.get('acknowledgmentMode') == 'official-terms-text-only',
+              'applicationSha256': result.get('applicationSha256') == 'fda0c9e4f432b330fda80a08f7ee423da16672b1f06afba84e5cb8795d63fb03',
+          }
+          failed = [name for name, ok in checks.items() if not ok]
+          if failed:
+              raise SystemExit(f'Dynamic rerender regression failed: {failed}')
+          print(json.dumps(result, indent=2))
+          PY
 
-          exit "$status"
+      - name: Build a combined validation receipt
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          def load(path):
+              p = Path(path)
+              return json.loads(p.read_text(encoding='utf-8')) if p.exists() else None
+          static = load('pathfinder-validation/static/selftest.json')
+          rerender = load('pathfinder-validation/rerender/fixture-test.json')
+          receipt = {
+              'status': 'PASSED' if static and rerender and static.get('passed') and rerender.get('passed') else 'FAILED',
+              'runnerVersion': '2.2.0',
+              'submissionId': 'matadata-openai-cybersecurity-grant-v1',
+              'runnerSha256': '01bfd573d085b481e501d2077ec5858d5c6b112fbc34c6194d73916e34f407ab',
+              'gzipSha256': 'c0af8aa0fa65a539e5812de492f332a6cf8a7f347041a5693a769d4046409103',
+              'applicationSha256': 'fda0c9e4f432b330fda80a08f7ee423da16672b1f06afba84e5cb8795d63fb03',
+              'static': static,
+              'rerender': rerender,
+              'liveFormOpened': False,
+              'submitClicks': 0,
+              'timestamp': datetime.now(timezone.utc).isoformat(),
+          }
+          Path('pathfinder-validation/VALIDATION_RECEIPT.json').write_text(json.dumps(receipt, indent=2), encoding='utf-8')
+          print(json.dumps(receipt, indent=2))
+          PY
 
-      - name: Upload bootstrap diagnostics
+      - name: Upload V2.2 validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: matadata-pathfinder-v22-bootstrap-diagnostics
-          path: /tmp/matadata-v22/bootstrap-diagnostics.txt
-          if-no-files-found: warn
-          retention-days: 1
-
-      - name: Publish failed transport diagnostics to the staged branch
-        if: failure()
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p tools/matadata-pathfinder/v2.2
-          cp /tmp/matadata-v22/bootstrap-diagnostics.txt tools/matadata-pathfinder/v2.2/BOOTSTRAP_DIAGNOSTICS.txt
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tools/matadata-pathfinder/v2.2/BOOTSTRAP_DIAGNOSTICS.txt
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Record MATADATA V2.2 transport diagnostics'
-          git push origin HEAD:${{ github.head_ref }}
-
-      - name: Remove one-time transport and bootstrap files
-        shell: bash
-        run: |
-          rm -rf tools/matadata-pathfinder/v2.2/transport
-          rm -f tools/matadata-pathfinder/v2.2/BOOTSTRAP_DIAGNOSTICS.txt
-          rm -f .github/workflows/matadata-pathfinder-v22-bootstrap.yml
-
-      - name: Commit the clean staged V2.2 implementation
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          git diff --cached --check
-          git commit -m 'Materialize hardened MATADATA Pathfinder V2.2'
-          git push origin HEAD:${{ github.head_ref }}
+          name: matadata-pathfinder-v22-validation
+          path: pathfinder-validation
+          if-no-files-found: error
+          retention-days: 30
