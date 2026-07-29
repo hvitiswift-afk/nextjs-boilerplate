@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "FARDARTER-DRIVE-AUTHORITY-V5-2026-07-29",
+  "driveId": "FARDARTER-DRIVE-V5",
+  "experimentId": "JP-REV-001",
+  "authorityVersion": "5.0.0",
+  "authorizedBy": "JP",
+  "authorizedAt": "2026-07-29T21:28:00Z",
+  "supersedesForFutureActions": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V4.json",
+  "historicalReceiptsRemainValid": true,
+  "grants": [
+    {
+      "grantId": "CAPACITY_100",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": false,
+      "scope": [
+        "Operate up to 100 separately scoped slots",
+        "Preserve zero-order and zero-cash evidence until supported",
+        "Do not treat capacity as demand or revenue"
+      ],
+      "evidenceRequired": ["canonical v5 capacity record", "green validators", "merged receipt"]
+    },
+    {
+      "grantId": "ACTIVE_DELIVERY_LIMIT_10",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Permit no more than 10 ACTIVE deliveries",
+        "Pause new work starts automatically at the limit",
+        "Continue intake and draft preparation while the start queue is paused"
+      ],
+      "evidenceRequired": ["active-delivery register", "work-start receipt", "backpressure check"]
+    },
+    {
+      "grantId": "NONBINDING_FIT_ACCEPTANCE",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Move a qualifying controlled request to FIT_APPROVED_FOR_SCOPE_DRAFT",
+        "Apply one idempotent public-safe acceptance receipt",
+        "Never create an order, reservation, contract, payment obligation, deadline, indemnity agreement, or work start"
+      ],
+      "evidenceRequired": ["controlled request form", "published-scope fit", "prohibited-data check", "queue-capacity check"]
+    },
+    {
+      "grantId": "PREAPPROVED_REVERSIBLE_EXECUTION",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Run validators and production builds",
+        "Create nonfinancial execution receipts",
+        "Perform pre-approved reversible repository and document preparation",
+        "Use confirmed-target deployment only after validation and immutable readback"
+      ],
+      "evidenceRequired": ["controlling work order", "allowed execution class", "green execution result", "rollback or recovery path"]
+    },
+    {
+      "grantId": "GOOGLE_DRIVE_PRIVATE_CONTINUITY",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Create private work-package folders and draft documents after nonbinding fit approval",
+        "Mirror public-safe receipts without exposing private Drive URLs or IDs in GitHub",
+        "Keep buyer identities, signatures, provider receipts, confidential delivery data, counsel notes, and dispute records private"
+      ],
+      "evidenceRequired": ["connected private folder", "Drive receipt", "public/private boundary check"]
+    },
+    {
+      "grantId": "DOCUMENT_DRAFT_AUTOMATION",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Prepare proposal, scope, agreement, invoice, delivery, acceptance, and receipt drafts",
+        "Keep every draft visibly nonbinding",
+        "Require human review before external use"
+      ],
+      "evidenceRequired": ["draft state", "consequence boundary", "human review gate"]
+    },
+    {
+      "grantId": "RELEVANT_EXACT_OUTREACH",
+      "state": "AUTHORIZED_CONDITIONAL",
+      "automated": false,
+      "scope": [
+        "One relevant message to an exact verified recipient or exact authorized channel",
+        "No mass messaging, scraping, impersonation, concealed commercial purpose, or repeated unsolicited follow-up"
+      ],
+      "evidenceRequired": ["verified recipient or channel", "relevance and privacy review", "locked message", "send receipt"]
+    },
+    {
+      "grantId": "VERIFIED_MERGE",
+      "state": "AUTHORIZED_CONDITIONAL",
+      "automated": false,
+      "scope": ["Merge after all repository-owned checks pass on an unchanged head and no review blocker exists"],
+      "evidenceRequired": ["current head SHA", "green checks", "no unresolved review threads"]
+    },
+    {
+      "grantId": "FIXED_SITE_DEPLOYMENT",
+      "state": "AUTHORIZED_CONDITIONAL",
+      "automated": true,
+      "scope": [
+        "Deploy only to the confirmed existing Netlify site",
+        "Run after validation on main",
+        "Require immutable page and API readback"
+      ],
+      "evidenceRequired": ["deploy ID", "immutable deploy URL", "route readback receipt"]
+    },
+    {
+      "grantId": "CONTRACT_ACCEPTANCE",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": ["Accept only a final agreement with identified parties, buyer consent, exact scope, price, due date, cancellation/refund terms, delivery destination, and final legal terms"],
+      "evidenceRequired": ["JP approval", "buyer informed consent", "dated final agreement", "counsel review when appropriate"]
+    },
+    {
+      "grantId": "INDEMNITY_AND_LIABILITY_TERMS",
+      "state": "COUNSEL_REVIEW_REQUIRED",
+      "automated": false,
+      "scope": ["Draft alternatives but never select or represent them as universally enforceable or indemnity-proof"],
+      "evidenceRequired": ["party and jurisdiction facts", "risk and insurance review", "legal review when appropriate", "knowing acceptance"]
+    },
+    {
+      "grantId": "PAYMENT_EXECUTION",
+      "state": "EXTERNAL_PROVIDER_ONLY",
+      "automated": false,
+      "scope": ["Payment initiation and settlement remain with the agreed external provider", "Only PAID_SETTLED evidence counts as received cash"],
+      "evidenceRequired": ["private provider receipt", "PAID_SETTLED state"]
+    },
+    {
+      "grantId": "PAID_DELIVERY_START",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": ["Start paid delivery only after locked scope, buyer acceptance, required settlement, available active capacity below 10, and JP approval"],
+      "evidenceRequired": ["final agreement", "provider settlement when required", "capacity record", "JP work-start approval"]
+    },
+    {
+      "grantId": "REFUND_DISPUTE_ADMISSION_OR_IRREVERSIBLE_ACTION",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": ["No automated refund, dispute response, settlement, admission, waiver, release, bank or payout change, domain or billing change, credential change, access-control change, destructive deletion, or force push"],
+      "evidenceRequired": ["exact target", "provider and agreement records", "consequence and rollback analysis", "JP approval", "counsel review when appropriate"]
+    }
+  ],
+  "guardrails": {
+    "capacityEqualsDemand": false,
+    "fitApprovalCreatesOrder": false,
+    "fitApprovalReservesCapacity": false,
+    "fitApprovalCreatesContract": false,
+    "draftCreatesContract": false,
+    "invoiceDraftCreatesPaymentObligation": false,
+    "googleDriveFileCreatesSignature": false,
+    "githubEvidenceProvesSettlement": false,
+    "templateIsIndemnityProof": false,
+    "automaticPaidWorkStart": false,
+    "sensitiveDriveDataAllowedInPublicRepo": false,
+    "horizonEqualsAchievedRevenueOrValuation": false
+  },
+  "revoked": false,
+  "nextControlledAction": "Merge the v5 capacity, nonbinding fit acceptance, bounded execution, and private Google Drive continuity package; then create private Drive work packages only after fit approval while preserving final contracts, payment, paid work starts, counsel terms, refunds, disputes, and irreversible actions behind their evidence gates."
+}

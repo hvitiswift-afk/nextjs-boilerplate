@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "FARDARTER-DRIVE-GDRIVE-V5-2026-07-29",
+  "driveId": "FARDARTER-DRIVE-V5",
+  "state": "CONNECTED_PRIVATE",
+  "folderTitle": "Fardarter Drive™",
+  "folderReferenceStoredPrivately": true,
+  "publicFolderUrlExposed": false,
+  "publicFileIdsExposed": false,
+  "documents": [
+    {
+      "title": "Fardarter Drive™ v5 — Authority and Execution Charter",
+      "purpose": "Private operating authority, acceptance, execution, capacity, legal, and receipt boundaries",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v5 — Acceptance and Execution Register",
+      "purpose": "Private state machine, work-start gates, capacity controls, and execution receipt template",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
+    }
+  ],
+  "automation": {
+    "createPrivateWorkPackageAfterFitApproval": true,
+    "publicReceiptMayExposeDriveUrl": false,
+    "publicReceiptMayExposeDriveFileId": false,
+    "publicReceiptMayExposeBuyerIdentity": false,
+    "workPackageMayContainDraftProposal": true,
+    "workPackageMayContainDraftScope": true,
+    "workPackageMayContainDraftAgreement": true,
+    "workPackageMayContainDraftInvoice": true,
+    "workPackageMayContainDraftDeliveryReceipt": true,
+    "workPackageCreatesContract": false,
+    "workPackageCreatesPaymentObligation": false,
+    "workPackageStartsPaidDelivery": false
+  },
+  "privacyBoundary": {
+    "buyerIdentityPublic": false,
+    "signaturePublic": false,
+    "providerReceiptPublic": false,
+    "confidentialDeliveryDataPublic": false,
+    "counselNotesPublic": false,
+    "disputeRecordsPublic": false,
+    "credentialsPublic": false,
+    "bankOrPayoutDataPublic": false
+  },
+  "publicRepositoryReceipt": {
+    "connectedStateMayBePublished": true,
+    "folderAndDocumentTitlesMayBePublished": true,
+    "privateReferencesMustRemainOutsideRepository": true
+  },
+  "financialEvidence": {
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "nextControlledAction": "After a request reaches FIT_APPROVED_FOR_SCOPE_DRAFT, create a private Drive work-package folder and nonbinding draft documents, then post only a public-safe GitHub receipt without exposing Drive URLs, file IDs, buyer identity, or confidential evidence."
+}

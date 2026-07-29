@@ -60,12 +60,12 @@
       "properties": {
         "name": { "type": "string", "minLength": 3 },
         "type": { "enum": ["paid_service", "product", "sponsorship", "voluntary_support"] },
-        "priceUsd": { "type": "number", "exclusiveMinimum": 0 },
-        "quantityTarget": { "type": "integer", "minimum": 1 },
-        "firstMilestoneUsd": { "type": "number", "exclusiveMinimum": 0 },
-        "grossTargetUsd": { "type": "number", "minimum": 0 },
-        "capacity": { "type": "integer", "minimum": 1 },
-        "maxConcurrentDeliveries": { "type": "integer", "minimum": 1 },
+        "priceUsd": { "const": 100 },
+        "quantityTarget": { "const": 100 },
+        "firstMilestoneUsd": { "const": 1000 },
+        "grossTargetUsd": { "const": 10000 },
+        "capacity": { "const": 100 },
+        "maxConcurrentDeliveries": { "const": 10 },
         "deliveryWindowBusinessDays": { "type": "integer", "minimum": 1 },
         "clarificationWindowDays": { "type": "integer", "minimum": 0 },
         "scopeLimits": {
@@ -73,21 +73,21 @@
           "additionalProperties": false,
           "required": ["repositories", "maxOpenPullRequests", "maxOpenIssues", "clarificationRounds"],
           "properties": {
-            "repositories": { "type": "integer", "const": 1 },
-            "maxOpenPullRequests": { "type": "integer", "minimum": 1 },
-            "maxOpenIssues": { "type": "integer", "minimum": 1 },
+            "repositories": { "const": 1 },
+            "maxOpenPullRequests": { "type": "integer", "minimum": 1, "maximum": 25 },
+            "maxOpenIssues": { "type": "integer", "minimum": 1, "maximum": 50 },
             "clarificationRounds": { "type": "integer", "minimum": 0 }
           }
         },
         "deliverables": {
           "type": "array",
-          "minItems": 3,
+          "minItems": 5,
           "uniqueItems": true,
           "items": { "type": "string", "minLength": 3 }
         },
         "exclusions": {
           "type": "array",
-          "minItems": 3,
+          "minItems": 5,
           "uniqueItems": true,
           "items": { "type": "string", "minLength": 3 }
         }
@@ -96,7 +96,7 @@
     "audience": { "type": "string", "minLength": 10 },
     "proofPackage": {
       "type": "array",
-      "minItems": 8,
+      "minItems": 12,
       "uniqueItems": true,
       "items": {
         "type": "string",
@@ -105,18 +105,17 @@
       }
     },
     "authorityReceiptPath": {
-      "type": "string",
-      "const": "receipts/revenue/JP-REV-001-AUTHORITY.json"
+      "const": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json"
     },
     "channel": {
       "type": "object",
       "additionalProperties": false,
       "required": ["name", "inboundRequestPath", "publicationAuthorized", "outreachAuthorized"],
       "properties": {
-        "name": { "type": "string", "minLength": 3 },
-        "inboundRequestPath": { "type": "string", "minLength": 3 },
-        "publicationAuthorized": { "type": "boolean" },
-        "outreachAuthorized": { "type": "boolean" }
+        "name": { "const": "GitHub inbound issue #133" },
+        "inboundRequestPath": { "const": ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml" },
+        "publicationAuthorized": { "const": true },
+        "outreachAuthorized": { "const": false }
       }
     },
     "metrics": {
@@ -127,8 +126,8 @@
         "views": { "type": "integer", "minimum": 0 },
         "qualifiedConversations": { "type": "integer", "minimum": 0 },
         "offersSent": { "type": "integer", "minimum": 0 },
-        "orders": { "type": "integer", "minimum": 0 },
-        "deliveriesAccepted": { "type": "integer", "minimum": 0 }
+        "orders": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "deliveriesAccepted": { "type": "integer", "minimum": 0, "maximum": 100 }
       }
     },
     "money": {
@@ -161,11 +160,11 @@
       "required": ["offerPreparation", "publication", "outreach", "contract", "paymentExecution", "delivery"],
       "properties": {
         "offerPreparation": { "const": "authorized" },
-        "publication": { "enum": ["not_authorized", "authorized"] },
-        "outreach": { "enum": ["not_authorized", "authorized"] },
-        "contract": { "enum": ["not_authorized", "authorized"] },
+        "publication": { "const": "authorized" },
+        "outreach": { "const": "not_authorized" },
+        "contract": { "const": "not_authorized" },
         "paymentExecution": { "const": "external_provider_only" },
-        "delivery": { "enum": ["not_authorized", "authorized"] }
+        "delivery": { "const": "not_authorized" }
       }
     },
     "fundingUrls": {
@@ -175,6 +174,6 @@
       "uniqueItems": true,
       "items": { "type": "string", "format": "uri", "pattern": "^https://" }
     },
-    "nextControlledAction": { "type": "string", "minLength": 20 }
+    "nextControlledAction": { "type": "string", "minLength": 40 }
   }
 }

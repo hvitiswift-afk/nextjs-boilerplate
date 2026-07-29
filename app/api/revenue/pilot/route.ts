@@ -1,6 +1,7 @@
 import experiment from "@/examples/revenue-experiment.sample.json";
-import authorityReceipt from "@/receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V4.json";
-import fardarterDrive from "@/receipts/revenue/FARDARTER-DRIVE-V4.json";
+import authorityReceipt from "@/receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json";
+import fardarterDrive from "@/receipts/revenue/FARDARTER-DRIVE-V5.json";
+import googleDriveReceipt from "@/receipts/revenue/FARDARTER-DRIVE-GDRIVE-V5.json";
 import chainReceipt from "@/receipts/revenue/JP-REV-001-CHAIN-133-140.json";
 import publicationReceipt from "@/receipts/revenue/JP-REV-001-PUBLICATION.json";
 import { getPublicAuditInterest } from "@/lib/revenue/public-audit-interest";
@@ -20,7 +21,7 @@ export async function GET() {
 
   return Response.json(
     {
-      schemaVersion: "1.3.0",
+      schemaVersion: "1.4.0",
       experimentId: experiment.experimentId,
       status: experiment.status,
       offer: {
@@ -35,9 +36,14 @@ export async function GET() {
         scopeLimits: experiment.offer.scopeLimits,
       },
       availability: {
+        fitApprovedRequests: fardarterDrive.currentEvidence.fitApprovedRequests,
         orders: experiment.metrics.orders,
         slotsRemaining,
+        activeDeliveries: fardarterDrive.currentEvidence.activeDeliveries,
         activeDeliveryLimit: experiment.offer.maxConcurrentDeliveries,
+        backpressureActive:
+          fardarterDrive.currentEvidence.activeDeliveries >=
+          experiment.offer.maxConcurrentDeliveries,
         qualifiedConversations: experiment.metrics.qualifiedConversations,
         deliveriesAccepted: experiment.metrics.deliveriesAccepted,
       },
@@ -67,6 +73,8 @@ export async function GET() {
         trademarkNotice: fardarterDrive.trademarkNotice,
         controllingIssues: fardarterDrive.controllingIssues,
         currentEvidence: fardarterDrive.currentEvidence,
+        acceptanceModel: fardarterDrive.acceptanceModel,
+        executionModel: fardarterDrive.executionModel,
         horizons: fardarterDrive.horizons.map((horizon) => ({
           stageId: horizon.stageId,
           amountUsd: horizon.amountUsd,
@@ -90,36 +98,62 @@ export async function GET() {
         historicalReceiptsRemainValid:
           authorityReceipt.historicalReceiptsRemainValid,
         revoked: authorityReceipt.revoked,
-        scaleHorizonPublication:
-          grantStates.SCALE_HORIZON_PUBLICATION,
-        repositoryImplementation:
-          grantStates.REPOSITORY_IMPLEMENTATION_AND_RECEIPTS,
+        capacity100: grantStates.CAPACITY_100,
+        activeDeliveryLimit10: grantStates.ACTIVE_DELIVERY_LIMIT_10,
+        nonbindingFitAcceptance:
+          grantStates.NONBINDING_FIT_ACCEPTANCE,
+        preapprovedReversibleExecution:
+          grantStates.PREAPPROVED_REVERSIBLE_EXECUTION,
+        googleDrivePrivateContinuity:
+          grantStates.GOOGLE_DRIVE_PRIVATE_CONTINUITY,
         documentDraftAutomation:
           grantStates.DOCUMENT_DRAFT_AUTOMATION,
-        relevantExactOutreach:
-          grantStates.RELEVANT_EXACT_OUTREACH,
-        automatedIntake: {
-          state: grantStates.GITHUB_INBOUND_AUTOMATION,
-          exactTitlePrefix: "[Audit request]:",
-          mayLabel: true,
-          mayAcknowledgeOnce: true,
-          mayCreateOrder: false,
-          mayReserveCapacity: false,
-          mayAcceptContract: false,
-          mayRequestPayment: false,
-          mayStartDelivery: false,
-        },
+        relevantExactOutreach: grantStates.RELEVANT_EXACT_OUTREACH,
         verifiedMerge: grantStates.VERIFIED_MERGE,
         fixedSiteDeployment: grantStates.FIXED_SITE_DEPLOYMENT,
         contractAcceptance: grantStates.CONTRACT_ACCEPTANCE,
         indemnityAndLiabilityTerms:
           grantStates.INDEMNITY_AND_LIABILITY_TERMS,
         paymentExecution: grantStates.PAYMENT_EXECUTION,
-        deliveryStart: grantStates.DELIVERY_START,
-        refundDisputeOrAdmission:
-          grantStates.REFUND_DISPUTE_OR_ADMISSION,
-        consequentialAccountActions:
-          grantStates.BANK_BILLING_DOMAIN_CREDENTIAL_OR_DESTRUCTIVE_ACTION,
+        paidDeliveryStart: grantStates.PAID_DELIVERY_START,
+        refundDisputeAdmissionOrIrreversibleAction:
+          grantStates.REFUND_DISPUTE_ADMISSION_OR_IRREVERSIBLE_ACTION,
+      },
+      automatedFitAcceptance: {
+        state: fardarterDrive.acceptanceModel.automatedState,
+        binding: false,
+        mayCreateOrder: false,
+        mayReserveCapacity: false,
+        mayAcceptFinalContract: false,
+        mayRequestOrConfirmPayment: false,
+        mayStartPaidDelivery: false,
+      },
+      approvedExecution: {
+        state: fardarterDrive.executionModel.state,
+        permittedClasses: fardarterDrive.executionModel.permittedClasses,
+        automaticPaidWorkStart: false,
+        activeLimit: fardarterDrive.executionModel.backpressure.activeLimit,
+        pauseNewWorkStartsAtLimit:
+          fardarterDrive.executionModel.backpressure
+            .pauseNewWorkStartsAtLimit,
+      },
+      googleDriveContinuity: {
+        state: googleDriveReceipt.state,
+        folderTitle: googleDriveReceipt.folderTitle,
+        documentTitles: googleDriveReceipt.documents.map(
+          (document) => document.title,
+        ),
+        folderReferenceStoredPrivately:
+          googleDriveReceipt.folderReferenceStoredPrivately,
+        publicFolderUrlExposed:
+          googleDriveReceipt.publicFolderUrlExposed,
+        publicFileIdsExposed: googleDriveReceipt.publicFileIdsExposed,
+        createPrivateWorkPackageAfterFitApproval:
+          googleDriveReceipt.automation
+            .createPrivateWorkPackageAfterFitApproval,
+        workPackageCreatesContract: false,
+        workPackageCreatesPaymentObligation: false,
+        workPackageStartsPaidDelivery: false,
       },
       chainReceipt: {
         receiptId: chainReceipt.receiptId,
@@ -127,13 +161,6 @@ export async function GET() {
         firstObject: chainReceipt.chain[0].number,
         lastObject: chainReceipt.chain.at(-1)?.number,
         objectCount: chainReceipt.chain.length,
-        items: chainReceipt.chain.map((item) => ({
-          number: item.number,
-          objectType: item.objectType,
-          state: item.state,
-          evidenceState: item.evidenceState,
-          mergeCommitSha: item.mergeCommitSha,
-        })),
       },
       publication: {
         issueNumber: publicationReceipt.issueNumber,
@@ -147,11 +174,14 @@ export async function GET() {
         openingAnIssueCreatesPaymentObligation: false,
         publicFitCheckCountsAsOrder: false,
         publicFitCheckReservesCapacity: false,
+        fitApprovedCreatesOrder: false,
+        fitApprovedCreatesContract: false,
+        fitApprovedStartsWork: false,
         githubLabelProvesPayment: false,
-        automatedAcknowledgementAcceptsScope: false,
-        automatedAcknowledgementStartsDelivery: false,
         documentDraftCreatesContract: false,
         invoiceDraftCreatesPaymentObligation: false,
+        googleDriveFileCreatesSignature: false,
+        googleDriveWorkPackageStartsPaidDelivery: false,
         horizonAmountIsAchievedRevenue: false,
         horizonAmountIsValuation: false,
         automaticStagePromotion: false,

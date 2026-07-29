@@ -1,0 +1,173 @@
+{
+  "schemaVersion": "1.0.0",
+  "driveId": "FARDARTER-DRIVE-V5",
+  "name": "Fardarter Drive™",
+  "trademarkNotice": "Fardarter Drive™ is used as a project identifier; no trademark registration status is asserted by this record.",
+  "controllingIssues": [141, 143, 146],
+  "currentEvidence": {
+    "asOf": "2026-07-29",
+    "experimentId": "JP-REV-001",
+    "offer": "GitHub Control Tower Audit",
+    "priceUsd": 100,
+    "quantityTarget": 100,
+    "firstMilestoneUsd": 1000,
+    "grossTargetUsd": 10000,
+    "capacity": 100,
+    "maxConcurrentDeliveries": 10,
+    "activeDeliveries": 0,
+    "fitApprovedRequests": 0,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "deploymentState": "UNVERIFIED",
+    "googleDriveContinuity": "CONNECTED_PRIVATE",
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "acceptanceModel": {
+    "automatedState": "FIT_APPROVED_FOR_SCOPE_DRAFT",
+    "binding": false,
+    "criteria": [
+      "controlled public-safe request form",
+      "plausible requester relationship to the repository",
+      "request fits the published scope",
+      "no detected prohibited data",
+      "queue capacity review passes"
+    ],
+    "prohibitedConsequences": [
+      "order creation",
+      "capacity reservation",
+      "contract formation",
+      "invoice or payment obligation",
+      "deadline promise",
+      "indemnity agreement",
+      "waiver or release",
+      "work start"
+    ],
+    "finalCommercialAcceptanceRequires": [
+      "identified parties",
+      "buyer authority and informed consent",
+      "exact scope and price",
+      "due date and delivery destination",
+      "cancellation and refund terms",
+      "final agreement version",
+      "JP approval"
+    ]
+  },
+  "executionModel": {
+    "state": "AUTHORIZED_BOUNDED",
+    "permittedClasses": [
+      "repository preparation",
+      "validators and production builds",
+      "non-destructive file changes and receipts",
+      "Google Drive folder and draft-document preparation",
+      "verified read-only analysis",
+      "confirmed-target deployment after validation and immutable readback"
+    ],
+    "automaticWorkStart": false,
+    "workStartRequires": [
+      "locked scope",
+      "available active capacity below 10",
+      "buyer acceptance",
+      "provider-confirmed PAID_SETTLED evidence when payment is required",
+      "JP approval"
+    ],
+    "backpressure": {
+      "activeLimit": 10,
+      "pauseNewWorkStartsAtLimit": true,
+      "continueIntakeAndDraftingAtLimit": true
+    },
+    "prohibitedAutomaticActions": [
+      "final contract acceptance or signature",
+      "payment initiation or settlement claim",
+      "indemnity or liability term selection",
+      "refund or dispute response",
+      "liability admission or waiver",
+      "bank, payout, billing, domain, credential, or access-control change",
+      "destructive external action"
+    ]
+  },
+  "horizons": [
+    {
+      "stageId": "FD-001K",
+      "amountUsd": "1000",
+      "label": "$1,000 first operating milestone",
+      "classification": "MILESTONE_TARGET",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-010K",
+      "amountUsd": "10000",
+      "label": "$10,000 current 100-slot gross capacity target",
+      "classification": "CURRENT_EXPERIMENT_TARGET",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-001M",
+      "amountUsd": "1000000",
+      "label": "$1 million repeatable-business horizon",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-001B",
+      "amountUsd": "1000000000",
+      "label": "$1 billion platform and ecosystem horizon",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-001T",
+      "amountUsd": "1000000000000",
+      "label": "$1 trillion infrastructure horizon",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-001Q",
+      "amountUsd": "1000000000000000",
+      "label": "$1 quadrillion possibility horizon",
+      "classification": "SYMBOLIC_POSSIBILITY_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    }
+  ],
+  "progressionRules": {
+    "automaticStagePromotion": false,
+    "priorStageEvidenceRequired": true,
+    "independentVerificationRequired": true,
+    "legalAndRiskReviewRequired": true,
+    "slotOrActiveLimitIncreaseProvesDemand": false,
+    "manualCapacityMayBeMultipliedToClaimHigherStage": false
+  },
+  "authorityReceiptPath": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json",
+  "googleDriveReceiptPath": "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V5.json",
+  "chainReceiptPath": "receipts/revenue/JP-REV-001-CHAIN-133-140.json",
+  "legalRisk": {
+    "indemnityProofClaimed": false,
+    "bindingAgreementRequired": true,
+    "buyerConsentRequired": true,
+    "counselReviewRequiredForIndemnityAndLiabilityTerms": true,
+    "templateCreatesBindingContract": false,
+    "googleDriveFileCreatesSignature": false
+  },
+  "claims": {
+    "currentRevenueClaimedAboveEvidence": false,
+    "currentValuationClaimed": false,
+    "futureEarningsGuaranteed": false,
+    "customerCountClaimedAboveEvidence": false,
+    "deploymentClaimedWithoutReadback": false,
+    "universalIndemnityClaimed": false
+  },
+  "nextControlledAction": "Merge and receipt the Fardarter Drive v5 capacity, nonbinding fit acceptance, bounded execution, and private Google Drive continuity package; then operate accepted-fit work packages without converting drafts or preparation into contracts, payments, or work starts."
+}
