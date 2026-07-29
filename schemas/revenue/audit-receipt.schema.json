@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/audit-receipt.schema.json",
+  "title": "GitHub Control Tower Audit Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "auditId",
+    "experimentId",
+    "offer",
+    "repository",
+    "scopeVersion",
+    "snapshot",
+    "agreement",
+    "payment",
+    "delivery",
+    "externalActionsPerformed",
+    "claims",
+    "publicDataBoundary",
+    "result",
+    "nextControlledAction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "auditId": { "type": "string", "pattern": "^JP-AUDIT-[A-Z0-9-]+$" },
+    "experimentId": { "type": "string", "pattern": "^JP-REV-[A-Z0-9-]+$" },
+    "offer": { "const": "GitHub Control Tower Audit" },
+    "repository": { "type": "string", "pattern": "^[^/\s]+/[^/\s]+$" },
+    "scopeVersion": { "type": "string", "minLength": 3 },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capturedAt", "defaultBranch", "headSha", "openPullRequestsReviewed", "openIssuesReviewed"],
+      "properties": {
+        "capturedAt": { "type": ["string", "null"], "format": "date-time" },
+        "defaultBranch": { "type": ["string", "null"] },
+        "headSha": { "type": ["string", "null"], "pattern": "^[a-f0-9]{7,64}$" },
+        "openPullRequestsReviewed": { "type": "integer", "minimum": 0, "maximum": 25 },
+        "openIssuesReviewed": { "type": "integer", "minimum": 0, "maximum": 50 }
+      }
+    },
+    "agreement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "priceUsd", "dueDate", "clarificationWindowDays"],
+      "properties": {
+        "state": { "enum": ["NOT_AGREED", "AGREED", "CANCELLED"] },
+        "priceUsd": { "type": "number", "const": 100 },
+        "dueDate": { "type": ["string", "null"], "format": "date" },
+        "clarificationWindowDays": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["settlementState", "grossUsd", "feesUsd", "refundsUsd", "netCashUsd", "externalProviderReceiptStoredPrivately"],
+      "properties": {
+        "settlementState": { "enum": ["UNKNOWN", "PAID_PENDING", "PAID_SETTLED", "REFUNDED", "DISPUTED"] },
+        "grossUsd": { "type": "number", "minimum": 0 },
+        "feesUsd": { "type": "number", "minimum": 0 },
+        "refundsUsd": { "type": "number", "minimum": 0 },
+        "netCashUsd": { "type": "number" },
+        "externalProviderReceiptStoredPrivately": { "type": "boolean" }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "templatePath", "artifactReference", "deliveredAt", "clarificationWindowEndsAt", "acceptedAt"],
+      "properties": {
+        "state": { "enum": ["NOT_STARTED", "ACTIVE", "DELIVERED", "ACCEPTED", "REVISED", "CANCELLED"] },
+        "templatePath": { "const": "templates/github-control-tower-audit.md" },
+        "artifactReference": { "type": ["string", "null"] },
+        "deliveredAt": { "type": ["string", "null"], "format": "date-time" },
+        "clarificationWindowEndsAt": { "type": ["string", "null"], "format": "date-time" },
+        "acceptedAt": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "externalActionsPerformed": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 3 }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["earningsGuaranteed", "securityCertified", "legalOpinionProvided", "deploymentCompleted", "ownershipVerified"],
+      "properties": {
+        "earningsGuaranteed": { "const": false },
+        "securityCertified": { "const": false },
+        "legalOpinionProvided": { "const": false },
+        "deploymentCompleted": { "const": false },
+        "ownershipVerified": { "const": false }
+      }
+    },
+    "publicDataBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["containsCredentials", "containsPaymentData", "containsCustomerIdentity", "containsConfidentialRecords"],
+      "properties": {
+        "containsCredentials": { "const": false },
+        "containsPaymentData": { "const": false },
+        "containsCustomerIdentity": { "const": false },
+        "containsConfidentialRecords": { "const": false }
+      }
+    },
+    "result": { "enum": ["PREPARED_SAMPLE", "PASS", "HOLD", "DENY", "RETEST", "REFERENCE"] },
+    "nextControlledAction": { "type": "string", "minLength": 20 }
+  }
+}
