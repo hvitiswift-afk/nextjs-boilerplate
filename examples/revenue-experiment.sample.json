@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0.0",
+  "experimentId": "JP-REV-001",
+  "status": "PREPARED",
+  "offer": {
+    "name": "GitHub Control Tower Audit",
+    "type": "paid_service",
+    "priceUsd": 100,
+    "quantityTarget": 5,
+    "grossTargetUsd": 500,
+    "capacity": 5,
+    "deliverables": [
+      "repository and workflow map",
+      "top five priority findings",
+      "pull-request and issue triage table",
+      "one-page control-tower action plan",
+      "dated delivery receipt"
+    ],
+    "exclusions": [
+      "credential access",
+      "production deployment",
+      "secret rotation",
+      "destructive cleanup",
+      "payment handling",
+      "legal opinion",
+      "security guarantee",
+      "automatic merging"
+    ]
+  },
+  "audience": "individual creators, small companies, and project owners with a disorganized GitHub repository",
+  "channel": {
+    "name": "unselected",
+    "publicationAuthorized": false,
+    "outreachAuthorized": false
+  },
+  "metrics": {
+    "views": 0,
+    "qualifiedConversations": 0,
+    "offersSent": 0,
+    "orders": 0,
+    "deliveriesAccepted": 0
+  },
+  "money": {
+    "grossRevenueUsd": 0,
+    "feesUsd": 0,
+    "refundsUsd": 0,
+    "netCashUsd": 0,
+    "settlementState": "UNKNOWN"
+  },
+  "claims": {
+    "earningsGuaranteed": false,
+    "taxDeductible": false,
+    "repaymentPromised": false,
+    "equityOffered": false,
+    "legalStatusClaimed": false
+  },
+  "authority": {
+    "offerPreparation": "authorized",
+    "publication": "not_authorized",
+    "outreach": "not_authorized",
+    "contract": "not_authorized",
+    "paymentExecution": "external_provider_only",
+    "delivery": "not_authorized"
+  },
+  "fundingUrls": [
+    "https://www.paypal.com/donate/?hosted_button_id=JJ4XGRU94T4XW",
+    "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/campaign"
+  ],
+  "nextControlledAction": "Review the offer and choose one acquisition channel for a separately approved test."
+}
