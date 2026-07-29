@@ -3,12 +3,14 @@ name: Netlify Audit Product Deploy
 on:
   pull_request:
     paths:
+      - ".github/workflows/audit-request-intake.yml"
       - ".github/workflows/netlify-audit-product-deploy.yml"
       - "app/github-control-tower-audit/**"
       - "app/api/revenue/pilot/**"
       - "app/page.tsx"
       - "app/robots.ts"
       - "app/sitemap.ts"
+      - "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md"
       - "examples/revenue-experiment.sample.json"
       - "receipts/revenue/**"
       - "schemas/revenue/**"
@@ -22,12 +24,14 @@ on:
     branches:
       - main
     paths:
+      - ".github/workflows/audit-request-intake.yml"
       - ".github/workflows/netlify-audit-product-deploy.yml"
       - "app/github-control-tower-audit/**"
       - "app/api/revenue/pilot/**"
       - "app/page.tsx"
       - "app/robots.ts"
       - "app/sitemap.ts"
+      - "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md"
       - "examples/revenue-experiment.sample.json"
       - "receipts/revenue/**"
       - "schemas/revenue/**"
@@ -52,7 +56,7 @@ env:
 
 jobs:
   validate:
-    name: Validate audit product deploy
+    name: Validate audit authority deploy
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -69,14 +73,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify revenue product
+      - name: Verify revenue authority product
         run: npm run revenue:verify
 
       - name: Build application
         run: npm run build
 
   deploy:
-    name: Deploy and read back audit product
+    name: Deploy and read back audit authority product
     if: github.event_name != 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
@@ -110,7 +114,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Revalidate revenue package
+      - name: Revalidate authority package
         run: npm run revenue:verify
 
       - name: Deploy to confirmed Netlify site
@@ -154,6 +158,9 @@ jobs:
           grep -q 'GitHub Control Tower Audit' artifacts/audit.html
           grep -q 'Request a public-safe fit check' artifacts/audit.html
           grep -q 'Public fit checks' artifacts/audit.html
+          grep -q 'Active limit' artifacts/audit.html
+          grep -q 'First milestone' artifacts/audit.html
+          grep -q 'Expanded target' artifacts/audit.html
           grep -q '/github-control-tower-audit' artifacts/sitemap.xml
           grep -q '/sitemap.xml' artifacts/robots.txt
 
@@ -165,12 +172,17 @@ jobs:
             publicRequestCount === null ||
             (Number.isInteger(publicRequestCount) && publicRequestCount >= 0);
           const required = [
+            [pilot.schemaVersion === '1.2.0', 'schemaVersion'],
             [pilot.experimentId === 'JP-REV-001', 'experimentId'],
             [pilot.status === 'PUBLISHED', 'status'],
             [pilot.offer?.priceUsd === 100, 'priceUsd'],
-            [pilot.offer?.capacity === 5, 'capacity'],
+            [pilot.offer?.firstMilestoneUsd === 500, 'firstMilestoneUsd'],
+            [pilot.offer?.grossTargetUsd === 1000, 'grossTargetUsd'],
+            [pilot.offer?.capacity === 10, 'capacity'],
+            [pilot.offer?.maxConcurrentDeliveries === 2, 'maxConcurrentDeliveries'],
             [pilot.availability?.orders === 0, 'orders'],
-            [pilot.availability?.slotsRemaining === 5, 'slotsRemaining'],
+            [pilot.availability?.slotsRemaining === 10, 'slotsRemaining'],
+            [pilot.availability?.activeDeliveryLimit === 2, 'activeDeliveryLimit'],
             [validPublicRequestCount, 'openFitCheckRequests'],
             [pilot.publicInterest?.countedAsOrders === false, 'interestNotOrders'],
             [pilot.publicInterest?.reservesCapacity === false, 'interestNotReservations'],
@@ -178,15 +190,31 @@ jobs:
             [pilot.money?.grossRevenueUsd === 0, 'grossRevenueUsd'],
             [pilot.money?.netCashUsd === 0, 'netCashUsd'],
             [pilot.publication?.issueNumber === 133, 'issueNumber'],
+            [pilot.authority?.version === '3.0.0', 'authorityVersion'],
+            [pilot.authority?.revoked === false, 'authorityActive'],
+            [pilot.authority?.automatedIntake?.state === 'AUTHORIZED_ACTIVE', 'automatedIntakeState'],
+            [pilot.authority?.automatedIntake?.exactTitlePrefix === '[Audit request]:', 'exactTitlePrefix'],
+            [pilot.authority?.automatedIntake?.mayCreateOrder === false, 'automationNotOrder'],
+            [pilot.authority?.automatedIntake?.mayReserveCapacity === false, 'automationNotReservation'],
+            [pilot.authority?.automatedIntake?.mayAcceptContract === false, 'automationNotContract'],
+            [pilot.authority?.automatedIntake?.mayRequestPayment === false, 'automationNotPayment'],
+            [pilot.authority?.automatedIntake?.mayStartDelivery === false, 'automationNotDelivery'],
+            [pilot.authority?.directOutreach === 'NOT_AUTHORIZED', 'directOutreach'],
+            [pilot.authority?.contractAcceptance === 'HUMAN_APPROVAL_REQUIRED', 'contractGate'],
+            [pilot.authority?.paymentExecution === 'EXTERNAL_PROVIDER_ONLY', 'paymentGate'],
+            [pilot.authority?.deliveryStart === 'HUMAN_APPROVAL_REQUIRED', 'deliveryGate'],
             [pilot.evidenceBoundary?.receivedCashRequires === 'PAID_SETTLED', 'receivedCashRequires'],
             [pilot.evidenceBoundary?.openingAnIssueCreatesContract === false, 'contractBoundary'],
             [pilot.evidenceBoundary?.publicFitCheckCountsAsOrder === false, 'fitCheckOrderBoundary'],
             [pilot.evidenceBoundary?.publicFitCheckReservesCapacity === false, 'fitCheckReservationBoundary'],
+            [pilot.evidenceBoundary?.githubLabelProvesPayment === false, 'labelPaymentBoundary'],
+            [pilot.evidenceBoundary?.automatedAcknowledgementAcceptsScope === false, 'ackScopeBoundary'],
+            [pilot.evidenceBoundary?.automatedAcknowledgementStartsDelivery === false, 'ackDeliveryBoundary'],
             [pilot.evidenceBoundary?.earningsGuaranteed === false, 'earningsBoundary'],
           ];
           const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
           if (failed.length) throw new Error(`Readback failed: ${failed.join(', ')}`);
-          console.log('Netlify audit product readback: PASS');
+          console.log('Netlify audit authority product readback: PASS');
           NODE
 
           echo "readback=PASS" >> "$GITHUB_OUTPUT"
@@ -205,7 +233,7 @@ jobs:
           const deployed = Boolean(process.env.DEPLOY_ID);
           const readback = process.env.READBACK || 'NOT_COMPLETED';
           const receipt = {
-            schemaVersion: '1.1.0',
+            schemaVersion: '1.2.0',
             receiptId: `JP-REV-001-NETLIFY-${process.env.GITHUB_RUN_ID}`,
             repository: process.env.GITHUB_REPOSITORY,
             commit: process.env.GITHUB_SHA,
@@ -219,11 +247,20 @@ jobs:
             readback,
             result: deployed && readback === 'PASS' ? 'DEPLOYED_AND_VERIFIED' : 'INCOMPLETE',
             verifiedRoutes: ['/', '/github-control-tower-audit', '/api/revenue/pilot', '/sitemap.xml', '/robots.txt'],
+            authorityVersion: '3.0.0',
+            priceUsd: 100,
+            firstMilestoneUsd: 500,
+            grossTargetUsd: 1000,
+            totalSlots: 10,
+            maximumActiveDeliveries: 2,
+            orders: 0,
             publicInterestEvidence: 'SEPARATE_FROM_ORDERS_AND_CAPACITY',
+            automatedIntake: 'EXACT_PREFIX_ACKNOWLEDGEMENT_ONLY',
+            directOutreach: 'NOT_AUTHORIZED',
             verifiedRevenueUsd: 0,
             verifiedSettledCashUsd: 0,
             externalActionsPerformed: deployed ? ['NETLIFY_PRODUCTION_DEPLOY'] : [],
-            excludedActions: ['new_site_creation', 'domain_change', 'billing_change', 'credential_change', 'payment_execution', 'customer_contact'],
+            excludedActions: ['new_site_creation', 'domain_change', 'billing_change', 'credential_change', 'payment_execution', 'customer_contact', 'contract_acceptance', 'delivery_start'],
             generatedAt: new Date().toISOString(),
           };
           fs.writeFileSync('artifacts/netlify-audit-product-receipt.json', JSON.stringify(receipt, null, 2) + '\n');
@@ -242,13 +279,20 @@ jobs:
         if: always()
         run: |
           {
-            echo "## Netlify audit product deployment"
+            echo "## Netlify audit authority deployment"
             echo "- Site ID: $NETLIFY_SITE_ID"
             echo "- Primary URL: $NETLIFY_PRIMARY_URL"
             echo "- Deploy ID: ${{ steps.deploy.outputs.deploy_id }}"
             echo "- Deploy URL: ${{ steps.deploy.outputs.deploy_url }}"
             echo "- Readback: ${{ steps.readback.outputs.readback }}"
+            echo "- Authority version: 3.0.0"
+            echo "- Total slots: 10"
+            echo "- Maximum active deliveries: 2"
+            echo "- First milestone: $500 USD"
+            echo "- Expanded gross target: $1,000 USD"
             echo "- Public fit checks: separate from orders and capacity"
+            echo "- Automated intake: exact-prefix acknowledgement only"
+            echo "- Direct outreach: not authorized"
             echo "- Verified revenue: $0 USD"
             echo "- Verified settled cash: $0 USD"
           } >> "$GITHUB_STEP_SUMMARY"
