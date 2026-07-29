@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
 import experiment from "@/examples/revenue-experiment.sample.json";
-import authorityReceipt from "@/receipts/revenue/JP-REV-001-AUTHORITY.json";
+import authorityReceipt from "@/receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V4.json";
+import fardarterDrive from "@/receipts/revenue/FARDARTER-DRIVE-V4.json";
+import chainReceipt from "@/receipts/revenue/JP-REV-001-CHAIN-133-140.json";
 import publicationReceipt from "@/receipts/revenue/JP-REV-001-PUBLICATION.json";
 import {
   getPublicAuditInterest,
@@ -15,16 +17,16 @@ export const revalidate = 900;
 const canonicalUrl = `${getSiteUrl()}/github-control-tower-audit`;
 
 export const metadata: Metadata = {
-  title: "GitHub Control Tower Audit | JP Systems",
+  title: "GitHub Control Tower Audit + Fardarter Drive™ | JP Systems",
   description:
-    "A $100 fixed-scope GitHub repository operations audit with ten total pilot slots, bounded automation, and explicit evidence gates.",
+    "A $100 fixed-scope GitHub repository audit with ten pilot slots, bounded automation, authority v4, and clearly separated Fardarter Drive scale horizons.",
   alternates: {
     canonical: canonicalUrl,
   },
   openGraph: {
-    title: "GitHub Control Tower Audit",
+    title: "GitHub Control Tower Audit + Fardarter Drive™",
     description:
-      "Turn stale pull requests, duplicate issues, unclear checks, and deployment boundaries into an exact operating sequence.",
+      "Current evidence, bounded GitHub intake, counsel-gated commercial drafts, and unachieved long-horizon scale objectives.",
     type: "website",
     url: canonicalUrl,
   },
@@ -32,6 +34,8 @@ export const metadata: Metadata = {
 
 const issueUrl =
   "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/133";
+const fardarterIssueUrl =
+  "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/141";
 const requestUrl =
   "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/new?template=control-tower-audit-request.yml";
 const statusApiUrl = "/api/revenue/pilot";
@@ -42,6 +46,9 @@ const usd = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+const formatScaleUsd = (amountUsd: string) =>
+  `$${amountUsd.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+
 const faqItems = [
   {
     question: "Does opening a GitHub issue reserve a pilot slot?",
@@ -51,7 +58,17 @@ const faqItems = [
   {
     question: "What part of intake is automated?",
     answer:
-      "Only exact-prefix audit-request issues may receive bounded labels and one idempotent acknowledgement. Automation cannot accept fit or scope, create an order, reserve capacity, request payment, start delivery, or issue a refund.",
+      "Only exact-prefix audit-request issues may receive bounded labels and one idempotent acknowledgement. Automation cannot accept fit or scope, create an order, reserve capacity, request payment, start delivery, issue a refund, or resolve a dispute.",
+  },
+  {
+    question: "What does Fardarter Drive mean?",
+    answer:
+      "Fardarter Drive is a staged planning and evidence framework. The $1 million, $1 billion, $1 trillion, and $1 quadrillion values are unachieved horizons, not revenue, valuation, market-size, customer-count, or earnings claims.",
+  },
+  {
+    question: "Is the agreement package indemnity-proof?",
+    answer:
+      "No. It is indemnity- and liability-ready for counsel review, but it is not indemnity-proof. Final protection depends on verified parties, facts, jurisdiction, insurance, negotiated language, informed consent, and applicable law.",
   },
   {
     question: "How can ten slots exist with only two active deliveries?",
@@ -59,19 +76,9 @@ const faqItems = [
       "Ten is the total pilot capacity. No more than two audits may be active at once. Additional work starts pause whenever the active-delivery limit is reached.",
   },
   {
-    question: "Do you need repository credentials?",
-    answer:
-      "No credentials should be posted. The pilot uses a public repository or a separately authorized read-only path, and sensitive information stays outside public issues.",
-  },
-  {
     question: "When does money count as received?",
     answer:
       "Only when an agreed external payment provider confirms settlement. Comments, labels, reactions, pledges, invoices, pending transfers, and screenshots do not count as received cash.",
-  },
-  {
-    question: "Are the $500 milestone and $1,000 target guaranteed?",
-    answer:
-      "No. Five $100 settled audits form the first $500 milestone, and ten form the expanded $1,000 gross target. Neither is a sales forecast, profit claim, or earnings guarantee.",
   },
 ] as const;
 
@@ -143,7 +150,13 @@ export default async function GitHubControlTowerAuditPage() {
           </a>
           <div className="flex flex-wrap items-center gap-4">
             <a className="transition hover:text-cyan-100" href={issueUrl}>
-              Launch issue #{publicationReceipt.issueNumber}
+              Audit issue #{publicationReceipt.issueNumber}
+            </a>
+            <a
+              className="transition hover:text-cyan-100"
+              href={fardarterIssueUrl}
+            >
+              Fardarter Drive #141
             </a>
             <a
               className="transition hover:text-cyan-100"
@@ -166,10 +179,9 @@ export default async function GitHubControlTowerAuditPage() {
               Turn a tangled GitHub repository into an exact operating sequence.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-              A fixed-scope repository operations audit for creators, maintainers,
-              small companies, and project owners dealing with stale pull
-              requests, duplicate issues, unclear checks, mixed experiments, or
-              uncertain deployment boundaries.
+              A fixed-scope repository operations audit backed by explicit evidence,
+              bounded automation, authority receipts, and a delivery limit that keeps
+              ambition separate from actual operating capacity.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
@@ -180,17 +192,17 @@ export default async function GitHubControlTowerAuditPage() {
               </a>
               <a
                 className="rounded-full border border-white/20 px-6 py-3 font-bold text-white transition hover:border-cyan-200/60 hover:text-cyan-100"
-                href={issueUrl}
+                href={fardarterIssueUrl}
               >
-                Review pilot receipt
+                Review Fardarter Drive
               </a>
             </div>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-white/45">
-              Opening an issue may trigger bounded automated labels and one
-              acknowledgement. It does not create a contract, invoice, payment
-              obligation, deadline, delivery commitment, order, work start, or
-              capacity reservation. Do not place credentials, payment data,
-              customer identities, or confidential records in a public issue.
+              Opening an issue may trigger bounded labels and one acknowledgement. It
+              does not create a contract, invoice, payment obligation, deadline,
+              delivery commitment, order, work start, or capacity reservation. Do not
+              place credentials, payment data, identities, or confidential records in
+              a public issue.
             </p>
           </div>
 
@@ -198,12 +210,12 @@ export default async function GitHubControlTowerAuditPage() {
             <div className="flex items-start justify-between gap-6">
               <div>
                 <p className="text-sm uppercase tracking-[0.22em] text-cyan-100/65">
-                  Fixed-scope pilot
+                  Current evidence
                 </p>
                 <p className="mt-2 text-5xl font-black text-cyan-100">
                   {usd.format(offer.priceUsd)}
                 </p>
-                <p className="mt-2 text-white/55">per accepted audit scope</p>
+                <p className="mt-2 text-white/55">per separately accepted scope</p>
               </div>
               <span className="rounded-full border border-white/15 bg-black/30 px-3 py-1 font-mono text-xs text-white/60">
                 {experimentId}
@@ -215,21 +227,9 @@ export default async function GitHubControlTowerAuditPage() {
               <Metric label="Active limit" value={String(offer.maxConcurrentDeliveries)} />
               <Metric label="Orders" value={String(metrics.orders)} />
               <Metric label="Public fit checks" value={publicRequestValue} />
-              <Metric label="First milestone" value={usd.format(offer.firstMilestoneUsd)} />
-              <Metric label="Expanded target" value={usd.format(offer.grossTargetUsd)} />
+              <Metric label="Current gross" value={usd.format(money.grossRevenueUsd)} />
               <Metric label="Settled cash" value={usd.format(money.netCashUsd)} />
-              <Metric
-                label="Delivery window"
-                value={`${offer.deliveryWindowBusinessDays} business days`}
-              />
-              <Metric label="Accepted deliveries" value={String(metrics.deliveriesAccepted)} />
             </div>
-
-            <p className="mt-3 text-xs leading-5 text-white/40">
-              Public fit checks are counted from exact-prefix GitHub issues. They
-              are interest signals only and are never orders, revenue, or reserved
-              capacity. Ten total slots do not override the two-active-delivery cap.
-            </p>
 
             <div className="mt-6">
               <div className="mb-2 flex justify-between text-xs uppercase tracking-[0.18em] text-white/45">
@@ -245,16 +245,101 @@ export default async function GitHubControlTowerAuditPage() {
             </div>
 
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/60">
-              <strong className="text-white">Authority state:</strong> publication
-              and bounded exact-prefix acknowledgement are active under authority
-              v{authorityReceipt.authorityVersion}; direct outreach is {channel.outreachAuthorized ? "authorized" : "not authorized"}; only provider-confirmed settled payments count as received cash.
+              <strong className="text-white">Authority v{authorityReceipt.authorityVersion}:</strong>{" "}
+              document drafts and bounded GitHub intake are active; relevant exact
+              outreach is conditional; contracts, liability terms, payment, and work
+              starts remain gated. Direct channel publication is {channel.publicationAuthorized ? "authorized" : "not authorized"}.
             </div>
           </aside>
         </section>
 
+        <section className="border-t border-white/10 py-12">
+          <p className="font-mono text-sm uppercase tracking-[0.25em] text-fuchsia-200">
+            Fardarter Drive™
+          </p>
+          <div className="mt-3 grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
+            <div>
+              <h2 className="text-3xl font-black">
+                Aspirational horizons — not achieved revenue
+              </h2>
+              <p className="mt-4 leading-7 text-white/60">
+                The scale ladder is permitted as planning, but no stage promotes
+                automatically. The current evidence remains {metrics.orders} orders,
+                {" "}{usd.format(money.grossRevenueUsd)} verified gross revenue, and
+                {" "}{usd.format(money.netCashUsd)} settled cash.
+              </p>
+              <div className="mt-5 rounded-3xl border border-amber-200/20 bg-amber-200/[0.05] p-5 text-sm leading-6 text-white/65">
+                <strong className="text-amber-100">Indemnity boundary:</strong>{" "}
+                the agreement package is counsel-gated and not indemnity-proof.
+                Templates do not become binding contracts, liability caps, or releases
+                merely because they are generated or committed.
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {fardarterDrive.horizons.map((horizon) => (
+                <article
+                  key={horizon.stageId}
+                  className="rounded-3xl border border-fuchsia-200/15 bg-fuchsia-200/[0.035] p-5"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-mono text-xs text-fuchsia-200/70">
+                      {horizon.stageId}
+                    </span>
+                    <span className="rounded-full bg-black/30 px-2 py-1 text-xs text-white/45">
+                      not achieved
+                    </span>
+                  </div>
+                  <p className="mt-4 text-2xl font-black text-fuchsia-100">
+                    {formatScaleUsd(horizon.amountUsd)}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/55">
+                    {horizon.label}
+                  </p>
+                  <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-white/35">
+                    {horizon.classification.replaceAll("_", " ")}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
+          <ScopeCard
+            title="Pilot boundary"
+            items={[
+              `${offer.scopeLimits.repositories} repository`,
+              `Up to ${offer.scopeLimits.maxOpenPullRequests} open pull requests`,
+              `Up to ${offer.scopeLimits.maxOpenIssues} open issues`,
+              `${offer.scopeLimits.clarificationRounds} clarification round`,
+              `No more than ${offer.maxConcurrentDeliveries} active deliveries`,
+            ]}
+          />
+          <ScopeCard
+            title="Authority and legal gates"
+            items={[
+              "Draft documents may be automated",
+              "Exact outreach requires relevance, recipient, message, and receipt controls",
+              "Final agreement requires buyer and JP consent",
+              "Indemnity and liability terms require counsel review",
+              "Payment requires external-provider PAID_SETTLED evidence",
+            ]}
+          />
+          <ScopeCard
+            title={`Receipt chain #${chainReceipt.chain[0].number}–#${chainReceipt.chain.at(-1)?.number}`}
+            items={[
+              `${chainReceipt.chain.filter((item) => item.objectType === "PULL_REQUEST").length} merged pull requests`,
+              `${chainReceipt.chain.filter((item) => item.objectType === "ISSUE").length} issues`,
+              "#136 remains open for immutable deployment proof",
+              "#140 closed with bounded intake self-test PASS",
+              `Chain result: ${chainReceipt.result}`,
+            ]}
+          />
+        </section>
+
         <section className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-[0.75fr_1.25fr]">
           <div>
-            <p className="font-mono text-sm uppercase tracking-[0.25em] text-fuchsia-200">
+            <p className="font-mono text-sm uppercase tracking-[0.25em] text-cyan-200">
               Buyer outcome
             </p>
             <h2 className="mt-3 text-3xl font-black">What the audit delivers</h2>
@@ -276,30 +361,6 @@ export default async function GitHubControlTowerAuditPage() {
               </article>
             ))}
           </div>
-        </section>
-
-        <section className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
-          <ScopeCard
-            title="Pilot boundary"
-            items={[
-              `${offer.scopeLimits.repositories} repository`,
-              `Up to ${offer.scopeLimits.maxOpenPullRequests} open pull requests`,
-              `Up to ${offer.scopeLimits.maxOpenIssues} open issues`,
-              `${offer.scopeLimits.clarificationRounds} clarification round`,
-              `No more than ${offer.maxConcurrentDeliveries} active deliveries`,
-            ]}
-          />
-          <ScopeCard title="Explicit exclusions" items={offer.exclusions} />
-          <ScopeCard
-            title="Transaction boundary"
-            items={[
-              "Human fit and written scope before an order",
-              "External provider confirms settlement",
-              "GitHub issues, labels, comments, and screenshots are not payment evidence",
-              "JP approval is required before delivery starts",
-              "Expanded implementation receives a separate scope and price",
-            ]}
-          />
         </section>
 
         <section className="border-t border-white/10 py-12">
@@ -333,9 +394,9 @@ export default async function GitHubControlTowerAuditPage() {
               </h2>
               <p className="mt-4 max-w-3xl leading-7 text-white/65">
                 Automation may acknowledge the request, but JP reviews fit first.
-                Scope, price, due date, cancellation terms, delivery destination,
-                active capacity, and payment method are confirmed separately in
-                writing before work begins.
+                Parties, scope, price, due date, cancellation terms, liability choices,
+                delivery destination, active capacity, and payment method are resolved
+                separately before work begins.
               </p>
             </div>
             <a
@@ -349,10 +410,10 @@ export default async function GitHubControlTowerAuditPage() {
 
         <footer className="flex flex-wrap items-center justify-between gap-4 py-10 text-sm text-white/40">
           <span>
-            Snapshot: {experimentId} • Issue #{publicationReceipt.issueNumber} • authority v{authorityReceipt.authorityVersion}
+            {fardarterDrive.driveId} • authority v{authorityReceipt.authorityVersion} • Issue #{publicationReceipt.issueNumber}
           </span>
           <span>
-            First milestone {usd.format(offer.firstMilestoneUsd)} • expanded target {usd.format(offer.grossTargetUsd)} • not an earnings forecast
+            Current gross {usd.format(money.grossRevenueUsd)} • current settled cash {usd.format(money.netCashUsd)} • horizons not forecasts
           </span>
         </footer>
       </div>
