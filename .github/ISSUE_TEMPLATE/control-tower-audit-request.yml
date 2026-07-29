@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This public issue is a fit-check request, not an order, capacity reservation, contract, invoice, payment request, deadline, or delivery commitment. Exact-prefix requests may receive automated labels and one boundary acknowledgement. That automation cannot accept fit or scope, request payment, or start work. Do not post credentials, private customer information, payment data, confidential records, or other sensitive information.
+        This public issue is a fit-check request. A qualifying exact-prefix request may automatically enter **FIT_APPROVED_FOR_SCOPE_DRAFT**, receive bounded labels and one receipt, and trigger preparation of a private Google Drive work package. That state is nonbinding: it is not an order, capacity reservation, contract, signature, invoice, payment request, deadline, indemnity agreement, waiver, release, or work start. Do not post credentials, payment records, private customer information, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, or counsel notes.
 
   - type: input
     id: repository
@@ -57,7 +57,7 @@ body:
       options:
         - Up to 10 open pull requests and 25 open issues
         - Up to 25 open pull requests and 50 open issues
-        - Larger than the pilot scope
+        - Larger than the published scope
         - Not sure
     validations:
       required: true
@@ -66,7 +66,7 @@ body:
     id: timing
     attributes:
       label: Timing or deadline
-      description: Provide a real deadline or write "no fixed deadline." The exact due date is confirmed only after written scope acceptance, active delivery capacity, and settlement evidence are verified.
+      description: Provide a real deadline or write "no fixed deadline." No deadline is promised until final written acceptance, active delivery capacity, and settlement evidence are confirmed.
       placeholder: "No fixed deadline"
     validations:
       required: true
@@ -76,7 +76,7 @@ body:
     attributes:
       label: Package being considered
       options:
-        - $100 USD Control Tower Audit pilot
+        - $100 USD Control Tower Audit
         - $250 USD Implementation Pack after audit
         - Audit first; implementation undecided
         - Fit check only
@@ -86,19 +86,21 @@ body:
   - type: checkboxes
     id: boundaries
     attributes:
-      label: Public, automation, and transaction boundaries
+      label: Public, automation, Google Drive, and transaction boundaries
       options:
-        - label: I have not posted credentials, payment details, private customer data, confidential records, or sensitive personal information.
+        - label: I have not posted credentials, payment records, private customer data, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, or counsel notes.
           required: true
-        - label: I understand that this issue is a fit check and does not create an order, capacity reservation, contract, invoice, payment obligation, deadline, or delivery commitment.
+        - label: I understand that this public request does not create an order, capacity reservation, contract, invoice, payment obligation, deadline, indemnity agreement, waiver, release, or work start.
           required: true
-        - label: I understand that automated labels or an acknowledgement are intake receipts only and do not accept fit, scope, price, payment, or work start.
+        - label: I understand that automation may approve fit for nonbinding scope drafting, but cannot accept the final commercial agreement, confirm payment, choose liability terms, or start paid work.
           required: true
-        - label: I understand that the pilot may have ten total slots while no more than two deliveries are active at once.
+        - label: I understand that a private Google Drive work package may be prepared after fit approval, but a folder or document is not a signature, contract, payment, settlement receipt, or paid work start.
           required: true
-        - label: I understand that merges, settings changes, deployments, billing, domains, credentials, and destructive actions are excluded unless separately scoped and explicitly authorized.
+        - label: I understand that the planning envelope is 100 total slots with no more than 10 ACTIVE deliveries, and new work starts pause at the active limit.
           required: true
-        - label: I understand that payment and settlement are confirmed only through an agreed external provider, not GitHub labels, comments, stars, reactions, pledges, invoices, or screenshots.
+        - label: I understand that payment and settlement are confirmed only through an agreed external provider, not GitHub labels, comments, stars, reactions, pledges, invoices, Drive files, pending transfers, or screenshots.
+          required: true
+        - label: I understand that refunds, disputes, admissions, bank or payout changes, billing, domains, credentials, access controls, and destructive actions remain separately approved and evidenced.
           required: true
 
   - type: textarea
