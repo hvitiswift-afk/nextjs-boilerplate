@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-capacity-ledger-v6-1.schema.json",
+  "title": "Fardarter Drive v6.1 Capacity Ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "ledgerId", "driveId", "authorityVersion", "controllingIssue", "canonicalCapacity", "financialEvidence", "stateLedger", "publicDynamicSources", "arithmetic", "overrideBoundary", "googleDriveContinuity", "claims", "nextControlledAction"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "ledgerId": { "const": "FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1" },
+    "driveId": { "const": "FARDARTER-DRIVE-V6" },
+    "authorityVersion": { "const": "6.0.0" },
+    "controllingIssue": { "const": 153 },
+    "asOf": { "type": "string", "format": "date" },
+    "canonicalCapacity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["totalPlanningSlots", "standardActiveCeiling", "effectiveActiveCeiling", "activeHeadroom", "above100Allowed", "overrideState", "activeDeliveries", "orders"],
+      "properties": {
+        "totalPlanningSlots": { "const": 1000 },
+        "standardActiveCeiling": { "const": 100 },
+        "effectiveActiveCeiling": { "type": "integer", "minimum": 100, "maximum": 1000 },
+        "activeHeadroom": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "above100Allowed": { "const": true },
+        "overrideState": { "enum": ["INACTIVE_NO_RECEIPT", "APPROVED_NOT_ACTIVE", "CAPACITY_OVERRIDE_ACTIVE", "EXPIRED", "REVOKED", "ROLLED_BACK"] },
+        "activeDeliveries": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "orders": { "type": "integer", "minimum": 0, "maximum": 1000 }
+      }
+    },
+    "financialEvidence": { "type": "object" },
+    "stateLedger": { "type": "array", "minItems": 13, "uniqueItems": true, "items": { "type": "object" } },
+    "publicDynamicSources": { "type": "object" },
+    "arithmetic": { "type": "object" },
+    "overrideBoundary": { "type": "object" },
+    "googleDriveContinuity": { "type": "object" },
+    "claims": { "type": "object" },
+    "nextControlledAction": { "type": "string", "minLength": 40 }
+  }
+}

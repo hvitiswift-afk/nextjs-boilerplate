@@ -1,0 +1,152 @@
+name: Fardarter Capacity Readback v6.1
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fardarter-capacity-readback-v6-1.yml"
+      - ".github/workflows/fardarter-capacity-request-v6.yml"
+      - ".github/ISSUE_TEMPLATE/fardarter-capacity-override.yml"
+      - "app/api/revenue/capacity/**"
+      - "receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json"
+      - "schemas/revenue/fardarter-drive-capacity-ledger-v6-1.schema.json"
+      - "scripts/check-fardarter-capacity-ledger-v6-1.mjs"
+      - "src/lib/revenue/public-capacity-ledger.ts"
+      - "package.json"
+  workflow_run:
+    workflows:
+      - Netlify Audit Product Deploy
+    types:
+      - completed
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    name: Validate capacity ledger source
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run fardarter:capacity:check
+      - run: npm run build
+
+  immutable-readback:
+    name: Verify immutable capacity API
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download Netlify deployment artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          pattern: netlify-fardarter-v6-*
+          path: deployment-artifacts
+          merge-multiple: true
+
+      - name: Resolve immutable deploy URL
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESULT="$(find deployment-artifacts -name netlify-deploy-result.json -print -quit)"
+          test -n "$RESULT" || { echo "Missing Netlify deploy result artifact"; exit 1; }
+          DEPLOY_URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")' "$RESULT")"
+          DEPLOY_ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_id || x.id || "")' "$RESULT")"
+          test -n "$DEPLOY_URL" || { echo "Missing immutable deploy URL"; exit 1; }
+          test -n "$DEPLOY_ID" || { echo "Missing deploy ID"; exit 1; }
+          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Read and verify capacity endpoint
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 \
+            "$DEPLOY_URL/api/revenue/capacity" --output capacity.json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const x = JSON.parse(fs.readFileSync('capacity.json', 'utf8'));
+          const count = x.publicCounts || {};
+          const validCount = (value) => value === null || (Number.isInteger(value) && value >= 0);
+          const required = [
+            [x.schemaVersion === '1.0.0', 'schemaVersion'],
+            [x.ledgerId === 'FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1', 'ledgerId'],
+            [x.driveId === 'FARDARTER-DRIVE-V6', 'driveId'],
+            [x.authorityVersion === '6.0.0', 'authorityVersion'],
+            [x.controllingIssue === 153, 'controllingIssue'],
+            [x.canonical?.totalPlanningSlots === 1000, 'totalPlanningSlots'],
+            [x.canonical?.slotsRemaining === 1000, 'slotsRemaining'],
+            [x.canonical?.standardActiveCeiling === 100, 'standardActiveCeiling'],
+            [x.canonical?.effectiveActiveCeiling === 100, 'effectiveActiveCeiling'],
+            [x.canonical?.activeDeliveries === 0, 'activeDeliveries'],
+            [x.canonical?.standardActiveHeadroom === 100, 'standardActiveHeadroom'],
+            [x.canonical?.effectiveActiveHeadroom === 100, 'effectiveActiveHeadroom'],
+            [x.canonical?.above100Allowed === true, 'above100Allowed'],
+            [x.canonical?.overrideState === 'INACTIVE_NO_RECEIPT', 'overrideState'],
+            [x.canonical?.backpressureActive === false, 'backpressureActive'],
+            [['AVAILABLE', 'UNAVAILABLE'].includes(count.sourceState), 'publicCountState'],
+            [validCount(count.openFitChecks), 'openFitChecks'],
+            [validCount(count.fitApprovedRequests), 'fitApprovedRequests'],
+            [validCount(count.activeDeliveryIssues), 'activeDeliveryIssues'],
+            [validCount(count.capacityOverrideRequests), 'capacityOverrideRequests'],
+            [count.countsAreCommercialEvidence === false, 'countsBoundary'],
+            [x.commercialEvidence?.orders === 0, 'orders'],
+            [x.commercialEvidence?.verifiedGrossRevenueUsd === 0, 'grossRevenue'],
+            [x.commercialEvidence?.verifiedSettledCashUsd === 0, 'settledCash'],
+            [x.commercialEvidence?.receivedCashRequires === 'PAID_SETTLED', 'cashGate'],
+            [x.overrideRail?.currentState === 'INACTIVE_NO_RECEIPT', 'overrideRailState'],
+            [x.overrideRail?.requestChangesEffectiveCeiling === false, 'requestNotActivation'],
+            [x.overrideRail?.workflowApprovalChangesEffectiveCeiling === false, 'workflowNotActivation'],
+            [x.overrideRail?.activeOverrideRequiresCanonicalMerge === true, 'canonicalMergeGate'],
+            [x.overrideRail?.activeOverrideRequiresReadback === true, 'readbackGate'],
+            [x.evidenceBoundary?.approvedNotActiveActivatesCapacity === false, 'approvedNotActiveBoundary'],
+            [x.evidenceBoundary?.capacityEqualsRevenue === false, 'capacityRevenueBoundary'],
+          ];
+          const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
+          if (failed.length) throw new Error(`Capacity readback failed: ${failed.join(', ')}`);
+          console.log('Fardarter Drive v6.1 immutable capacity readback: PASS');
+          NODE
+
+      - name: Write readback receipt
+        env:
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          fs.writeFileSync('capacity-readback-receipt.json', JSON.stringify({
+            schemaVersion: '1.0.0',
+            receiptId: `FARDARTER-CAPACITY-READBACK-V6-1-${process.env.GITHUB_RUN_ID}`,
+            result: 'DEPLOYED_AND_VERIFIED',
+            deployId: process.env.DEPLOY_ID,
+            deployUrl: process.env.DEPLOY_URL,
+            ledgerId: 'FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1',
+            totalPlanningSlots: 1000,
+            standardActiveCeiling: 100,
+            effectiveActiveCeiling: 100,
+            overrideState: 'INACTIVE_NO_RECEIPT',
+            orders: 0,
+            verifiedGrossRevenueUsd: 0,
+            verifiedSettledCashUsd: 0,
+            generatedAt: new Date().toISOString(),
+          }, null, 2) + '\n');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-capacity-readback-v6-1-${{ github.event.workflow_run.head_sha }}
+          path: capacity-readback-receipt.json
+          retention-days: 30

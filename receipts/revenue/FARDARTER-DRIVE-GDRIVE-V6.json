@@ -21,11 +21,19 @@
       "nativeGoogleDoc": true,
       "referenceStoredPrivately": true,
       "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v6.1 — Operational Capacity Ledger",
+      "purpose": "Private evidence-state definitions, capacity arithmetic, public/private count boundaries, override lifecycle, and operational receipts",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
     }
   ],
   "automation": {
     "createPrivateWorkPackageAfterFitApproval": true,
     "validateCapacityOverride": true,
+    "maintainOperationalCapacityLedger": true,
     "activateOverrideWithoutCompleteReceipt": false,
     "publicReceiptMayExposeDriveUrl": false,
     "publicReceiptMayExposeDriveFileId": false,
@@ -43,5 +51,5 @@
     "overrideReadinessEvidencePublic": false,
     "disputeRecordsPublic": false
   },
-  "nextControlledAction": "Keep v6 capacity and override evidence private, expose only CONNECTED_PRIVATE state and document titles publicly, and create private work packages after qualifying nonbinding fit approval."
+  "nextControlledAction": "Keep v6 capacity, override, and operational-ledger evidence private; expose only CONNECTED_PRIVATE state and document titles publicly; create private work packages after qualifying nonbinding fit approval and valid override requests."
 }

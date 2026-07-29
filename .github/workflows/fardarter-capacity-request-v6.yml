@@ -1,0 +1,113 @@
+name: Fardarter Capacity Request Triage v6
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - edited
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: fardarter-capacity-request-v6-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  triage:
+    name: Triage override request without activation
+    if: >-
+      github.event_name == 'issues' &&
+      startsWith(github.event.issue.title, '[FD capacity override]:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Apply public-safe override decision
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const body = context.payload.issue.body || '';
+            const marker = '<!-- jp-fardarter-capacity-request-v6 -->';
+
+            const readSection = (heading) => {
+              const pattern = new RegExp(`## ${heading}\\s+([^#]+)`, 'i');
+              return body.match(pattern)?.[1]?.trim() || '';
+            };
+            const requested = Number(readSection('Requested ACTIVE ceiling'));
+            const rollback = Number(readSection('Rollback ceiling'));
+            const scope = readSection('Exact override scope or work class');
+            const expiration = readSection('Expiration date or required review condition');
+            const authorization = readSection('Public-safe JP authorization or controlling receipt reference');
+
+            const prohibitedPatterns = [
+              /password\s*[:=]/i,
+              /private[_ -]?key\s*[:=]/i,
+              /secret\s*[:=]/i,
+              /routing\s*number\s*[:=]/i,
+              /bank\s*account\s*[:=]/i,
+              /social\s*security\s*[:=]/i,
+              /provider\s*transaction\s*id\s*[:=]/i,
+              /signature\s*[:=]/i,
+            ];
+            const prohibitedDataDetected = prohibitedPatterns.some((pattern) => pattern.test(body));
+            const complete =
+              Number.isInteger(requested) && requested >= 101 && requested <= 1000 &&
+              Number.isInteger(rollback) && rollback >= 1 && rollback <= 100 &&
+              scope.length >= 4 && expiration.length >= 4 && authorization.length >= 4 &&
+              !prohibitedDataDetected;
+
+            const labels = [
+              { name: 'fd-capacity-v6', color: '5319E7', description: 'Fardarter Drive v6 capacity control' },
+              { name: 'fd-capacity-override-request', color: '006B75', description: 'Public-safe above-100 capacity request' },
+              { name: 'not-active-capacity', color: 'D4C5F9', description: 'Does not change the effective ACTIVE ceiling' },
+              complete
+                ? { name: 'capacity-override-approved-not-active', color: '0E8A16', description: 'Public inputs valid; private readiness and canonical activation still required' }
+                : { name: 'capacity-override-needs-evidence', color: 'B60205', description: 'Public request incomplete or unsafe; human review required' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: labels.map((label) => label.name),
+            });
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+            if (comments.some((comment) => comment.body?.includes(marker))) return;
+
+            const decision = complete ? 'APPROVED_NOT_ACTIVE' : 'NEEDS_JP_REVIEW';
+            const requestedText = Number.isInteger(requested) ? String(requested) : 'UNRESOLVED';
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: `${marker}
+            **Fardarter Drive™ v6 capacity request receipt**
+
+            - Decision: **${decision}**
+            - Requested ACTIVE ceiling: **${requestedText}**
+            - Standard/effective ceiling remains: **100 / 100**
+            - Above 100 is allowed only through a complete active override receipt.
+            - Effective capacity changed: **NO**
+            - Orders / verified gross / settled cash: **0 / $0 / $0 canonical baseline**
+
+            This receipt is public-input triage only. It is not CAPACITY_OVERRIDE_ACTIVE, does not reserve capacity, accept a contract, prove payment, start work, select legal terms, or expose private readiness evidence. Activation requires complete private evidence, JP authorization, canonical merge, and readback.`,
+            });

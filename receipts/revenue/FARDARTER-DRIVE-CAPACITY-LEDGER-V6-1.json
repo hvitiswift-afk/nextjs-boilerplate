@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.0.0",
+  "ledgerId": "FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "authorityVersion": "6.0.0",
+  "controllingIssue": 153,
+  "asOf": "2026-07-29",
+  "canonicalCapacity": {
+    "totalPlanningSlots": 1000,
+    "standardActiveCeiling": 100,
+    "effectiveActiveCeiling": 100,
+    "activeHeadroom": 100,
+    "above100Allowed": true,
+    "overrideState": "INACTIVE_NO_RECEIPT",
+    "activeDeliveries": 0,
+    "orders": 0
+  },
+  "financialEvidence": {
+    "settlementState": "UNKNOWN",
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "stateLedger": [
+    { "state": "REQUESTED", "canonicalCount": 0, "countsAsOrder": false, "usesActiveCapacity": false },
+    { "state": "FIT_APPROVED_FOR_SCOPE_DRAFT", "canonicalCount": 0, "countsAsOrder": false, "usesActiveCapacity": false },
+    { "state": "SCOPE_DRAFTED", "canonicalCount": 0, "countsAsOrder": false, "usesActiveCapacity": false },
+    { "state": "HUMAN_ACCEPTED", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
+    { "state": "PAID_PENDING", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
+    { "state": "PAID_SETTLED", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
+    { "state": "WORK_START_APPROVED", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
+    { "state": "ACTIVE", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": true },
+    { "state": "DELIVERED", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
+    { "state": "ACCEPTED", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
+    { "state": "CANCELLED", "canonicalCount": 0, "countsAsOrder": false, "usesActiveCapacity": false },
+    { "state": "REFUNDED", "canonicalCount": 0, "countsAsOrder": false, "usesActiveCapacity": false },
+    { "state": "DISPUTED", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false }
+  ],
+  "publicDynamicSources": {
+    "repository": "hvitiswift-afk/nextjs-boilerplate",
+    "fitCheckTitlePrefix": "[Audit request]:",
+    "fitApprovedLabel": "fit-approved-for-scope-draft",
+    "activeDeliveryLabel": "fd-active-delivery",
+    "capacityOverrideTitlePrefix": "[FD capacity override]:",
+    "sourceState": "UNAVAILABLE",
+    "openFitChecks": null,
+    "fitApprovedRequests": null,
+    "activeDeliveryIssues": null,
+    "capacityOverrideRequests": null,
+    "countsAreCommercialEvidence": false
+  },
+  "arithmetic": {
+    "slotsRemaining": 1000,
+    "standardActiveHeadroom": 100,
+    "effectiveActiveHeadroom": 100,
+    "backpressureActive": false,
+    "backpressureActivatesAtEffectiveCeiling": true
+  },
+  "overrideBoundary": {
+    "requestMayReturnApprovedNotActive": true,
+    "requestChangesEffectiveCeiling": false,
+    "workflowApprovalChangesEffectiveCeiling": false,
+    "activeOverrideRequiresCompletePrivateEvidence": true,
+    "activeOverrideRequiresJpAuthorization": true,
+    "activeOverrideRequiresCanonicalMerge": true,
+    "activeOverrideRequiresReadback": true
+  },
+  "googleDriveContinuity": {
+    "state": "CONNECTED_PRIVATE",
+    "documentTitle": "Fardarter Drive™ v6.1 — Operational Capacity Ledger",
+    "referenceStoredPrivately": true,
+    "publicUrlExposed": false,
+    "publicFileIdExposed": false
+  },
+  "claims": {
+    "capacityEqualsDemand": false,
+    "capacityEqualsCustomers": false,
+    "capacityEqualsOrders": false,
+    "capacityEqualsRevenue": false,
+    "capacityEqualsValuation": false,
+    "overrideApprovalEqualsActivation": false,
+    "publicLabelProvesPrivateEvidence": false,
+    "futureOutcomesGuaranteed": false
+  },
+  "nextControlledAction": "Merge and verify the v6.1 capacity ledger, dynamic public count API, and override request rail; then prove a 250-ACTIVE request remains APPROVED_NOT_ACTIVE with the effective ceiling still 100."
+}

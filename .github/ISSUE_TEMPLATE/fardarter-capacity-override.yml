@@ -1,0 +1,73 @@
+name: Fardarter Drive Capacity Override Request
+description: Request public-safe review of an exact ACTIVE ceiling above 100 without activating it.
+title: "[FD capacity override]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This request can reach **APPROVED_NOT_ACTIVE** only. It cannot change the effective ACTIVE ceiling, reserve capacity, create an order, accept a contract, prove payment, or start work. Do not post identities, credentials, payment records, signatures, confidential records, counsel notes, or private readiness evidence.
+
+  - type: input
+    id: requested_ceiling
+    attributes:
+      label: Requested ACTIVE ceiling
+      description: Enter one integer from 101 through 1,000.
+      placeholder: "250"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Exact override scope or work class
+      description: State what work the higher ceiling would cover. Avoid private or confidential details.
+    validations:
+      required: true
+
+  - type: input
+    id: expiration
+    attributes:
+      label: Expiration date or required review condition
+      description: Provide a date or a concrete review condition.
+      placeholder: "Review after 30 days or 50 completed deliveries"
+    validations:
+      required: true
+
+  - type: input
+    id: rollback
+    attributes:
+      label: Rollback ceiling
+      description: Enter one integer from 1 through 100.
+      placeholder: "100"
+    validations:
+      required: true
+
+  - type: input
+    id: authorization
+    attributes:
+      label: Public-safe JP authorization or controlling receipt reference
+      placeholder: "Issue #151 and current JP instruction"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Capacity, privacy, and evidence boundaries
+      options:
+        - label: I understand this request and its automated receipt cannot activate capacity above 100.
+          required: true
+        - label: I understand CAPACITY_OVERRIDE_ACTIVE requires complete private readiness evidence, JP authorization, canonical merge, and readback.
+          required: true
+        - label: I have not posted identities, credentials, payment records, confidential records, signatures, counsel notes, or private readiness evidence.
+          required: true
+        - label: I understand capacity does not prove demand, customers, orders, revenue, valuation, funding, market size, or outcomes.
+          required: true
+        - label: I understand contracts, payment, paid work starts, legal terms, refunds, disputes, admissions, banking, billing, domains, credentials, access controls, and destructive actions remain separately gated.
+          required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional public-safe context
+      description: Optional context that does not expose private readiness evidence.
