@@ -1,0 +1,134 @@
+name: Fardarter Capacity Override v6
+
+on:
+  workflow_dispatch:
+    inputs:
+      requested_active_ceiling:
+        description: Exact requested ACTIVE ceiling above 100 and no greater than 1,000
+        required: true
+        type: string
+      scope:
+        description: Exact override scope or work class
+        required: true
+        type: string
+      expiration_or_review:
+        description: Expiration date or required review condition
+        required: true
+        type: string
+      rollback_ceiling:
+        description: Rollback ceiling from 1 through 100
+        required: true
+        default: "100"
+        type: string
+      authorization_receipt:
+        description: Immutable JP authorization or controlling receipt reference
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-capacity-override-v6-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  approve-not-activate:
+    name: Validate above-100 override for canonical activation
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate requested override
+        id: validate
+        shell: bash
+        env:
+          REQUESTED_CEILING: ${{ inputs.requested_active_ceiling }}
+          SCOPE: ${{ inputs.scope }}
+          EXPIRATION_OR_REVIEW: ${{ inputs.expiration_or_review }}
+          ROLLBACK_CEILING: ${{ inputs.rollback_ceiling }}
+          AUTHORIZATION_RECEIPT: ${{ inputs.authorization_receipt }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const requested = Number(process.env.REQUESTED_CEILING);
+          const rollback = Number(process.env.ROLLBACK_CEILING);
+          if (!Number.isInteger(requested) || requested <= 100 || requested > 1000) {
+            throw new Error('requested_active_ceiling must be an integer from 101 through 1000');
+          }
+          if (!Number.isInteger(rollback) || rollback < 1 || rollback > 100) {
+            throw new Error('rollback_ceiling must be an integer from 1 through 100');
+          }
+          for (const [label, value] of [
+            ['scope', process.env.SCOPE],
+            ['expiration_or_review', process.env.EXPIRATION_OR_REVIEW],
+            ['authorization_receipt', process.env.AUTHORIZATION_RECEIPT],
+          ]) {
+            if (!value || value.trim().length < 4) throw new Error(`${label} is incomplete`);
+          }
+          const receipt = {
+            schemaVersion: '1.0.0',
+            receiptId: `FARDARTER-CAPACITY-OVERRIDE-V6-${process.env.GITHUB_RUN_ID}`,
+            driveId: 'FARDARTER-DRIVE-V6',
+            authorityVersion: '6.0.0',
+            result: 'APPROVED_NOT_ACTIVE',
+            activationTarget: 'CAPACITY_OVERRIDE_ACTIVE',
+            activationRequiresCanonicalMerge: true,
+            standardActiveCeiling: 100,
+            totalPlanningCapacity: 1000,
+            requestedActiveCeiling: requested,
+            approvedActiveCeiling: requested,
+            scope: process.env.SCOPE,
+            expirationOrReview: process.env.EXPIRATION_OR_REVIEW,
+            rollbackCeiling: rollback,
+            authorizationReceipt: process.env.AUTHORIZATION_RECEIPT,
+            readinessReviewStoredPrivately: true,
+            changesCanonicalEffectiveCeiling: false,
+            financialState: {
+              orders: 0,
+              verifiedGrossRevenueUsd: 0,
+              verifiedSettledCashUsd: 0,
+            },
+            claims: {
+              overrideEqualsDemand: false,
+              overrideEqualsCustomerCount: false,
+              overrideEqualsOrders: false,
+              overrideEqualsRevenue: false,
+              overrideEqualsValuation: false,
+              overrideGuaranteesOutcomes: false,
+            },
+            generatedAt: new Date().toISOString(),
+          };
+          fs.mkdirSync('artifacts', { recursive: true });
+          fs.writeFileSync(
+            'artifacts/fardarter-capacity-override-v6.json',
+            JSON.stringify(receipt, null, 2) + '\n',
+          );
+          console.log('Override validated as APPROVED_NOT_ACTIVE. This workflow does not change the canonical effective ceiling.');
+          NODE
+
+      - name: Upload override approval receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-capacity-override-v6-${{ github.run_id }}
+          path: artifacts/fardarter-capacity-override-v6.json
+          retention-days: 30
+
+      - name: Write summary
+        run: |
+          {
+            echo "## Fardarter Drive v6 capacity override"
+            echo "- Result: APPROVED_NOT_ACTIVE"
+            echo "- Activation target: CAPACITY_OVERRIDE_ACTIVE"
+            echo "- Standard active ceiling: 100"
+            echo "- Total planning capacity: 1,000"
+            echo "- Requested active ceiling: ${{ inputs.requested_active_ceiling }}"
+            echo "- Rollback ceiling: ${{ inputs.rollback_ceiling }}"
+            echo "- Activation requires canonical merge: true"
+            echo "- Canonical effective ceiling changed by this workflow: false"
+            echo "- Orders / verified gross / settled cash: 0 / $0 / $0"
+          } >> "$GITHUB_STEP_SUMMARY"

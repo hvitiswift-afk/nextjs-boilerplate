@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This public issue is a fit-check request. A qualifying exact-prefix request may automatically enter **FIT_APPROVED_FOR_SCOPE_DRAFT**, receive bounded labels and one receipt, and trigger preparation of a private Google Drive work package. That state is nonbinding: it is not an order, capacity reservation, contract, signature, invoice, payment request, deadline, indemnity agreement, waiver, release, or work start. Do not post credentials, payment records, private customer information, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, or counsel notes.
+        This public issue is a fit-check request. A qualifying exact-prefix request may automatically enter **FIT_APPROVED_FOR_SCOPE_DRAFT**, receive bounded labels and one receipt, and trigger preparation of a private Google Drive work package. That state is nonbinding: it is not an order, capacity reservation, contract, signature, invoice, payment request, deadline, indemnity agreement, waiver, release, or paid work start. Fardarter Drive v6 provides **1,000 total slots** with a standard maximum of **100 ACTIVE deliveries**. Operation above 100 requires a complete active capacity-override receipt. Do not post credentials, payment records, private customer information, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, counsel notes, or private capacity-readiness evidence.
 
   - type: input
     id: repository
@@ -66,7 +66,7 @@ body:
     id: timing
     attributes:
       label: Timing or deadline
-      description: Provide a real deadline or write "no fixed deadline." No deadline is promised until final written acceptance, active delivery capacity, and settlement evidence are confirmed.
+      description: Provide a real deadline or write "no fixed deadline." No deadline is promised until final written acceptance, effective active capacity, and settlement evidence are confirmed.
       placeholder: "No fixed deadline"
     validations:
       required: true
@@ -86,9 +86,9 @@ body:
   - type: checkboxes
     id: boundaries
     attributes:
-      label: Public, automation, Google Drive, and transaction boundaries
+      label: Public, automation, capacity, Google Drive, and transaction boundaries
       options:
-        - label: I have not posted credentials, payment records, private customer data, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, or counsel notes.
+        - label: I have not posted credentials, payment records, private customer data, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, counsel notes, or private capacity-readiness evidence.
           required: true
         - label: I understand that this public request does not create an order, capacity reservation, contract, invoice, payment obligation, deadline, indemnity agreement, waiver, release, or work start.
           required: true
@@ -96,7 +96,9 @@ body:
           required: true
         - label: I understand that a private Google Drive work package may be prepared after fit approval, but a folder or document is not a signature, contract, payment, settlement receipt, or paid work start.
           required: true
-        - label: I understand that the planning envelope is 100 total slots with no more than 10 ACTIVE deliveries, and new work starts pause at the active limit.
+        - label: I understand that the planning envelope is 1,000 total slots with a standard maximum of 100 ACTIVE deliveries, and new work starts pause at the effective active ceiling.
+          required: true
+        - label: I understand that above 100 requires a complete active capacity-override receipt, readiness evidence, rollback controls, JP authorization, and canonical activation; total capacity alone does not activate it.
           required: true
         - label: I understand that payment and settlement are confirmed only through an agreed external provider, not GitHub labels, comments, stars, reactions, pledges, invoices, Drive files, pending transfers, or screenshots.
           required: true

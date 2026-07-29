@@ -1,16 +1,16 @@
 {
-  "schemaVersion": "1.2.0",
+  "schemaVersion": "1.3.0",
   "experimentId": "JP-REV-001",
   "status": "PUBLISHED",
   "offer": {
     "name": "GitHub Control Tower Audit",
     "type": "paid_service",
     "priceUsd": 100,
-    "quantityTarget": 100,
+    "quantityTarget": 1000,
     "firstMilestoneUsd": 1000,
-    "grossTargetUsd": 10000,
-    "capacity": 100,
-    "maxConcurrentDeliveries": 10,
+    "grossTargetUsd": 100000,
+    "capacity": 1000,
+    "maxConcurrentDeliveries": 100,
     "deliveryWindowBusinessDays": 3,
     "clarificationWindowDays": 3,
     "scopeLimits": {
@@ -34,7 +34,8 @@
       "legal opinion",
       "security guarantee",
       "automatic final contract acceptance",
-      "automatic paid work start"
+      "automatic paid work start",
+      "unreceipted capacity override activation"
     ]
   },
   "audience": "individual creators, small companies, and project owners with a disorganized GitHub repository",
@@ -48,15 +49,17 @@
     "docs/repository/MONEY-RAIL-ACTIVATION.md",
     "receipts/revenue/JP-REV-001-PUBLICATION.json",
     "receipts/revenue/JP-REV-001-AUTHORITY.json",
-    "receipts/revenue/FARDARTER-DRIVE-V5.json",
-    "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json",
-    "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V5.json",
-    "docs/repository/FARDARTER-DRIVE-V5-ACCEPT-EXECUTE-GDRIVE.md",
+    "receipts/revenue/FARDARTER-DRIVE-V6.json",
+    "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json",
+    "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json",
+    "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json",
+    "docs/repository/FARDARTER-DRIVE-V6-CAPACITY-1000-100.md",
     ".github/workflows/audit-request-intake.yml",
-    ".github/workflows/fardarter-fit-acceptance-v5.yml",
-    ".github/workflows/fardarter-approved-execution-v5.yml"
+    ".github/workflows/fardarter-fit-acceptance-v6.yml",
+    ".github/workflows/fardarter-approved-execution-v6.yml",
+    ".github/workflows/fardarter-capacity-override-v6.yml"
   ],
-  "authorityReceiptPath": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json",
+  "authorityReceiptPath": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json",
   "channel": {
     "name": "GitHub inbound issue #133",
     "inboundRequestPath": ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml",
@@ -96,5 +99,5 @@
     "https://www.paypal.com/donate/?hosted_button_id=JJ4XGRU94T4XW",
     "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/campaign"
   ],
-  "nextControlledAction": "Operate the 100-slot Fardarter Drive v5 inbound system with no more than 10 ACTIVE deliveries, use automated nonbinding fit acceptance and approved verification/build execution, create private Google Drive work packages after fit approval, and preserve final agreement, settlement, paid work start, counsel terms, refunds, disputes, and irreversible actions as separately evidenced states."
+  "nextControlledAction": "Operate the 1,000-slot Fardarter Drive v6 inbound system with a standard maximum of 100 ACTIVE deliveries; allow an exact ceiling above 100 only through a complete active capacity-override receipt and canonical activation merge; preserve nonbinding fit acceptance, one-shot execution, private Google Drive continuity, and independent contract, settlement, work-start, counsel, refund, dispute, and irreversible-action gates."
 }

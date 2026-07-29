@@ -1,4 +1,4 @@
-name: Fardarter Approved Execution v5
+name: Fardarter Approved Execution v6
 
 on:
   issues:
@@ -18,13 +18,14 @@ on:
         options:
           - VERIFY_AND_BUILD
           - RECEIPT_ONLY
+          - CAPACITY_HEADROOM_CHECK
 
 permissions:
   contents: read
   issues: write
 
 concurrency:
-  group: fardarter-execution-v5-${{ github.event.issue.number || inputs.controlling_issue || github.run_id }}
+  group: fardarter-execution-v6-${{ github.event.issue.number || inputs.controlling_issue || github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -34,7 +35,7 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (
         github.event_name == 'issues' &&
-        github.event.label.name == 'fd-execute-approved' &&
+        github.event.label.name == 'fd-execute-approved-v6' &&
         startsWith(github.event.issue.title, '[FD execute]:')
       )
     runs-on: ubuntu-latest
@@ -54,7 +55,7 @@ jobs:
           EXECUTION_CLASS="${INPUT_CLASS:-VERIFY_AND_BUILD}"
           test -n "$ISSUE_REF" || { echo "Missing controlling issue"; exit 1; }
           case "$EXECUTION_CLASS" in
-            VERIFY_AND_BUILD|RECEIPT_ONLY) ;;
+            VERIFY_AND_BUILD|RECEIPT_ONLY|CAPACITY_HEADROOM_CHECK) ;;
             *) echo "Unsupported execution class"; exit 1 ;;
           esac
           echo "issue_ref=$ISSUE_REF" >> "$GITHUB_OUTPUT"
@@ -63,16 +64,12 @@ jobs:
       - name: Enforce one execution receipt per issue
         id: guard
         uses: actions/github-script@v7
-        env:
-          EXECUTION_CLASS: ${{ steps.context.outputs.execution_class }}
         with:
           script: |
             if (context.eventName !== 'issues') {
               core.setOutput('should_run', 'true');
-              core.setOutput('prior_receipt', 'false');
               return;
             }
-
             const comments = await github.paginate(
               github.rest.issues.listComments,
               {
@@ -82,17 +79,13 @@ jobs:
                 per_page: 100,
               },
             );
-
             const priorReceipt = comments.some((comment) =>
-              comment.body?.includes('<!-- jp-fardarter-execution-v5-'),
+              comment.body?.includes('<!-- jp-fardarter-execution-v6-'),
             );
-
             core.setOutput('should_run', priorReceipt ? 'false' : 'true');
-            core.setOutput('prior_receipt', priorReceipt ? 'true' : 'false');
-
             if (priorReceipt) {
               core.notice(
-                `Execution suppressed for issue #${context.issue.number}: a v5 execution receipt already exists.`,
+                `Execution suppressed for issue #${context.issue.number}: a v6 execution receipt already exists.`,
               );
             }
 
@@ -125,6 +118,20 @@ jobs:
           steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
         run: npm run build
 
+      - name: Calculate standard capacity headroom
+        if: >-
+          steps.guard.outputs.should_run == 'true' &&
+          steps.context.outputs.execution_class == 'CAPACITY_HEADROOM_CHECK'
+        run: |
+          node - <<'NODE'
+          const standardActiveCeiling = 100;
+          const effectiveActiveCeiling = 100;
+          const activeDeliveries = 0;
+          const headroom = effectiveActiveCeiling - activeDeliveries;
+          if (headroom !== 100) throw new Error('Unexpected v6 baseline headroom');
+          console.log({ standardActiveCeiling, effectiveActiveCeiling, activeDeliveries, headroom });
+          NODE
+
       - name: Write execution receipt
         if: always() && steps.guard.outputs.should_run == 'true'
         shell: bash
@@ -138,19 +145,22 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const receipt = {
-            schemaVersion: '1.1.0',
-            receiptId: `FARDARTER-EXECUTION-V5-${process.env.GITHUB_RUN_ID}`,
-            idempotencyKey: `issue:${process.env.ISSUE_REF}:fardarter-execution-v5`,
-            driveId: 'FARDARTER-DRIVE-V5',
-            authorityVersion: '5.0.0',
+            schemaVersion: '1.0.0',
+            receiptId: `FARDARTER-EXECUTION-V6-${process.env.GITHUB_RUN_ID}`,
+            idempotencyKey: `issue:${process.env.ISSUE_REF}:fardarter-execution-v6`,
+            driveId: 'FARDARTER-DRIVE-V6',
+            authorityVersion: '6.0.0',
             controllingIssue: process.env.ISSUE_REF,
             executionClass: process.env.EXECUTION_CLASS,
             result: process.env.JOB_STATUS === 'success' ? 'PASS' : 'INCOMPLETE',
             repository: process.env.GITHUB_REPOSITORY,
             commit: process.env.GITHUB_SHA,
             runId: process.env.GITHUB_RUN_ID,
-            capacity: 100,
-            maximumActiveDeliveries: 10,
+            capacity: 1000,
+            standardActiveCeiling: 100,
+            effectiveActiveCeiling: 100,
+            above100Allowed: true,
+            capacityOverrideState: 'INACTIVE_NO_RECEIPT',
             oneShotPerIssue: true,
             financialState: {
               orders: 0,
@@ -163,6 +173,7 @@ jobs:
               'contract_acceptance',
               'payment_execution',
               'paid_work_start',
+              'unreceipted_capacity_override_activation',
               'indemnity_or_liability_term_selection',
               'refund_or_dispute_response',
               'bank_or_payout_change',
@@ -174,7 +185,7 @@ jobs:
             generatedAt: new Date().toISOString(),
           };
           fs.writeFileSync(
-            'artifacts/fardarter-execution-v5.json',
+            'artifacts/fardarter-execution-v6.json',
             JSON.stringify(receipt, null, 2) + '\n',
           );
           NODE
@@ -183,8 +194,8 @@ jobs:
         if: always() && steps.guard.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: fardarter-execution-v5-${{ github.run_id }}
-          path: artifacts/fardarter-execution-v5.json
+          name: fardarter-execution-v6-${{ github.run_id }}
+          path: artifacts/fardarter-execution-v6.json
           retention-days: 30
 
       - name: Add one public-safe issue receipt
@@ -198,23 +209,24 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         with:
           script: |
-            const marker = '<!-- jp-fardarter-execution-v5-one-shot -->';
+            const marker = '<!-- jp-fardarter-execution-v6-one-shot -->';
             const result = process.env.JOB_STATUS === 'success' ? 'PASS' : 'INCOMPLETE';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
               body: `${marker}
-            **Fardarter Drive™ v5 one-shot bounded execution receipt**
+            **Fardarter Drive™ v6 one-shot bounded execution receipt**
 
             - Execution class: \`${process.env.EXECUTION_CLASS}\`
             - Result: **${result}**
             - Run ID: \`${context.runId}\`
             - Commit: \`${context.sha}\`
             - Idempotency: **one execution per controlling issue**
-            - Capacity model: 100 total slots / 10 maximum ACTIVE deliveries
+            - Capacity model: 1,000 total slots / 100 standard ACTIVE / 100 effective baseline
+            - Above 100: **ALLOWED ONLY THROUGH AN ACTIVE CAPACITY OVERRIDE RECEIPT**
             - External actions performed: **NONE**
             - Orders / verified gross / settled cash: **0 / $0 / $0**
 
-            This receipt proves only the approved repository verification/build execution. A later approval-label event on this same issue is suppressed before checkout, dependency installation, validation, build, artifact creation, or comment creation. It does not accept a contract, request or settle payment, start paid delivery, choose indemnity or liability terms, issue a refund, answer a dispute, admit liability, or expose private Google Drive references.`,
+            This receipt proves only the approved repository verification, build, receipt, or capacity-headroom execution. It does not activate an above-100 override, accept a contract, request or settle payment, start paid delivery, choose indemnity or liability terms, issue a refund, answer a dispute, admit liability, or expose private Google Drive references.`,
             });

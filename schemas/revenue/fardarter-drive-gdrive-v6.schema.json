@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-gdrive-v6.schema.json",
+  "title": "Fardarter Drive Google Drive Continuity v6",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "receiptId", "driveId", "state", "folderTitle", "folderReferenceStoredPrivately", "publicFolderUrlExposed", "publicFileIdsExposed", "documents", "automation", "privacyBoundary", "nextControlledAction"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "receiptId": { "const": "FARDARTER-DRIVE-GDRIVE-V6-2026-07-29" },
+    "driveId": { "const": "FARDARTER-DRIVE-V6" },
+    "state": { "const": "CONNECTED_PRIVATE" },
+    "folderTitle": { "const": "Fardarter Drive™" },
+    "folderReferenceStoredPrivately": { "const": true },
+    "publicFolderUrlExposed": { "const": false },
+    "publicFileIdsExposed": { "const": false },
+    "documents": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "purpose", "nativeGoogleDoc", "referenceStoredPrivately", "publicUrlExposed"],
+        "properties": {
+          "title": { "type": "string" },
+          "purpose": { "type": "string" },
+          "nativeGoogleDoc": { "const": true },
+          "referenceStoredPrivately": { "const": true },
+          "publicUrlExposed": { "const": false }
+        }
+      }
+    },
+    "automation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["createPrivateWorkPackageAfterFitApproval", "validateCapacityOverride", "activateOverrideWithoutCompleteReceipt", "publicReceiptMayExposeDriveUrl", "publicReceiptMayExposeDriveFileId", "publicReceiptMayExposeBuyerIdentity", "workPackageCreatesContract", "workPackageCreatesPaymentObligation", "workPackageStartsPaidDelivery"],
+      "properties": {
+        "createPrivateWorkPackageAfterFitApproval": { "const": true },
+        "validateCapacityOverride": { "const": true },
+        "activateOverrideWithoutCompleteReceipt": { "const": false },
+        "publicReceiptMayExposeDriveUrl": { "const": false },
+        "publicReceiptMayExposeDriveFileId": { "const": false },
+        "publicReceiptMayExposeBuyerIdentity": { "const": false },
+        "workPackageCreatesContract": { "const": false },
+        "workPackageCreatesPaymentObligation": { "const": false },
+        "workPackageStartsPaidDelivery": { "const": false }
+      }
+    },
+    "privacyBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["buyerIdentityPublic", "signaturePublic", "providerReceiptPublic", "counselNotesPublic", "confidentialDeliveryDataPublic", "overrideReadinessEvidencePublic", "disputeRecordsPublic"],
+      "properties": {
+        "buyerIdentityPublic": { "const": false },
+        "signaturePublic": { "const": false },
+        "providerReceiptPublic": { "const": false },
+        "counselNotesPublic": { "const": false },
+        "confidentialDeliveryDataPublic": { "const": false },
+        "overrideReadinessEvidencePublic": { "const": false },
+        "disputeRecordsPublic": { "const": false }
+      }
+    },
+    "nextControlledAction": { "type": "string", "minLength": 40 }
+  }
+}

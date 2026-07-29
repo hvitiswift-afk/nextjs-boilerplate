@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "FARDARTER-DRIVE-GDRIVE-V6-2026-07-29",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "state": "CONNECTED_PRIVATE",
+  "folderTitle": "Fardarter Drive™",
+  "folderReferenceStoredPrivately": true,
+  "publicFolderUrlExposed": false,
+  "publicFileIdsExposed": false,
+  "documents": [
+    {
+      "title": "Fardarter Drive™ v6 — Capacity and Override Charter",
+      "purpose": "Private v6 operating envelope, authority, backpressure, acceptance, execution, evidence, and privacy controls",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v6 — Active Capacity Override Register",
+      "purpose": "Private above-100 capacity lifecycle, readiness, activation, expiration, rollback, and immutable receipt register",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
+    }
+  ],
+  "automation": {
+    "createPrivateWorkPackageAfterFitApproval": true,
+    "validateCapacityOverride": true,
+    "activateOverrideWithoutCompleteReceipt": false,
+    "publicReceiptMayExposeDriveUrl": false,
+    "publicReceiptMayExposeDriveFileId": false,
+    "publicReceiptMayExposeBuyerIdentity": false,
+    "workPackageCreatesContract": false,
+    "workPackageCreatesPaymentObligation": false,
+    "workPackageStartsPaidDelivery": false
+  },
+  "privacyBoundary": {
+    "buyerIdentityPublic": false,
+    "signaturePublic": false,
+    "providerReceiptPublic": false,
+    "counselNotesPublic": false,
+    "confidentialDeliveryDataPublic": false,
+    "overrideReadinessEvidencePublic": false,
+    "disputeRecordsPublic": false
+  },
+  "nextControlledAction": "Keep v6 capacity and override evidence private, expose only CONNECTED_PRIVATE state and document titles publicly, and create private work packages after qualifying nonbinding fit approval."
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-v6.schema.json",
+  "title": "Fardarter Drive v6",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "driveId", "name", "trademarkNotice", "controllingIssues", "currentEvidence", "capacityModel", "acceptanceModel", "executionModel", "horizons", "progressionRules", "authorityReceiptPath", "googleDriveReceiptPath", "capacityOverrideReceiptPath", "legalRisk", "claims", "nextControlledAction"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "driveId": { "const": "FARDARTER-DRIVE-V6" },
+    "name": { "const": "Fardarter Drive™" },
+    "trademarkNotice": { "type": "string", "minLength": 20 },
+    "controllingIssues": { "const": [141, 143, 151] },
+    "currentEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asOf", "experimentId", "offer", "priceUsd", "quantityTarget", "firstMilestoneUsd", "grossTargetUsd", "capacity", "standardMaxConcurrentDeliveries", "effectiveMaxConcurrentDeliveries", "capacityOverrideState", "capacityAbove100Allowed", "activeDeliveries", "fitApprovedRequests", "orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd", "deploymentState", "googleDriveContinuity", "receivedCashRequires"],
+      "properties": {
+        "asOf": { "const": "2026-07-29" },
+        "experimentId": { "const": "JP-REV-001" },
+        "offer": { "const": "GitHub Control Tower Audit" },
+        "priceUsd": { "const": 100 },
+        "quantityTarget": { "const": 1000 },
+        "firstMilestoneUsd": { "const": 1000 },
+        "grossTargetUsd": { "const": 100000 },
+        "capacity": { "const": 1000 },
+        "standardMaxConcurrentDeliveries": { "const": 100 },
+        "effectiveMaxConcurrentDeliveries": { "type": "integer", "minimum": 100, "maximum": 1000 },
+        "capacityOverrideState": { "enum": ["INACTIVE_NO_RECEIPT", "APPROVED_NOT_ACTIVE", "CAPACITY_OVERRIDE_ACTIVE", "PAUSED", "EXPIRED", "REVOKED", "ROLLED_BACK"] },
+        "capacityAbove100Allowed": { "const": true },
+        "activeDeliveries": { "const": 0 },
+        "fitApprovedRequests": { "const": 0 },
+        "orders": { "const": 0 },
+        "verifiedGrossRevenueUsd": { "const": 0 },
+        "verifiedSettledCashUsd": { "const": 0 },
+        "deploymentState": { "const": "UNVERIFIED" },
+        "googleDriveContinuity": { "const": "CONNECTED_PRIVATE" },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "capacityModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["standardActiveCeiling", "effectiveActiveCeiling", "totalPlanningCapacity", "aboveStandardAllowed", "overrideActivationState", "overrideReceiptPath", "activationRequiresCompleteReceipt", "automaticActivation", "overrideMayExceed100", "overrideMayExceedTotalPlanningCapacity", "pauseNewStartsAtEffectiveCeiling", "intakeAndDraftingMayContinueDuringBackpressure", "rollbackCeiling"],
+      "properties": {
+        "standardActiveCeiling": { "const": 100 },
+        "effectiveActiveCeiling": { "type": "integer", "minimum": 100, "maximum": 1000 },
+        "totalPlanningCapacity": { "const": 1000 },
+        "aboveStandardAllowed": { "const": true },
+        "overrideActivationState": { "enum": ["INACTIVE_NO_RECEIPT", "APPROVED_NOT_ACTIVE", "CAPACITY_OVERRIDE_ACTIVE", "PAUSED", "EXPIRED", "REVOKED", "ROLLED_BACK"] },
+        "overrideReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json" },
+        "activationRequiresCompleteReceipt": { "const": true },
+        "automaticActivation": { "const": false },
+        "overrideMayExceed100": { "const": true },
+        "overrideMayExceedTotalPlanningCapacity": { "const": false },
+        "pauseNewStartsAtEffectiveCeiling": { "const": true },
+        "intakeAndDraftingMayContinueDuringBackpressure": { "const": true },
+        "rollbackCeiling": { "type": "integer", "minimum": 1, "maximum": 100 }
+      }
+    },
+    "acceptanceModel": { "type": "object" },
+    "executionModel": { "type": "object" },
+    "horizons": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stageId", "amountUsd", "label", "classification", "achieved", "forecast", "guaranteed"],
+        "properties": {
+          "stageId": { "type": "string" },
+          "amountUsd": { "type": "string", "pattern": "^[0-9]+$" },
+          "label": { "type": "string" },
+          "classification": { "enum": ["MILESTONE_TARGET", "EXPANSION_MILESTONE", "CURRENT_EXPERIMENT_TARGET", "ASPIRATIONAL_HORIZON", "SYMBOLIC_POSSIBILITY_HORIZON"] },
+          "achieved": { "const": false },
+          "forecast": { "const": false },
+          "guaranteed": { "const": false }
+        }
+      }
+    },
+    "progressionRules": { "type": "object" },
+    "authorityReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json" },
+    "googleDriveReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json" },
+    "capacityOverrideReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json" },
+    "legalRisk": { "type": "object" },
+    "claims": { "type": "object" },
+    "nextControlledAction": { "type": "string", "minLength": 50 }
+  }
+}

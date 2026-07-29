@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6-SAMPLE",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "authorityVersion": "6.0.0",
+  "state": "INACTIVE_NO_RECEIPT",
+  "standardActiveCeiling": 100,
+  "totalPlanningCapacity": 1000,
+  "above100Allowed": true,
+  "requestedActiveCeiling": null,
+  "approvedActiveCeiling": null,
+  "effectiveConditions": [],
+  "expirationOrReviewAt": null,
+  "scope": "NONE",
+  "readiness": {
+    "staffingOrAutomationCapacityEvidenced": false,
+    "qualityControlEvidenced": false,
+    "securityAndPrivacyReadinessEvidenced": false,
+    "insuranceAndLegalReadinessEvidenced": false,
+    "accountingAndTaxReadinessEvidenced": false,
+    "supportAndIncidentReadinessEvidenced": false
+  },
+  "backpressure": {
+    "pauseNewStartsAtEffectiveCeiling": true,
+    "rollbackCeiling": 100,
+    "rollbackProcedureRecorded": false
+  },
+  "authorization": {
+    "authorizedBy": null,
+    "authorizedAt": null,
+    "immutableReceipt": null
+  },
+  "financialEvidence": {
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0
+  },
+  "claims": {
+    "overrideEqualsDemand": false,
+    "overrideEqualsCustomerCount": false,
+    "overrideEqualsOrders": false,
+    "overrideEqualsRevenue": false,
+    "overrideEqualsValuation": false,
+    "overrideGuaranteesOutcomes": false
+  },
+  "nextControlledAction": "Remain inactive until a complete, private, receipted readiness review approves an exact active ceiling above 100."
+}

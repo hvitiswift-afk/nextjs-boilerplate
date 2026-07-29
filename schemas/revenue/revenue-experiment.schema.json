@@ -1,71 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/revenue-experiment.schema.json",
-  "title": "JP Revenue Experiment",
+  "title": "JP Revenue Experiment v6",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "schemaVersion",
-    "experimentId",
-    "status",
-    "offer",
-    "audience",
-    "proofPackage",
-    "authorityReceiptPath",
-    "channel",
-    "metrics",
-    "money",
-    "claims",
-    "authority",
-    "fundingUrls",
-    "nextControlledAction"
-  ],
+  "required": ["schemaVersion", "experimentId", "status", "offer", "audience", "proofPackage", "authorityReceiptPath", "channel", "metrics", "money", "claims", "authority", "fundingUrls", "nextControlledAction"],
   "properties": {
-    "schemaVersion": { "const": "1.2.0" },
-    "experimentId": { "type": "string", "pattern": "^JP-REV-[A-Z0-9-]+$" },
-    "status": {
-      "enum": [
-        "PREPARED",
-        "PUBLISHED",
-        "INTEREST",
-        "AGREED",
-        "PAID_PENDING",
-        "PAID_SETTLED",
-        "DELIVERED",
-        "ACCEPTED",
-        "REFUNDED",
-        "DISPUTED",
-        "CANCELLED",
-        "UNKNOWN"
-      ]
-    },
+    "schemaVersion": { "const": "1.3.0" },
+    "experimentId": { "const": "JP-REV-001" },
+    "status": { "const": "PUBLISHED" },
     "offer": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "name",
-        "type",
-        "priceUsd",
-        "quantityTarget",
-        "firstMilestoneUsd",
-        "grossTargetUsd",
-        "capacity",
-        "maxConcurrentDeliveries",
-        "deliveryWindowBusinessDays",
-        "clarificationWindowDays",
-        "scopeLimits",
-        "deliverables",
-        "exclusions"
-      ],
+      "required": ["name", "type", "priceUsd", "quantityTarget", "firstMilestoneUsd", "grossTargetUsd", "capacity", "maxConcurrentDeliveries", "deliveryWindowBusinessDays", "clarificationWindowDays", "scopeLimits", "deliverables", "exclusions"],
       "properties": {
-        "name": { "type": "string", "minLength": 3 },
-        "type": { "enum": ["paid_service", "product", "sponsorship", "voluntary_support"] },
+        "name": { "const": "GitHub Control Tower Audit" },
+        "type": { "const": "paid_service" },
         "priceUsd": { "const": 100 },
-        "quantityTarget": { "const": 100 },
+        "quantityTarget": { "const": 1000 },
         "firstMilestoneUsd": { "const": 1000 },
-        "grossTargetUsd": { "const": 10000 },
-        "capacity": { "const": 100 },
-        "maxConcurrentDeliveries": { "const": 10 },
+        "grossTargetUsd": { "const": 100000 },
+        "capacity": { "const": 1000 },
+        "maxConcurrentDeliveries": { "const": 100 },
         "deliveryWindowBusinessDays": { "type": "integer", "minimum": 1 },
         "clarificationWindowDays": { "type": "integer", "minimum": 0 },
         "scopeLimits": {
@@ -79,34 +35,18 @@
             "clarificationRounds": { "type": "integer", "minimum": 0 }
           }
         },
-        "deliverables": {
-          "type": "array",
-          "minItems": 5,
-          "uniqueItems": true,
-          "items": { "type": "string", "minLength": 3 }
-        },
-        "exclusions": {
-          "type": "array",
-          "minItems": 5,
-          "uniqueItems": true,
-          "items": { "type": "string", "minLength": 3 }
-        }
+        "deliverables": { "type": "array", "minItems": 5, "uniqueItems": true, "items": { "type": "string", "minLength": 3 } },
+        "exclusions": { "type": "array", "minItems": 5, "uniqueItems": true, "items": { "type": "string", "minLength": 3 } }
       }
     },
     "audience": { "type": "string", "minLength": 10 },
     "proofPackage": {
       "type": "array",
-      "minItems": 12,
+      "minItems": 15,
       "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "minLength": 3,
-        "not": { "pattern": "^(?:/|[A-Za-z]:|.*(?:^|/)[.][.](?:/|$))" }
-      }
+      "items": { "type": "string", "minLength": 3, "not": { "pattern": "^(?:/|[A-Za-z]:|.*(?:^|/)[.][.](?:/|$))" } }
     },
-    "authorityReceiptPath": {
-      "const": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json"
-    },
+    "authorityReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json" },
     "channel": {
       "type": "object",
       "additionalProperties": false,
@@ -126,8 +66,8 @@
         "views": { "type": "integer", "minimum": 0 },
         "qualifiedConversations": { "type": "integer", "minimum": 0 },
         "offersSent": { "type": "integer", "minimum": 0 },
-        "orders": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "deliveriesAccepted": { "type": "integer", "minimum": 0, "maximum": 100 }
+        "orders": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "deliveriesAccepted": { "type": "integer", "minimum": 0, "maximum": 1000 }
       }
     },
     "money": {
@@ -167,13 +107,7 @@
         "delivery": { "const": "not_authorized" }
       }
     },
-    "fundingUrls": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 4,
-      "uniqueItems": true,
-      "items": { "type": "string", "format": "uri", "pattern": "^https://" }
-    },
+    "fundingUrls": { "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true, "items": { "type": "string", "format": "uri", "pattern": "^https://" } },
     "nextControlledAction": { "type": "string", "minLength": 40 }
   }
 }
