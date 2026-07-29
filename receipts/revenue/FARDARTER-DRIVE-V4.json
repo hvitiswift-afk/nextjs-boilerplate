@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "1.0.0",
+  "driveId": "FARDARTER-DRIVE-V4",
+  "name": "Fardarter Drive™",
+  "trademarkNotice": "Fardarter Drive™ is used as a project identifier; no trademark registration status is asserted by this record.",
+  "controllingIssues": [141, 142, 143],
+  "currentEvidence": {
+    "asOf": "2026-07-29",
+    "experimentId": "JP-REV-001",
+    "offer": "GitHub Control Tower Audit",
+    "priceUsd": 100,
+    "capacity": 10,
+    "maxConcurrentDeliveries": 2,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "deploymentState": "UNVERIFIED",
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "horizons": [
+    {
+      "stageId": "FD-001K",
+      "amountUsd": "1000",
+      "label": "$1,000 current experiment target",
+      "classification": "CURRENT_EXPERIMENT_TARGET",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false,
+      "requirements": [
+        "10 separately accepted $100 audit scopes",
+        "external-provider-confirmed settlement for each counted order",
+        "no more than two active deliveries at once",
+        "delivery and acceptance receipts"
+      ]
+    },
+    {
+      "stageId": "FD-001M",
+      "amountUsd": "1000000",
+      "label": "$1 million repeatable-business horizon",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false,
+      "requirements": [
+        "proven demand and repeatable unit economics",
+        "lawful business, tax, accounting, and insurance operations",
+        "documented delivery capacity beyond a manual two-delivery pilot",
+        "independently auditable revenue and settlement evidence"
+      ]
+    },
+    {
+      "stageId": "FD-001B",
+      "amountUsd": "1000000000",
+      "label": "$1 billion platform and ecosystem horizon",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false,
+      "requirements": [
+        "validated products or platform economics",
+        "teams, governance, security, compliance, and licensing",
+        "independent financial reporting",
+        "evidence that scale is not inferred from the current service pilot"
+      ]
+    },
+    {
+      "stageId": "FD-001T",
+      "amountUsd": "1000000000000",
+      "label": "$1 trillion long-horizon infrastructure objective",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false,
+      "requirements": [
+        "lawful global-scale operations",
+        "institutional governance and independently audited evidence",
+        "material real-world infrastructure or ecosystem value",
+        "separate board, legal, regulatory, risk, and capital approvals"
+      ]
+    },
+    {
+      "stageId": "FD-001Q",
+      "amountUsd": "1000000000000000",
+      "label": "$1 quadrillion possibility horizon",
+      "classification": "SYMBOLIC_POSSIBILITY_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false,
+      "requirements": [
+        "must remain symbolic unless independently evidenced through lawful real-world operations",
+        "must never be presented as current revenue, valuation, market size, funding, or capacity",
+        "requires a new authority and evidence review before any change of classification"
+      ]
+    }
+  ],
+  "progressionRules": {
+    "automaticStagePromotion": false,
+    "priorStageEvidenceRequired": true,
+    "independentVerificationRequired": true,
+    "legalAndRiskReviewRequired": true,
+    "manualAuditCapacityMayBeMultipliedToClaimHigherStage": false
+  },
+  "authorityReceiptPath": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V4.json",
+  "chainReceiptPath": "receipts/revenue/JP-REV-001-CHAIN-133-140.json",
+  "automationReceiptPath": "receipts/revenue/FARDARTER-DRIVE-V4-AUTOMATION.json",
+  "legalRisk": {
+    "indemnityProofClaimed": false,
+    "bindingAgreementRequired": true,
+    "buyerConsentRequired": true,
+    "counselReviewRequiredForIndemnityAndLiabilityTerms": true,
+    "insuranceReviewRequiredWhenRiskOrScaleWarrants": true,
+    "willfulMisconductOrBadFaithAutomaticallyExcused": false,
+    "templateCreatesBindingContract": false
+  },
+  "claims": {
+    "currentRevenueClaimedAboveEvidence": false,
+    "currentValuationClaimed": false,
+    "futureEarningsGuaranteed": false,
+    "customerCountClaimedAboveEvidence": false,
+    "deploymentClaimedWithoutReadback": false,
+    "universalIndemnityClaimed": false
+  },
+  "nextControlledAction": "Merge and receipt the Fardarter Drive v4 package, preserve the current $0 evidence state, complete the #133–#140 cross-item chain receipt, and verify the fixed-site deployment separately through Issue #143."
+}
