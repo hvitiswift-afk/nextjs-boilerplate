@@ -7,15 +7,20 @@ on:
       - ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml"
       - ".github/ISSUE_TEMPLATE/revenue-experiment.yml"
       - ".github/workflows/revenue-experiment.yml"
+      - "app/github-control-tower-audit/**"
+      - "app/api/revenue/pilot/**"
+      - "app/page.tsx"
       - "docs/repository/FIRST-500-EXECUTION-BOARD.md"
       - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
       - "docs/repository/MONEY-RAIL.md"
       - "docs/repository/MONEY-RAIL-ACTIVATION.md"
       - "examples/github-control-tower-audit-receipt.sample.json"
       - "examples/revenue-experiment.sample.json"
+      - "package.json"
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-experiment.mjs"
+      - "scripts/check-revenue-product-surface.mjs"
       - "templates/github-control-tower-audit-outreach.md"
       - "templates/github-control-tower-audit.md"
   push:
@@ -26,15 +31,20 @@ on:
       - ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml"
       - ".github/ISSUE_TEMPLATE/revenue-experiment.yml"
       - ".github/workflows/revenue-experiment.yml"
+      - "app/github-control-tower-audit/**"
+      - "app/api/revenue/pilot/**"
+      - "app/page.tsx"
       - "docs/repository/FIRST-500-EXECUTION-BOARD.md"
       - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
       - "docs/repository/MONEY-RAIL.md"
       - "docs/repository/MONEY-RAIL-ACTIVATION.md"
       - "examples/github-control-tower-audit-receipt.sample.json"
       - "examples/revenue-experiment.sample.json"
+      - "package.json"
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-experiment.mjs"
+      - "scripts/check-revenue-product-surface.mjs"
       - "templates/github-control-tower-audit-outreach.md"
       - "templates/github-control-tower-audit.md"
   workflow_dispatch:
@@ -48,7 +58,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify first-$500 package
+    name: Verify first-$500 package and product surface
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -61,8 +71,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Validate package
-        run: node scripts/check-revenue-experiment.mjs
+      - name: Validate package and product surface
+        run: npm run revenue:verify
 
       - name: Verify JSON syntax
         run: |
@@ -73,6 +83,8 @@ jobs:
           echo "result=PASS"
           echo "experiment_state=PUBLISHED"
           echo "publication_issue=133"
+          echo "product_route=/github-control-tower-audit"
+          echo "status_api=/api/revenue/pilot"
           echo "gross_target_usd=500"
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
