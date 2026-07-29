@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-capacity-override-v6.schema.json",
+  "title": "Fardarter Drive Capacity Override v6",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "receiptId", "driveId", "authorityVersion", "state", "standardActiveCeiling", "totalPlanningCapacity", "above100Allowed", "requestedActiveCeiling", "approvedActiveCeiling", "effectiveConditions", "expirationOrReviewAt", "scope", "readiness", "backpressure", "authorization", "financialEvidence", "claims", "nextControlledAction"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "receiptId": { "type": "string", "minLength": 10 },
+    "driveId": { "const": "FARDARTER-DRIVE-V6" },
+    "authorityVersion": { "const": "6.0.0" },
+    "state": { "enum": ["INACTIVE_NO_RECEIPT", "PROPOSED", "READINESS_REVIEW", "APPROVED_NOT_ACTIVE", "CAPACITY_OVERRIDE_ACTIVE", "PAUSED", "EXPIRED", "REVOKED", "ROLLED_BACK", "CLOSED"] },
+    "standardActiveCeiling": { "const": 100 },
+    "totalPlanningCapacity": { "const": 1000 },
+    "above100Allowed": { "const": true },
+    "requestedActiveCeiling": { "type": ["integer", "null"], "minimum": 101, "maximum": 1000 },
+    "approvedActiveCeiling": { "type": ["integer", "null"], "minimum": 101, "maximum": 1000 },
+    "effectiveConditions": { "type": "array", "items": { "type": "string" } },
+    "expirationOrReviewAt": { "type": ["string", "null"] },
+    "scope": { "type": "string" },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["staffingOrAutomationCapacityEvidenced", "qualityControlEvidenced", "securityAndPrivacyReadinessEvidenced", "insuranceAndLegalReadinessEvidenced", "accountingAndTaxReadinessEvidenced", "supportAndIncidentReadinessEvidenced"],
+      "properties": {
+        "staffingOrAutomationCapacityEvidenced": { "type": "boolean" },
+        "qualityControlEvidenced": { "type": "boolean" },
+        "securityAndPrivacyReadinessEvidenced": { "type": "boolean" },
+        "insuranceAndLegalReadinessEvidenced": { "type": "boolean" },
+        "accountingAndTaxReadinessEvidenced": { "type": "boolean" },
+        "supportAndIncidentReadinessEvidenced": { "type": "boolean" }
+      }
+    },
+    "backpressure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pauseNewStartsAtEffectiveCeiling", "rollbackCeiling", "rollbackProcedureRecorded"],
+      "properties": {
+        "pauseNewStartsAtEffectiveCeiling": { "const": true },
+        "rollbackCeiling": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "rollbackProcedureRecorded": { "type": "boolean" }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authorizedBy", "authorizedAt", "immutableReceipt"],
+      "properties": {
+        "authorizedBy": { "type": ["string", "null"] },
+        "authorizedAt": { "type": ["string", "null"] },
+        "immutableReceipt": { "type": ["string", "null"] }
+      }
+    },
+    "financialEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd"],
+      "properties": {
+        "orders": { "const": 0 },
+        "verifiedGrossRevenueUsd": { "const": 0 },
+        "verifiedSettledCashUsd": { "const": 0 }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overrideEqualsDemand", "overrideEqualsCustomerCount", "overrideEqualsOrders", "overrideEqualsRevenue", "overrideEqualsValuation", "overrideGuaranteesOutcomes"],
+      "properties": {
+        "overrideEqualsDemand": { "const": false },
+        "overrideEqualsCustomerCount": { "const": false },
+        "overrideEqualsOrders": { "const": false },
+        "overrideEqualsRevenue": { "const": false },
+        "overrideEqualsValuation": { "const": false },
+        "overrideGuaranteesOutcomes": { "const": false }
+      }
+    },
+    "nextControlledAction": { "type": "string", "minLength": 40 }
+  }
+}
