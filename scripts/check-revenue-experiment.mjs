@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 
 const samplePath = process.argv[2] ?? "examples/revenue-experiment.sample.json";
 const fundingPath = process.argv[3] ?? ".github/FUNDING.yml";
+const receiptPath = process.argv[4] ?? "examples/github-control-tower-audit-receipt.sample.json";
 
 function assert(condition, message) {
   if (!condition) {
@@ -11,6 +12,10 @@ function assert(condition, message) {
 
 function assertNonNegativeNumber(value, label) {
   assert(Number.isFinite(value) && value >= 0, `${label} must be a non-negative number`);
+}
+
+function assertPositiveInteger(value, label) {
+  assert(Number.isInteger(value) && value > 0, `${label} must be a positive integer`);
 }
 
 function collectKeys(value, output = []) {
@@ -29,14 +34,23 @@ function collectKeys(value, output = []) {
   return output;
 }
 
-const [sampleText, fundingText] = await Promise.all([
+function assertPublicRelativePath(pathText, label) {
+  assert(typeof pathText === "string" && pathText.length > 0, `${label} must be a non-empty string`);
+  assert(!pathText.startsWith("/"), `${label} must be repository-relative`);
+  assert(!pathText.includes(".."), `${label} must not traverse directories`);
+  assert(!pathText.includes(":"), `${label} must not be a URL or drive path`);
+}
+
+const [sampleText, fundingText, receiptText] = await Promise.all([
   readFile(samplePath, "utf8"),
-  readFile(fundingPath, "utf8")
+  readFile(fundingPath, "utf8"),
+  readFile(receiptPath, "utf8")
 ]);
 
 const sample = JSON.parse(sampleText);
+const receipt = JSON.parse(receiptText);
 
-assert(sample.schemaVersion === "1.0.0", "schemaVersion must be 1.0.0");
+assert(sample.schemaVersion === "1.1.0", "schemaVersion must be 1.1.0");
 assert(/^JP-REV-[A-Z0-9-]+$/.test(sample.experimentId), "experimentId must use the JP-REV namespace");
 assert(
   [
@@ -56,19 +70,36 @@ assert(
   "unsupported experiment status"
 );
 
-const { offer, channel, metrics, money, claims, authority, fundingUrls } = sample;
+const { offer, proofPackage, channel, metrics, money, claims, authority, fundingUrls } = sample;
 
 assert(offer?.name && offer?.type, "offer name and type are required");
 assertNonNegativeNumber(offer.priceUsd, "offer.priceUsd");
 assert(offer.priceUsd > 0, "offer.priceUsd must be greater than zero");
-assert(Number.isInteger(offer.quantityTarget) && offer.quantityTarget > 0, "offer.quantityTarget must be a positive integer");
-assert(Number.isInteger(offer.capacity) && offer.capacity > 0, "offer.capacity must be a positive integer");
+assertPositiveInteger(offer.quantityTarget, "offer.quantityTarget");
+assertPositiveInteger(offer.capacity, "offer.capacity");
+assertPositiveInteger(offer.deliveryWindowBusinessDays, "offer.deliveryWindowBusinessDays");
+assertPositiveInteger(offer.clarificationWindowDays, "offer.clarificationWindowDays");
 assert(offer.grossTargetUsd === offer.priceUsd * offer.quantityTarget, "gross target must equal price times quantity target");
-assert(Array.isArray(offer.deliverables) && offer.deliverables.length >= 3, "at least three deliverables are required");
-assert(Array.isArray(offer.exclusions) && offer.exclusions.length >= 3, "at least three exclusions are required");
+assert(Array.isArray(offer.deliverables) && offer.deliverables.length >= 5, "at least five deliverables are required");
+assert(Array.isArray(offer.exclusions) && offer.exclusions.length >= 5, "at least five exclusions are required");
+
+for (const [key, value] of Object.entries(offer.scopeLimits ?? {})) {
+  assertPositiveInteger(value, `offer.scopeLimits.${key}`);
+}
+assert(Object.keys(offer.scopeLimits ?? {}).length >= 4, "offer.scopeLimits must define the pilot boundary");
+
+assert(Array.isArray(proofPackage) && proofPackage.length >= 4, "proofPackage must contain at least four files");
+assert(new Set(proofPackage).size === proofPackage.length, "proofPackage paths must be unique");
+for (const [index, proofPath] of proofPackage.entries()) {
+  assertPublicRelativePath(proofPath, `proofPackage[${index}]`);
+  const proofText = await readFile(proofPath, "utf8");
+  assert(proofText.trim().length >= 40, `proof package file is empty or incomplete: ${proofPath}`);
+}
 
 assert(channel?.publicationAuthorized === false, "sample publication must remain unauthorized");
 assert(channel?.outreachAuthorized === false, "sample outreach must remain unauthorized");
+assertPublicRelativePath(channel?.inboundRequestPath, "channel.inboundRequestPath");
+assert(proofPackage.includes(channel.inboundRequestPath), "inbound request path must be part of the proof package");
 
 for (const [key, value] of Object.entries(metrics ?? {})) {
   assertNonNegativeNumber(value, `metrics.${key}`);
@@ -105,8 +136,32 @@ for (const urlText of fundingUrls) {
   assert(fundingFileUrls.includes(urlText), `funding URL missing from FUNDING.yml: ${urlText}`);
 }
 
-const forbiddenKey = /^(password|secret|token|routingNumber|bankAccount|accountNumber|donorIdentity|customerEmail|payoutData)$/i;
-for (const key of collectKeys(sample)) {
+assert(receipt.schemaVersion === "1.0.0", "audit receipt schemaVersion must be 1.0.0");
+assert(/^JP-AUDIT-[A-Z0-9-]+$/.test(receipt.auditId), "auditId must use the JP-AUDIT namespace");
+assert(receipt.experimentId === sample.experimentId, "audit receipt must reference the revenue experiment");
+assert(receipt.agreement?.priceUsd === offer.priceUsd, "audit receipt price must match the offer price");
+assert(receipt.agreement?.state === "NOT_AGREED", "prepared receipt must not claim an agreement");
+assert(receipt.payment?.settlementState === "UNKNOWN", "prepared receipt must not claim settled money");
+for (const key of ["grossUsd", "feesUsd", "refundsUsd", "netCashUsd"]) {
+  assertNonNegativeNumber(receipt.payment?.[key], `receipt.payment.${key}`);
+}
+assert(
+  receipt.payment.netCashUsd === receipt.payment.grossUsd - receipt.payment.feesUsd - receipt.payment.refundsUsd,
+  "audit receipt net cash arithmetic is inconsistent"
+);
+assert(receipt.payment.externalProviderReceiptStoredPrivately === false, "prepared receipt must not claim a stored provider receipt");
+assert(receipt.delivery?.state === "NOT_STARTED", "prepared receipt must not claim delivery");
+assert(proofPackage.includes(receipt.delivery?.templatePath), "audit receipt delivery template must be in the proof package");
+assert(Array.isArray(receipt.externalActionsPerformed) && receipt.externalActionsPerformed.length === 0, "prepared receipt must record no external actions");
+for (const [key, value] of Object.entries(receipt.claims ?? {})) {
+  assert(value === false, `receipt.claims.${key} must be false in the prepared sample`);
+}
+for (const [key, value] of Object.entries(receipt.publicDataBoundary ?? {})) {
+  assert(value === false, `receipt.publicDataBoundary.${key} must be false in the public sample`);
+}
+
+const forbiddenKey = /^(password|secret|token|routingNumber|bankAccount|accountNumber|donorIdentity|customerName|customerEmail|buyerIdentity|providerTransactionId|payoutData)$/i;
+for (const key of [...collectKeys(sample), ...collectKeys(receipt)]) {
   assert(!forbiddenKey.test(key), `forbidden sensitive field in public sample: ${key}`);
 }
 
@@ -114,9 +169,15 @@ assert(
   typeof sample.nextControlledAction === "string" && sample.nextControlledAction.length >= 20,
   "nextControlledAction is required"
 );
+assert(
+  typeof receipt.nextControlledAction === "string" && receipt.nextControlledAction.length >= 20,
+  "audit receipt nextControlledAction is required"
+);
 
-console.log("Revenue experiment sample: PASS");
+console.log("Revenue experiment package: PASS");
 console.log(`Experiment: ${sample.experimentId}`);
 console.log(`Gross target: $${offer.grossTargetUsd}`);
 console.log(`Authority: ${authority.publication}/${authority.outreach}`);
 console.log(`Funding URLs verified: ${fundingUrls.length}`);
+console.log(`Proof files verified: ${proofPackage.length}`);
+console.log(`Audit receipt: ${receipt.auditId}/${receipt.result}`);
