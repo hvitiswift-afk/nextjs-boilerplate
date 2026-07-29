@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "1.0.0",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "name": "Fardarter Drive™",
+  "trademarkNotice": "Fardarter Drive™ is used as a project identifier; no trademark registration status is asserted by this record.",
+  "controllingIssues": [
+    141,
+    143,
+    151
+  ],
+  "currentEvidence": {
+    "asOf": "2026-07-29",
+    "experimentId": "JP-REV-001",
+    "offer": "GitHub Control Tower Audit",
+    "priceUsd": 100,
+    "quantityTarget": 1000,
+    "firstMilestoneUsd": 1000,
+    "grossTargetUsd": 100000,
+    "capacity": 1000,
+    "standardMaxConcurrentDeliveries": 100,
+    "effectiveMaxConcurrentDeliveries": 100,
+    "capacityOverrideState": "INACTIVE_NO_RECEIPT",
+    "capacityAbove100Allowed": true,
+    "activeDeliveries": 0,
+    "fitApprovedRequests": 0,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "deploymentState": "UNVERIFIED",
+    "googleDriveContinuity": "CONNECTED_PRIVATE",
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "capacityModel": {
+    "standardActiveCeiling": 100,
+    "effectiveActiveCeiling": 100,
+    "totalPlanningCapacity": 1000,
+    "aboveStandardAllowed": true,
+    "overrideActivationState": "INACTIVE_NO_RECEIPT",
+    "overrideReceiptPath": "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json",
+    "activationRequiresCompleteReceipt": true,
+    "automaticActivation": false,
+    "overrideMayExceed100": true,
+    "overrideMayExceedTotalPlanningCapacity": false,
+    "pauseNewStartsAtEffectiveCeiling": true,
+    "intakeAndDraftingMayContinueDuringBackpressure": true,
+    "rollbackCeiling": 100
+  },
+  "acceptanceModel": {
+    "automatedState": "FIT_APPROVED_FOR_SCOPE_DRAFT",
+    "binding": false,
+    "criteria": [
+      "controlled public-safe request form",
+      "plausible requester relationship to the repository",
+      "request fits the published scope",
+      "no detected prohibited data",
+      "queue and effective-capacity review passes"
+    ],
+    "prohibitedConsequences": [
+      "order creation",
+      "capacity reservation",
+      "contract formation",
+      "invoice or payment obligation",
+      "deadline promise",
+      "indemnity agreement",
+      "waiver or release",
+      "paid work start"
+    ]
+  },
+  "executionModel": {
+    "state": "AUTHORIZED_BOUNDED_ONE_SHOT",
+    "oneShotPerIssue": true,
+    "permittedClasses": [
+      "repository verification and production build",
+      "non-destructive repository preparation",
+      "private Google Drive work-package drafting",
+      "read-only analysis and receipt generation",
+      "confirmed-target deployment after validation and immutable readback",
+      "capacity override validation and headroom calculation"
+    ],
+    "automaticPaidWorkStart": false,
+    "backpressure": {
+      "standardActiveLimit": 100,
+      "effectiveActiveLimit": 100,
+      "pauseNewWorkStartsAtEffectiveLimit": true,
+      "above100RequiresActiveOverrideReceipt": true
+    }
+  },
+  "horizons": [
+    {
+      "stageId": "FD-001K",
+      "amountUsd": "1000",
+      "label": "$1,000 first operating milestone",
+      "classification": "MILESTONE_TARGET",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-010K",
+      "amountUsd": "10000",
+      "label": "$10,000 intermediate operating milestone",
+      "classification": "EXPANSION_MILESTONE",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-100K",
+      "amountUsd": "100000",
+      "label": "$100,000 current gross capacity target",
+      "classification": "CURRENT_EXPERIMENT_TARGET",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-001M",
+      "amountUsd": "1000000",
+      "label": "$1 million repeatable-business horizon",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-001B",
+      "amountUsd": "1000000000",
+      "label": "$1 billion platform and ecosystem horizon",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-001T",
+      "amountUsd": "1000000000000",
+      "label": "$1 trillion infrastructure horizon",
+      "classification": "ASPIRATIONAL_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    },
+    {
+      "stageId": "FD-001Q",
+      "amountUsd": "1000000000000000",
+      "label": "$1 quadrillion symbolic possibility horizon",
+      "classification": "SYMBOLIC_POSSIBILITY_HORIZON",
+      "achieved": false,
+      "forecast": false,
+      "guaranteed": false
+    }
+  ],
+  "progressionRules": {
+    "automaticStagePromotion": false,
+    "priorStageEvidenceRequired": true,
+    "independentVerificationRequired": true,
+    "legalAndRiskReviewRequired": true,
+    "planningCapacityMayBeMultipliedToClaimRevenue": false,
+    "activeCapacityOverrideMayBeTreatedAsDemand": false
+  },
+  "authorityReceiptPath": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json",
+  "googleDriveReceiptPath": "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json",
+  "capacityOverrideReceiptPath": "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json",
+  "legalRisk": {
+    "indemnityProofClaimed": false,
+    "bindingAgreementRequired": true,
+    "buyerConsentRequired": true,
+    "counselReviewRequiredForIndemnityAndLiabilityTerms": true,
+    "insuranceReviewRequiredWhenRiskOrScaleWarrants": true,
+    "templateCreatesBindingContract": false
+  },
+  "claims": {
+    "capacityEqualsDemand": false,
+    "capacityEqualsCustomerCount": false,
+    "capacityEqualsOrders": false,
+    "capacityEqualsRevenue": false,
+    "overrideEqualsRevenue": false,
+    "currentValuationClaimed": false,
+    "futureEarningsGuaranteed": false,
+    "deploymentClaimedWithoutReadback": false,
+    "universalIndemnityClaimed": false
+  },
+  "nextControlledAction": "Operate the 1,000-slot Fardarter Drive v6 planning system with a standard 100-ACTIVE ceiling, permit above-100 operation only through an active receipted capacity override, preserve nonbinding fit acceptance and one-shot execution, and keep contracts, payment, paid work starts, counsel terms, refunds, disputes, and irreversible actions behind their independent evidence gates."
+}
