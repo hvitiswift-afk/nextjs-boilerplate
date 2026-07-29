@@ -49,7 +49,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: netlify-fardarter-v5-${{ github.ref }}
+  group: netlify-fardarter-v6-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -58,7 +58,7 @@ env:
 
 jobs:
   validate:
-    name: Validate Fardarter Drive v5 deploy
+    name: Validate Fardarter Drive v6 deploy
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -75,14 +75,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify v5 revenue, authority, acceptance, execution, and Drive package
+      - name: Verify v6 revenue, capacity, override, authority, execution, and Drive package
         run: npm run revenue:verify
 
       - name: Build application
         run: npm run build
 
   deploy:
-    name: Deploy and read back Fardarter Drive v5
+    name: Deploy and read back Fardarter Drive v6
     if: github.event_name != 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
@@ -101,22 +101,15 @@ jobs:
           cache: npm
 
       - name: Require existing-site credentials
-        shell: bash
         run: |
           set -euo pipefail
-          test -n "$NETLIFY_AUTH_TOKEN" || {
-            echo "Missing GitHub Actions secret NETLIFY_AUTH_TOKEN"
-            exit 1
-          }
-          test "$NETLIFY_SITE_ID" = "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f" || {
-            echo "Unexpected Netlify site ID"
-            exit 1
-          }
+          test -n "$NETLIFY_AUTH_TOKEN" || { echo "Missing NETLIFY_AUTH_TOKEN"; exit 1; }
+          test "$NETLIFY_SITE_ID" = "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f" || { echo "Unexpected Netlify site ID"; exit 1; }
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Revalidate Fardarter Drive v5 package
+      - name: Revalidate Fardarter Drive v6 package
         run: npm run revenue:verify
 
       - name: Deploy to confirmed Netlify site
@@ -135,21 +128,14 @@ jobs:
 
       - name: Verify immutable deploy readback
         id: readback
-        shell: bash
         env:
           DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
         run: |
           set -euo pipefail
           mkdir -p artifacts
-
           retry_get() {
-            local url="$1"
-            local output="$2"
-            curl --fail --silent --show-error --location \
-              --retry 12 --retry-delay 5 --retry-all-errors \
-              --max-time 30 "$url" --output "$output"
+            curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 "$1" --output "$2"
           }
-
           retry_get "$DEPLOY_URL/" artifacts/home.html
           retry_get "$DEPLOY_URL/github-control-tower-audit" artifacts/audit.html
           retry_get "$DEPLOY_URL/api/revenue/pilot" artifacts/pilot.json
@@ -158,30 +144,28 @@ jobs:
 
           grep -q '/github-control-tower-audit' artifacts/home.html
           grep -q 'Fardarter Drive' artifacts/audit.html
-          grep -q 'Fardarter Drive™ v5' artifacts/audit.html
-          grep -q '100 total slots' artifacts/audit.html
-          grep -q '10 active' artifacts/audit.html
+          grep -q 'Fardarter Drive™ v6' artifacts/audit.html
+          grep -q '1,000 total slots' artifacts/audit.html
+          grep -q '100 standard ACTIVE' artifacts/audit.html
+          grep -q 'Above 100 is allowed' artifacts/audit.html
+          grep -q 'CAPACITY_OVERRIDE_ACTIVE' artifacts/audit.html
+          grep -q 'INACTIVE_NO_RECEIPT' artifacts/audit.html
           grep -q 'FIT_APPROVED_FOR_SCOPE_DRAFT' artifacts/audit.html
-          grep -q 'Google Drive continuity' artifacts/audit.html
           grep -q 'CONNECTED_PRIVATE' artifacts/audit.html
           grep -q 'not indemnity-proof' artifacts/audit.html
-          grep -q 'Request a public-safe fit check' artifacts/audit.html
           grep -q '/github-control-tower-audit' artifacts/sitemap.xml
           grep -q '/sitemap.xml' artifacts/robots.txt
 
           node <<'NODE'
           const fs = require('node:fs');
           const pilot = JSON.parse(fs.readFileSync('artifacts/pilot.json', 'utf8'));
-          const publicRequestCount = pilot.publicInterest?.openFitCheckRequests;
-          const validPublicRequestCount =
-            publicRequestCount === null ||
-            (Number.isInteger(publicRequestCount) && publicRequestCount >= 0);
           const horizonMap = new Map(
             (pilot.fardarterDrive?.horizons || []).map((stage) => [stage.stageId, stage]),
           );
           const expectedHorizons = [
             ['FD-001K', '1000', 'MILESTONE_TARGET'],
-            ['FD-010K', '10000', 'CURRENT_EXPERIMENT_TARGET'],
+            ['FD-010K', '10000', 'EXPANSION_MILESTONE'],
+            ['FD-100K', '100000', 'CURRENT_EXPERIMENT_TARGET'],
             ['FD-001M', '1000000', 'ASPIRATIONAL_HORIZON'],
             ['FD-001B', '1000000000', 'ASPIRATIONAL_HORIZON'],
             ['FD-001T', '1000000000000', 'ASPIRATIONAL_HORIZON'],
@@ -198,83 +182,66 @@ jobs:
             ];
           });
           const required = [
-            [pilot.schemaVersion === '1.4.0', 'schemaVersion'],
+            [pilot.schemaVersion === '1.5.0', 'schemaVersion'],
             [pilot.experimentId === 'JP-REV-001', 'experimentId'],
             [pilot.status === 'PUBLISHED', 'status'],
             [pilot.offer?.priceUsd === 100, 'priceUsd'],
             [pilot.offer?.firstMilestoneUsd === 1000, 'firstMilestoneUsd'],
-            [pilot.offer?.grossTargetUsd === 10000, 'grossTargetUsd'],
-            [pilot.offer?.capacity === 100, 'capacity'],
-            [pilot.offer?.maxConcurrentDeliveries === 10, 'maxConcurrentDeliveries'],
+            [pilot.offer?.grossTargetUsd === 100000, 'grossTargetUsd'],
+            [pilot.offer?.capacity === 1000, 'capacity'],
+            [pilot.offer?.maxConcurrentDeliveries === 100, 'maxConcurrentDeliveries'],
             [pilot.availability?.fitApprovedRequests === 0, 'fitApprovedRequests'],
             [pilot.availability?.orders === 0, 'orders'],
-            [pilot.availability?.slotsRemaining === 100, 'slotsRemaining'],
+            [pilot.availability?.slotsRemaining === 1000, 'slotsRemaining'],
             [pilot.availability?.activeDeliveries === 0, 'activeDeliveries'],
-            [pilot.availability?.activeDeliveryLimit === 10, 'activeDeliveryLimit'],
+            [pilot.availability?.standardActiveCeiling === 100, 'standardActiveCeiling'],
+            [pilot.availability?.effectiveActiveCeiling === 100, 'effectiveActiveCeiling'],
+            [pilot.availability?.activeHeadroom === 100, 'activeHeadroom'],
             [pilot.availability?.backpressureActive === false, 'backpressureActive'],
-            [validPublicRequestCount, 'openFitCheckRequests'],
-            [pilot.publicInterest?.countedAsOrders === false, 'interestNotOrders'],
-            [pilot.publicInterest?.reservesCapacity === false, 'interestNotReservations'],
+            [pilot.capacityOverride?.above100Allowed === true, 'above100Allowed'],
+            [pilot.capacityOverride?.state === 'INACTIVE_NO_RECEIPT', 'overrideState'],
+            [pilot.capacityOverride?.activationTarget === 'CAPACITY_OVERRIDE_ACTIVE', 'activationTarget'],
+            [pilot.capacityOverride?.activationRequiresCompleteReceipt === true, 'completeReceipt'],
+            [pilot.capacityOverride?.activationRequiresCanonicalMerge === true, 'canonicalMerge'],
+            [pilot.capacityOverride?.automaticActivation === false, 'automaticActivation'],
+            [pilot.capacityOverride?.mayExceedTotalPlanningCapacity === false, 'totalCapacityBoundary'],
             [pilot.money?.grossRevenueUsd === 0, 'grossRevenueUsd'],
             [pilot.money?.netCashUsd === 0, 'netCashUsd'],
             [pilot.publication?.issueNumber === 133, 'publicationIssue'],
-            [pilot.fardarterDrive?.driveId === 'FARDARTER-DRIVE-V5', 'driveId'],
-            [pilot.fardarterDrive?.controllingIssues?.join(',') === '141,143,146', 'controllingIssues'],
-            [pilot.fardarterDrive?.currentEvidence?.googleDriveContinuity === 'CONNECTED_PRIVATE', 'sourceDriveState'],
-            [pilot.fardarterDrive?.acceptanceModel?.automatedState === 'FIT_APPROVED_FOR_SCOPE_DRAFT', 'acceptanceState'],
-            [pilot.fardarterDrive?.acceptanceModel?.binding === false, 'acceptanceNonbinding'],
-            [pilot.fardarterDrive?.executionModel?.state === 'AUTHORIZED_BOUNDED', 'executionState'],
-            [pilot.fardarterDrive?.executionModel?.automaticWorkStart === false, 'automaticWorkStart'],
-            [pilot.fardarterDrive?.executionModel?.backpressure?.activeLimit === 10, 'backpressureLimit'],
-            [pilot.fardarterDrive?.progressionRules?.automaticStagePromotion === false, 'noStagePromotion'],
-            [pilot.fardarterDrive?.progressionRules?.slotOrActiveLimitIncreaseProvesDemand === false, 'capacityNotDemand'],
-            [pilot.authority?.version === '5.0.0', 'authorityVersion'],
+            [pilot.fardarterDrive?.driveId === 'FARDARTER-DRIVE-V6', 'driveId'],
+            [pilot.fardarterDrive?.controllingIssues?.join(',') === '141,143,151', 'controllingIssues'],
+            [pilot.authority?.version === '6.0.0', 'authorityVersion'],
             [pilot.authority?.revoked === false, 'authorityActive'],
-            [pilot.authority?.capacity100 === 'AUTHORIZED_ACTIVE', 'capacityAuthority'],
-            [pilot.authority?.activeDeliveryLimit10 === 'AUTHORIZED_ACTIVE', 'activeLimitAuthority'],
-            [pilot.authority?.nonbindingFitAcceptance === 'AUTHORIZED_ACTIVE', 'fitAcceptanceAuthority'],
-            [pilot.authority?.preapprovedReversibleExecution === 'AUTHORIZED_ACTIVE', 'executionAuthority'],
-            [pilot.authority?.googleDrivePrivateContinuity === 'AUTHORIZED_ACTIVE', 'driveAuthority'],
+            [pilot.authority?.capacity1000 === 'AUTHORIZED_ACTIVE', 'capacityAuthority'],
+            [pilot.authority?.standardActiveLimit100 === 'AUTHORIZED_ACTIVE', 'standardActiveAuthority'],
+            [pilot.authority?.above100ActiveOverride === 'AUTHORIZED_ACTIVE', 'overrideAuthority'],
             [pilot.authority?.contractAcceptance === 'HUMAN_APPROVAL_REQUIRED', 'contractGate'],
             [pilot.authority?.indemnityAndLiabilityTerms === 'COUNSEL_REVIEW_REQUIRED', 'indemnityGate'],
             [pilot.authority?.paymentExecution === 'EXTERNAL_PROVIDER_ONLY', 'paymentGate'],
             [pilot.authority?.paidDeliveryStart === 'HUMAN_APPROVAL_REQUIRED', 'workStartGate'],
-            [pilot.automatedFitAcceptance?.state === 'FIT_APPROVED_FOR_SCOPE_DRAFT', 'publicFitState'],
-            [pilot.automatedFitAcceptance?.binding === false, 'publicFitNonbinding'],
-            [pilot.automatedFitAcceptance?.mayCreateOrder === false, 'fitNotOrder'],
-            [pilot.automatedFitAcceptance?.mayReserveCapacity === false, 'fitNotReservation'],
-            [pilot.automatedFitAcceptance?.mayAcceptFinalContract === false, 'fitNotContract'],
-            [pilot.automatedFitAcceptance?.mayRequestOrConfirmPayment === false, 'fitNotPayment'],
-            [pilot.automatedFitAcceptance?.mayStartPaidDelivery === false, 'fitNotWorkStart'],
-            [pilot.approvedExecution?.state === 'AUTHORIZED_BOUNDED', 'approvedExecution'],
-            [pilot.approvedExecution?.automaticPaidWorkStart === false, 'executionNotWorkStart'],
-            [pilot.googleDriveContinuity?.state === 'CONNECTED_PRIVATE', 'googleDriveContinuity'],
-            [pilot.googleDriveContinuity?.folderTitle === 'Fardarter Drive™', 'driveFolderTitle'],
-            [pilot.googleDriveContinuity?.publicFolderUrlExposed === false, 'noPublicDriveUrl'],
-            [pilot.googleDriveContinuity?.publicFileIdsExposed === false, 'noPublicDriveIds'],
-            [pilot.googleDriveContinuity?.createPrivateWorkPackageAfterFitApproval === true, 'driveWorkPackageAutomation'],
-            [pilot.googleDriveContinuity?.workPackageCreatesContract === false, 'driveNotContract'],
-            [pilot.googleDriveContinuity?.workPackageCreatesPaymentObligation === false, 'driveNotPayment'],
-            [pilot.googleDriveContinuity?.workPackageStartsPaidDelivery === false, 'driveNotWorkStart'],
-            [pilot.evidenceBoundary?.receivedCashRequires === 'PAID_SETTLED', 'receivedCashRequires'],
-            [pilot.evidenceBoundary?.fitApprovedCreatesOrder === false, 'fitOrderBoundary'],
-            [pilot.evidenceBoundary?.fitApprovedCreatesContract === false, 'fitContractBoundary'],
-            [pilot.evidenceBoundary?.fitApprovedStartsWork === false, 'fitWorkBoundary'],
-            [pilot.evidenceBoundary?.googleDriveFileCreatesSignature === false, 'driveSignatureBoundary'],
-            [pilot.evidenceBoundary?.googleDriveWorkPackageStartsPaidDelivery === false, 'driveDeliveryBoundary'],
+            [pilot.automatedFitAcceptance?.state === 'FIT_APPROVED_FOR_SCOPE_DRAFT', 'fitState'],
+            [pilot.automatedFitAcceptance?.binding === false, 'fitNonbinding'],
+            [pilot.approvedExecution?.state === 'AUTHORIZED_BOUNDED_ONE_SHOT', 'executionState'],
+            [pilot.approvedExecution?.oneShotPerIssue === true, 'oneShot'],
+            [pilot.googleDriveContinuity?.state === 'CONNECTED_PRIVATE', 'driveContinuity'],
+            [pilot.googleDriveContinuity?.publicFolderUrlExposed === false, 'noDriveUrl'],
+            [pilot.googleDriveContinuity?.publicFileIdsExposed === false, 'noDriveIds'],
+            [pilot.evidenceBoundary?.receivedCashRequires === 'PAID_SETTLED', 'cashGate'],
+            [pilot.evidenceBoundary?.capacityEqualsRevenue === false, 'capacityRevenueBoundary'],
+            [pilot.evidenceBoundary?.above100CapacityIsAllowed === true, 'above100Boundary'],
+            [pilot.evidenceBoundary?.capacityOverrideActivatesWithoutReceipt === false, 'overrideReceiptBoundary'],
+            [pilot.evidenceBoundary?.automaticStagePromotion === false, 'stageBoundary'],
             [pilot.evidenceBoundary?.templateIsIndemnityProof === false, 'indemnityProofBoundary'],
             ...horizonChecks,
           ];
           const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
           if (failed.length) throw new Error(`Readback failed: ${failed.join(', ')}`);
-          console.log('Netlify Fardarter Drive v5 readback: PASS');
+          console.log('Fardarter Drive v6 immutable readback: PASS');
           NODE
-
           echo "readback=PASS" >> "$GITHUB_OUTPUT"
 
       - name: Write deployment receipt
         if: always()
-        shell: bash
         env:
           DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
           DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
@@ -286,10 +253,8 @@ jobs:
           const deployed = Boolean(process.env.DEPLOY_ID);
           const readback = process.env.READBACK || 'NOT_COMPLETED';
           const receipt = {
-            schemaVersion: '1.4.0',
-            receiptId: `FARDARTER-DRIVE-V5-NETLIFY-${process.env.GITHUB_RUN_ID}`,
-            driveId: 'FARDARTER-DRIVE-V5',
-            authorityVersion: '5.0.0',
+            schemaVersion: '1.5.0',
+            receiptId: `FARDARTER-DRIVE-V6-NETLIFY-${process.env.GITHUB_RUN_ID}`,
             repository: process.env.GITHUB_REPOSITORY,
             commit: process.env.GITHUB_SHA,
             runId: process.env.GITHUB_RUN_ID,
@@ -300,44 +265,40 @@ jobs:
             deploymentCompleted: deployed,
             readback,
             result: deployed && readback === 'PASS' ? 'DEPLOYED_AND_VERIFIED' : 'INCOMPLETE',
-            capacity: 100,
-            maximumActiveDeliveries: 10,
-            fitApprovedRequests: 0,
-            activeDeliveries: 0,
+            driveId: 'FARDARTER-DRIVE-V6',
+            authorityVersion: '6.0.0',
+            totalSlots: 1000,
+            standardActiveCeiling: 100,
+            effectiveActiveCeiling: 100,
+            above100Allowed: true,
+            capacityOverrideState: 'INACTIVE_NO_RECEIPT',
             orders: 0,
             verifiedRevenueUsd: 0,
             verifiedSettledCashUsd: 0,
-            fitAcceptance: 'FIT_APPROVED_FOR_SCOPE_DRAFT_NONBINDING',
-            execution: 'AUTHORIZED_BOUNDED',
-            automaticPaidWorkStart: false,
-            googleDriveContinuity: 'CONNECTED_PRIVATE',
-            googleDriveUrlExposed: false,
             externalActionsPerformed: deployed ? ['NETLIFY_PRODUCTION_DEPLOY'] : [],
-            excludedActions: [
-              'contract_acceptance',
-              'payment_execution',
-              'paid_work_start',
-              'indemnity_or_liability_term_selection',
-              'refund_or_dispute_response',
-              'bank_or_payout_change',
-              'credential_or_access_control_change',
-              'destructive_external_action',
-            ],
             generatedAt: new Date().toISOString(),
           };
-          fs.writeFileSync(
-            'artifacts/netlify-fardarter-v5-receipt.json',
-            JSON.stringify(receipt, null, 2) + '\n',
-          );
+          fs.writeFileSync('artifacts/netlify-fardarter-v6-receipt.json', JSON.stringify(receipt, null, 2) + '\n');
           NODE
-          if [ -f netlify-deploy-result.json ]; then
-            cp netlify-deploy-result.json artifacts/
-          fi
+          if [ -f netlify-deploy-result.json ]; then cp netlify-deploy-result.json artifacts/; fi
 
       - name: Upload deployment receipt
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: netlify-fardarter-v5-${{ github.sha }}
+          name: netlify-fardarter-v6-${{ github.sha }}
           path: artifacts
           retention-days: 30
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          {
+            echo "## Netlify Fardarter Drive v6 deployment"
+            echo "- Site ID: $NETLIFY_SITE_ID"
+            echo "- Primary URL: $NETLIFY_PRIMARY_URL"
+            echo "- Deploy ID: ${{ steps.deploy.outputs.deploy_id }}"
+            echo "- Deploy URL: ${{ steps.deploy.outputs.deploy_url }}"
+            echo "- Readback: ${{ steps.readback.outputs.readback }}"
+            echo "- Capacity: 1,000 total / 100 standard ACTIVE / above 100 allowed with receipt"
+          } >> "$GITHUB_STEP_SUMMARY"
