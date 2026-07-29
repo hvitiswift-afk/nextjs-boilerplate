@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-gdrive-v5.schema.json",
+  "title": "Fardarter Drive Google Drive Continuity v5",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "receiptId", "driveId", "state", "folderTitle", "folderReferenceStoredPrivately", "publicFolderUrlExposed", "publicFileIdsExposed", "documents", "automation", "privacyBoundary", "publicRepositoryReceipt", "financialEvidence", "nextControlledAction"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "receiptId": { "const": "FARDARTER-DRIVE-GDRIVE-V5-2026-07-29" },
+    "driveId": { "const": "FARDARTER-DRIVE-V5" },
+    "state": { "const": "CONNECTED_PRIVATE" },
+    "folderTitle": { "const": "Fardarter Drive™" },
+    "folderReferenceStoredPrivately": { "const": true },
+    "publicFolderUrlExposed": { "const": false },
+    "publicFileIdsExposed": { "const": false },
+    "documents": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "purpose", "nativeGoogleDoc", "referenceStoredPrivately", "publicUrlExposed"],
+        "properties": {
+          "title": { "type": "string", "minLength": 10 },
+          "purpose": { "type": "string", "minLength": 20 },
+          "nativeGoogleDoc": { "const": true },
+          "referenceStoredPrivately": { "const": true },
+          "publicUrlExposed": { "const": false }
+        }
+      }
+    },
+    "automation": { "type": "object" },
+    "privacyBoundary": { "type": "object" },
+    "publicRepositoryReceipt": { "type": "object" },
+    "financialEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd", "receivedCashRequires"],
+      "properties": {
+        "orders": { "const": 0 },
+        "verifiedGrossRevenueUsd": { "const": 0 },
+        "verifiedSettledCashUsd": { "const": 0 },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "nextControlledAction": { "type": "string", "minLength": 40 }
+  }
+}
