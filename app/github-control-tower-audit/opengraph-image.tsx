@@ -34,18 +34,18 @@ export default function OpenGraphImage() {
               fontSize: "24px",
             }}
           >
-            JP Systems • {experiment.status}
+            {`JP Systems • ${experiment.status}`}
           </div>
-          <div style={{ color: "#d8b4fe", fontSize: "24px" }}>
-            {experiment.offer.capacity} pilot slots
+          <div style={{ display: "flex", color: "#d8b4fe", fontSize: "24px" }}>
+            {`${experiment.offer.capacity} pilot slots`}
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          <div style={{ fontSize: "72px", fontWeight: 900, lineHeight: 1.02 }}>
+          <div style={{ display: "flex", fontSize: "72px", fontWeight: 900, lineHeight: 1.02 }}>
             GitHub Control Tower Audit
           </div>
-          <div style={{ maxWidth: "950px", color: "#cbd5e1", fontSize: "32px" }}>
+          <div style={{ display: "flex", maxWidth: "950px", color: "#cbd5e1", fontSize: "32px" }}>
             Turn stale pull requests, duplicate issues, unclear checks, and deployment boundaries into an exact operating sequence.
           </div>
         </div>
@@ -59,8 +59,8 @@ export default function OpenGraphImage() {
             fontSize: "28px",
           }}
         >
-          <div>${experiment.offer.priceUsd} fixed-scope pilot</div>
-          <div style={{ color: "#a5f3fc" }}>Public-safe fit check first</div>
+          <div style={{ display: "flex" }}>{`$${experiment.offer.priceUsd} fixed-scope pilot`}</div>
+          <div style={{ display: "flex", color: "#a5f3fc" }}>Public-safe fit check first</div>
         </div>
       </div>
     ),
