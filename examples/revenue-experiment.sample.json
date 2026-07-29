@@ -6,11 +6,11 @@
     "name": "GitHub Control Tower Audit",
     "type": "paid_service",
     "priceUsd": 100,
-    "quantityTarget": 10,
-    "firstMilestoneUsd": 500,
-    "grossTargetUsd": 1000,
-    "capacity": 10,
-    "maxConcurrentDeliveries": 2,
+    "quantityTarget": 100,
+    "firstMilestoneUsd": 1000,
+    "grossTargetUsd": 10000,
+    "capacity": 100,
+    "maxConcurrentDeliveries": 10,
     "deliveryWindowBusinessDays": 3,
     "clarificationWindowDays": 3,
     "scopeLimits": {
@@ -28,13 +28,13 @@
     ],
     "exclusions": [
       "credential access",
-      "production deployment",
       "secret rotation",
       "destructive cleanup",
       "payment handling",
       "legal opinion",
       "security guarantee",
-      "automatic merging"
+      "automatic final contract acceptance",
+      "automatic paid work start"
     ]
   },
   "audience": "individual creators, small companies, and project owners with a disorganized GitHub repository",
@@ -48,10 +48,15 @@
     "docs/repository/MONEY-RAIL-ACTIVATION.md",
     "receipts/revenue/JP-REV-001-PUBLICATION.json",
     "receipts/revenue/JP-REV-001-AUTHORITY.json",
-    "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md",
-    ".github/workflows/audit-request-intake.yml"
+    "receipts/revenue/FARDARTER-DRIVE-V5.json",
+    "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json",
+    "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V5.json",
+    "docs/repository/FARDARTER-DRIVE-V5-ACCEPT-EXECUTE-GDRIVE.md",
+    ".github/workflows/audit-request-intake.yml",
+    ".github/workflows/fardarter-fit-acceptance-v5.yml",
+    ".github/workflows/fardarter-approved-execution-v5.yml"
   ],
-  "authorityReceiptPath": "receipts/revenue/JP-REV-001-AUTHORITY.json",
+  "authorityReceiptPath": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json",
   "channel": {
     "name": "GitHub inbound issue #133",
     "inboundRequestPath": ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml",
@@ -91,5 +96,5 @@
     "https://www.paypal.com/donate/?hosted_button_id=JJ4XGRU94T4XW",
     "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/campaign"
   ],
-  "nextControlledAction": "Operate the ten-slot GitHub inbound pilot with no more than two active deliveries, use automated acknowledgement only for exact-prefix public fit checks, and preserve agreement, provider settlement, delivery, and acceptance as separately approved evidence states."
+  "nextControlledAction": "Operate the 100-slot Fardarter Drive v5 inbound system with no more than 10 ACTIVE deliveries, use automated nonbinding fit acceptance and approved verification/build execution, create private Google Drive work packages after fit approval, and preserve final agreement, settlement, paid work start, counsel terms, refunds, disputes, and irreversible actions as separately evidenced states."
 }
