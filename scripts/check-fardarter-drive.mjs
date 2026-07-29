@@ -197,7 +197,7 @@ assertDraftBoundary(text.invoiceDraft, "invoice draft");
 assertDraftBoundary(text.deliveryDraft, "delivery draft");
 assert(text.agreementDraft.includes("COUNSEL MUST SELECT AND COMPLETE"), "agreement draft must counsel-gate indemnity and liability terms");
 assert(text.agreementDraft.includes("No option is effective until completed and accepted"), "agreement indemnity options must remain nonbinding");
-assert(text.legalReadiness.includes("Indemnity-proof claim: prohibited"), "legal-readiness document must prohibit indemnity-proof claims");
+assert(/\*{0,2}Indemnity-proof claim:\*{0,2}\s+prohibited/i.test(text.legalReadiness), "legal-readiness document must prohibit indemnity-proof claims");
 assert(text.legalReadiness.includes("No automated system may"), "legal-readiness document must define automation prohibitions");
 assert(text.operatingDoc.includes("$1,000,000,000,000,000"), "operating document must display the quadrillion horizon");
 assert(text.operatingDoc.includes("Automatic stage promotion is prohibited"), "operating document must prohibit automatic stage promotion");
