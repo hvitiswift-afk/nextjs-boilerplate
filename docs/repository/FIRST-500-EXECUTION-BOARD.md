@@ -1,34 +1,42 @@
-# First $500 Execution Board
+# First $500 Milestone and $1,000 Expansion Board
 
 **Experiment:** `JP-REV-001`  
 **Offer:** GitHub Control Tower Audit  
 **Test price:** $100 USD  
-**Target:** five settled pilot orders = $500 gross revenue  
-**Total pilot capacity:** five audits  
+**First milestone:** five settled orders = $500 USD gross  
+**Expanded target:** ten settled orders = $1,000 USD gross  
+**Total pilot capacity:** ten audits  
 **Maximum active deliveries:** two at one time  
-**Status:** prepared; no acquisition channel has been authorized or activated
+**Active channel:** GitHub inbound Issue `#133`  
+**Automated intake:** exact-prefix label and boundary acknowledgement only
 
 ## Operating equation
 
 ```text
-relevant exposure → qualified conversation → exact offer → written agreement
-                  → provider-confirmed settlement → bounded delivery
-                  → acceptance → receipt → referral request
+public-safe request → automated acknowledgement → human fit decision
+                    → written agreement → provider-confirmed settlement
+                    → JP work-start approval → bounded delivery
+                    → acceptance → receipt → optional referral request
 ```
 
-The target is an experiment parameter, not a forecast or earnings guarantee.
+Targets are experiment parameters, not forecasts or guarantees.
 
-## Five-slot board
+## Ten-slot board
 
-Use anonymous lead IDs in public records. Store identities, contact details, payment records, and private delivery information outside the public repository.
+Use anonymous lead IDs in public records. Store identities, contact details, payment records, agreements, and private delivery information outside the public repository.
 
-| Slot | Lead ID | Fit state | Offer state | Money state | Delivery state | Gross USD | Next controlled action |
+| Slot | Lead ID | Fit state | Agreement state | Money state | Delivery state | Gross USD | Next controlled action |
 |---|---|---|---|---|---|---:|---|
-| 1 | `LEAD-001` | UNASSESSED | NOT_SENT | UNKNOWN | NOT_STARTED | 0 | Select approved channel |
-| 2 | `LEAD-002` | UNASSESSED | NOT_SENT | UNKNOWN | NOT_STARTED | 0 | Hold until capacity opens |
-| 3 | `LEAD-003` | UNASSESSED | NOT_SENT | UNKNOWN | NOT_STARTED | 0 | Hold until capacity opens |
-| 4 | `LEAD-004` | UNASSESSED | NOT_SENT | UNKNOWN | NOT_STARTED | 0 | Hold until capacity opens |
-| 5 | `LEAD-005` | UNASSESSED | NOT_SENT | UNKNOWN | NOT_STARTED | 0 | Hold until capacity opens |
+| 1 | `LEAD-001` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Await public-safe fit check |
+| 2 | `LEAD-002` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Available |
+| 3 | `LEAD-003` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Available |
+| 4 | `LEAD-004` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Available |
+| 5 | `LEAD-005` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | First-milestone wave |
+| 6 | `LEAD-006` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Expansion wave |
+| 7 | `LEAD-007` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Expansion wave |
+| 8 | `LEAD-008` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Expansion wave |
+| 9 | `LEAD-009` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Expansion wave |
+| 10 | `LEAD-010` | UNASSESSED | NOT_AGREED | UNKNOWN | NOT_STARTED | 0 | Expanded target wave |
 
 ### Allowed fit states
 
@@ -36,10 +44,10 @@ Use anonymous lead IDs in public records. Store identities, contact details, pay
 UNASSESSED → RELEVANT → QUALIFIED → NOT_FIT → DECLINED
 ```
 
-### Allowed offer states
+### Allowed agreement states
 
 ```text
-NOT_SENT → SENT → QUESTIONS → AGREED → DECLINED → EXPIRED
+NOT_AGREED → QUESTIONS → AGREED → DECLINED → EXPIRED → CANCELLED
 ```
 
 ### Allowed money states
@@ -54,83 +62,80 @@ UNKNOWN → PAID_PENDING → PAID_SETTLED → REFUNDED → DISPUTED
 NOT_STARTED → ACTIVE → DELIVERED → ACCEPTED → REVISED → CANCELLED
 ```
 
-Only `PAID_SETTLED` counts toward received cash. Do not count stars, reactions, issue comments, pledges, verbal interest, invoices, pending transfers, or screenshots.
+Only `PAID_SETTLED` counts toward received cash. Public issues, automated comments, labels, stars, reactions, pledges, invoices, pending transfers, and screenshots do not create orders, reserve slots, or prove settlement.
 
-## Channel decision gate
+## Capacity gate
 
-Select exactly one primary channel for the first test. Do not activate all channels at once; otherwise conversion evidence becomes ambiguous and delivery demand can exceed capacity.
+```text
+total slots            10
+maximum active work     2
+public fit checks       do not consume slots
+written agreements      may consume a slot only with separate evidence
+work start              requires PAID_SETTLED + JP approval
+```
 
-| Candidate channel | Speed | Trust | Public-data risk | Fees | Prepared asset | Authority required |
-|---|---|---|---|---|---|---|
-| Existing professional network | high | high | low when handled privately | none | warm message template | explicit outreach approval |
-| Relevant direct email | medium | medium | low when recipient is verified | none | direct message template | exact-recipient approval |
-| GitHub inbound request | low initially | high proof value | public issue requires strict data boundary | none | audit request issue form | merge and publication approval |
-| Professional marketplace | medium | marketplace-dependent | platform-dependent | likely | offer and delivery package | account, listing, and fee approval |
-| Public social post | medium | variable | public claims require care | none | public post template | explicit publication approval |
+When two deliveries are `ACTIVE`, all additional work starts must remain on hold even when total unused slots remain.
 
-### Recommended first-channel test
+## Authority states
 
-Use **one to five relevant people in JP's existing professional network** as the first candidate channel because trust is already present and no marketplace setup is required. This is a recommendation only. No message is authorized or sent by this board.
+| Action | State | Automatic? | Required evidence |
+|---|---|---:|---|
+| Keep Issue #133 public | AUTHORIZED_ACTIVE | yes | publication receipt |
+| Label exact-prefix audit requests | AUTHORIZED_ACTIVE | yes | workflow run |
+| Post one bounded acknowledgement | AUTHORIZED_ACTIVE | yes | marker + workflow run |
+| Direct email or message | NOT_AUTHORIZED | no | exact recipient/channel approval |
+| Accept fit or scope | HUMAN_APPROVAL_REQUIRED | no | JP decision |
+| Create an order | HUMAN_APPROVAL_REQUIRED | no | written agreement |
+| Count received cash | EXTERNAL_PROVIDER_ONLY | no | provider-confirmed PAID_SETTLED |
+| Start delivery | HUMAN_APPROVAL_REQUIRED | no | settlement + JP approval |
+| Merge revenue changes | AUTHORIZED_CONDITIONAL | no | current green checks |
+| Deploy fixed Netlify site | AUTHORIZED_CONDITIONAL | yes | validation + immutable readback |
+| Refund or dispute response | HUMAN_APPROVAL_REQUIRED | no | provider record + JP approval |
 
-## Seven-day pilot sequence
+Canonical authority receipt:
 
-### Day 0 — gate
+```text
+receipts/revenue/JP-REV-001-AUTHORITY.json
+```
 
-- Review and merge PR `#129` before or with PR `#130`.
-- Confirm the $100 USD price, three-business-day delivery window, and two-active-client limit.
-- Select one acquisition channel.
-- Record explicit publication or outreach authority.
+## Automated intake behavior
 
-### Day 1 — proof and first offers
+The workflow may run only for issue titles beginning `[Audit request]:`.
 
-- Verify the buyer-facing offer file renders correctly.
-- Select no more than five highly relevant prospects.
-- Send no more than three exact offers during the first batch.
-- Create a receipt for each sent offer without storing personal data publicly.
+Allowed:
 
-### Day 2 — qualification
+- create/reuse `audit-fit-check`, `needs-jp-review`, and `not-an-order` labels;
+- apply the labels;
+- post one public-safe boundary acknowledgement;
+- preserve an idempotency marker.
 
-- Answer fit and scope questions.
-- Decline work that requires credentials, hidden access, destructive action, unsupported claims, or work outside capacity.
-- Confirm repository size and delivery requirements before agreement.
+Not allowed:
 
-### Day 3 — decision
-
-- If there are no relevant responses, improve the audience or opening sentence before sending more.
-- If qualified prospects object to price, identify whether the objection is proof, scope, trust, urgency, or affordability before changing the price.
-- Do not discount automatically.
-
-### Days 4–5 — first delivery
-
-- Start no more than two audits after written agreement and provider-confirmed settlement.
-- Capture the repository head SHA and scope before analysis.
-- Deliver using `templates/github-control-tower-audit.md`.
-
-### Days 6–7 — acceptance and learning
-
-- Record delivery, clarification, acceptance, refund, or dispute state.
-- Ask an accepted buyer for one factual testimonial or referral, with permission before publication.
-- Compare actual conversion and delivery time with the stop/revise rules.
+- echo requester content;
+- approve fit, scope, price, or deadline;
+- create an order or reserve capacity;
+- request or process payment;
+- start delivery;
+- post repeated acknowledgements.
 
 ## Conversion dashboard
 
-| Metric | Current | First decision threshold |
-|---|---:|---:|
-| Relevant exposures | 0 | 20 |
-| Qualified conversations | 0 | at least 1 before 20 exposures |
-| Exact offers sent | 0 | maximum 5 before offer revision |
-| Written agreements | 0 | review after 5 offers |
-| Paid settled orders | 0 | pilot target 5 |
-| Gross revenue | $0 | pilot target $500 |
-| Fees | $0 | record provider-confirmed amount |
-| Refunds and disputes | $0 | pause on first material event |
-| Net cash before taxes | $0 | gross minus fees and refunds |
-| Delivered | 0 | never exceed two active at once |
-| Accepted | 0 | record acceptance evidence |
+| Metric | Current | First milestone | Expanded target |
+|---|---:|---:|---:|
+| Public fit-check requests | self-reporting / unavailable | informational | informational |
+| Qualified conversations | 0 | evidence only | evidence only |
+| Written agreements | 0 | 5 | 10 |
+| Paid settled orders | 0 | 5 | 10 |
+| Gross revenue | $0 | $500 | $1,000 |
+| Fees | $0 | provider-confirmed | provider-confirmed |
+| Refunds/disputes | $0 | pause on material event | pause on material event |
+| Net cash before taxes | $0 | gross minus fees/refunds | gross minus fees/refunds |
+| Active deliveries | 0 | maximum 2 | maximum 2 |
+| Accepted deliveries | 0 | record evidence | record evidence |
 
 ## Unit economics worksheet
 
-Fill these values only from actual evidence.
+Fill only from actual evidence.
 
 ```text
 price per audit                         $100
@@ -146,12 +151,13 @@ Do not call gross revenue profit. Taxes, labor value, tools, platform fees, refu
 
 ## Decision rules
 
-- **Continue:** at least one paid settled order and delivery remains inside scope and capacity.
+- **Continue:** at least one `PAID_SETTLED` order and delivery remains inside scope and the two-active limit.
+- **Pause work starts:** two deliveries are active.
 - **Revise proof:** relevant prospects understand the problem but do not trust the result.
-- **Revise scope:** prospects want a smaller or more concrete deliverable.
-- **Review price:** qualified prospects consistently value the outcome but cannot accept the pilot price; do not infer this from silence alone.
-- **Hold:** delivery capacity reaches two active audits.
-- **Stop:** work creates recurring misunderstanding, refund/dispute risk, unsafe access requests, or delivery time that makes the offer uneconomic.
+- **Revise scope:** prospects request a smaller or more concrete deliverable.
+- **Review price:** qualified prospects consistently value the outcome but cannot accept the pilot price; do not infer this from silence.
+- **Pause sales:** a material refund, dispute, repeated misunderstanding, or capacity failure occurs.
+- **Stop:** work requires unsafe access, unsupported claims, hidden authority, or delivery effort that makes the offer uneconomic.
 
 ## Receipt chain
 
@@ -159,10 +165,11 @@ Each slot should preserve references for:
 
 ```text
 channel authority
-exact message or publication version
-offer sent
-scope agreement
+automated intake receipt when applicable
+human fit decision
+written scope and agreement
 external provider settlement
+JP work-start approval
 repository snapshot
 report delivery
 clarification or revision
@@ -172,4 +179,4 @@ referral or testimonial permission
 
 ## Next controlled action
 
-After the stacked governance and money PRs are ready, choose one acquisition channel and authorize one small first batch. No outreach, publication, contract, invoice, payment, delivery, or testimonial request is authorized by this board alone.
+Merge the ten-slot authority packet only after the current repository-owned checks pass. Then update Issue `#133`, activate exact-prefix acknowledgement, and monitor inbound fit checks without treating them as orders, reservations, or money.
