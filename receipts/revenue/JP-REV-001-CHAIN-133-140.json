@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "JP-REV-001-CHAIN-133-140-2026-07-29",
+  "experimentId": "JP-REV-001",
+  "driveId": "FARDARTER-DRIVE-V4",
+  "assembledAt": "2026-07-29T20:48:45Z",
+  "source": "GitHub connector readback",
+  "chain": [
+    {
+      "number": 133,
+      "objectType": "ISSUE",
+      "state": "OPEN",
+      "role": "Public audit offer and authority record",
+      "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/133",
+      "mergeCommitSha": null,
+      "evidenceState": "ACTIVE"
+    },
+    {
+      "number": 134,
+      "objectType": "PULL_REQUEST",
+      "state": "MERGED",
+      "role": "Published the GitHub inbound revenue experiment",
+      "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/134",
+      "mergeCommitSha": "3393562796868dbe4eee3b9bd3d7896602b3229a",
+      "evidenceState": "MERGED"
+    },
+    {
+      "number": 135,
+      "objectType": "PULL_REQUEST",
+      "state": "MERGED",
+      "role": "Added the buyer-facing audit page and status API",
+      "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/135",
+      "mergeCommitSha": "e4332853b4f4a05db9eddf7aaa999fd1fd152572",
+      "evidenceState": "MERGED"
+    },
+    {
+      "number": 136,
+      "objectType": "ISSUE",
+      "state": "OPEN",
+      "role": "Netlify deployment and immutable-readback recovery gate",
+      "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/136",
+      "mergeCommitSha": null,
+      "evidenceState": "RECEIPT_REQUIRED"
+    },
+    {
+      "number": 137,
+      "objectType": "PULL_REQUEST",
+      "state": "MERGED",
+      "role": "Added fixed-site receipted Netlify deployment",
+      "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/137",
+      "mergeCommitSha": "28329eb4e5144cc39f5860e33d665e7e297e5443",
+      "evidenceState": "MERGED"
+    },
+    {
+      "number": 138,
+      "objectType": "PULL_REQUEST",
+      "state": "MERGED",
+      "role": "Added self-reporting discovery and public-interest separation",
+      "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/138",
+      "mergeCommitSha": "2c08a8d3c9710844a6cc0fc183413d3123d2ff04",
+      "evidenceState": "MERGED"
+    },
+    {
+      "number": 139,
+      "objectType": "PULL_REQUEST",
+      "state": "MERGED",
+      "role": "Added ten-slot capacity, authority v3, and bounded intake automation",
+      "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/139",
+      "mergeCommitSha": "814b26a8d59baf8e1279a8eaeca378f7088fe7f9",
+      "evidenceState": "MERGED"
+    },
+    {
+      "number": 140,
+      "objectType": "ISSUE",
+      "state": "CLOSED",
+      "role": "Exact-prefix intake automation self-test",
+      "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/140",
+      "mergeCommitSha": null,
+      "evidenceState": "PASS"
+    }
+  ],
+  "successors": [
+    {
+      "number": 141,
+      "role": "Fardarter Drive strategy and scale authority",
+      "state": "OPEN"
+    },
+    {
+      "number": 142,
+      "role": "Fardarter Drive v4 implementation and merge receipt",
+      "state": "OPEN"
+    },
+    {
+      "number": 143,
+      "role": "Fardarter Drive rollout and live-readback verification",
+      "state": "OPEN"
+    },
+    {
+      "number": 144,
+      "role": "Action-routing incident receipt",
+      "state": "CLOSED_NOT_PLANNED"
+    }
+  ],
+  "financialEvidence": {
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "result": "CHAIN_RESOLVED",
+  "claims": {
+    "allObjectsArePullRequests": false,
+    "deploymentVerified": false,
+    "revenueReceived": false,
+    "higherScaleHorizonAchieved": false
+  },
+  "nextControlledAction": "Merge the v4 package, record its immutable file blob SHAs, comment once on each object from #133 through #140, and keep #136 open until Netlify deployment and immutable live readback are proven."
+}
