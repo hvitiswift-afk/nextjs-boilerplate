@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/revenue-experiment.schema.json",
+  "title": "JP Revenue Experiment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "experimentId",
+    "status",
+    "offer",
+    "audience",
+    "proofPackage",
+    "channel",
+    "metrics",
+    "money",
+    "claims",
+    "authority",
+    "fundingUrls",
+    "nextControlledAction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.1.0" },
+    "experimentId": { "type": "string", "pattern": "^JP-REV-[A-Z0-9-]+$" },
+    "status": {
+      "enum": [
+        "PREPARED",
+        "PUBLISHED",
+        "INTEREST",
+        "AGREED",
+        "PAID_PENDING",
+        "PAID_SETTLED",
+        "DELIVERED",
+        "ACCEPTED",
+        "REFUNDED",
+        "DISPUTED",
+        "CANCELLED",
+        "UNKNOWN"
+      ]
+    },
+    "offer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "priceUsd",
+        "quantityTarget",
+        "grossTargetUsd",
+        "capacity",
+        "deliveryWindowBusinessDays",
+        "clarificationWindowDays",
+        "scopeLimits",
+        "deliverables",
+        "exclusions"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 3 },
+        "type": { "enum": ["paid_service", "product", "sponsorship", "voluntary_support"] },
+        "priceUsd": { "type": "number", "exclusiveMinimum": 0 },
+        "quantityTarget": { "type": "integer", "minimum": 1 },
+        "grossTargetUsd": { "type": "number", "minimum": 0 },
+        "capacity": { "type": "integer", "minimum": 1 },
+        "deliveryWindowBusinessDays": { "type": "integer", "minimum": 1 },
+        "clarificationWindowDays": { "type": "integer", "minimum": 0 },
+        "scopeLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repositories", "maxOpenPullRequests", "maxOpenIssues", "clarificationRounds"],
+          "properties": {
+            "repositories": { "type": "integer", "const": 1 },
+            "maxOpenPullRequests": { "type": "integer", "minimum": 1 },
+            "maxOpenIssues": { "type": "integer", "minimum": 1 },
+            "clarificationRounds": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "deliverables": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "exclusions": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 3 }
+        }
+      }
+    },
+    "audience": { "type": "string", "minLength": 10 },
+    "proofPackage": {
+      "type": "array",
+      "minItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "not": { "pattern": "^(?:/|[A-Za-z]:|.*(?:^|/)\.\.(?:/|$))" }
+      }
+    },
+    "channel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "inboundRequestPath", "publicationAuthorized", "outreachAuthorized"],
+      "properties": {
+        "name": { "type": "string", "minLength": 3 },
+        "inboundRequestPath": { "type": "string", "minLength": 3 },
+        "publicationAuthorized": { "type": "boolean" },
+        "outreachAuthorized": { "type": "boolean" }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["views", "qualifiedConversations", "offersSent", "orders", "deliveriesAccepted"],
+      "properties": {
+        "views": { "type": "integer", "minimum": 0 },
+        "qualifiedConversations": { "type": "integer", "minimum": 0 },
+        "offersSent": { "type": "integer", "minimum": 0 },
+        "orders": { "type": "integer", "minimum": 0 },
+        "deliveriesAccepted": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["grossRevenueUsd", "feesUsd", "refundsUsd", "netCashUsd", "settlementState"],
+      "properties": {
+        "grossRevenueUsd": { "type": "number", "minimum": 0 },
+        "feesUsd": { "type": "number", "minimum": 0 },
+        "refundsUsd": { "type": "number", "minimum": 0 },
+        "netCashUsd": { "type": "number" },
+        "settlementState": { "enum": ["UNKNOWN", "PAID_PENDING", "PAID_SETTLED", "REFUNDED", "DISPUTED"] }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["earningsGuaranteed", "taxDeductible", "repaymentPromised", "equityOffered", "legalStatusClaimed"],
+      "properties": {
+        "earningsGuaranteed": { "const": false },
+        "taxDeductible": { "const": false },
+        "repaymentPromised": { "const": false },
+        "equityOffered": { "const": false },
+        "legalStatusClaimed": { "const": false }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offerPreparation", "publication", "outreach", "contract", "paymentExecution", "delivery"],
+      "properties": {
+        "offerPreparation": { "const": "authorized" },
+        "publication": { "enum": ["not_authorized", "authorized"] },
+        "outreach": { "enum": ["not_authorized", "authorized"] },
+        "contract": { "enum": ["not_authorized", "authorized"] },
+        "paymentExecution": { "const": "external_provider_only" },
+        "delivery": { "enum": ["not_authorized", "authorized"] }
+      }
+    },
+    "fundingUrls": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "type": "string", "format": "uri", "pattern": "^https://" }
+    },
+    "nextControlledAction": { "type": "string", "minLength": 20 }
+  }
+}
