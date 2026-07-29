@@ -23,6 +23,7 @@ const stack = [
 const scale = ["0 Local enclave", "1 Edge bridge", "2 Server tower", "3 Worker swarm", "4 LLM mesh", "5 Outpost 2099-2100"];
 
 const vaultDoors = [
+  { label: "GitHub Control Tower Audit", href: "/github-control-tower-audit", note: "See the active $100 fixed-scope repository audit pilot, current slots, evidence boundary, and public-safe request path." },
   { label: "GRIPLOOM AI", href: "/griploom", note: "Run ML beam scoring, mesh density, vitality, GOBLIN checks, and BLACKLETTER status." },
   { label: "F-WAD Arena", href: "/f-wad", note: "Play the Quadflare Hollow prototype with four cubes, swirls, Stokes verification, and Goblin routing." },
   { label: "Operator Dashboard", href: "/vault", note: "Inspect manifest, health, ledger, and approval audit filters." },
@@ -38,6 +39,7 @@ export default function Home() {
         <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5 text-sm text-white/60">
           <span className="font-mono uppercase tracking-[0.35em] text-cyan-200">Goblin + Fabian + GRIPLOOM</span>
           <div className="flex flex-wrap items-center gap-3">
+            <a className="transition hover:text-cyan-100" href="/github-control-tower-audit">GitHub Audit</a>
             <a className="transition hover:text-cyan-100" href="/griploom">GRIPLOOM AI</a>
             <a className="transition hover:text-cyan-100" href="/f-wad">F-WAD Arena</a>
             <a className="transition hover:text-cyan-100" href="/vault">Vault Dashboard</a>
@@ -55,7 +57,8 @@ export default function Home() {
               Fabian plans, Goblin routes, GRIPLOOM maps production geometry, F-WAD turns four-cube field logic into play, hyperscripts coordinate, servers execute only after approval, and the 2099-2100 Outpost preserves continuity.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="/griploom">Open GRIPLOOM AI</a>
+              <a className="rounded-full bg-cyan-200 px-5 py-3 font-bold text-black" href="/github-control-tower-audit">Open $100 GitHub Audit</a>
+              <a className="rounded-full border border-cyan-200/30 px-5 py-3 font-bold text-cyan-100" href="/griploom">Open GRIPLOOM AI</a>
               <a className="rounded-full border border-cyan-200/30 px-5 py-3 font-bold text-cyan-100" href="/f-wad">Open F-WAD Arena</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="/vault">Open Vault Dashboard</a>
               <a className="rounded-full border border-white/15 px-5 py-3 font-bold text-white" href="#algorithm">Open Algorithm</a>
