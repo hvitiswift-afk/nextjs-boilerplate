@@ -7,10 +7,14 @@ on:
       - "app/github-control-tower-audit/**"
       - "app/api/revenue/pilot/**"
       - "app/page.tsx"
+      - "app/robots.ts"
+      - "app/sitemap.ts"
       - "examples/revenue-experiment.sample.json"
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-*.mjs"
+      - "src/lib/revenue/**"
+      - "src/lib/site-url.ts"
       - "package.json"
       - "package-lock.json"
       - "netlify.toml"
@@ -22,10 +26,14 @@ on:
       - "app/github-control-tower-audit/**"
       - "app/api/revenue/pilot/**"
       - "app/page.tsx"
+      - "app/robots.ts"
+      - "app/sitemap.ts"
       - "examples/revenue-experiment.sample.json"
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-*.mjs"
+      - "src/lib/revenue/**"
+      - "src/lib/site-url.ts"
       - "package.json"
       - "package-lock.json"
       - "netlify.toml"
@@ -139,14 +147,23 @@ jobs:
           retry_get "$DEPLOY_URL/" artifacts/home.html
           retry_get "$DEPLOY_URL/github-control-tower-audit" artifacts/audit.html
           retry_get "$DEPLOY_URL/api/revenue/pilot" artifacts/pilot.json
+          retry_get "$DEPLOY_URL/sitemap.xml" artifacts/sitemap.xml
+          retry_get "$DEPLOY_URL/robots.txt" artifacts/robots.txt
 
           grep -q '/github-control-tower-audit' artifacts/home.html
           grep -q 'GitHub Control Tower Audit' artifacts/audit.html
           grep -q 'Request a public-safe fit check' artifacts/audit.html
+          grep -q 'Public fit checks' artifacts/audit.html
+          grep -q '/github-control-tower-audit' artifacts/sitemap.xml
+          grep -q '/sitemap.xml' artifacts/robots.txt
 
           node <<'NODE'
           const fs = require('node:fs');
           const pilot = JSON.parse(fs.readFileSync('artifacts/pilot.json', 'utf8'));
+          const publicRequestCount = pilot.publicInterest?.openFitCheckRequests;
+          const validPublicRequestCount =
+            publicRequestCount === null ||
+            (Number.isInteger(publicRequestCount) && publicRequestCount >= 0);
           const required = [
             [pilot.experimentId === 'JP-REV-001', 'experimentId'],
             [pilot.status === 'PUBLISHED', 'status'],
@@ -154,11 +171,17 @@ jobs:
             [pilot.offer?.capacity === 5, 'capacity'],
             [pilot.availability?.orders === 0, 'orders'],
             [pilot.availability?.slotsRemaining === 5, 'slotsRemaining'],
+            [validPublicRequestCount, 'openFitCheckRequests'],
+            [pilot.publicInterest?.countedAsOrders === false, 'interestNotOrders'],
+            [pilot.publicInterest?.reservesCapacity === false, 'interestNotReservations'],
+            [['AVAILABLE', 'UNAVAILABLE'].includes(pilot.publicInterest?.sourceState), 'interestSourceState'],
             [pilot.money?.grossRevenueUsd === 0, 'grossRevenueUsd'],
             [pilot.money?.netCashUsd === 0, 'netCashUsd'],
             [pilot.publication?.issueNumber === 133, 'issueNumber'],
             [pilot.evidenceBoundary?.receivedCashRequires === 'PAID_SETTLED', 'receivedCashRequires'],
             [pilot.evidenceBoundary?.openingAnIssueCreatesContract === false, 'contractBoundary'],
+            [pilot.evidenceBoundary?.publicFitCheckCountsAsOrder === false, 'fitCheckOrderBoundary'],
+            [pilot.evidenceBoundary?.publicFitCheckReservesCapacity === false, 'fitCheckReservationBoundary'],
             [pilot.evidenceBoundary?.earningsGuaranteed === false, 'earningsBoundary'],
           ];
           const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
@@ -182,7 +205,7 @@ jobs:
           const deployed = Boolean(process.env.DEPLOY_ID);
           const readback = process.env.READBACK || 'NOT_COMPLETED';
           const receipt = {
-            schemaVersion: '1.0.0',
+            schemaVersion: '1.1.0',
             receiptId: `JP-REV-001-NETLIFY-${process.env.GITHUB_RUN_ID}`,
             repository: process.env.GITHUB_REPOSITORY,
             commit: process.env.GITHUB_SHA,
@@ -195,7 +218,8 @@ jobs:
             deploymentCompleted: deployed,
             readback,
             result: deployed && readback === 'PASS' ? 'DEPLOYED_AND_VERIFIED' : 'INCOMPLETE',
-            verifiedRoutes: ['/', '/github-control-tower-audit', '/api/revenue/pilot'],
+            verifiedRoutes: ['/', '/github-control-tower-audit', '/api/revenue/pilot', '/sitemap.xml', '/robots.txt'],
+            publicInterestEvidence: 'SEPARATE_FROM_ORDERS_AND_CAPACITY',
             verifiedRevenueUsd: 0,
             verifiedSettledCashUsd: 0,
             externalActionsPerformed: deployed ? ['NETLIFY_PRODUCTION_DEPLOY'] : [],
@@ -224,6 +248,7 @@ jobs:
             echo "- Deploy ID: ${{ steps.deploy.outputs.deploy_id }}"
             echo "- Deploy URL: ${{ steps.deploy.outputs.deploy_url }}"
             echo "- Readback: ${{ steps.readback.outputs.readback }}"
+            echo "- Public fit checks: separate from orders and capacity"
             echo "- Verified revenue: $0 USD"
             echo "- Verified settled cash: $0 USD"
           } >> "$GITHUB_STEP_SUMMARY"
