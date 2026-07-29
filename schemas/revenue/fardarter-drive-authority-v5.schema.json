@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-authority-v5.schema.json",
+  "title": "Fardarter Drive Authority v5",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "receiptId", "driveId", "experimentId", "authorityVersion", "authorizedBy", "authorizedAt", "supersedesForFutureActions", "historicalReceiptsRemainValid", "grants", "guardrails", "revoked", "nextControlledAction"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "receiptId": { "const": "FARDARTER-DRIVE-AUTHORITY-V5-2026-07-29" },
+    "driveId": { "const": "FARDARTER-DRIVE-V5" },
+    "experimentId": { "const": "JP-REV-001" },
+    "authorityVersion": { "const": "5.0.0" },
+    "authorizedBy": { "const": "JP" },
+    "authorizedAt": { "type": "string" },
+    "supersedesForFutureActions": { "const": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V4.json" },
+    "historicalReceiptsRemainValid": { "const": true },
+    "grants": {
+      "type": "array",
+      "minItems": 14,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["grantId", "state", "automated", "scope", "evidenceRequired"],
+        "properties": {
+          "grantId": { "type": "string", "minLength": 3 },
+          "state": { "enum": ["AUTHORIZED_ACTIVE", "AUTHORIZED_CONDITIONAL", "HUMAN_APPROVAL_REQUIRED", "COUNSEL_REVIEW_REQUIRED", "EXTERNAL_PROVIDER_ONLY"] },
+          "automated": { "type": "boolean" },
+          "scope": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "evidenceRequired": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        }
+      }
+    },
+    "guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capacityEqualsDemand", "fitApprovalCreatesOrder", "fitApprovalReservesCapacity", "fitApprovalCreatesContract", "draftCreatesContract", "invoiceDraftCreatesPaymentObligation", "googleDriveFileCreatesSignature", "githubEvidenceProvesSettlement", "templateIsIndemnityProof", "automaticPaidWorkStart", "sensitiveDriveDataAllowedInPublicRepo", "horizonEqualsAchievedRevenueOrValuation"],
+      "properties": {
+        "capacityEqualsDemand": { "const": false },
+        "fitApprovalCreatesOrder": { "const": false },
+        "fitApprovalReservesCapacity": { "const": false },
+        "fitApprovalCreatesContract": { "const": false },
+        "draftCreatesContract": { "const": false },
+        "invoiceDraftCreatesPaymentObligation": { "const": false },
+        "googleDriveFileCreatesSignature": { "const": false },
+        "githubEvidenceProvesSettlement": { "const": false },
+        "templateIsIndemnityProof": { "const": false },
+        "automaticPaidWorkStart": { "const": false },
+        "sensitiveDriveDataAllowedInPublicRepo": { "const": false },
+        "horizonEqualsAchievedRevenueOrValuation": { "const": false }
+      }
+    },
+    "revoked": { "const": false },
+    "nextControlledAction": { "type": "string", "minLength": 40 }
+  }
+}
