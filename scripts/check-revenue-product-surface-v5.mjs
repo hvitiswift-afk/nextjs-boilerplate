@@ -34,6 +34,8 @@ assert(slotsRemaining === 100, "baseline must show 100 remaining slots");
 assert(experiment.offer.grossTargetUsd === 10000, "gross target must be $10,000");
 assert(experiment.money.netCashUsd === 0, "surface must not claim settled cash");
 assert(drive.driveId === "FARDARTER-DRIVE-V5", "surface must use Fardarter Drive v5");
+assert(drive.acceptanceModel.automatedState === "FIT_APPROVED_FOR_SCOPE_DRAFT", "canonical fit state is incorrect");
+assert(drive.acceptanceModel.binding === false, "canonical fit state must be nonbinding");
 assert(authority.authorityVersion === "5.0.0", "surface must use authority v5");
 assert(gdrive.state === "CONNECTED_PRIVATE", "surface must expose private connected Drive state");
 assert(publication.issueNumber === 133, "surface must link Issue #133");
@@ -44,13 +46,13 @@ for (const requiredText of [
   "FARDARTER-DRIVE-GDRIVE-V5.json",
   "getPublicAuditInterest",
   "schemaVersion: \"1.4.0\"",
-  "FIT_APPROVED_FOR_SCOPE_DRAFT",
-  "CONNECTED_PRIVATE",
+  "acceptanceModel.automatedState",
+  "googleDriveReceipt.state",
   "workPackageCreatesContract: false",
   "workPackageCreatesPaymentObligation: false",
   "workPackageStartsPaidDelivery: false",
   "receivedCashRequires: \"PAID_SETTLED\"",
-]) assert(text.api.includes(requiredText), `API missing: ${requiredText}`);
+]) assert(text.api.includes(requiredText), `API missing canonical derivation: ${requiredText}`);
 
 for (const requiredText of [
   "Fardarter Drive™ v5",
