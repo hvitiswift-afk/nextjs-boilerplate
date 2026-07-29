@@ -1,0 +1,73 @@
+name: Revenue Experiment Verify
+
+on:
+  pull_request:
+    paths:
+      - ".github/FUNDING.yml"
+      - ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml"
+      - ".github/ISSUE_TEMPLATE/revenue-experiment.yml"
+      - ".github/workflows/revenue-experiment.yml"
+      - "docs/repository/FIRST-500-EXECUTION-BOARD.md"
+      - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
+      - "docs/repository/MONEY-RAIL.md"
+      - "examples/github-control-tower-audit-receipt.sample.json"
+      - "examples/revenue-experiment.sample.json"
+      - "schemas/revenue/**"
+      - "scripts/check-revenue-experiment.mjs"
+      - "templates/github-control-tower-audit-outreach.md"
+      - "templates/github-control-tower-audit.md"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/FUNDING.yml"
+      - ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml"
+      - ".github/ISSUE_TEMPLATE/revenue-experiment.yml"
+      - ".github/workflows/revenue-experiment.yml"
+      - "docs/repository/FIRST-500-EXECUTION-BOARD.md"
+      - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
+      - "docs/repository/MONEY-RAIL.md"
+      - "examples/github-control-tower-audit-receipt.sample.json"
+      - "examples/revenue-experiment.sample.json"
+      - "schemas/revenue/**"
+      - "scripts/check-revenue-experiment.mjs"
+      - "templates/github-control-tower-audit-outreach.md"
+      - "templates/github-control-tower-audit.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revenue-experiment-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify first-$500 package
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate package
+        run: node scripts/check-revenue-experiment.mjs
+
+      - name: Verify JSON syntax
+        run: |
+          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Revenue JSON syntax: PASS")'
+
+      - name: Emit non-financial receipt
+        run: |
+          echo "result=PASS"
+          echo "gross_target_usd=500"
+          echo "verified_revenue_usd=0"
+          echo "settled_cash_usd=0"
+          echo "external_actions=NONE"

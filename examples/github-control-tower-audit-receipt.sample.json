@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0.0",
+  "auditId": "JP-AUDIT-SAMPLE-001",
+  "experimentId": "JP-REV-001",
+  "offer": "GitHub Control Tower Audit",
+  "repository": "owner/repository",
+  "scopeVersion": "pilot-1.0",
+  "snapshot": {
+    "capturedAt": null,
+    "defaultBranch": null,
+    "headSha": null,
+    "openPullRequestsReviewed": 0,
+    "openIssuesReviewed": 0
+  },
+  "agreement": {
+    "state": "NOT_AGREED",
+    "priceUsd": 100,
+    "dueDate": null,
+    "clarificationWindowDays": 3
+  },
+  "payment": {
+    "settlementState": "UNKNOWN",
+    "grossUsd": 0,
+    "feesUsd": 0,
+    "refundsUsd": 0,
+    "netCashUsd": 0,
+    "externalProviderReceiptStoredPrivately": false
+  },
+  "delivery": {
+    "state": "NOT_STARTED",
+    "templatePath": "templates/github-control-tower-audit.md",
+    "artifactReference": null,
+    "deliveredAt": null,
+    "clarificationWindowEndsAt": null,
+    "acceptedAt": null
+  },
+  "externalActionsPerformed": [],
+  "claims": {
+    "earningsGuaranteed": false,
+    "securityCertified": false,
+    "legalOpinionProvided": false,
+    "deploymentCompleted": false,
+    "ownershipVerified": false
+  },
+  "publicDataBoundary": {
+    "containsCredentials": false,
+    "containsPaymentData": false,
+    "containsCustomerIdentity": false,
+    "containsConfidentialRecords": false
+  },
+  "result": "PREPARED_SAMPLE",
+  "nextControlledAction": "Replace sample placeholders only after written scope acceptance while keeping private identity and provider records outside the public repository."
+}

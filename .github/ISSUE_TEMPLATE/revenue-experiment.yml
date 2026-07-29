@@ -1,0 +1,101 @@
+name: Revenue experiment
+description: Define one ethical, measurable offer or funding experiment without earnings guarantees or automatic outreach.
+title: "[Revenue]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to test one offer, audience, channel, and price. Preparation does not authorize outreach, contracting, invoicing, payment execution, or delivery.
+
+  - type: input
+    id: offer
+    attributes:
+      label: Offer
+      description: Name the exact paid service, product, sponsorship, or voluntary-support proposition.
+      placeholder: "Example: GitHub Control Tower Audit"
+    validations:
+      required: true
+
+  - type: textarea
+    id: buyer_problem
+    attributes:
+      label: Buyer and problem
+      description: Identify the intended buyer and the costly problem this offer addresses.
+    validations:
+      required: true
+
+  - type: input
+    id: price
+    attributes:
+      label: Price and quantity target
+      description: State the test price and number of sales needed. Use gross revenue, not guaranteed income.
+      placeholder: "Example: 5 × $100 = $500 gross target"
+    validations:
+      required: true
+
+  - type: textarea
+    id: deliverable
+    attributes:
+      label: Exact deliverable
+      description: Define what the buyer receives, the format, acceptance criteria, and delivery boundary.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proof
+    attributes:
+      label: Proof and trust assets
+      description: List public-safe examples, receipts, demos, portfolio material, or verification evidence.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: channel
+    attributes:
+      label: Primary acquisition channel
+      options:
+        - Existing network
+        - GitHub
+        - Direct email with explicit recipient approval
+        - Professional marketplace
+        - Public social post with explicit publication approval
+        - Sponsor or donation link
+        - Other controlled channel
+    validations:
+      required: true
+
+  - type: textarea
+    id: costs
+    attributes:
+      label: Costs, fees, and capacity
+      description: Include payment fees, taxes to investigate, delivery time, refunds, and maximum active clients.
+    validations:
+      required: true
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Success and stop metrics
+      description: Define views, qualified conversations, offers sent, paid orders, gross revenue, fees, refunds, net cash, and a stop/revise rule.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Claims and execution boundary
+      options:
+        - label: No earnings, conversion, investment-return, or fundraising result is guaranteed.
+          required: true
+        - label: Donations are voluntary and carry no repayment, equity, product-delivery, or tax-deductibility claim unless separately verified and stated.
+          required: true
+        - label: No outreach, contract, invoice, payment, refund, publication, or delivery occurs without the required explicit approval and tool receipt.
+          required: true
+        - label: No donor, customer, bank, payout, credential, or sensitive personal data will be committed to the repository.
+          required: true
+
+  - type: textarea
+    id: receipt
+    attributes:
+      label: Experiment receipt
+      description: Provide the experiment ID, authority state, launch decision, and next controlled action.
