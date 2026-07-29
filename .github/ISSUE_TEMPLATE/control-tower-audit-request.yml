@@ -1,0 +1,104 @@
+name: Control Tower Audit Request
+description: Request a fixed-scope GitHub repository operations audit using public-safe information only.
+title: "[Audit request]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This public issue is a fit-check request, not a contract, invoice, payment request, or delivery commitment. Do not post credentials, private customer information, payment data, confidential records, or other sensitive information.
+
+  - type: input
+    id: repository
+    attributes:
+      label: Repository URL
+      description: Provide the GitHub repository to review. It must be public or accessible through a separately authorized read-only path.
+      placeholder: "https://github.com/owner/repository"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: Your relationship to the repository
+      options:
+        - Owner or administrator
+        - Maintainer or authorized contributor
+        - Client representative with authority to request review
+        - Evaluating fit before obtaining authority
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Current operating problem
+      description: Describe what is difficult today, such as stale pull requests, duplicate issues, unclear checks, blocked deployment, or uncertain priorities.
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: State what should be clearer or more actionable after the audit.
+    validations:
+      required: true
+
+  - type: textarea
+    id: priorities
+    attributes:
+      label: Priority branches, pull requests, issues, or workflows
+      description: List public-safe references that should receive attention first.
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Approximate review size
+      options:
+        - Up to 10 open pull requests and 25 open issues
+        - Up to 25 open pull requests and 50 open issues
+        - Larger than the pilot scope
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: timing
+    attributes:
+      label: Timing or deadline
+      description: Provide a real deadline or write "no fixed deadline." The exact due date is confirmed only after written scope acceptance.
+      placeholder: "No fixed deadline"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package being considered
+      options:
+        - $100 USD Control Tower Audit pilot
+        - $250 USD Implementation Pack after audit
+        - Audit first; implementation undecided
+        - Fit check only
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Public and transaction boundaries
+      options:
+        - label: I have not posted credentials, payment details, private customer data, confidential records, or sensitive personal information.
+          required: true
+        - label: I understand that this issue is a fit check and does not create a contract, invoice, payment obligation, deadline, or delivery commitment.
+          required: true
+        - label: I understand that merges, settings changes, deployments, billing, domains, credentials, and destructive actions are excluded unless separately scoped and explicitly authorized.
+          required: true
+        - label: I understand that payment and settlement are confirmed only through an agreed external provider, not GitHub comments, stars, reactions, pledges, or screenshots.
+          required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional public-safe context
+      description: Add anything else needed for the fit check without including sensitive or confidential information.
