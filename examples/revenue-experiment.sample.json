@@ -40,7 +40,9 @@
     "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md",
     ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml",
     "templates/github-control-tower-audit.md",
-    "examples/github-control-tower-audit-receipt.sample.json"
+    "examples/github-control-tower-audit-receipt.sample.json",
+    "docs/repository/FIRST-500-EXECUTION-BOARD.md",
+    "templates/github-control-tower-audit-outreach.md"
   ],
   "channel": {
     "name": "unselected",
