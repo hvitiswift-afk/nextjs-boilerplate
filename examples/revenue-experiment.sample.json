@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "experimentId": "JP-REV-001",
   "status": "PREPARED",
   "offer": {
@@ -9,12 +9,20 @@
     "quantityTarget": 5,
     "grossTargetUsd": 500,
     "capacity": 5,
+    "deliveryWindowBusinessDays": 3,
+    "clarificationWindowDays": 3,
+    "scopeLimits": {
+      "repositories": 1,
+      "maxOpenPullRequests": 25,
+      "maxOpenIssues": 50,
+      "clarificationRounds": 1
+    },
     "deliverables": [
       "repository and workflow map",
       "top five priority findings",
       "pull-request and issue triage table",
       "one-page control-tower action plan",
-      "dated delivery receipt"
+      "dated delivery and acceptance receipt"
     ],
     "exclusions": [
       "credential access",
@@ -28,8 +36,15 @@
     ]
   },
   "audience": "individual creators, small companies, and project owners with a disorganized GitHub repository",
+  "proofPackage": [
+    "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md",
+    ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml",
+    "templates/github-control-tower-audit.md",
+    "examples/github-control-tower-audit-receipt.sample.json"
+  ],
   "channel": {
     "name": "unselected",
+    "inboundRequestPath": ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml",
     "publicationAuthorized": false,
     "outreachAuthorized": false
   },
@@ -66,5 +81,5 @@
     "https://www.paypal.com/donate/?hosted_button_id=JJ4XGRU94T4XW",
     "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/campaign"
   ],
-  "nextControlledAction": "Review the offer and choose one acquisition channel for a separately approved test."
+  "nextControlledAction": "Review the complete proof package, merge the required governance sequence, and choose one acquisition channel for a separately approved test."
 }
