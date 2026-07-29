@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security-sensitive report
+    url: https://github.com/hvitiswift-afk/nextjs-boilerplate/security/advisories/new
+    about: Use a private security advisory for suspected vulnerabilities, credentials, or sensitive security details.

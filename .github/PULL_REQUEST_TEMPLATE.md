@@ -1,37 +1,75 @@
-## Summary
+# Mission
 
-Describe the smallest coherent change in this pull request.
+<!-- State the exact result this pull request is intended to produce. -->
 
-## Lane
+- **Target:**
+- **Purpose:**
+- **Owner / final approval:** JP (`@hvitiswift-afk`)
+- **Base → head:**
+- **Related issue or receipt:**
 
-Name the affected system or repository lane.
+## Scope lock
 
-## Scope
+### Included
 
-- Exact files or components changed:
-- Intended result:
-- Explicit exclusions:
+- 
 
-## Public / private boundary
+### Explicitly excluded
 
-Confirm that no secrets, private records, restricted source, credentials, or unsupported external claims are included.
+- Account or repository settings
+- Secrets, credentials, billing, or payment execution
+- Production deployment or publication
+- External submissions, outreach, or irreversible actions
+
+<!-- Delete an exclusion only when the PR is explicitly authorized to perform it. -->
+
+## Change classification
+
+- [ ] Documentation only
+- [ ] Application code
+- [ ] Tests or verification
+- [ ] GitHub Actions / CI
+- [ ] Deployment preparation only
+- [ ] Consequential action requiring a separate approval gate
+
+## Dependencies and sequencing
+
+- **Must merge before:**
+- **Must merge after:**
+- **Supersedes:**
+- **Conflicts with:**
 
 ## Verification
 
-List the commands, checks, screenshots, logs, or receipts used to verify this change.
+- [ ] Diff reviewed for unrelated changes
+- [ ] Secret scan passed or not applicable
+- [ ] Relevant tests/checks passed
+- [ ] Build passed or documented as not applicable
+- [ ] Human-only boundaries preserved
+- [ ] Rollback path documented
 
-## Risk and rollback
+Commands and results:
 
-Describe the main failure modes and the exact rollback or revert path.
+```text
 
-## External-action gate
+```
 
-State whether any Pages setting, secret, domain, billing, credential, deployment, submission, outreach, payment, or publication action remains. Repository preparation alone does not authorize those actions.
+## Risk and authority gates
 
-## Receipt
+- **Risk level:** low / moderate / high
+- **Current authority state:** prepared / reviewed / approved / executed
+- **External side effects:** none / describe exactly
+- **Human action still required:**
 
-- Issue or task:
-- Branch:
-- Verification result:
-- Approval state:
-- Merge receipt: pending until merged
+## Evidence and receipt
+
+- **Evidence reviewed:**
+- **Result:** PASS / HOLD / DENY / RETEST / REFERENCE
+- **Receipt ID or path:**
+- **Next controlled action:**
+
+## Final approval
+
+- [ ] Ready for JP review
+- [ ] JP explicitly approved merge
+- [ ] Post-merge receipt or verification is attached
