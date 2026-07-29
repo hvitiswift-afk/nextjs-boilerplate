@@ -1,136 +1,157 @@
-# GitHub Control Tower Audit — Fixed-Scope Pilot
+# GitHub Control Tower Audit — Fardarter Drive™ v5
 
-**Pilot test price:** $100 USD  
-**Total capacity:** ten pilot audits  
-**Maximum active deliveries:** two at one time  
-**First milestone:** five settled audits / $500 USD gross  
-**Expanded gross target:** ten settled audits / $1,000 USD gross  
-**Delivery format:** public-safe Markdown report  
-**Status:** active through GitHub inbound Issue `#133`; exact-prefix intake acknowledgement is automated; direct outreach is inactive
+**Test price:** $100 USD per separately accepted audit scope  
+**Total planning capacity:** 100 slots  
+**Maximum active deliveries:** 10  
+**First operating milestone:** ten settled audits / $1,000 USD gross  
+**Current gross capacity target:** 100 settled audits / $10,000 USD gross  
+**Current orders:** 0  
+**Verified gross revenue:** $0 USD  
+**Verified settled cash:** $0 USD  
+**Status:** active through GitHub Issue `#133` under v5 control Issue `#146`
+
+The capacity and target are planning parameters—not demand, customer, revenue, valuation, market-size, funding, profit, or earnings claims.
 
 ## Who this is for
 
-This audit is designed for an individual creator, small company, open-source maintainer, or project owner whose GitHub repository has become difficult to operate because priorities, pull requests, issues, checks, deployment boundaries, or ownership are unclear.
+This audit is for creators, maintainers, small companies, and project owners whose GitHub repository has unclear priorities, stale or overlapping pull requests, duplicate issues, confusing checks, mixed experiments, or uncertain deployment and authority boundaries.
 
-Good fit examples:
+## Fixed scope
 
-- several open pull requests with no obvious merge order;
-- duplicate or stale issues;
-- important work mixed with experiments;
-- checks that fail without a clear owner or next action;
-- deployment preparation being mistaken for a completed deployment;
-- no durable record of what was reviewed, approved, merged, or left blocked.
-
-## What the buyer receives
-
-One audit covers one GitHub repository and produces:
-
-1. a repository and workflow map;
-2. the five highest-priority findings;
-3. a pull-request and issue triage table;
-4. a recommended merge, repair, close, or hold sequence;
-5. a one-page control-tower action plan;
-6. explicit safety, authority, deployment, and external-action boundaries;
-7. a dated delivery and acceptance receipt.
-
-## Pilot scope limit
-
-The $100 pilot includes:
+One $100 audit covers:
 
 - one repository;
-- up to 25 open pull requests and 50 open issues in the initial review set;
-- repository metadata, public-safe files, checks, and visible workflow evidence;
-- one delivered report;
-- one clarification round requested within three calendar days of delivery.
+- up to 25 open pull requests;
+- up to 50 open issues;
+- visible repository metadata, checks, workflows, and deployment evidence;
+- one repository and workflow map;
+- five priority findings;
+- PR and issue triage;
+- a recommended action sequence;
+- one-page control-tower plan;
+- one delivery and acceptance receipt;
+- one clarification round.
 
-A larger repository, code remediation, implementation branch, or additional review round requires a separate written scope and price before work starts.
+Larger repositories, code implementation, credentialed access, settings changes, deployment, or additional review rounds require a separate written scope and price.
 
-## Capacity rule
-
-Ten slots may be available while no more than two deliveries are active. Public fit-check issues do not create orders or reserve slots. A slot becomes an order only after written agreement and separate evidence; delivery begins only after provider-confirmed settlement and JP approval.
-
-When two deliveries are active, new work starts must pause even when unused total slots remain.
-
-## Delivery window
-
-The proposed pilot window is within three business days after all of these are confirmed:
-
-- the repository is accessible;
-- the exact audit scope is accepted in writing;
-- the delivery destination is agreed;
-- payment settlement is confirmed by the external payment provider;
-- active delivery capacity is available.
-
-The exact due date must be stated before purchase. No automatic deadline begins from a GitHub issue, label, comment, message, pledge, or unverified payment screenshot.
-
-## What is not included
-
-This is an operations and repository-governance audit. It does not include:
-
-- passwords, tokens, private keys, or credential access;
-- destructive cleanup, merges, branch deletion, or repository-setting changes;
-- production deployment, domain configuration, billing, or payment handling;
-- penetration testing, security certification, legal advice, tax advice, or a security guarantee;
-- source-code ownership verification;
-- automatic outreach, customer contact, or publication outside the active GitHub inbound issue;
-- automatic fit acceptance, order creation, capacity reservation, contract, invoice, payment, work start, refund, or dispute response;
-- a guarantee that revenue, fundraising, deployment, or project outcomes will improve.
-
-## Buyer inputs
-
-A buyer should provide only:
-
-- the repository URL or an explicitly authorized read-only access path;
-- the desired outcome or current operating problem;
-- known deadlines or blockers;
-- any branches, pull requests, or issues that must receive priority;
-- a safe delivery destination after scope acceptance.
-
-Do not place credentials, private customer information, payment details, protected health information, or confidential business records in a public GitHub issue.
-
-## How the pilot works
+## State sequence
 
 ```text
-public request → automated bounded acknowledgement → human fit check
-               → written scope and due date → external provider receipt
-               → JP delivery approval → bounded audit → report delivery
-               → clarification window → acceptance or revision receipt
+REQUESTED
+  → FIT_APPROVED_FOR_SCOPE_DRAFT
+  → SCOPE_DRAFTED
+  → HUMAN_ACCEPTED
+  → PAID_PENDING
+  → PAID_SETTLED
+  → WORK_START_APPROVED
+  → ACTIVE
+  → DELIVERED
+  → ACCEPTED / CANCELLED / REFUNDED / DISPUTED
 ```
 
-1. Open a **Control Tower Audit Request** issue with public-safe information only.
-2. The exact-prefix GitHub automation may add `audit-fit-check`, `needs-jp-review`, and `not-an-order` labels and one boundary acknowledgement.
-3. The acknowledgement is not acceptance. JP reviews fit and either accepts, declines, or requests a narrower scope.
-4. No contract, payment request, order, capacity reservation, deadline, or delivery obligation exists until scope, price, due date, cancellation terms, and payment method are confirmed in writing.
-5. Payment must use an agreed external provider. GitHub stars, labels, reactions, issue comments, pledges, and screenshots do not count as received money.
-6. The report is delivered with a receipt identifying the reviewed repository state and the evidence boundary.
+## Nonbinding automated fit acceptance
 
-## Acceptance standard
+An exact-prefix request may automatically enter `FIT_APPROVED_FOR_SCOPE_DRAFT` when the controlled form, relationship, scope, prohibited-data, and queue checks pass.
 
-The audit is complete when the delivered report contains every promised section and the buyer either:
+That state does **not** create:
 
-- confirms acceptance; or
-- does not identify a missing promised section during the agreed three-day clarification window.
+- an order;
+- a capacity reservation;
+- a contract or signature;
+- an invoice or payment obligation;
+- a deadline promise;
+- indemnity, liability, waiver, release, or governing-law terms;
+- a work start.
 
-A disagreement about a new or expanded request is handled as a scope change, not silently absorbed into the pilot.
+The request may receive `fit-approved-for-scope-draft`, `needs-scope-draft`, and `not-an-order` labels plus one idempotent public-safe receipt.
 
-## Upgrade path
+## Capacity and backpressure
 
-A buyer who wants implementation may request a separate **GitHub Control Tower Implementation Pack**. The proposed test price is $250 USD and may include a reviewable branch and draft pull request containing agreed templates, guidance, or validation files. Settings changes, merges, deployments, credentials, and external publication remain outside that package unless separately and explicitly authorized.
+One hundred slots may exist while no more than 10 deliveries are `ACTIVE`.
 
-## Authority reference
+- At 10 active deliveries, new work starts pause automatically.
+- Intake, fit review, analysis, and draft preparation may continue.
+- A public issue, label, comment, or private Google Drive folder does not consume a commercial slot by itself.
+- A paid work start requires the complete agreement, settlement, capacity, and JP approval chain.
 
-The current grant map is recorded in:
+## Approved bounded execution
+
+Automation may execute pre-approved and reversible preparation classes:
+
+- validators and production builds;
+- repository issues, branches, draft pull requests, non-destructive files, and receipts;
+- private Google Drive work-package folders and nonbinding draft documents;
+- verified read-only repository, workflow, deployment, and document analysis;
+- deployment only to a confirmed target after validation and immutable readback.
+
+It may not automatically accept a final contract, initiate or confirm payment, start a paid delivery, select indemnity/liability terms, issue refunds, answer disputes, admit liability, change bank/payout/billing/domain/credentials/access controls, or perform destructive external actions.
+
+## Google Drive continuity
+
+The private continuity layer is `CONNECTED_PRIVATE` in the folder titled **Fardarter Drive™**.
+
+After fit approval, a private work package may be prepared with proposal, scope, agreement, invoice, delivery, and receipt drafts. Public GitHub records do not expose Drive URLs or IDs, buyer identities, signatures, provider receipts, counsel notes, confidential delivery data, or dispute records.
+
+A Google Drive file is not a signature, contract, invoice payment, settlement receipt, or work start.
+
+## Commercial acceptance and work start
+
+`HUMAN_ACCEPTED` requires:
+
+- identified parties;
+- buyer authority and informed consent;
+- exact scope and price;
+- due date and delivery destination;
+- cancellation and refund terms;
+- final agreement version;
+- JP approval.
+
+`PAID_SETTLED` requires the agreed external provider’s private receipt.
+
+`WORK_START_APPROVED` requires:
+
+- locked scope;
+- active capacity below 10;
+- buyer acceptance;
+- `PAID_SETTLED` when payment is required;
+- JP approval.
+
+## Legal and indemnity boundary
+
+The package is indemnity- and liability-ready for counsel review, but it is not indemnity-proof. Automation may prepare alternatives but may not select or accept indemnity, liability-cap, warranty, governing-law, arbitration, insurance, waiver, release, or admission terms.
+
+No template guarantees enforceability or excuses fraud, willful misconduct, bad faith, infringement, confidentiality breaches, unauthorized access, or obligations that law does not permit a party to disclaim.
+
+## Exclusions
+
+The $100 audit does not include:
+
+- credentials, private keys, secret rotation, or account recovery;
+- destructive cleanup, automatic merges, branch deletion, or settings changes;
+- production deployment, domains, billing, or payment handling;
+- penetration testing, security certification, legal or tax advice, or guaranteed outcomes;
+- automatic final contract acceptance, paid work start, refund, dispute response, waiver, release, or admission.
+
+## Scale boundary
+
+Fardarter Drive™ v5 records:
+
+- $1,000 first milestone;
+- $10,000 current 100-slot gross capacity target;
+- $1 million repeatable-business horizon;
+- $1 billion platform/ecosystem horizon;
+- $1 trillion infrastructure horizon;
+- $1 quadrillion symbolic possibility horizon.
+
+Every stage remains unachieved, nonforecast, and nonguaranteed. Increasing capacity or the active limit does not prove demand, revenue, valuation, funding, customers, market size, or a higher stage.
+
+## Authority and receipt references
 
 ```text
-receipts/revenue/JP-REV-001-AUTHORITY.json
+receipts/revenue/FARDARTER-DRIVE-V5.json
+receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json
+receipts/revenue/FARDARTER-DRIVE-GDRIVE-V5.json
+docs/repository/FARDARTER-DRIVE-V5-ACCEPT-EXECUTE-GDRIVE.md
 ```
 
-It authorizes the ten-slot capacity, GitHub inbound publication, bounded exact-prefix intake acknowledgement, verified merges, and fixed-site deployments under stated conditions. It does not authorize automatic direct outreach, contract acceptance, payment execution, delivery start, refund, or dispute action.
-
-## Claims boundary
-
-The $100 price, ten-audit capacity, $500 first milestone, and $1,000 expanded gross target are experiment parameters—not earnings forecasts or guarantees. An audit is not ordered, paid, delivered, or accepted until the corresponding evidence exists.
-
-## Current next action
-
-Monitor GitHub Issue `#133` and exact-prefix Control Tower Audit Request issues. Preserve public interest, fit, agreement, external-provider settlement, active-delivery capacity, delivery, and acceptance as separate states. Direct outreach remains inactive.
+Only independently supported state changes count. Unknown remains unknown. A draft remains a draft. `PAID_PENDING` is not `PAID_SETTLED`.
