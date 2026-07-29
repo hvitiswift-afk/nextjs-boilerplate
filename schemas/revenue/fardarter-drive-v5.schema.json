@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-v5.schema.json",
+  "title": "Fardarter Drive v5",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "driveId", "name", "controllingIssues", "currentEvidence", "acceptanceModel", "executionModel", "horizons", "progressionRules", "authorityReceiptPath", "googleDriveReceiptPath", "chainReceiptPath", "legalRisk", "claims", "nextControlledAction"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "driveId": { "const": "FARDARTER-DRIVE-V5" },
+    "name": { "const": "Fardarter Drive™" },
+    "trademarkNotice": { "type": "string", "minLength": 20 },
+    "controllingIssues": { "type": "array", "const": [141, 143, 146] },
+    "currentEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asOf", "experimentId", "offer", "priceUsd", "quantityTarget", "firstMilestoneUsd", "grossTargetUsd", "capacity", "maxConcurrentDeliveries", "activeDeliveries", "fitApprovedRequests", "orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd", "deploymentState", "googleDriveContinuity", "receivedCashRequires"],
+      "properties": {
+        "asOf": { "type": "string" },
+        "experimentId": { "const": "JP-REV-001" },
+        "offer": { "const": "GitHub Control Tower Audit" },
+        "priceUsd": { "const": 100 },
+        "quantityTarget": { "const": 100 },
+        "firstMilestoneUsd": { "const": 1000 },
+        "grossTargetUsd": { "const": 10000 },
+        "capacity": { "const": 100 },
+        "maxConcurrentDeliveries": { "const": 10 },
+        "activeDeliveries": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "fitApprovedRequests": { "type": "integer", "minimum": 0 },
+        "orders": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "verifiedGrossRevenueUsd": { "type": "number", "minimum": 0 },
+        "verifiedSettledCashUsd": { "type": "number", "minimum": 0 },
+        "deploymentState": { "enum": ["UNVERIFIED", "DEPLOYED_AND_VERIFIED"] },
+        "googleDriveContinuity": { "const": "CONNECTED_PRIVATE" },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "acceptanceModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["automatedState", "binding", "criteria", "prohibitedConsequences", "finalCommercialAcceptanceRequires"],
+      "properties": {
+        "automatedState": { "const": "FIT_APPROVED_FOR_SCOPE_DRAFT" },
+        "binding": { "const": false },
+        "criteria": { "type": "array", "minItems": 5, "uniqueItems": true, "items": { "type": "string" } },
+        "prohibitedConsequences": { "type": "array", "minItems": 7, "uniqueItems": true, "items": { "type": "string" } },
+        "finalCommercialAcceptanceRequires": { "type": "array", "minItems": 6, "uniqueItems": true, "items": { "type": "string" } }
+      }
+    },
+    "executionModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "permittedClasses", "automaticWorkStart", "workStartRequires", "backpressure", "prohibitedAutomaticActions"],
+      "properties": {
+        "state": { "const": "AUTHORIZED_BOUNDED" },
+        "permittedClasses": { "type": "array", "minItems": 5, "uniqueItems": true, "items": { "type": "string" } },
+        "automaticWorkStart": { "const": false },
+        "workStartRequires": { "type": "array", "minItems": 5, "uniqueItems": true, "items": { "type": "string" } },
+        "backpressure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["activeLimit", "pauseNewWorkStartsAtLimit", "continueIntakeAndDraftingAtLimit"],
+          "properties": {
+            "activeLimit": { "const": 10 },
+            "pauseNewWorkStartsAtLimit": { "const": true },
+            "continueIntakeAndDraftingAtLimit": { "const": true }
+          }
+        },
+        "prohibitedAutomaticActions": { "type": "array", "minItems": 7, "uniqueItems": true, "items": { "type": "string" } }
+      }
+    },
+    "horizons": { "type": "array", "minItems": 6, "maxItems": 6 },
+    "progressionRules": { "type": "object" },
+    "authorityReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V5.json" },
+    "googleDriveReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V5.json" },
+    "chainReceiptPath": { "const": "receipts/revenue/JP-REV-001-CHAIN-133-140.json" },
+    "legalRisk": { "type": "object" },
+    "claims": { "type": "object" },
+    "nextControlledAction": { "type": "string", "minLength": 40 }
+  }
+}
