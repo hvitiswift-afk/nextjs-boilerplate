@@ -11,6 +11,7 @@
     "offer",
     "audience",
     "proofPackage",
+    "authorityReceiptPath",
     "channel",
     "metrics",
     "money",
@@ -20,7 +21,7 @@
     "nextControlledAction"
   ],
   "properties": {
-    "schemaVersion": { "const": "1.1.0" },
+    "schemaVersion": { "const": "1.2.0" },
     "experimentId": { "type": "string", "pattern": "^JP-REV-[A-Z0-9-]+$" },
     "status": {
       "enum": [
@@ -46,8 +47,10 @@
         "type",
         "priceUsd",
         "quantityTarget",
+        "firstMilestoneUsd",
         "grossTargetUsd",
         "capacity",
+        "maxConcurrentDeliveries",
         "deliveryWindowBusinessDays",
         "clarificationWindowDays",
         "scopeLimits",
@@ -59,8 +62,10 @@
         "type": { "enum": ["paid_service", "product", "sponsorship", "voluntary_support"] },
         "priceUsd": { "type": "number", "exclusiveMinimum": 0 },
         "quantityTarget": { "type": "integer", "minimum": 1 },
+        "firstMilestoneUsd": { "type": "number", "exclusiveMinimum": 0 },
         "grossTargetUsd": { "type": "number", "minimum": 0 },
         "capacity": { "type": "integer", "minimum": 1 },
+        "maxConcurrentDeliveries": { "type": "integer", "minimum": 1 },
         "deliveryWindowBusinessDays": { "type": "integer", "minimum": 1 },
         "clarificationWindowDays": { "type": "integer", "minimum": 0 },
         "scopeLimits": {
@@ -91,13 +96,17 @@
     "audience": { "type": "string", "minLength": 10 },
     "proofPackage": {
       "type": "array",
-      "minItems": 6,
+      "minItems": 8,
       "uniqueItems": true,
       "items": {
         "type": "string",
         "minLength": 3,
         "not": { "pattern": "^(?:/|[A-Za-z]:|.*(?:^|/)[.][.](?:/|$))" }
       }
+    },
+    "authorityReceiptPath": {
+      "type": "string",
+      "const": "receipts/revenue/JP-REV-001-AUTHORITY.json"
     },
     "channel": {
       "type": "object",
