@@ -1,0 +1,93 @@
+name: GitHub Audit Request Intake
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - edited
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: audit-request-intake-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  acknowledge:
+    name: Label and acknowledge exact audit requests
+    if: >-
+      github.event_name == 'issues' &&
+      startsWith(github.event.issue.title, '[Audit request]:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Apply bounded intake receipt
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- jp-audit-intake-v1 -->';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+
+            const labels = [
+              {
+                name: 'audit-fit-check',
+                color: '0E8A16',
+                description: 'Public-safe GitHub audit fit check; not an order or contract',
+              },
+              {
+                name: 'needs-jp-review',
+                color: 'FBCA04',
+                description: 'Requires JP review before scope, agreement, payment, or delivery',
+              },
+              {
+                name: 'not-an-order',
+                color: 'D4C5F9',
+                description: 'Interest evidence only; does not reserve capacity or prove payment',
+              },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: labels.map((label) => label.name),
+            });
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+
+            if (!comments.some((comment) => comment.body?.includes(marker))) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: `${marker}
+            **Automated public-safe intake receipt**
+
+            This issue is recorded as a **fit check only**. It is not an order, capacity reservation, contract, invoice, proof of payment, delivery commitment, or acceptance of scope.
+
+            JP must separately review fit and approve the exact repository scope, price, due date, cancellation terms, delivery destination, and work start. Only an agreed external provider can confirm payment, and only provider-confirmed \`PAID_SETTLED\` evidence counts as received cash.
+
+            Do not post credentials, tokens, private customer data, payment records, confidential business records, protected health information, or other sensitive material in this public issue.`,
+              });
+            }
+
+            core.notice(`Audit intake receipt applied to issue #${issue_number}`);

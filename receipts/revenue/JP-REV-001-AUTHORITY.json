@@ -1,0 +1,162 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "JP-REV-001-AUTHORITY-2026-07-29",
+  "experimentId": "JP-REV-001",
+  "authorityVersion": "3.0.0",
+  "authorizedBy": "JP",
+  "authorizedAt": "2026-07-29T20:18:00Z",
+  "grants": [
+    {
+      "grantId": "CAPACITY_EXPANSION",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": false,
+      "scope": [
+        "Expand total fixed-scope audit capacity from five to ten slots",
+        "Keep the pilot price at $100 USD",
+        "Keep no more than two deliveries active at once",
+        "Preserve the first $500 USD as a milestone within the $1,000 USD gross target"
+      ],
+      "evidenceRequired": [
+        "Canonical revenue experiment record",
+        "Green repository-owned checks",
+        "Merged capacity-expansion receipt"
+      ]
+    },
+    {
+      "grantId": "GITHUB_INBOUND_PUBLICATION",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Maintain the public GitHub inbound offer through Issue #133",
+        "Expose the controlled audit-request form",
+        "Publish factual capacity and evidence states"
+      ],
+      "evidenceRequired": [
+        "Publication receipt",
+        "Issue #133",
+        "Public-data boundary"
+      ]
+    },
+    {
+      "grantId": "GITHUB_INTAKE_AUTOMATION",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Run only on issues whose title begins [Audit request]:",
+        "Create and apply bounded intake labels",
+        "Post one idempotent public-safe acknowledgement",
+        "Never accept scope, create an order, reserve capacity, invoice, or claim payment"
+      ],
+      "evidenceRequired": [
+        "Exact issue-title prefix",
+        "Automation marker preventing duplicate comments",
+        "GitHub Actions run receipt"
+      ]
+    },
+    {
+      "grantId": "VERIFIED_MERGE",
+      "state": "AUTHORIZED_CONDITIONAL",
+      "automated": false,
+      "scope": [
+        "Merge revenue-governance changes after all repository-owned required checks pass",
+        "Reject merge when the head SHA changes or review blockers appear"
+      ],
+      "evidenceRequired": [
+        "Current head SHA",
+        "Green Build Check",
+        "Green GRIPLOOM Verify",
+        "Green revenue verifier",
+        "No unresolved review threads"
+      ]
+    },
+    {
+      "grantId": "FIXED_SITE_DEPLOYMENT",
+      "state": "AUTHORIZED_CONDITIONAL",
+      "automated": true,
+      "scope": [
+        "Deploy only to Netlify site 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f",
+        "Run only after validation on main",
+        "Verify immutable page, API, sitemap, robots, and evidence-boundary readback"
+      ],
+      "evidenceRequired": [
+        "Netlify deploy ID",
+        "Immutable deploy URL",
+        "Route readback receipt"
+      ]
+    },
+    {
+      "grantId": "DIRECT_OUTREACH",
+      "state": "NOT_AUTHORIZED",
+      "automated": false,
+      "scope": [
+        "No automatic email, direct message, social post, marketplace listing, or prospect targeting"
+      ],
+      "evidenceRequired": [
+        "Separate exact-recipient or exact-channel authorization"
+      ]
+    },
+    {
+      "grantId": "CONTRACT_ACCEPTANCE",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": [
+        "Written fit, scope, price, due date, cancellation terms, and delivery destination"
+      ],
+      "evidenceRequired": [
+        "JP approval",
+        "Buyer acceptance",
+        "Dated private agreement record"
+      ]
+    },
+    {
+      "grantId": "PAYMENT_EXECUTION",
+      "state": "EXTERNAL_PROVIDER_ONLY",
+      "automated": false,
+      "scope": [
+        "Payment initiation and settlement remain with the agreed external provider",
+        "Only provider-confirmed PAID_SETTLED evidence counts as received cash"
+      ],
+      "evidenceRequired": [
+        "Private provider receipt",
+        "Settlement state PAID_SETTLED"
+      ]
+    },
+    {
+      "grantId": "DELIVERY_START",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": [
+        "Start no more than two active deliveries",
+        "Use the agreed repository snapshot and fixed-scope template"
+      ],
+      "evidenceRequired": [
+        "Written agreement",
+        "Provider-confirmed settlement",
+        "JP delivery approval"
+      ]
+    },
+    {
+      "grantId": "REFUND_OR_DISPUTE_ACTION",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": [
+        "No automated refund, charge response, dispute response, or admission"
+      ],
+      "evidenceRequired": [
+        "Provider record",
+        "JP approval",
+        "Dated resolution receipt"
+      ]
+    }
+  ],
+  "guardrails": {
+    "publicFitCheckCreatesOrder": false,
+    "publicFitCheckReservesCapacity": false,
+    "githubLabelProvesPayment": false,
+    "unverifiedScreenshotProvesPayment": false,
+    "directOutreachAutomatic": false,
+    "sensitiveDataAllowedInPublicRepo": false
+  },
+  "revoked": false,
+  "nextControlledAction": "Merge the verified ten-slot capacity and bounded GitHub intake automation, then monitor Issue #133 and exact-prefix audit requests without converting public interest into orders or money evidence."
+}

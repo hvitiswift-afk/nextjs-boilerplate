@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/authority-receipt.schema.json",
+  "title": "JP Revenue Authority Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "experimentId",
+    "authorityVersion",
+    "authorizedBy",
+    "authorizedAt",
+    "grants",
+    "guardrails",
+    "revoked",
+    "nextControlledAction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "receiptId": { "type": "string", "pattern": "^JP-REV-[A-Z0-9-]+-AUTHORITY-[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "experimentId": { "type": "string", "pattern": "^JP-REV-[A-Z0-9-]+$" },
+    "authorityVersion": { "type": "string", "pattern": "^[0-9]+[.][0-9]+[.][0-9]+$" },
+    "authorizedBy": { "const": "JP" },
+    "authorizedAt": { "type": "string", "format": "date-time" },
+    "grants": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["grantId", "state", "automated", "scope", "evidenceRequired"],
+        "properties": {
+          "grantId": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+          "state": {
+            "enum": [
+              "AUTHORIZED_ACTIVE",
+              "AUTHORIZED_CONDITIONAL",
+              "HUMAN_APPROVAL_REQUIRED",
+              "EXTERNAL_PROVIDER_ONLY",
+              "NOT_AUTHORIZED"
+            ]
+          },
+          "automated": { "type": "boolean" },
+          "scope": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 3 }
+          },
+          "evidenceRequired": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 3 }
+          }
+        }
+      }
+    },
+    "guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publicFitCheckCreatesOrder",
+        "publicFitCheckReservesCapacity",
+        "githubLabelProvesPayment",
+        "unverifiedScreenshotProvesPayment",
+        "directOutreachAutomatic",
+        "sensitiveDataAllowedInPublicRepo"
+      ],
+      "properties": {
+        "publicFitCheckCreatesOrder": { "const": false },
+        "publicFitCheckReservesCapacity": { "const": false },
+        "githubLabelProvesPayment": { "const": false },
+        "unverifiedScreenshotProvesPayment": { "const": false },
+        "directOutreachAutomatic": { "const": false },
+        "sensitiveDataAllowedInPublicRepo": { "const": false }
+      }
+    },
+    "revoked": { "const": false },
+    "nextControlledAction": { "type": "string", "minLength": 20 }
+  }
+}

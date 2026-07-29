@@ -1,11 +1,16 @@
 # GitHub Control Tower Audit Outreach Pack
 
-**Status:** prepared only; no message is authorized or sent by this file  
+**Status:** prepared only; direct outreach remains unauthorized unless a separate exact-recipient or exact-channel approval exists  
+**Active inbound channel:** GitHub Issue `#133`  
 **Offer:** fixed-scope GitHub Control Tower Audit  
 **Pilot price:** $100 USD  
-**Pilot capacity:** five total audits, no more than two active deliveries
+**Pilot capacity:** ten total audits, no more than two active deliveries  
+**First milestone:** five settled audits / $500 USD gross  
+**Expanded target:** ten settled audits / $1,000 USD gross
 
-Use only with a relevant recipient or audience. Verify the recipient and channel before sending. Do not mass-message, scrape contacts, impersonate anyone, conceal that the message is commercial, or imply a prior relationship that does not exist.
+The exact-prefix GitHub intake acknowledgement is authorized separately. It is not direct outreach and may run only after a requester opens an issue titled `[Audit request]:`.
+
+Use any outbound wording below only with a relevant recipient or audience and a separate authorization. Verify the recipient and channel before sending. Do not mass-message, scrape contacts, impersonate anyone, conceal that the message is commercial, or imply a prior relationship that does not exist.
 
 ## Warm professional contact
 
@@ -13,7 +18,7 @@ Hi [Name] — I’m piloting a fixed-scope GitHub Control Tower Audit for creato
 
 For $100 USD, I review one repository and deliver a repository/workflow map, the top five findings, PR and issue triage, a recommended action sequence, and a dated receipt. I do not need credentials and I do not merge, deploy, change settings, or perform destructive cleanup.
 
-I’m opening five pilot slots, with a proposed delivery window of three business days after scope and payment are confirmed. Would this be useful for [project or repository]? No problem if it is not a fit.
+The pilot has ten total slots with no more than two deliveries active at once. The proposed delivery window is three business days after written scope, exact due date, active capacity, and external-provider settlement are confirmed. Would this be useful for [project or repository]? No problem if it is not a fit.
 
 ## Relevant direct message or email
 
@@ -35,7 +40,7 @@ Would you like the one-page scope for [repository]? I will not follow up again u
 
 ## Public post
 
-I’m opening five pilot spots for a **GitHub Control Tower Audit** at **$100 USD** each.
+I’m opening **ten total pilot slots** for a **GitHub Control Tower Audit** at **$100 USD** each, with no more than two deliveries active at once.
 
 This is for creators and small teams whose repository has become hard to operate: unclear priorities, stale pull requests, duplicate issues, confusing CI, or deployment preparation that is not clearly separated from deployment completion.
 
@@ -50,11 +55,11 @@ Each audit covers one repository and delivers:
 
 No credentials are required. The audit does not include merges, destructive cleanup, repository-setting changes, production deployment, legal advice, or a security guarantee.
 
-Pilot scope: up to 25 open pull requests and 50 open issues, with a proposed three-business-day delivery window after written scope and payment settlement are confirmed.
+Pilot scope: up to 25 open pull requests and 50 open issues, with a proposed three-business-day delivery window after written scope, exact due date, active capacity, and payment settlement are confirmed.
 
-Interested project owners can open a public-safe **Control Tower Audit Request** issue after the money rail is merged. Please do not post credentials, payment information, customer-private data, or confidential records.
+Interested project owners can open a public-safe **Control Tower Audit Request** issue. The automated acknowledgement marks it as a fit check only; it does not create an order, reserve capacity, or prove payment. Please do not post credentials, payment information, customer-private data, or confidential records.
 
-The five-slot and $500 gross target are experiment parameters, not guaranteed earnings.
+The $500 first milestone and $1,000 expanded gross target are experiment parameters, not guaranteed earnings.
 
 ## One permitted follow-up
 
@@ -66,15 +71,16 @@ Should I send the one-page scope for [repository]? I’ll close the loop here if
 
 ## Qualified-interest reply
 
-Thanks for the interest. Before either of us treats this as an order, I need to confirm five items:
+Thanks for the interest. Before either of us treats this as an order, I need to confirm:
 
 1. the exact repository and your authority to request the review;
 2. the main operating problem and desired outcome;
 3. whether the pilot limits—one repository, up to 25 open PRs and 50 open issues—fit;
 4. the exact due date and delivery destination;
-5. the $100 USD price, cancellation/refund terms, and external payment method.
+5. the $100 USD price, cancellation/refund terms, and external payment method;
+6. that active delivery capacity is available under the two-active limit.
 
-Please keep credentials, payment information, private customer data, and confidential records out of the public GitHub issue. A request or conversation is not a contract or payment obligation.
+Please keep credentials, payment information, private customer data, and confidential records out of the public GitHub issue. A request, automated acknowledgement, label, or conversation is not a contract, order, capacity reservation, or payment obligation.
 
 ## Not-fit reply
 
@@ -96,7 +102,7 @@ A referral is also appreciated only when you believe the audit would genuinely f
 
 ## Outreach receipts
 
-For every authorized send or publication, preserve:
+For every separately authorized send or publication, preserve:
 
 ```text
 channel

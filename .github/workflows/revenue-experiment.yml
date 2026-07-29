@@ -6,16 +6,18 @@ on:
       - ".github/FUNDING.yml"
       - ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml"
       - ".github/ISSUE_TEMPLATE/revenue-experiment.yml"
+      - ".github/workflows/audit-request-intake.yml"
       - ".github/workflows/revenue-experiment.yml"
       - "app/github-control-tower-audit/**"
       - "app/api/revenue/pilot/**"
       - "app/page.tsx"
-      - "app/robots.ts"
       - "app/sitemap.ts"
+      - "app/robots.ts"
       - "docs/repository/FIRST-500-EXECUTION-BOARD.md"
       - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
       - "docs/repository/MONEY-RAIL.md"
       - "docs/repository/MONEY-RAIL-ACTIVATION.md"
+      - "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md"
       - "examples/github-control-tower-audit-receipt.sample.json"
       - "examples/revenue-experiment.sample.json"
       - "package.json"
@@ -34,16 +36,18 @@ on:
       - ".github/FUNDING.yml"
       - ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml"
       - ".github/ISSUE_TEMPLATE/revenue-experiment.yml"
+      - ".github/workflows/audit-request-intake.yml"
       - ".github/workflows/revenue-experiment.yml"
       - "app/github-control-tower-audit/**"
       - "app/api/revenue/pilot/**"
       - "app/page.tsx"
-      - "app/robots.ts"
       - "app/sitemap.ts"
+      - "app/robots.ts"
       - "docs/repository/FIRST-500-EXECUTION-BOARD.md"
       - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
       - "docs/repository/MONEY-RAIL.md"
       - "docs/repository/MONEY-RAIL-ACTIVATION.md"
+      - "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md"
       - "examples/github-control-tower-audit-receipt.sample.json"
       - "examples/revenue-experiment.sample.json"
       - "package.json"
@@ -66,9 +70,9 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify first-$500 package and product surface
+    name: Verify authority, capacity, and product surface
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
 
     steps:
       - name: Checkout
@@ -79,23 +83,28 @@ jobs:
         with:
           node-version: 20
 
-      - name: Validate package and product surface
+      - name: Validate authority and product package
         run: npm run revenue:verify
 
       - name: Verify JSON syntax
         run: |
-          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Revenue JSON syntax: PASS")'
+          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "receipts/revenue/JP-REV-001-AUTHORITY.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json", "schemas/revenue/authority-receipt.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Revenue authority JSON syntax: PASS")'
 
       - name: Emit non-financial receipt
         run: |
           echo "result=PASS"
           echo "experiment_state=PUBLISHED"
           echo "publication_issue=133"
+          echo "authority_version=3.0.0"
           echo "product_route=/github-control-tower-audit"
           echo "status_api=/api/revenue/pilot"
-          echo "public_interest=GITHUB_OPEN_ISSUES_SEPARATE_FROM_ORDERS"
-          echo "discovery=/sitemap.xml,/robots.txt,/github-control-tower-audit/opengraph-image"
-          echo "gross_target_usd=500"
+          echo "price_usd=100"
+          echo "first_milestone_usd=500"
+          echo "expanded_gross_target_usd=1000"
+          echo "total_slots=10"
+          echo "maximum_active_deliveries=2"
+          echo "orders=0"
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
-          echo "direct_outreach=NONE"
+          echo "automated_intake=EXACT_PREFIX_ACKNOWLEDGEMENT_ONLY"
+          echo "direct_outreach=NOT_AUTHORIZED"
