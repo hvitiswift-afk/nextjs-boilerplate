@@ -11,12 +11,16 @@ on:
       - "app/robots.ts"
       - "app/sitemap.ts"
       - "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md"
+      - "docs/repository/FARDARTER-DRIVE.md"
+      - "docs/repository/INDEMNITY-LIABILITY-READINESS.md"
       - "examples/revenue-experiment.sample.json"
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-*.mjs"
+      - "scripts/check-fardarter-drive.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
+      - "templates/fardarter-drive-*.md"
       - "package.json"
       - "package-lock.json"
       - "netlify.toml"
@@ -32,12 +36,16 @@ on:
       - "app/robots.ts"
       - "app/sitemap.ts"
       - "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md"
+      - "docs/repository/FARDARTER-DRIVE.md"
+      - "docs/repository/INDEMNITY-LIABILITY-READINESS.md"
       - "examples/revenue-experiment.sample.json"
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-*.mjs"
+      - "scripts/check-fardarter-drive.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
+      - "templates/fardarter-drive-*.md"
       - "package.json"
       - "package-lock.json"
       - "netlify.toml"
@@ -56,9 +64,9 @@ env:
 
 jobs:
   validate:
-    name: Validate audit authority deploy
+    name: Validate Fardarter Drive audit deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -73,14 +81,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify revenue authority product
+      - name: Verify Fardarter Drive revenue and authority package
         run: npm run revenue:verify
 
       - name: Build application
         run: npm run build
 
   deploy:
-    name: Deploy and read back audit authority product
+    name: Deploy and read back Fardarter Drive product
     if: github.event_name != 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
@@ -114,7 +122,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Revalidate authority package
+      - name: Revalidate Fardarter Drive package
         run: npm run revenue:verify
 
       - name: Deploy to confirmed Netlify site
@@ -156,11 +164,13 @@ jobs:
 
           grep -q '/github-control-tower-audit' artifacts/home.html
           grep -q 'GitHub Control Tower Audit' artifacts/audit.html
+          grep -q 'Fardarter Drive' artifacts/audit.html
           grep -q 'Request a public-safe fit check' artifacts/audit.html
-          grep -q 'Public fit checks' artifacts/audit.html
-          grep -q 'Active limit' artifacts/audit.html
-          grep -q 'First milestone' artifacts/audit.html
-          grep -q 'Expanded target' artifacts/audit.html
+          grep -q 'Aspirational horizons' artifacts/audit.html
+          grep -q 'not achieved' artifacts/audit.html
+          grep -q 'not indemnity-proof' artifacts/audit.html
+          grep -q 'Current gross' artifacts/audit.html
+          grep -q 'Settled cash' artifacts/audit.html
           grep -q '/github-control-tower-audit' artifacts/sitemap.xml
           grep -q '/sitemap.xml' artifacts/robots.txt
 
@@ -171,8 +181,28 @@ jobs:
           const validPublicRequestCount =
             publicRequestCount === null ||
             (Number.isInteger(publicRequestCount) && publicRequestCount >= 0);
+          const horizonMap = new Map(
+            (pilot.fardarterDrive?.horizons || []).map((stage) => [stage.stageId, stage]),
+          );
+          const expectedHorizons = [
+            ['FD-001K', '1000', 'CURRENT_EXPERIMENT_TARGET'],
+            ['FD-001M', '1000000', 'ASPIRATIONAL_HORIZON'],
+            ['FD-001B', '1000000000', 'ASPIRATIONAL_HORIZON'],
+            ['FD-001T', '1000000000000', 'ASPIRATIONAL_HORIZON'],
+            ['FD-001Q', '1000000000000000', 'SYMBOLIC_POSSIBILITY_HORIZON'],
+          ];
+          const horizonChecks = expectedHorizons.flatMap(([stageId, amountUsd, classification]) => {
+            const stage = horizonMap.get(stageId);
+            return [
+              [stage?.amountUsd === amountUsd, `${stageId}.amountUsd`],
+              [stage?.classification === classification, `${stageId}.classification`],
+              [stage?.achieved === false, `${stageId}.achieved`],
+              [stage?.forecast === false, `${stageId}.forecast`],
+              [stage?.guaranteed === false, `${stageId}.guaranteed`],
+            ];
+          });
           const required = [
-            [pilot.schemaVersion === '1.2.0', 'schemaVersion'],
+            [pilot.schemaVersion === '1.3.0', 'schemaVersion'],
             [pilot.experimentId === 'JP-REV-001', 'experimentId'],
             [pilot.status === 'PUBLISHED', 'status'],
             [pilot.offer?.priceUsd === 100, 'priceUsd'],
@@ -190,8 +220,20 @@ jobs:
             [pilot.money?.grossRevenueUsd === 0, 'grossRevenueUsd'],
             [pilot.money?.netCashUsd === 0, 'netCashUsd'],
             [pilot.publication?.issueNumber === 133, 'issueNumber'],
-            [pilot.authority?.version === '3.0.0', 'authorityVersion'],
+            [pilot.fardarterDrive?.driveId === 'FARDARTER-DRIVE-V4', 'driveId'],
+            [pilot.fardarterDrive?.controllingIssues?.join(',') === '141,142,143', 'controllingIssues'],
+            [pilot.fardarterDrive?.currentEvidence?.verifiedGrossRevenueUsd === 0, 'driveCurrentGross'],
+            [pilot.fardarterDrive?.currentEvidence?.verifiedSettledCashUsd === 0, 'driveCurrentSettled'],
+            [pilot.fardarterDrive?.currentEvidence?.deploymentState === 'UNVERIFIED', 'sourceDeploymentState'],
+            [pilot.fardarterDrive?.progressionRules?.automaticStagePromotion === false, 'noAutomaticStagePromotion'],
+            [pilot.fardarterDrive?.progressionRules?.manualAuditCapacityMayBeMultipliedToClaimHigherStage === false, 'noPilotMultiplicationClaim'],
+            [pilot.fardarterDrive?.legalRisk?.indemnityProofClaimed === false, 'noIndemnityProofClaim'],
+            [pilot.fardarterDrive?.legalRisk?.counselReviewRequiredForIndemnityAndLiabilityTerms === true, 'counselReviewGate'],
+            [pilot.authority?.version === '4.0.0', 'authorityVersion'],
             [pilot.authority?.revoked === false, 'authorityActive'],
+            [pilot.authority?.scaleHorizonPublication === 'AUTHORIZED_ACTIVE', 'scalePublication'],
+            [pilot.authority?.documentDraftAutomation === 'AUTHORIZED_ACTIVE', 'documentDraftAutomation'],
+            [pilot.authority?.relevantExactOutreach === 'AUTHORIZED_CONDITIONAL', 'exactOutreach'],
             [pilot.authority?.automatedIntake?.state === 'AUTHORIZED_ACTIVE', 'automatedIntakeState'],
             [pilot.authority?.automatedIntake?.exactTitlePrefix === '[Audit request]:', 'exactTitlePrefix'],
             [pilot.authority?.automatedIntake?.mayCreateOrder === false, 'automationNotOrder'],
@@ -199,22 +241,30 @@ jobs:
             [pilot.authority?.automatedIntake?.mayAcceptContract === false, 'automationNotContract'],
             [pilot.authority?.automatedIntake?.mayRequestPayment === false, 'automationNotPayment'],
             [pilot.authority?.automatedIntake?.mayStartDelivery === false, 'automationNotDelivery'],
-            [pilot.authority?.directOutreach === 'NOT_AUTHORIZED', 'directOutreach'],
             [pilot.authority?.contractAcceptance === 'HUMAN_APPROVAL_REQUIRED', 'contractGate'],
+            [pilot.authority?.indemnityAndLiabilityTerms === 'COUNSEL_REVIEW_REQUIRED', 'indemnityGate'],
             [pilot.authority?.paymentExecution === 'EXTERNAL_PROVIDER_ONLY', 'paymentGate'],
             [pilot.authority?.deliveryStart === 'HUMAN_APPROVAL_REQUIRED', 'deliveryGate'],
+            [pilot.chainReceipt?.result === 'CHAIN_RESOLVED', 'chainResult'],
+            [pilot.chainReceipt?.firstObject === 133, 'chainFirst'],
+            [pilot.chainReceipt?.lastObject === 140, 'chainLast'],
+            [pilot.chainReceipt?.objectCount === 8, 'chainCount'],
             [pilot.evidenceBoundary?.receivedCashRequires === 'PAID_SETTLED', 'receivedCashRequires'],
             [pilot.evidenceBoundary?.openingAnIssueCreatesContract === false, 'contractBoundary'],
-            [pilot.evidenceBoundary?.publicFitCheckCountsAsOrder === false, 'fitCheckOrderBoundary'],
-            [pilot.evidenceBoundary?.publicFitCheckReservesCapacity === false, 'fitCheckReservationBoundary'],
-            [pilot.evidenceBoundary?.githubLabelProvesPayment === false, 'labelPaymentBoundary'],
-            [pilot.evidenceBoundary?.automatedAcknowledgementAcceptsScope === false, 'ackScopeBoundary'],
-            [pilot.evidenceBoundary?.automatedAcknowledgementStartsDelivery === false, 'ackDeliveryBoundary'],
+            [pilot.evidenceBoundary?.documentDraftCreatesContract === false, 'draftContractBoundary'],
+            [pilot.evidenceBoundary?.invoiceDraftCreatesPaymentObligation === false, 'invoiceBoundary'],
+            [pilot.evidenceBoundary?.horizonAmountIsAchievedRevenue === false, 'horizonRevenueBoundary'],
+            [pilot.evidenceBoundary?.horizonAmountIsValuation === false, 'horizonValuationBoundary'],
+            [pilot.evidenceBoundary?.automaticStagePromotion === false, 'stagePromotionBoundary'],
+            [pilot.evidenceBoundary?.templateIsIndemnityProof === false, 'templateIndemnityBoundary'],
+            [pilot.evidenceBoundary?.indemnityAndLiabilityTermsRequireCounselReview === true, 'legalReviewBoundary'],
+            [pilot.evidenceBoundary?.buyerConsentRequiredForBindingAgreement === true, 'buyerConsentBoundary'],
             [pilot.evidenceBoundary?.earningsGuaranteed === false, 'earningsBoundary'],
+            ...horizonChecks,
           ];
           const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
           if (failed.length) throw new Error(`Readback failed: ${failed.join(', ')}`);
-          console.log('Netlify audit authority product readback: PASS');
+          console.log('Netlify Fardarter Drive product readback: PASS');
           NODE
 
           echo "readback=PASS" >> "$GITHUB_OUTPUT"
@@ -233,8 +283,9 @@ jobs:
           const deployed = Boolean(process.env.DEPLOY_ID);
           const readback = process.env.READBACK || 'NOT_COMPLETED';
           const receipt = {
-            schemaVersion: '1.2.0',
-            receiptId: `JP-REV-001-NETLIFY-${process.env.GITHUB_RUN_ID}`,
+            schemaVersion: '1.3.0',
+            receiptId: `FARDARTER-DRIVE-V4-NETLIFY-${process.env.GITHUB_RUN_ID}`,
+            driveId: 'FARDARTER-DRIVE-V4',
             repository: process.env.GITHUB_REPOSITORY,
             commit: process.env.GITHUB_SHA,
             runId: process.env.GITHUB_RUN_ID,
@@ -247,23 +298,46 @@ jobs:
             readback,
             result: deployed && readback === 'PASS' ? 'DEPLOYED_AND_VERIFIED' : 'INCOMPLETE',
             verifiedRoutes: ['/', '/github-control-tower-audit', '/api/revenue/pilot', '/sitemap.xml', '/robots.txt'],
-            authorityVersion: '3.0.0',
-            priceUsd: 100,
-            firstMilestoneUsd: 500,
-            grossTargetUsd: 1000,
-            totalSlots: 10,
-            maximumActiveDeliveries: 2,
-            orders: 0,
-            publicInterestEvidence: 'SEPARATE_FROM_ORDERS_AND_CAPACITY',
-            automatedIntake: 'EXACT_PREFIX_ACKNOWLEDGEMENT_ONLY',
-            directOutreach: 'NOT_AUTHORIZED',
-            verifiedRevenueUsd: 0,
-            verifiedSettledCashUsd: 0,
+            authorityVersion: '4.0.0',
+            chainReceipt: 'JP-REV-001-CHAIN-133-140',
+            currentEvidence: {
+              priceUsd: 100,
+              totalSlots: 10,
+              maximumActiveDeliveries: 2,
+              orders: 0,
+              verifiedRevenueUsd: 0,
+              verifiedSettledCashUsd: 0
+            },
+            horizons: {
+              FD_001K: 'UNACHIEVED_NONFORECAST',
+              FD_001M: 'UNACHIEVED_NONFORECAST',
+              FD_001B: 'UNACHIEVED_NONFORECAST',
+              FD_001T: 'UNACHIEVED_NONFORECAST',
+              FD_001Q: 'SYMBOLIC_UNACHIEVED'
+            },
+            legalBoundary: {
+              documentDraftsMayBePrepared: true,
+              finalContractRequiresHumanAcceptance: true,
+              indemnityAndLiabilityTermsRequireCounselReview: true,
+              templateIsIndemnityProof: false,
+              paymentExecution: 'EXTERNAL_PROVIDER_ONLY'
+            },
             externalActionsPerformed: deployed ? ['NETLIFY_PRODUCTION_DEPLOY'] : [],
-            excludedActions: ['new_site_creation', 'domain_change', 'billing_change', 'credential_change', 'payment_execution', 'customer_contact', 'contract_acceptance', 'delivery_start'],
+            excludedAutomaticActions: [
+              'new_site_creation',
+              'domain_change',
+              'billing_change',
+              'credential_change',
+              'payment_execution',
+              'contract_acceptance',
+              'delivery_start',
+              'refund_or_dispute_response',
+              'claim_horizon_as_achieved',
+              'claim_indemnity_proof'
+            ],
             generatedAt: new Date().toISOString(),
           };
-          fs.writeFileSync('artifacts/netlify-audit-product-receipt.json', JSON.stringify(receipt, null, 2) + '\n');
+          fs.writeFileSync('artifacts/fardarter-drive-v4-netlify-receipt.json', JSON.stringify(receipt, null, 2) + '\n');
           NODE
           if [ -f netlify-deploy-result.json ]; then cp netlify-deploy-result.json artifacts/; fi
 
@@ -271,7 +345,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: netlify-audit-product-${{ github.sha }}
+          name: fardarter-drive-v4-${{ github.sha }}
           path: artifacts
           retention-days: 30
 
@@ -279,20 +353,16 @@ jobs:
         if: always()
         run: |
           {
-            echo "## Netlify audit authority deployment"
+            echo "## Fardarter Drive v4 deployment"
             echo "- Site ID: $NETLIFY_SITE_ID"
             echo "- Primary URL: $NETLIFY_PRIMARY_URL"
             echo "- Deploy ID: ${{ steps.deploy.outputs.deploy_id }}"
             echo "- Deploy URL: ${{ steps.deploy.outputs.deploy_url }}"
             echo "- Readback: ${{ steps.readback.outputs.readback }}"
-            echo "- Authority version: 3.0.0"
-            echo "- Total slots: 10"
-            echo "- Maximum active deliveries: 2"
-            echo "- First milestone: $500 USD"
-            echo "- Expanded gross target: $1,000 USD"
-            echo "- Public fit checks: separate from orders and capacity"
-            echo "- Automated intake: exact-prefix acknowledgement only"
-            echo "- Direct outreach: not authorized"
-            echo "- Verified revenue: $0 USD"
-            echo "- Verified settled cash: $0 USD"
+            echo "- Authority version: 4.0.0"
+            echo "- Chain receipt: #133-#140"
+            echo "- Current verified revenue: $0 USD"
+            echo "- Current verified settled cash: $0 USD"
+            echo "- Higher horizons: unachieved / nonforecast"
+            echo "- Indemnity status: counsel-gated / not indemnity-proof"
           } >> "$GITHUB_STEP_SUMMARY"

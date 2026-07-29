@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/chain-133-140.schema.json",
+  "title": "JP Revenue Chain Receipt 133 through 140",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "experimentId",
+    "driveId",
+    "assembledAt",
+    "source",
+    "chain",
+    "successors",
+    "financialEvidence",
+    "result",
+    "claims",
+    "nextControlledAction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "receiptId": { "const": "JP-REV-001-CHAIN-133-140-2026-07-29" },
+    "experimentId": { "const": "JP-REV-001" },
+    "driveId": { "const": "FARDARTER-DRIVE-V4" },
+    "assembledAt": { "type": "string", "format": "date-time" },
+    "source": { "const": "GitHub connector readback" },
+    "chain": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "objectType", "state", "role", "url", "mergeCommitSha", "evidenceState"],
+          "properties": {
+            "number": { "const": 133 },
+            "objectType": { "const": "ISSUE" },
+            "state": { "const": "OPEN" },
+            "role": { "type": "string", "minLength": 10 },
+            "url": { "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/133" },
+            "mergeCommitSha": { "type": "null" },
+            "evidenceState": { "const": "ACTIVE" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "objectType", "state", "role", "url", "mergeCommitSha", "evidenceState"],
+          "properties": {
+            "number": { "const": 134 },
+            "objectType": { "const": "PULL_REQUEST" },
+            "state": { "const": "MERGED" },
+            "role": { "type": "string", "minLength": 10 },
+            "url": { "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/134" },
+            "mergeCommitSha": { "const": "3393562796868dbe4eee3b9bd3d7896602b3229a" },
+            "evidenceState": { "const": "MERGED" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "objectType", "state", "role", "url", "mergeCommitSha", "evidenceState"],
+          "properties": {
+            "number": { "const": 135 },
+            "objectType": { "const": "PULL_REQUEST" },
+            "state": { "const": "MERGED" },
+            "role": { "type": "string", "minLength": 10 },
+            "url": { "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/135" },
+            "mergeCommitSha": { "const": "e4332853b4f4a05db9eddf7aaa999fd1fd152572" },
+            "evidenceState": { "const": "MERGED" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "objectType", "state", "role", "url", "mergeCommitSha", "evidenceState"],
+          "properties": {
+            "number": { "const": 136 },
+            "objectType": { "const": "ISSUE" },
+            "state": { "const": "OPEN" },
+            "role": { "type": "string", "minLength": 10 },
+            "url": { "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/136" },
+            "mergeCommitSha": { "type": "null" },
+            "evidenceState": { "const": "RECEIPT_REQUIRED" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "objectType", "state", "role", "url", "mergeCommitSha", "evidenceState"],
+          "properties": {
+            "number": { "const": 137 },
+            "objectType": { "const": "PULL_REQUEST" },
+            "state": { "const": "MERGED" },
+            "role": { "type": "string", "minLength": 10 },
+            "url": { "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/137" },
+            "mergeCommitSha": { "const": "28329eb4e5144cc39f5860e33d665e7e297e5443" },
+            "evidenceState": { "const": "MERGED" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "objectType", "state", "role", "url", "mergeCommitSha", "evidenceState"],
+          "properties": {
+            "number": { "const": 138 },
+            "objectType": { "const": "PULL_REQUEST" },
+            "state": { "const": "MERGED" },
+            "role": { "type": "string", "minLength": 10 },
+            "url": { "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/138" },
+            "mergeCommitSha": { "const": "2c08a8d3c9710844a6cc0fc183413d3123d2ff04" },
+            "evidenceState": { "const": "MERGED" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "objectType", "state", "role", "url", "mergeCommitSha", "evidenceState"],
+          "properties": {
+            "number": { "const": 139 },
+            "objectType": { "const": "PULL_REQUEST" },
+            "state": { "const": "MERGED" },
+            "role": { "type": "string", "minLength": 10 },
+            "url": { "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/pull/139" },
+            "mergeCommitSha": { "const": "814b26a8d59baf8e1279a8eaeca378f7088fe7f9" },
+            "evidenceState": { "const": "MERGED" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "objectType", "state", "role", "url", "mergeCommitSha", "evidenceState"],
+          "properties": {
+            "number": { "const": 140 },
+            "objectType": { "const": "ISSUE" },
+            "state": { "const": "CLOSED" },
+            "role": { "type": "string", "minLength": 10 },
+            "url": { "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/140" },
+            "mergeCommitSha": { "type": "null" },
+            "evidenceState": { "const": "PASS" }
+          }
+        }
+      ],
+      "items": false
+    },
+    "successors": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["number", "role", "state"],
+        "properties": {
+          "number": { "enum": [141, 142, 143, 144] },
+          "role": { "type": "string", "minLength": 8 },
+          "state": { "enum": ["OPEN", "CLOSED_NOT_PLANNED"] }
+        }
+      }
+    },
+    "financialEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd", "receivedCashRequires"],
+      "properties": {
+        "orders": { "const": 0 },
+        "verifiedGrossRevenueUsd": { "const": 0 },
+        "verifiedSettledCashUsd": { "const": 0 },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "result": { "const": "CHAIN_RESOLVED" },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allObjectsArePullRequests", "deploymentVerified", "revenueReceived", "higherScaleHorizonAchieved"],
+      "properties": {
+        "allObjectsArePullRequests": { "const": false },
+        "deploymentVerified": { "const": false },
+        "revenueReceived": { "const": false },
+        "higherScaleHorizonAchieved": { "const": false }
+      }
+    },
+    "nextControlledAction": { "type": "string", "minLength": 40 }
+  }
+}

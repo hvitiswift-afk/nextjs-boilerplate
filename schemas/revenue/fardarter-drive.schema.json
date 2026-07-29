@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive.schema.json",
+  "title": "Fardarter Drive v4 Scale Horizon Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "driveId",
+    "name",
+    "trademarkNotice",
+    "controllingIssues",
+    "currentEvidence",
+    "horizons",
+    "progressionRules",
+    "authorityReceiptPath",
+    "chainReceiptPath",
+    "automationReceiptPath",
+    "legalRisk",
+    "claims",
+    "nextControlledAction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "driveId": { "const": "FARDARTER-DRIVE-V4" },
+    "name": { "const": "Fardarter Drive™" },
+    "trademarkNotice": { "type": "string", "minLength": 20 },
+    "controllingIssues": {
+      "type": "array",
+      "prefixItems": [
+        { "const": 141 },
+        { "const": 142 },
+        { "const": 143 }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "currentEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asOf",
+        "experimentId",
+        "offer",
+        "priceUsd",
+        "capacity",
+        "maxConcurrentDeliveries",
+        "orders",
+        "verifiedGrossRevenueUsd",
+        "verifiedSettledCashUsd",
+        "deploymentState",
+        "receivedCashRequires"
+      ],
+      "properties": {
+        "asOf": { "type": "string", "format": "date" },
+        "experimentId": { "const": "JP-REV-001" },
+        "offer": { "const": "GitHub Control Tower Audit" },
+        "priceUsd": { "const": 100 },
+        "capacity": { "const": 10 },
+        "maxConcurrentDeliveries": { "const": 2 },
+        "orders": { "const": 0 },
+        "verifiedGrossRevenueUsd": { "const": 0 },
+        "verifiedSettledCashUsd": { "const": 0 },
+        "deploymentState": { "enum": ["UNVERIFIED", "DEPLOYED_AND_VERIFIED"] },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "horizons": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stageId",
+          "amountUsd",
+          "label",
+          "classification",
+          "achieved",
+          "forecast",
+          "guaranteed",
+          "requirements"
+        ],
+        "properties": {
+          "stageId": { "enum": ["FD-001K", "FD-001M", "FD-001B", "FD-001T", "FD-001Q"] },
+          "amountUsd": { "enum": ["1000", "1000000", "1000000000", "1000000000000", "1000000000000000"] },
+          "label": { "type": "string", "minLength": 12 },
+          "classification": { "enum": ["CURRENT_EXPERIMENT_TARGET", "ASPIRATIONAL_HORIZON", "SYMBOLIC_POSSIBILITY_HORIZON"] },
+          "achieved": { "const": false },
+          "forecast": { "const": false },
+          "guaranteed": { "const": false },
+          "requirements": {
+            "type": "array",
+            "minItems": 3,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 12 }
+          }
+        }
+      }
+    },
+    "progressionRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "automaticStagePromotion",
+        "priorStageEvidenceRequired",
+        "independentVerificationRequired",
+        "legalAndRiskReviewRequired",
+        "manualAuditCapacityMayBeMultipliedToClaimHigherStage"
+      ],
+      "properties": {
+        "automaticStagePromotion": { "const": false },
+        "priorStageEvidenceRequired": { "const": true },
+        "independentVerificationRequired": { "const": true },
+        "legalAndRiskReviewRequired": { "const": true },
+        "manualAuditCapacityMayBeMultipliedToClaimHigherStage": { "const": false }
+      }
+    },
+    "authorityReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V4.json" },
+    "chainReceiptPath": { "const": "receipts/revenue/JP-REV-001-CHAIN-133-140.json" },
+    "automationReceiptPath": { "const": "receipts/revenue/FARDARTER-DRIVE-V4-AUTOMATION.json" },
+    "legalRisk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "indemnityProofClaimed",
+        "bindingAgreementRequired",
+        "buyerConsentRequired",
+        "counselReviewRequiredForIndemnityAndLiabilityTerms",
+        "insuranceReviewRequiredWhenRiskOrScaleWarrants",
+        "willfulMisconductOrBadFaithAutomaticallyExcused",
+        "templateCreatesBindingContract"
+      ],
+      "properties": {
+        "indemnityProofClaimed": { "const": false },
+        "bindingAgreementRequired": { "const": true },
+        "buyerConsentRequired": { "const": true },
+        "counselReviewRequiredForIndemnityAndLiabilityTerms": { "const": true },
+        "insuranceReviewRequiredWhenRiskOrScaleWarrants": { "const": true },
+        "willfulMisconductOrBadFaithAutomaticallyExcused": { "const": false },
+        "templateCreatesBindingContract": { "const": false }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currentRevenueClaimedAboveEvidence",
+        "currentValuationClaimed",
+        "futureEarningsGuaranteed",
+        "customerCountClaimedAboveEvidence",
+        "deploymentClaimedWithoutReadback",
+        "universalIndemnityClaimed"
+      ],
+      "properties": {
+        "currentRevenueClaimedAboveEvidence": { "const": false },
+        "currentValuationClaimed": { "const": false },
+        "futureEarningsGuaranteed": { "const": false },
+        "customerCountClaimedAboveEvidence": { "const": false },
+        "deploymentClaimedWithoutReadback": { "const": false },
+        "universalIndemnityClaimed": { "const": false }
+      }
+    },
+    "nextControlledAction": { "type": "string", "minLength": 40 }
+  }
+}

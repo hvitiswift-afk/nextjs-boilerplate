@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "FARDARTER-DRIVE-V4-AUTOMATION-2026-07-29",
+  "driveId": "FARDARTER-DRIVE-V4",
+  "result": "PREPARED_FOR_VERIFIED_MERGE",
+  "externalActionsPerformed": [
+    "CREATE_ISSUE_141_STRATEGY_RAIL",
+    "CREATE_ISSUE_142_IMPLEMENTATION_RECEIPT",
+    "CREATE_ISSUE_143_ROLLOUT_READBACK_RAIL",
+    "CLOSE_ISSUE_144_ACTION_ROUTING_INCIDENT",
+    "CREATE_BRANCH_agent/fardarter-drive-v4"
+  ],
+  "repositoryActionsAuthorized": [
+    "CREATE_AND_UPDATE_REVIEWABLE_FILES",
+    "RUN_REPOSITORY_VALIDATION",
+    "OPEN_PULL_REQUEST",
+    "MERGE_AFTER_UNCHANGED_HEAD_AND_GREEN_CHECKS",
+    "POST_NONFINANCIAL_CHAIN_RECEIPTS",
+    "TRIGGER_FIXED_SITE_DEPLOYMENT_AFTER_MERGE"
+  ],
+  "draftAutomationAuthorized": [
+    "PROPOSAL_DRAFT",
+    "SCOPE_DRAFT",
+    "CONTRACT_DRAFT",
+    "INDEMNITY_AND_LIABILITY_DRAFT",
+    "INVOICE_DRAFT",
+    "DELIVERY_AND_ACCEPTANCE_DRAFT"
+  ],
+  "conditionalExternalActions": [
+    "ONE_RELEVANT_MESSAGE_TO_EXACT_VERIFIED_RECIPIENT_OR_AUTHORIZED_CHANNEL",
+    "FIXED_SITE_NETLIFY_DEPLOYMENT_AFTER_VALIDATION"
+  ],
+  "prohibitedAutomaticActions": [
+    "MASS_OUTREACH",
+    "CONTACT_SCRAPING",
+    "CONTRACT_ACCEPTANCE",
+    "PAYMENT_EXECUTION_OR_SETTLEMENT_CLAIM",
+    "WORK_START",
+    "REFUND_OR_DISPUTE_RESPONSE",
+    "BANK_OR_PAYOUT_CHANGE",
+    "DOMAIN_OR_BILLING_CHANGE",
+    "CREDENTIAL_OR_ACCESS_CONTROL_CHANGE",
+    "DESTRUCTIVE_REPOSITORY_ACTION",
+    "CLAIM_HORIZON_AS_ACHIEVED",
+    "CLAIM_TEMPLATE_IS_INDEMNITY_PROOF"
+  ],
+  "currentEvidence": {
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "deploymentVerified": false,
+    "horizonsAchieved": []
+  },
+  "publicDataBoundary": {
+    "containsCredentials": false,
+    "containsPaymentData": false,
+    "containsCustomerIdentity": false,
+    "containsConfidentialRecords": false,
+    "containsBindingAgreement": false
+  },
+  "nextControlledAction": "Open and verify the Fardarter Drive v4 pull request, merge only after all required checks pass on the unchanged head, then complete the cross-item receipt comments and rollout readback through Issues #142 and #143."
+}

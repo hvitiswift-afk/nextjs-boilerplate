@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "FARDARTER-DRIVE-AUTHORITY-V4-2026-07-29",
+  "driveId": "FARDARTER-DRIVE-V4",
+  "authorityVersion": "4.0.0",
+  "authorizedBy": "JP",
+  "authorizedAt": "2026-07-29T20:45:00Z",
+  "supersedesForFutureActions": "receipts/revenue/JP-REV-001-AUTHORITY.json",
+  "historicalReceiptsRemainValid": true,
+  "grants": [
+    {
+      "grantId": "SCALE_HORIZON_PUBLICATION",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Publish Fardarter Drive scale horizons as unachieved nonforecast planning objectives",
+        "Display current verified evidence separately from every horizon",
+        "Reject any automatic stage promotion or achieved-state claim"
+      ],
+      "evidenceRequired": [
+        "Fardarter Drive scale record",
+        "Green Fardarter Drive validator",
+        "Current evidence snapshot"
+      ]
+    },
+    {
+      "grantId": "REPOSITORY_IMPLEMENTATION_AND_RECEIPTS",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Create branches, files, schemas, drafts, pull requests, verification, and nonfinancial receipts",
+        "Maintain the #133 through #140 chain receipt",
+        "Prepare fixed-site deployment and readback evidence"
+      ],
+      "evidenceRequired": [
+        "Current branch and head SHA",
+        "Repository-owned check results",
+        "Merge and readback receipts"
+      ]
+    },
+    {
+      "grantId": "DOCUMENT_DRAFT_AUTOMATION",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Prepare proposal drafts",
+        "Prepare scope and statement-of-work drafts",
+        "Prepare contract and indemnity-readiness drafts",
+        "Prepare invoice drafts that do not request or execute payment",
+        "Prepare delivery and acceptance drafts"
+      ],
+      "evidenceRequired": [
+        "Draft status visibly stated",
+        "No binding acceptance or payment claim",
+        "Human review before external use"
+      ]
+    },
+    {
+      "grantId": "RELEVANT_EXACT_OUTREACH",
+      "state": "AUTHORIZED_CONDITIONAL",
+      "automated": false,
+      "scope": [
+        "One relevant message to an exact verified recipient or exact authorized channel",
+        "No mass messaging, scraping, impersonation, concealed commercial purpose, or repeated unsolicited follow-up",
+        "Preserve the exact message version and send receipt"
+      ],
+      "evidenceRequired": [
+        "Verified recipient or channel",
+        "Relevance and privacy review",
+        "Locked message version",
+        "JP approval for the exact send unless the exact channel has separately granted standing authority"
+      ]
+    },
+    {
+      "grantId": "GITHUB_INBOUND_AUTOMATION",
+      "state": "AUTHORIZED_ACTIVE",
+      "automated": true,
+      "scope": [
+        "Maintain Issue #133 and the controlled request form",
+        "Label and acknowledge exact-prefix audit requests once",
+        "Count public interest separately from orders and capacity"
+      ],
+      "evidenceRequired": [
+        "Exact title prefix",
+        "Idempotent marker",
+        "Not-an-order and sensitive-data boundaries"
+      ]
+    },
+    {
+      "grantId": "VERIFIED_MERGE",
+      "state": "AUTHORIZED_CONDITIONAL",
+      "automated": false,
+      "scope": [
+        "Merge after all repository-owned required checks pass on an unchanged head",
+        "Reject merge when review blockers or head drift appear"
+      ],
+      "evidenceRequired": [
+        "Current head SHA",
+        "Green Build Check",
+        "Green GRIPLOOM Verify",
+        "Green revenue and Fardarter Drive verification",
+        "No unresolved review threads"
+      ]
+    },
+    {
+      "grantId": "FIXED_SITE_DEPLOYMENT",
+      "state": "AUTHORIZED_CONDITIONAL",
+      "automated": true,
+      "scope": [
+        "Deploy only to Netlify site 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f",
+        "Run after validation on main",
+        "Verify immutable page, API, sitemap, robots, authority, chain, and horizon readback"
+      ],
+      "evidenceRequired": [
+        "Netlify deploy ID",
+        "Immutable deploy URL",
+        "Route readback receipt"
+      ]
+    },
+    {
+      "grantId": "CONTRACT_ACCEPTANCE",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": [
+        "Accept only a final agreement stating exact parties, authority, scope, price, due date, cancellation and refund terms, delivery destination, liability allocation, and governing terms"
+      ],
+      "evidenceRequired": [
+        "JP approval",
+        "Buyer informed consent and authority representation",
+        "Dated final agreement",
+        "Counsel review where risk or scale warrants"
+      ]
+    },
+    {
+      "grantId": "INDEMNITY_AND_LIABILITY_TERMS",
+      "state": "COUNSEL_REVIEW_REQUIRED",
+      "automated": false,
+      "scope": [
+        "Draft mutual or one-way indemnity alternatives",
+        "Draft liability caps, exclusions, warranties, no-reliance, defense-control, notice, insurance, survival, and dispute terms",
+        "Never represent a template as universally enforceable or indemnity-proof"
+      ],
+      "evidenceRequired": [
+        "Final party and jurisdiction facts",
+        "Risk and insurance review",
+        "Legal review when appropriate",
+        "Knowing acceptance by the parties"
+      ]
+    },
+    {
+      "grantId": "PAYMENT_EXECUTION",
+      "state": "EXTERNAL_PROVIDER_ONLY",
+      "automated": false,
+      "scope": [
+        "Payment initiation and settlement remain with the agreed external provider",
+        "Only provider-confirmed PAID_SETTLED evidence counts as received cash"
+      ],
+      "evidenceRequired": [
+        "Private provider receipt",
+        "Settlement state PAID_SETTLED"
+      ]
+    },
+    {
+      "grantId": "DELIVERY_START",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": [
+        "Start only after written agreement, provider-confirmed settlement, available capacity, and JP approval",
+        "Keep no more than two current audit deliveries active unless a new capacity model is independently approved"
+      ],
+      "evidenceRequired": [
+        "Written agreement",
+        "Provider-confirmed settlement",
+        "Capacity record",
+        "JP work-start approval"
+      ]
+    },
+    {
+      "grantId": "REFUND_DISPUTE_OR_ADMISSION",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": [
+        "No automated refund, charge response, dispute response, settlement, waiver, admission, or release"
+      ],
+      "evidenceRequired": [
+        "Provider and agreement records",
+        "JP approval",
+        "Counsel review when appropriate",
+        "Dated resolution receipt"
+      ]
+    },
+    {
+      "grantId": "BANK_BILLING_DOMAIN_CREDENTIAL_OR_DESTRUCTIVE_ACTION",
+      "state": "HUMAN_APPROVAL_REQUIRED",
+      "automated": false,
+      "scope": [
+        "No automatic bank, payout, billing, domain, credential, access-control, deletion, force-push, or destructive repository action"
+      ],
+      "evidenceRequired": [
+        "Exact target",
+        "Consequences and rollback plan",
+        "JP approval",
+        "Post-action readback"
+      ]
+    }
+  ],
+  "guardrails": {
+    "horizonEqualsAchievedRevenue": false,
+    "horizonEqualsValuation": false,
+    "publicFitCheckCreatesOrder": false,
+    "draftCreatesContract": false,
+    "invoiceDraftCreatesPaymentObligation": false,
+    "automatedAcknowledgementAcceptsScope": false,
+    "githubEvidenceProvesSettlement": false,
+    "unverifiedScreenshotProvesPayment": false,
+    "templateIsIndemnityProof": false,
+    "willfulMisconductOrBadFaithAutomaticallyExcused": false,
+    "sensitiveDataAllowedInPublicRepo": false
+  },
+  "revoked": false,
+  "nextControlledAction": "Merge the Fardarter Drive v4 scale, authority, legal-readiness, and chain-receipt package; then preserve external outreach, final contracts, payments, work starts, refunds, disputes, and liability terms behind their defined evidence gates."
+}

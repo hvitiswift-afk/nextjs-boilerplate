@@ -18,6 +18,8 @@ on:
       - "docs/repository/MONEY-RAIL.md"
       - "docs/repository/MONEY-RAIL-ACTIVATION.md"
       - "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md"
+      - "docs/repository/FARDARTER-DRIVE.md"
+      - "docs/repository/INDEMNITY-LIABILITY-READINESS.md"
       - "examples/github-control-tower-audit-receipt.sample.json"
       - "examples/revenue-experiment.sample.json"
       - "package.json"
@@ -25,10 +27,12 @@ on:
       - "schemas/revenue/**"
       - "scripts/check-revenue-experiment.mjs"
       - "scripts/check-revenue-product-surface.mjs"
+      - "scripts/check-fardarter-drive.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
       - "templates/github-control-tower-audit-outreach.md"
       - "templates/github-control-tower-audit.md"
+      - "templates/fardarter-drive-*.md"
   push:
     branches:
       - main
@@ -48,6 +52,8 @@ on:
       - "docs/repository/MONEY-RAIL.md"
       - "docs/repository/MONEY-RAIL-ACTIVATION.md"
       - "docs/repository/REVENUE-AUTHORITY-CAPACITY-V3.md"
+      - "docs/repository/FARDARTER-DRIVE.md"
+      - "docs/repository/INDEMNITY-LIABILITY-READINESS.md"
       - "examples/github-control-tower-audit-receipt.sample.json"
       - "examples/revenue-experiment.sample.json"
       - "package.json"
@@ -55,10 +61,12 @@ on:
       - "schemas/revenue/**"
       - "scripts/check-revenue-experiment.mjs"
       - "scripts/check-revenue-product-surface.mjs"
+      - "scripts/check-fardarter-drive.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
       - "templates/github-control-tower-audit-outreach.md"
       - "templates/github-control-tower-audit.md"
+      - "templates/fardarter-drive-*.md"
   workflow_dispatch:
 
 permissions:
@@ -70,9 +78,9 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify authority, capacity, and product surface
+    name: Verify Fardarter Drive authority, horizons, and product
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -83,28 +91,37 @@ jobs:
         with:
           node-version: 20
 
-      - name: Validate authority and product package
+      - name: Validate authority, horizons, chain, legal readiness, and product
         run: npm run revenue:verify
 
       - name: Verify JSON syntax
         run: |
-          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "receipts/revenue/JP-REV-001-AUTHORITY.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json", "schemas/revenue/authority-receipt.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Revenue authority JSON syntax: PASS")'
+          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "receipts/revenue/JP-REV-001-AUTHORITY.json", "receipts/revenue/FARDARTER-DRIVE-V4.json", "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V4.json", "receipts/revenue/JP-REV-001-CHAIN-133-140.json", "receipts/revenue/FARDARTER-DRIVE-V4-AUTOMATION.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json", "schemas/revenue/authority-receipt.schema.json", "schemas/revenue/fardarter-drive.schema.json", "schemas/revenue/fardarter-drive-authority-v4.schema.json", "schemas/revenue/chain-133-140.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive JSON syntax: PASS")'
 
       - name: Emit non-financial receipt
         run: |
           echo "result=PASS"
+          echo "drive_id=FARDARTER-DRIVE-V4"
           echo "experiment_state=PUBLISHED"
           echo "publication_issue=133"
-          echo "authority_version=3.0.0"
+          echo "authority_version=4.0.0"
+          echo "chain_receipt=133-140/CHAIN_RESOLVED"
           echo "product_route=/github-control-tower-audit"
           echo "status_api=/api/revenue/pilot"
           echo "price_usd=100"
-          echo "first_milestone_usd=500"
-          echo "expanded_gross_target_usd=1000"
+          echo "current_gross_target_usd=1000"
           echo "total_slots=10"
           echo "maximum_active_deliveries=2"
           echo "orders=0"
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
-          echo "automated_intake=EXACT_PREFIX_ACKNOWLEDGEMENT_ONLY"
-          echo "direct_outreach=NOT_AUTHORIZED"
+          echo "horizon_1m=UNACHIEVED_NONFORECAST"
+          echo "horizon_1b=UNACHIEVED_NONFORECAST"
+          echo "horizon_1t=UNACHIEVED_NONFORECAST"
+          echo "horizon_1q=SYMBOLIC_UNACHIEVED"
+          echo "document_drafts=AUTHORIZED_ACTIVE"
+          echo "exact_outreach=AUTHORIZED_CONDITIONAL"
+          echo "contract_acceptance=HUMAN_APPROVAL_REQUIRED"
+          echo "payment_execution=EXTERNAL_PROVIDER_ONLY"
+          echo "indemnity_terms=COUNSEL_REVIEW_REQUIRED"
+          echo "indemnity_proof_claim=FALSE"
