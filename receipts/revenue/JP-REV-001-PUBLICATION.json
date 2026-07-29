@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptId": "JP-REV-001-PUBLICATION-2026-07-29",
+  "experimentId": "JP-REV-001",
+  "channel": "GITHUB_INBOUND_ISSUE",
+  "issueNumber": 133,
+  "publicationUrl": "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/133",
+  "publishedAt": "2026-07-29T16:26:13Z",
+  "publicationAuthorized": true,
+  "directOutreachSent": 0,
+  "orders": 0,
+  "grossRevenueUsd": 0,
+  "settledCashUsd": 0,
+  "externalActionsPerformed": [
+    "MERGE_PR_129",
+    "MERGE_PR_132",
+    "PUBLISH_GITHUB_ISSUE_133"
+  ],
+  "excludedActions": [
+    "direct_email",
+    "direct_message",
+    "social_post",
+    "marketplace_listing",
+    "contract_execution",
+    "invoice_execution",
+    "payment_execution",
+    "delivery",
+    "deployment",
+    "settings_change"
+  ],
+  "publicDataBoundary": {
+    "containsCredentials": false,
+    "containsPaymentData": false,
+    "containsCustomerIdentity": false,
+    "containsConfidentialRecords": false
+  },
+  "result": "PUBLISHED",
+  "nextControlledAction": "Monitor GitHub Issue #133 for public-safe fit-check requests and keep interest, agreement, settlement, delivery, and acceptance as separate evidenced states."
+}
