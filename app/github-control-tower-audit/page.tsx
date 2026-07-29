@@ -2,13 +2,31 @@ import type { Metadata } from "next";
 
 import experiment from "@/examples/revenue-experiment.sample.json";
 import publicationReceipt from "@/receipts/revenue/JP-REV-001-PUBLICATION.json";
+import {
+  getPublicAuditInterest,
+  publicAuditRequestsUrl,
+} from "@/lib/revenue/public-audit-interest";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
+export const revalidate = 900;
+
+const canonicalUrl = `${getSiteUrl()}/github-control-tower-audit`;
 
 export const metadata: Metadata = {
   title: "GitHub Control Tower Audit | JP Systems",
   description:
     "A fixed-scope GitHub repository operations audit for creators, maintainers, and small teams with unclear pull requests, issues, checks, or deployment boundaries.",
+  alternates: {
+    canonical: canonicalUrl,
+  },
+  openGraph: {
+    title: "GitHub Control Tower Audit",
+    description:
+      "Turn stale pull requests, duplicate issues, unclear checks, and deployment boundaries into an exact operating sequence.",
+    type: "website",
+    url: canonicalUrl,
+  },
 };
 
 const issueUrl =
@@ -23,16 +41,83 @@ const usd = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-export default function GitHubControlTowerAuditPage() {
+const faqItems = [
+  {
+    question: "Does opening a GitHub issue reserve a pilot slot?",
+    answer:
+      "No. A public issue is a fit-check request only. It does not reserve capacity, create an order, form a contract, or create a payment obligation.",
+  },
+  {
+    question: "Do you need repository credentials?",
+    answer:
+      "No credentials should be posted. The pilot uses a public repository or a separately authorized read-only path, and sensitive information stays outside public issues.",
+  },
+  {
+    question: "When does money count as received?",
+    answer:
+      "Only when an agreed external payment provider confirms settlement. Comments, reactions, pledges, invoices, pending transfers, and screenshots do not count as received cash.",
+  },
+  {
+    question: "Is the $500 target guaranteed?",
+    answer:
+      "No. Five $100 pilot slots create a $500 gross experiment target. It is not a sales forecast, profit claim, or earnings guarantee.",
+  },
+] as const;
+
+export default async function GitHubControlTowerAuditPage() {
+  const publicInterest = await getPublicAuditInterest();
   const { offer, metrics, money, channel, status, experimentId } = experiment;
   const slotsRemaining = Math.max(offer.capacity - metrics.orders, 0);
   const percentFilled = Math.min(
     Math.round((metrics.orders / offer.capacity) * 100),
     100,
   );
+  const publicRequestValue =
+    publicInterest.publicRequestCount === null
+      ? "Unavailable"
+      : String(publicInterest.publicRequestCount);
+
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      name: offer.name,
+      description:
+        "A fixed-scope GitHub repository operations audit for creators, maintainers, and small teams.",
+      url: canonicalUrl,
+      offers: {
+        "@type": "Offer",
+        price: String(offer.priceUsd),
+        priceCurrency: "USD",
+        availability:
+          slotsRemaining > 0
+            ? "https://schema.org/LimitedAvailability"
+            : "https://schema.org/OutOfStock",
+        url: requestUrl,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer,
+        },
+      })),
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-[#07070b] text-[#f5efe2]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="mx-auto w-full max-w-6xl px-6 py-10 sm:px-10 lg:px-12">
         <nav className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5 text-sm text-white/60">
           <a
@@ -44,6 +129,12 @@ export default function GitHubControlTowerAuditPage() {
           <div className="flex flex-wrap items-center gap-4">
             <a className="transition hover:text-cyan-100" href={issueUrl}>
               Launch issue #{publicationReceipt.issueNumber}
+            </a>
+            <a
+              className="transition hover:text-cyan-100"
+              href={publicAuditRequestsUrl}
+            >
+              Public fit checks
             </a>
             <a className="transition hover:text-cyan-100" href={statusApiUrl}>
               JSON status
@@ -81,9 +172,9 @@ export default function GitHubControlTowerAuditPage() {
             </div>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-white/45">
               Opening an issue is only a fit check. It does not create a contract,
-              invoice, payment obligation, deadline, or delivery commitment. Do
-              not place credentials, payment data, customer identities, or
-              confidential records in a public issue.
+              invoice, payment obligation, deadline, delivery commitment, order,
+              or capacity reservation. Do not place credentials, payment data,
+              customer identities, or confidential records in a public issue.
             </p>
           </div>
 
@@ -103,12 +194,23 @@ export default function GitHubControlTowerAuditPage() {
               </span>
             </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-3">
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <Metric label="Slots left" value={`${slotsRemaining}/${offer.capacity}`} />
               <Metric label="Orders" value={String(metrics.orders)} />
+              <Metric label="Public fit checks" value={publicRequestValue} />
               <Metric label="Settled cash" value={usd.format(money.netCashUsd)} />
-              <Metric label="Delivery window" value={`${offer.deliveryWindowBusinessDays} business days`} />
+              <Metric
+                label="Delivery window"
+                value={`${offer.deliveryWindowBusinessDays} business days`}
+              />
+              <Metric label="Accepted deliveries" value={String(metrics.deliveriesAccepted)} />
             </div>
+
+            <p className="mt-3 text-xs leading-5 text-white/40">
+              Public fit checks are counted from open GitHub issues titled
+              “ [Audit request] ”. They are interest signals only and are never
+              counted as orders, revenue, or reserved capacity.
+            </p>
 
             <div className="mt-6">
               <div className="mb-2 flex justify-between text-xs uppercase tracking-[0.18em] text-white/45">
@@ -178,6 +280,26 @@ export default function GitHubControlTowerAuditPage() {
               "Expanded implementation receives a separate scope and price",
             ]}
           />
+        </section>
+
+        <section className="border-t border-white/10 py-12">
+          <p className="font-mono text-sm uppercase tracking-[0.25em] text-cyan-200">
+            Clear before purchase
+          </p>
+          <h2 className="mt-3 text-3xl font-black">Frequently asked questions</h2>
+          <div className="mt-7 grid gap-4 lg:grid-cols-2">
+            {faqItems.map((item) => (
+              <details
+                key={item.question}
+                className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 open:border-cyan-200/30"
+              >
+                <summary className="cursor-pointer font-bold text-white/85">
+                  {item.question}
+                </summary>
+                <p className="mt-4 text-sm leading-6 text-white/60">{item.answer}</p>
+              </details>
+            ))}
+          </div>
         </section>
 
         <section className="rounded-[2rem] border border-fuchsia-200/20 bg-fuchsia-200/[0.055] p-7 sm:p-9">

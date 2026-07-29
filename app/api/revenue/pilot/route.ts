@@ -1,9 +1,12 @@
 import experiment from "@/examples/revenue-experiment.sample.json";
 import publicationReceipt from "@/receipts/revenue/JP-REV-001-PUBLICATION.json";
+import { getPublicAuditInterest } from "@/lib/revenue/public-audit-interest";
 
 export const dynamic = "force-static";
+export const revalidate = 900;
 
-export function GET() {
+export async function GET() {
+  const publicInterest = await getPublicAuditInterest();
   const slotsRemaining = Math.max(
     experiment.offer.capacity - experiment.metrics.orders,
     0,
@@ -11,7 +14,7 @@ export function GET() {
 
   return Response.json(
     {
-      schemaVersion: "1.0.0",
+      schemaVersion: "1.1.0",
       experimentId: experiment.experimentId,
       status: experiment.status,
       offer: {
@@ -28,6 +31,13 @@ export function GET() {
         slotsRemaining,
         qualifiedConversations: experiment.metrics.qualifiedConversations,
         deliveriesAccepted: experiment.metrics.deliveriesAccepted,
+      },
+      publicInterest: {
+        openFitCheckRequests: publicInterest.publicRequestCount,
+        sourceState: publicInterest.sourceState,
+        sourceUrl: publicInterest.sourceUrl,
+        countedAsOrders: false,
+        reservesCapacity: false,
       },
       money: {
         settlementState: experiment.money.settlementState,
@@ -52,13 +62,15 @@ export function GET() {
         receivedCashRequires: "PAID_SETTLED",
         openingAnIssueCreatesContract: false,
         openingAnIssueCreatesPaymentObligation: false,
+        publicFitCheckCountsAsOrder: false,
+        publicFitCheckReservesCapacity: false,
         earningsGuaranteed: false,
       },
       nextControlledAction: experiment.nextControlledAction,
     },
     {
       headers: {
-        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Cache-Control": "public, s-maxage=900, stale-while-revalidate=3600",
       },
     },
   );
