@@ -1,0 +1,229 @@
+name: Netlify Audit Product Deploy
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/netlify-audit-product-deploy.yml"
+      - "app/github-control-tower-audit/**"
+      - "app/api/revenue/pilot/**"
+      - "app/page.tsx"
+      - "examples/revenue-experiment.sample.json"
+      - "receipts/revenue/**"
+      - "schemas/revenue/**"
+      - "scripts/check-revenue-*.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "netlify.toml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/netlify-audit-product-deploy.yml"
+      - "app/github-control-tower-audit/**"
+      - "app/api/revenue/pilot/**"
+      - "app/page.tsx"
+      - "examples/revenue-experiment.sample.json"
+      - "receipts/revenue/**"
+      - "schemas/revenue/**"
+      - "scripts/check-revenue-*.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "netlify.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-audit-product-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NETLIFY_SITE_ID: 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f
+  NETLIFY_PRIMARY_URL: https://lichburn-v0-2-8.netlify.app
+
+jobs:
+  validate:
+    name: Validate audit product deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify revenue product
+        run: npm run revenue:verify
+
+      - name: Build application
+        run: npm run build
+
+  deploy:
+    name: Deploy and read back audit product
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Require existing-site credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$NETLIFY_AUTH_TOKEN" || {
+            echo "Missing GitHub Actions secret NETLIFY_AUTH_TOKEN"
+            exit 1
+          }
+          test "$NETLIFY_SITE_ID" = "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f" || {
+            echo "Unexpected Netlify site ID"
+            exit 1
+          }
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Revalidate revenue package
+        run: npm run revenue:verify
+
+      - name: Deploy to confirmed Netlify site
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESULT="$(npx -y netlify-cli@latest deploy --build --prod --json --site "$NETLIFY_SITE_ID")"
+          printf '%s\n' "$RESULT" > netlify-deploy-result.json
+          DEPLOY_URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync("netlify-deploy-result.json","utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")')"
+          DEPLOY_ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync("netlify-deploy-result.json","utf8")); console.log(x.deploy_id || x.id || "")')"
+          test -n "$DEPLOY_URL" || { echo "Netlify did not return a deploy URL"; exit 1; }
+          test -n "$DEPLOY_ID" || { echo "Netlify did not return a deploy ID"; exit 1; }
+          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Verify immutable deploy readback
+        id: readback
+        shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+
+          retry_get() {
+            local url="$1"
+            local output="$2"
+            curl --fail --silent --show-error --location \
+              --retry 12 --retry-delay 5 --retry-all-errors \
+              --max-time 30 "$url" --output "$output"
+          }
+
+          retry_get "$DEPLOY_URL/" artifacts/home.html
+          retry_get "$DEPLOY_URL/github-control-tower-audit" artifacts/audit.html
+          retry_get "$DEPLOY_URL/api/revenue/pilot" artifacts/pilot.json
+
+          grep -q '/github-control-tower-audit' artifacts/home.html
+          grep -q 'GitHub Control Tower Audit' artifacts/audit.html
+          grep -q 'Request a public-safe fit check' artifacts/audit.html
+
+          node <<'NODE'
+          const fs = require('node:fs');
+          const pilot = JSON.parse(fs.readFileSync('artifacts/pilot.json', 'utf8'));
+          const required = [
+            [pilot.experimentId === 'JP-REV-001', 'experimentId'],
+            [pilot.status === 'PUBLISHED', 'status'],
+            [pilot.offer?.priceUsd === 100, 'priceUsd'],
+            [pilot.offer?.capacity === 5, 'capacity'],
+            [pilot.availability?.orders === 0, 'orders'],
+            [pilot.availability?.slotsRemaining === 5, 'slotsRemaining'],
+            [pilot.money?.grossRevenueUsd === 0, 'grossRevenueUsd'],
+            [pilot.money?.netCashUsd === 0, 'netCashUsd'],
+            [pilot.publication?.issueNumber === 133, 'issueNumber'],
+            [pilot.evidenceBoundary?.receivedCashRequires === 'PAID_SETTLED', 'receivedCashRequires'],
+            [pilot.evidenceBoundary?.openingAnIssueCreatesContract === false, 'contractBoundary'],
+            [pilot.evidenceBoundary?.earningsGuaranteed === false, 'earningsBoundary'],
+          ];
+          const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
+          if (failed.length) throw new Error(`Readback failed: ${failed.join(', ')}`);
+          console.log('Netlify audit product readback: PASS');
+          NODE
+
+          echo "readback=PASS" >> "$GITHUB_OUTPUT"
+
+      - name: Write deployment receipt
+        if: always()
+        shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          READBACK: ${{ steps.readback.outputs.readback }}
+        run: |
+          mkdir -p artifacts
+          node <<'NODE'
+          const fs = require('node:fs');
+          const deployed = Boolean(process.env.DEPLOY_ID);
+          const readback = process.env.READBACK || 'NOT_COMPLETED';
+          const receipt = {
+            schemaVersion: '1.0.0',
+            receiptId: `JP-REV-001-NETLIFY-${process.env.GITHUB_RUN_ID}`,
+            repository: process.env.GITHUB_REPOSITORY,
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            siteId: process.env.NETLIFY_SITE_ID,
+            primaryUrl: process.env.NETLIFY_PRIMARY_URL,
+            deployId: process.env.DEPLOY_ID || null,
+            deployUrl: process.env.DEPLOY_URL || null,
+            productionRequested: true,
+            deploymentCompleted: deployed,
+            readback,
+            result: deployed && readback === 'PASS' ? 'DEPLOYED_AND_VERIFIED' : 'INCOMPLETE',
+            verifiedRoutes: ['/', '/github-control-tower-audit', '/api/revenue/pilot'],
+            verifiedRevenueUsd: 0,
+            verifiedSettledCashUsd: 0,
+            externalActionsPerformed: deployed ? ['NETLIFY_PRODUCTION_DEPLOY'] : [],
+            excludedActions: ['new_site_creation', 'domain_change', 'billing_change', 'credential_change', 'payment_execution', 'customer_contact'],
+            generatedAt: new Date().toISOString(),
+          };
+          fs.writeFileSync('artifacts/netlify-audit-product-receipt.json', JSON.stringify(receipt, null, 2) + '\n');
+          NODE
+          if [ -f netlify-deploy-result.json ]; then cp netlify-deploy-result.json artifacts/; fi
+
+      - name: Upload deployment receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-audit-product-${{ github.sha }}
+          path: artifacts
+          retention-days: 30
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          {
+            echo "## Netlify audit product deployment"
+            echo "- Site ID: $NETLIFY_SITE_ID"
+            echo "- Primary URL: $NETLIFY_PRIMARY_URL"
+            echo "- Deploy ID: ${{ steps.deploy.outputs.deploy_id }}"
+            echo "- Deploy URL: ${{ steps.deploy.outputs.deploy_url }}"
+            echo "- Readback: ${{ steps.readback.outputs.readback }}"
+            echo "- Verified revenue: $0 USD"
+            echo "- Verified settled cash: $0 USD"
+          } >> "$GITHUB_STEP_SUMMARY"
