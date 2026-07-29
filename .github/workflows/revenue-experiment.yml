@@ -78,7 +78,9 @@ jobs:
           node-version: 20
 
       - name: Validate v5 authority, capacity, acceptance, execution, Drive, and product
-        run: npm run revenue:verify
+        run: |
+          # check-fardarter-drive-v5.mjs is invoked by the unified revenue:verify script.
+          npm run revenue:verify
 
       - name: Verify JSON syntax
         run: |
