@@ -10,8 +10,10 @@ on:
       - "docs/repository/FIRST-500-EXECUTION-BOARD.md"
       - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
       - "docs/repository/MONEY-RAIL.md"
+      - "docs/repository/MONEY-RAIL-ACTIVATION.md"
       - "examples/github-control-tower-audit-receipt.sample.json"
       - "examples/revenue-experiment.sample.json"
+      - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-experiment.mjs"
       - "templates/github-control-tower-audit-outreach.md"
@@ -27,8 +29,10 @@ on:
       - "docs/repository/FIRST-500-EXECUTION-BOARD.md"
       - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
       - "docs/repository/MONEY-RAIL.md"
+      - "docs/repository/MONEY-RAIL-ACTIVATION.md"
       - "examples/github-control-tower-audit-receipt.sample.json"
       - "examples/revenue-experiment.sample.json"
+      - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-experiment.mjs"
       - "templates/github-control-tower-audit-outreach.md"
@@ -62,12 +66,14 @@ jobs:
 
       - name: Verify JSON syntax
         run: |
-          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Revenue JSON syntax: PASS")'
+          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Revenue JSON syntax: PASS")'
 
       - name: Emit non-financial receipt
         run: |
           echo "result=PASS"
+          echo "experiment_state=PUBLISHED"
+          echo "publication_issue=133"
           echo "gross_target_usd=500"
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
-          echo "external_actions=NONE"
+          echo "direct_outreach=NONE"

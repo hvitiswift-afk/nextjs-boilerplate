@@ -3,7 +3,7 @@
 **Pilot test price:** $100 USD  
 **Capacity:** five pilot audits  
 **Delivery format:** public-safe Markdown report  
-**Status:** prepared for review; not yet published as an active sales offer
+**Status:** active through GitHub inbound Issue `#133`; no direct outreach is active
 
 ## Who this is for
 
@@ -62,7 +62,7 @@ This is an operations and repository-governance audit. It does not include:
 - production deployment, domain configuration, billing, or payment handling;
 - penetration testing, security certification, legal advice, tax advice, or a security guarantee;
 - source-code ownership verification;
-- automatic outreach, customer contact, or publication;
+- automatic outreach, customer contact, or publication outside the active GitHub inbound issue;
 - a guarantee that revenue, fundraising, deployment, or project outcomes will improve.
 
 ## Buyer inputs
@@ -110,4 +110,4 @@ The $100 price, five-audit capacity, and $500 gross target are experiment parame
 
 ## Current next action
 
-Review and merge the money rail before treating this as an active public offer. After merge, select exactly one approved acquisition channel and preserve the publication or outreach receipt.
+Monitor GitHub Issue `#133` and the Control Tower Audit Request issue form for public-safe fit-check requests. Record interest, agreement, external-provider settlement, delivery, and acceptance as separate states. Direct outreach remains inactive.

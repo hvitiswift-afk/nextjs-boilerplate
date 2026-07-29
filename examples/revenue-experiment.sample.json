@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1.0",
   "experimentId": "JP-REV-001",
-  "status": "PREPARED",
+  "status": "PUBLISHED",
   "offer": {
     "name": "GitHub Control Tower Audit",
     "type": "paid_service",
@@ -42,12 +42,14 @@
     "templates/github-control-tower-audit.md",
     "examples/github-control-tower-audit-receipt.sample.json",
     "docs/repository/FIRST-500-EXECUTION-BOARD.md",
-    "templates/github-control-tower-audit-outreach.md"
+    "templates/github-control-tower-audit-outreach.md",
+    "docs/repository/MONEY-RAIL-ACTIVATION.md",
+    "receipts/revenue/JP-REV-001-PUBLICATION.json"
   ],
   "channel": {
-    "name": "unselected",
+    "name": "GitHub inbound issue #133",
     "inboundRequestPath": ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml",
-    "publicationAuthorized": false,
+    "publicationAuthorized": true,
     "outreachAuthorized": false
   },
   "metrics": {
@@ -73,7 +75,7 @@
   },
   "authority": {
     "offerPreparation": "authorized",
-    "publication": "not_authorized",
+    "publication": "authorized",
     "outreach": "not_authorized",
     "contract": "not_authorized",
     "paymentExecution": "external_provider_only",
@@ -83,5 +85,5 @@
     "https://www.paypal.com/donate/?hosted_button_id=JJ4XGRU94T4XW",
     "https://jp-hviti-fundraiser-bridge.justin-rackham.chatgpt.site/campaign"
   ],
-  "nextControlledAction": "Review the complete proof package, merge the required governance sequence, and choose one acquisition channel for a separately approved test."
+  "nextControlledAction": "Monitor GitHub Issue #133 for public-safe fit-check requests and preserve interest, agreement, provider-confirmed settlement, delivery, and acceptance as separate evidenced states."
 }
