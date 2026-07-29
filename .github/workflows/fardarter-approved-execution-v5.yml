@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   execute:
-    name: Run approved reversible execution
+    name: Run one-shot approved reversible execution
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (
@@ -41,15 +41,6 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
       - name: Resolve execution context
         id: context
         shell: bash
@@ -69,20 +60,73 @@ jobs:
           echo "issue_ref=$ISSUE_REF" >> "$GITHUB_OUTPUT"
           echo "execution_class=$EXECUTION_CLASS" >> "$GITHUB_OUTPUT"
 
+      - name: Enforce one execution receipt per issue
+        id: guard
+        uses: actions/github-script@v7
+        env:
+          EXECUTION_CLASS: ${{ steps.context.outputs.execution_class }}
+        with:
+          script: |
+            if (context.eventName !== 'issues') {
+              core.setOutput('should_run', 'true');
+              core.setOutput('prior_receipt', 'false');
+              return;
+            }
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                per_page: 100,
+              },
+            );
+
+            const priorReceipt = comments.some((comment) =>
+              comment.body?.includes('<!-- jp-fardarter-execution-v5-'),
+            );
+
+            core.setOutput('should_run', priorReceipt ? 'false' : 'true');
+            core.setOutput('prior_receipt', priorReceipt ? 'true' : 'false');
+
+            if (priorReceipt) {
+              core.notice(
+                `Execution suppressed for issue #${context.issue.number}: a v5 execution receipt already exists.`,
+              );
+            }
+
+      - name: Checkout repository
+        if: steps.guard.outputs.should_run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: steps.guard.outputs.should_run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
       - name: Install dependencies
-        if: steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
+        if: >-
+          steps.guard.outputs.should_run == 'true' &&
+          steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
         run: npm ci
 
       - name: Verify Fardarter and revenue package
-        if: steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
+        if: >-
+          steps.guard.outputs.should_run == 'true' &&
+          steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
         run: npm run revenue:verify
 
       - name: Build application
-        if: steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
+        if: >-
+          steps.guard.outputs.should_run == 'true' &&
+          steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
         run: npm run build
 
       - name: Write execution receipt
-        if: always()
+        if: always() && steps.guard.outputs.should_run == 'true'
         shell: bash
         env:
           ISSUE_REF: ${{ steps.context.outputs.issue_ref }}
@@ -94,8 +138,9 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const receipt = {
-            schemaVersion: '1.0.0',
+            schemaVersion: '1.1.0',
             receiptId: `FARDARTER-EXECUTION-V5-${process.env.GITHUB_RUN_ID}`,
+            idempotencyKey: `issue:${process.env.ISSUE_REF}:fardarter-execution-v5`,
             driveId: 'FARDARTER-DRIVE-V5',
             authorityVersion: '5.0.0',
             controllingIssue: process.env.ISSUE_REF,
@@ -106,6 +151,7 @@ jobs:
             runId: process.env.GITHUB_RUN_ID,
             capacity: 100,
             maximumActiveDeliveries: 10,
+            oneShotPerIssue: true,
             financialState: {
               orders: 0,
               verifiedGrossRevenueUsd: 0,
@@ -134,37 +180,41 @@ jobs:
           NODE
 
       - name: Upload execution receipt
-        if: always()
+        if: always() && steps.guard.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: fardarter-execution-v5-${{ github.run_id }}
           path: artifacts/fardarter-execution-v5.json
           retention-days: 30
 
-      - name: Add public-safe issue receipt
-        if: always() && github.event_name == 'issues'
+      - name: Add one public-safe issue receipt
+        if: >-
+          always() &&
+          github.event_name == 'issues' &&
+          steps.guard.outputs.should_run == 'true'
         uses: actions/github-script@v7
         env:
           EXECUTION_CLASS: ${{ steps.context.outputs.execution_class }}
           JOB_STATUS: ${{ job.status }}
         with:
           script: |
-            const marker = `<!-- jp-fardarter-execution-v5-${context.runId} -->`;
+            const marker = '<!-- jp-fardarter-execution-v5-one-shot -->';
             const result = process.env.JOB_STATUS === 'success' ? 'PASS' : 'INCOMPLETE';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
               body: `${marker}
-            **Fardarter Drive™ v5 bounded execution receipt**
+            **Fardarter Drive™ v5 one-shot bounded execution receipt**
 
             - Execution class: \`${process.env.EXECUTION_CLASS}\`
             - Result: **${result}**
             - Run ID: \`${context.runId}\`
             - Commit: \`${context.sha}\`
+            - Idempotency: **one execution per controlling issue**
             - Capacity model: 100 total slots / 10 maximum ACTIVE deliveries
             - External actions performed: **NONE**
             - Orders / verified gross / settled cash: **0 / $0 / $0**
 
-            This receipt proves only the approved repository verification/build execution. It does not accept a contract, request or settle payment, start paid delivery, choose indemnity or liability terms, issue a refund, answer a dispute, admit liability, or expose private Google Drive references.`,
+            This receipt proves only the approved repository verification/build execution. A later approval-label event on this same issue is suppressed before checkout, dependency installation, validation, build, artifact creation, or comment creation. It does not accept a contract, request or settle payment, start paid delivery, choose indemnity or liability terms, issue a refund, answer a dispute, admit liability, or expose private Google Drive references.`,
             });
