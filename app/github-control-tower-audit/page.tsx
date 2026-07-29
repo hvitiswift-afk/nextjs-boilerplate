@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import experiment from "@/examples/revenue-experiment.sample.json";
+import authorityReceipt from "@/receipts/revenue/JP-REV-001-AUTHORITY.json";
 import publicationReceipt from "@/receipts/revenue/JP-REV-001-PUBLICATION.json";
 import {
   getPublicAuditInterest,
@@ -16,7 +17,7 @@ const canonicalUrl = `${getSiteUrl()}/github-control-tower-audit`;
 export const metadata: Metadata = {
   title: "GitHub Control Tower Audit | JP Systems",
   description:
-    "A fixed-scope GitHub repository operations audit for creators, maintainers, and small teams with unclear pull requests, issues, checks, or deployment boundaries.",
+    "A $100 fixed-scope GitHub repository operations audit with ten total pilot slots, bounded automation, and explicit evidence gates.",
   alternates: {
     canonical: canonicalUrl,
   },
@@ -48,6 +49,16 @@ const faqItems = [
       "No. A public issue is a fit-check request only. It does not reserve capacity, create an order, form a contract, or create a payment obligation.",
   },
   {
+    question: "What part of intake is automated?",
+    answer:
+      "Only exact-prefix audit-request issues may receive bounded labels and one idempotent acknowledgement. Automation cannot accept fit or scope, create an order, reserve capacity, request payment, start delivery, or issue a refund.",
+  },
+  {
+    question: "How can ten slots exist with only two active deliveries?",
+    answer:
+      "Ten is the total pilot capacity. No more than two audits may be active at once. Additional work starts pause whenever the active-delivery limit is reached.",
+  },
+  {
     question: "Do you need repository credentials?",
     answer:
       "No credentials should be posted. The pilot uses a public repository or a separately authorized read-only path, and sensitive information stays outside public issues.",
@@ -55,12 +66,12 @@ const faqItems = [
   {
     question: "When does money count as received?",
     answer:
-      "Only when an agreed external payment provider confirms settlement. Comments, reactions, pledges, invoices, pending transfers, and screenshots do not count as received cash.",
+      "Only when an agreed external payment provider confirms settlement. Comments, labels, reactions, pledges, invoices, pending transfers, and screenshots do not count as received cash.",
   },
   {
-    question: "Is the $500 target guaranteed?",
+    question: "Are the $500 milestone and $1,000 target guaranteed?",
     answer:
-      "No. Five $100 pilot slots create a $500 gross experiment target. It is not a sales forecast, profit claim, or earnings guarantee.",
+      "No. Five $100 settled audits form the first $500 milestone, and ten form the expanded $1,000 gross target. Neither is a sales forecast, profit claim, or earnings guarantee.",
   },
 ] as const;
 
@@ -93,6 +104,10 @@ export default async function GitHubControlTowerAuditPage() {
           slotsRemaining > 0
             ? "https://schema.org/LimitedAvailability"
             : "https://schema.org/OutOfStock",
+        inventoryLevel: {
+          "@type": "QuantitativeValue",
+          value: slotsRemaining,
+        },
         url: requestUrl,
       },
     },
@@ -145,7 +160,7 @@ export default async function GitHubControlTowerAuditPage() {
         <section className="grid gap-10 py-16 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
           <div>
             <p className="mb-5 inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-100">
-              {status} • GitHub inbound • {slotsRemaining} of {offer.capacity} pilot slots available
+              {status} • GitHub inbound • {slotsRemaining} of {offer.capacity} total slots available
             </p>
             <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-7xl">
               Turn a tangled GitHub repository into an exact operating sequence.
@@ -171,9 +186,10 @@ export default async function GitHubControlTowerAuditPage() {
               </a>
             </div>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-white/45">
-              Opening an issue is only a fit check. It does not create a contract,
-              invoice, payment obligation, deadline, delivery commitment, order,
-              or capacity reservation. Do not place credentials, payment data,
+              Opening an issue may trigger bounded automated labels and one
+              acknowledgement. It does not create a contract, invoice, payment
+              obligation, deadline, delivery commitment, order, work start, or
+              capacity reservation. Do not place credentials, payment data,
               customer identities, or confidential records in a public issue.
             </p>
           </div>
@@ -196,8 +212,11 @@ export default async function GitHubControlTowerAuditPage() {
 
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <Metric label="Slots left" value={`${slotsRemaining}/${offer.capacity}`} />
+              <Metric label="Active limit" value={String(offer.maxConcurrentDeliveries)} />
               <Metric label="Orders" value={String(metrics.orders)} />
               <Metric label="Public fit checks" value={publicRequestValue} />
+              <Metric label="First milestone" value={usd.format(offer.firstMilestoneUsd)} />
+              <Metric label="Expanded target" value={usd.format(offer.grossTargetUsd)} />
               <Metric label="Settled cash" value={usd.format(money.netCashUsd)} />
               <Metric
                 label="Delivery window"
@@ -207,15 +226,15 @@ export default async function GitHubControlTowerAuditPage() {
             </div>
 
             <p className="mt-3 text-xs leading-5 text-white/40">
-              Public fit checks are counted from open GitHub issues titled
-              “ [Audit request] ”. They are interest signals only and are never
-              counted as orders, revenue, or reserved capacity.
+              Public fit checks are counted from exact-prefix GitHub issues. They
+              are interest signals only and are never orders, revenue, or reserved
+              capacity. Ten total slots do not override the two-active-delivery cap.
             </p>
 
             <div className="mt-6">
               <div className="mb-2 flex justify-between text-xs uppercase tracking-[0.18em] text-white/45">
-                <span>Pilot capacity</span>
-                <span>{percentFilled}% filled</span>
+                <span>Total pilot capacity</span>
+                <span>{percentFilled}% ordered</span>
               </div>
               <div className="h-3 overflow-hidden rounded-full bg-black/40">
                 <div
@@ -226,10 +245,9 @@ export default async function GitHubControlTowerAuditPage() {
             </div>
 
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/60">
-              <strong className="text-white">Evidence state:</strong> publication is
-              verified through Issue #{publicationReceipt.issueNumber}; direct
-              outreach is {channel.outreachAuthorized ? "authorized" : "not authorized"};
-              only provider-confirmed settled payments count as received cash.
+              <strong className="text-white">Authority state:</strong> publication
+              and bounded exact-prefix acknowledgement are active under authority
+              v{authorityReceipt.authorityVersion}; direct outreach is {channel.outreachAuthorized ? "authorized" : "not authorized"}; only provider-confirmed settled payments count as received cash.
             </div>
           </aside>
         </section>
@@ -268,15 +286,17 @@ export default async function GitHubControlTowerAuditPage() {
               `Up to ${offer.scopeLimits.maxOpenPullRequests} open pull requests`,
               `Up to ${offer.scopeLimits.maxOpenIssues} open issues`,
               `${offer.scopeLimits.clarificationRounds} clarification round`,
+              `No more than ${offer.maxConcurrentDeliveries} active deliveries`,
             ]}
           />
           <ScopeCard title="Explicit exclusions" items={offer.exclusions} />
           <ScopeCard
             title="Transaction boundary"
             items={[
-              "Written scope and exact due date before purchase",
+              "Human fit and written scope before an order",
               "External provider confirms settlement",
-              "GitHub comments and screenshots are not payment evidence",
+              "GitHub issues, labels, comments, and screenshots are not payment evidence",
+              "JP approval is required before delivery starts",
               "Expanded implementation receives a separate scope and price",
             ]}
           />
@@ -312,9 +332,10 @@ export default async function GitHubControlTowerAuditPage() {
                 Describe the repository problem with public-safe information.
               </h2>
               <p className="mt-4 max-w-3xl leading-7 text-white/65">
-                JP reviews fit first. Scope, price, due date, cancellation terms,
-                delivery destination, and payment method are confirmed separately
-                in writing before work begins.
+                Automation may acknowledge the request, but JP reviews fit first.
+                Scope, price, due date, cancellation terms, delivery destination,
+                active capacity, and payment method are confirmed separately in
+                writing before work begins.
               </p>
             </div>
             <a
@@ -328,10 +349,10 @@ export default async function GitHubControlTowerAuditPage() {
 
         <footer className="flex flex-wrap items-center justify-between gap-4 py-10 text-sm text-white/40">
           <span>
-            Snapshot source: experiment {experimentId} • Issue #{publicationReceipt.issueNumber}
+            Snapshot: {experimentId} • Issue #{publicationReceipt.issueNumber} • authority v{authorityReceipt.authorityVersion}
           </span>
           <span>
-            Gross target {usd.format(offer.grossTargetUsd)} • not an earnings forecast
+            First milestone {usd.format(offer.firstMilestoneUsd)} • expanded target {usd.format(offer.grossTargetUsd)} • not an earnings forecast
           </span>
         </footer>
       </div>
