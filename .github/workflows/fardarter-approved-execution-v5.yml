@@ -1,0 +1,170 @@
+name: Fardarter Approved Execution v5
+
+on:
+  issues:
+    types:
+      - labeled
+  workflow_dispatch:
+    inputs:
+      controlling_issue:
+        description: Controlling GitHub issue number or receipt reference
+        required: true
+        type: string
+      execution_class:
+        description: Approved execution class
+        required: true
+        default: VERIFY_AND_BUILD
+        type: choice
+        options:
+          - VERIFY_AND_BUILD
+          - RECEIPT_ONLY
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: fardarter-execution-v5-${{ github.event.issue.number || inputs.controlling_issue || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    name: Run approved reversible execution
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'issues' &&
+        github.event.label.name == 'fd-execute-approved' &&
+        startsWith(github.event.issue.title, '[FD execute]:')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Resolve execution context
+        id: context
+        shell: bash
+        env:
+          INPUT_ISSUE: ${{ inputs.controlling_issue }}
+          INPUT_CLASS: ${{ inputs.execution_class }}
+          EVENT_ISSUE: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          ISSUE_REF="${INPUT_ISSUE:-${EVENT_ISSUE:-}}"
+          EXECUTION_CLASS="${INPUT_CLASS:-VERIFY_AND_BUILD}"
+          test -n "$ISSUE_REF" || { echo "Missing controlling issue"; exit 1; }
+          case "$EXECUTION_CLASS" in
+            VERIFY_AND_BUILD|RECEIPT_ONLY) ;;
+            *) echo "Unsupported execution class"; exit 1 ;;
+          esac
+          echo "issue_ref=$ISSUE_REF" >> "$GITHUB_OUTPUT"
+          echo "execution_class=$EXECUTION_CLASS" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        if: steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
+        run: npm ci
+
+      - name: Verify Fardarter and revenue package
+        if: steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
+        run: npm run revenue:verify
+
+      - name: Build application
+        if: steps.context.outputs.execution_class == 'VERIFY_AND_BUILD'
+        run: npm run build
+
+      - name: Write execution receipt
+        if: always()
+        shell: bash
+        env:
+          ISSUE_REF: ${{ steps.context.outputs.issue_ref }}
+          EXECUTION_CLASS: ${{ steps.context.outputs.execution_class }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node <<'NODE'
+          const fs = require('node:fs');
+          const receipt = {
+            schemaVersion: '1.0.0',
+            receiptId: `FARDARTER-EXECUTION-V5-${process.env.GITHUB_RUN_ID}`,
+            driveId: 'FARDARTER-DRIVE-V5',
+            authorityVersion: '5.0.0',
+            controllingIssue: process.env.ISSUE_REF,
+            executionClass: process.env.EXECUTION_CLASS,
+            result: process.env.JOB_STATUS === 'success' ? 'PASS' : 'INCOMPLETE',
+            repository: process.env.GITHUB_REPOSITORY,
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            capacity: 100,
+            maximumActiveDeliveries: 10,
+            financialState: {
+              orders: 0,
+              verifiedGrossRevenueUsd: 0,
+              verifiedSettledCashUsd: 0,
+              receivedCashRequires: 'PAID_SETTLED',
+            },
+            externalActionsPerformed: [],
+            prohibitedActions: [
+              'contract_acceptance',
+              'payment_execution',
+              'paid_work_start',
+              'indemnity_or_liability_term_selection',
+              'refund_or_dispute_response',
+              'bank_or_payout_change',
+              'credential_or_access_control_change',
+              'destructive_external_action',
+            ],
+            googleDriveContinuity: 'CONNECTED_PRIVATE',
+            googleDriveUrlExposed: false,
+            generatedAt: new Date().toISOString(),
+          };
+          fs.writeFileSync(
+            'artifacts/fardarter-execution-v5.json',
+            JSON.stringify(receipt, null, 2) + '\n',
+          );
+          NODE
+
+      - name: Upload execution receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-execution-v5-${{ github.run_id }}
+          path: artifacts/fardarter-execution-v5.json
+          retention-days: 30
+
+      - name: Add public-safe issue receipt
+        if: always() && github.event_name == 'issues'
+        uses: actions/github-script@v7
+        env:
+          EXECUTION_CLASS: ${{ steps.context.outputs.execution_class }}
+          JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const marker = `<!-- jp-fardarter-execution-v5-${context.runId} -->`;
+            const result = process.env.JOB_STATUS === 'success' ? 'PASS' : 'INCOMPLETE';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `${marker}
+            **Fardarter Drive™ v5 bounded execution receipt**
+
+            - Execution class: \`${process.env.EXECUTION_CLASS}\`
+            - Result: **${result}**
+            - Run ID: \`${context.runId}\`
+            - Commit: \`${context.sha}\`
+            - Capacity model: 100 total slots / 10 maximum ACTIVE deliveries
+            - External actions performed: **NONE**
+            - Orders / verified gross / settled cash: **0 / $0 / $0**
+
+            This receipt proves only the approved repository verification/build execution. It does not accept a contract, request or settle payment, start paid delivery, choose indemnity or liability terms, issue a refund, answer a dispute, admit liability, or expose private Google Drive references.`,
+            });
