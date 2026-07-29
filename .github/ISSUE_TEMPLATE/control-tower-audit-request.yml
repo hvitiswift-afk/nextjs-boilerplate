@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This public issue is a fit-check request, not a contract, invoice, payment request, or delivery commitment. Do not post credentials, private customer information, payment data, confidential records, or other sensitive information.
+        This public issue is a fit-check request, not an order, capacity reservation, contract, invoice, payment request, deadline, or delivery commitment. Exact-prefix requests may receive automated labels and one boundary acknowledgement. That automation cannot accept fit or scope, request payment, or start work. Do not post credentials, private customer information, payment data, confidential records, or other sensitive information.
 
   - type: input
     id: repository
@@ -66,7 +66,7 @@ body:
     id: timing
     attributes:
       label: Timing or deadline
-      description: Provide a real deadline or write "no fixed deadline." The exact due date is confirmed only after written scope acceptance.
+      description: Provide a real deadline or write "no fixed deadline." The exact due date is confirmed only after written scope acceptance, active delivery capacity, and settlement evidence are verified.
       placeholder: "No fixed deadline"
     validations:
       required: true
@@ -86,15 +86,19 @@ body:
   - type: checkboxes
     id: boundaries
     attributes:
-      label: Public and transaction boundaries
+      label: Public, automation, and transaction boundaries
       options:
         - label: I have not posted credentials, payment details, private customer data, confidential records, or sensitive personal information.
           required: true
-        - label: I understand that this issue is a fit check and does not create a contract, invoice, payment obligation, deadline, or delivery commitment.
+        - label: I understand that this issue is a fit check and does not create an order, capacity reservation, contract, invoice, payment obligation, deadline, or delivery commitment.
+          required: true
+        - label: I understand that automated labels or an acknowledgement are intake receipts only and do not accept fit, scope, price, payment, or work start.
+          required: true
+        - label: I understand that the pilot may have ten total slots while no more than two deliveries are active at once.
           required: true
         - label: I understand that merges, settings changes, deployments, billing, domains, credentials, and destructive actions are excluded unless separately scoped and explicitly authorized.
           required: true
-        - label: I understand that payment and settlement are confirmed only through an agreed external provider, not GitHub comments, stars, reactions, pledges, or screenshots.
+        - label: I understand that payment and settlement are confirmed only through an agreed external provider, not GitHub labels, comments, stars, reactions, pledges, invoices, or screenshots.
           required: true
 
   - type: textarea
