@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 const samplePath = process.argv[2] ?? "examples/revenue-experiment.sample.json";
 const fundingPath = process.argv[3] ?? ".github/FUNDING.yml";
 const receiptPath = process.argv[4] ?? "examples/github-control-tower-audit-receipt.sample.json";
+const experimentSchemaPath = process.argv[5] ?? "schemas/revenue/revenue-experiment.schema.json";
+const receiptSchemaPath = process.argv[6] ?? "schemas/revenue/audit-receipt.schema.json";
 
 function assert(condition, message) {
   if (!condition) {
@@ -41,16 +43,45 @@ function assertPublicRelativePath(pathText, label) {
   assert(!pathText.includes(":"), `${label} must not be a URL or drive path`);
 }
 
-const [sampleText, fundingText, receiptText] = await Promise.all([
+function assertSchemaContract(schema, { label, version, idSuffix, requiredFields }) {
+  assert(schema?.$schema === "https://json-schema.org/draft/2020-12/schema", `${label} must use JSON Schema draft 2020-12`);
+  assert(typeof schema?.$id === "string" && schema.$id.endsWith(idSuffix), `${label} $id is incorrect`);
+  assert(schema?.type === "object", `${label} root type must be object`);
+  assert(schema?.additionalProperties === false, `${label} must reject undeclared root fields`);
+  assert(schema?.properties?.schemaVersion?.const === version, `${label} schemaVersion contract must be ${version}`);
+  assert(Array.isArray(schema?.required), `${label} required fields must be declared`);
+  for (const field of requiredFields) {
+    assert(schema.required.includes(field), `${label} is missing required field: ${field}`);
+  }
+}
+
+const [sampleText, fundingText, receiptText, experimentSchemaText, receiptSchemaText] = await Promise.all([
   readFile(samplePath, "utf8"),
   readFile(fundingPath, "utf8"),
-  readFile(receiptPath, "utf8")
+  readFile(receiptPath, "utf8"),
+  readFile(experimentSchemaPath, "utf8"),
+  readFile(receiptSchemaPath, "utf8")
 ]);
 
 const sample = JSON.parse(sampleText);
 const receipt = JSON.parse(receiptText);
+const experimentSchema = JSON.parse(experimentSchemaText);
+const receiptSchema = JSON.parse(receiptSchemaText);
 
-assert(sample.schemaVersion === "1.1.0", "schemaVersion must be 1.1.0");
+assertSchemaContract(experimentSchema, {
+  label: "revenue experiment schema",
+  version: "1.1.0",
+  idSuffix: "/schemas/revenue/revenue-experiment.schema.json",
+  requiredFields: ["experimentId", "status", "offer", "proofPackage", "channel", "money", "authority"]
+});
+assertSchemaContract(receiptSchema, {
+  label: "audit receipt schema",
+  version: "1.0.0",
+  idSuffix: "/schemas/revenue/audit-receipt.schema.json",
+  requiredFields: ["auditId", "experimentId", "agreement", "payment", "delivery", "publicDataBoundary"]
+});
+
+assert(sample.schemaVersion === experimentSchema.properties.schemaVersion.const, "sample schemaVersion must match the revenue schema");
 assert(/^JP-REV-[A-Z0-9-]+$/.test(sample.experimentId), "experimentId must use the JP-REV namespace");
 assert(
   [
@@ -87,8 +118,11 @@ for (const [key, value] of Object.entries(offer.scopeLimits ?? {})) {
   assertPositiveInteger(value, `offer.scopeLimits.${key}`);
 }
 assert(Object.keys(offer.scopeLimits ?? {}).length >= 4, "offer.scopeLimits must define the pilot boundary");
+assert(offer.scopeLimits.repositories === 1, "pilot scope must remain limited to one repository");
+assert(offer.scopeLimits.maxOpenPullRequests <= 25, "pilot scope must not exceed 25 open pull requests");
+assert(offer.scopeLimits.maxOpenIssues <= 50, "pilot scope must not exceed 50 open issues");
 
-assert(Array.isArray(proofPackage) && proofPackage.length >= 4, "proofPackage must contain at least four files");
+assert(Array.isArray(proofPackage) && proofPackage.length >= 6, "proofPackage must contain at least six files");
 assert(new Set(proofPackage).size === proofPackage.length, "proofPackage paths must be unique");
 for (const [index, proofPath] of proofPackage.entries()) {
   assertPublicRelativePath(proofPath, `proofPackage[${index}]`);
@@ -104,6 +138,8 @@ assert(proofPackage.includes(channel.inboundRequestPath), "inbound request path 
 for (const [key, value] of Object.entries(metrics ?? {})) {
   assertNonNegativeNumber(value, `metrics.${key}`);
 }
+assert(metrics.orders <= offer.quantityTarget, "orders must not exceed the experiment quantity target");
+assert(metrics.deliveriesAccepted <= metrics.orders, "accepted deliveries must not exceed orders");
 
 for (const key of ["grossRevenueUsd", "feesUsd", "refundsUsd", "netCashUsd"]) {
   assertNonNegativeNumber(money?.[key], `money.${key}`);
@@ -117,6 +153,9 @@ assert(
   ["UNKNOWN", "PAID_PENDING", "PAID_SETTLED", "REFUNDED", "DISPUTED"].includes(money.settlementState),
   "unsupported settlement state"
 );
+if (money.settlementState !== "PAID_SETTLED") {
+  assert(money.grossRevenueUsd === 0, "unsettled prepared sample must not count gross revenue");
+}
 
 for (const [key, value] of Object.entries(claims ?? {})) {
   assert(value === false, `claims.${key} must be false in the prepared sample`);
@@ -136,7 +175,7 @@ for (const urlText of fundingUrls) {
   assert(fundingFileUrls.includes(urlText), `funding URL missing from FUNDING.yml: ${urlText}`);
 }
 
-assert(receipt.schemaVersion === "1.0.0", "audit receipt schemaVersion must be 1.0.0");
+assert(receipt.schemaVersion === receiptSchema.properties.schemaVersion.const, "receipt schemaVersion must match the audit receipt schema");
 assert(/^JP-AUDIT-[A-Z0-9-]+$/.test(receipt.auditId), "auditId must use the JP-AUDIT namespace");
 assert(receipt.experimentId === sample.experimentId, "audit receipt must reference the revenue experiment");
 assert(receipt.agreement?.priceUsd === offer.priceUsd, "audit receipt price must match the offer price");
@@ -180,4 +219,5 @@ console.log(`Gross target: $${offer.grossTargetUsd}`);
 console.log(`Authority: ${authority.publication}/${authority.outreach}`);
 console.log(`Funding URLs verified: ${fundingUrls.length}`);
 console.log(`Proof files verified: ${proofPackage.length}`);
+console.log(`Schemas verified: ${experimentSchema.title}/${receiptSchema.title}`);
 console.log(`Audit receipt: ${receipt.auditId}/${receipt.result}`);
