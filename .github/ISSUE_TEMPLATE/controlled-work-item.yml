@@ -1,0 +1,112 @@
+name: Controlled work item
+description: Define a bounded, reviewable task with authority, verification, and receipt fields.
+title: "[Work]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for repository work that should move through an exact scope, dedicated branch, pull request, verification, JP approval, and receipt.
+
+  - type: input
+    id: target
+    attributes:
+      label: Target
+      description: Name the exact repository lane, route, component, document, workflow, or artifact.
+      placeholder: "Example: MATADATA intake ledger"
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose and expected result
+      description: State what should be true when this work is complete.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Primary lane
+      options:
+        - Application code
+        - Verification or tests
+        - GitHub Actions or CI
+        - Documentation or receipts
+        - Deployment preparation
+        - Repository governance
+        - Research or experiment
+    validations:
+      required: true
+
+  - type: dropdown
+    id: state
+    attributes:
+      label: Starting state
+      options:
+        - Proposed
+        - Active
+        - Blocked
+        - Superseded
+        - Reference only
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Included scope
+      description: List the smallest coherent set of files, behavior, or decisions included.
+    validations:
+      required: true
+
+  - type: textarea
+    id: exclusions
+    attributes:
+      label: Explicit exclusions
+      description: Name what this task must not change or perform.
+      placeholder: "No settings, secrets, production deployment, publication, submission, outreach, billing, or payments."
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and sequencing
+      description: Identify required predecessor PRs, conflicting branches, superseded work, or external blockers.
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification plan
+      description: List the commands, checks, evidence, screenshots, logs, or receipt conditions required.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: authority
+    attributes:
+      label: Authority state
+      options:
+        - Preparation authorized only
+        - Review authorized
+        - Merge requires JP approval
+        - Consequential action requires separate explicit approval
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Public and safety boundary
+      options:
+        - label: I have not included secrets, credentials, private records, payment data, or sensitive personal information.
+          required: true
+        - label: I understand that repository preparation does not authorize settings changes, deployment, publication, submissions, outreach, billing, or payments.
+          required: true
+
+  - type: textarea
+    id: receipt
+    attributes:
+      label: Receipt and next controlled action
+      description: Provide an existing receipt ID, proposed receipt path, and the next bounded action.
