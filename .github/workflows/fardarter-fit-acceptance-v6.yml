@@ -1,0 +1,138 @@
+name: Fardarter Fit Acceptance v6
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - edited
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: fardarter-fit-v6-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  accept-fit:
+    name: Accept qualifying request for nonbinding scope drafting
+    if: >-
+      github.event_name == 'issues' &&
+      startsWith(github.event.issue.title, '[Audit request]:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Apply v6 nonbinding fit decision
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const body = context.payload.issue.body || '';
+            const marker = '<!-- jp-fardarter-fit-v6 -->';
+
+            const requiredSections = [
+              'Repository URL',
+              'Your relationship to the repository',
+              'Current operating problem',
+              'Desired outcome',
+              'Approximate review size',
+              'Timing or deadline',
+              'Package being considered',
+              'Public and transaction boundaries',
+            ];
+            const missingSections = requiredSections.filter(
+              (section) => !body.includes(section),
+            );
+            const prohibitedPatterns = [
+              /password\s*[:=]/i,
+              /private[_ -]?key\s*[:=]/i,
+              /secret\s*[:=]/i,
+              /routing\s*number\s*[:=]/i,
+              /bank\s*account\s*[:=]/i,
+              /social\s*security\s*[:=]/i,
+              /provider\s*transaction\s*id\s*[:=]/i,
+            ];
+            const prohibitedDataDetected = prohibitedPatterns.some((pattern) =>
+              pattern.test(body),
+            );
+            const fitsPublishedScope =
+              !body.includes('Larger than the published scope') ||
+              body.includes('Fit check only');
+            const accepted =
+              missingSections.length === 0 &&
+              !prohibitedDataDetected &&
+              fitsPublishedScope;
+
+            const labelDefinitions = [
+              {
+                name: 'not-an-order',
+                color: 'D4C5F9',
+                description: 'Interest or fit evidence only; not an order, reservation, contract, or payment',
+              },
+              {
+                name: 'fd-capacity-v6',
+                color: '5319E7',
+                description: 'Fardarter Drive v6 uses 1,000 total planning slots and a 100-ACTIVE standard ceiling',
+              },
+              {
+                name: accepted ? 'fit-approved-for-scope-draft' : 'needs-jp-review',
+                color: accepted ? '0E8A16' : 'FBCA04',
+                description: accepted
+                  ? 'Nonbinding fit accepted for draft scope preparation only'
+                  : 'Human review required before any fit decision',
+              },
+              {
+                name: accepted ? 'needs-scope-draft' : 'fit-not-auto-approved',
+                color: accepted ? '1D76DB' : 'B60205',
+                description: accepted
+                  ? 'Private scope and work-package drafts may be prepared'
+                  : 'Automated fit criteria were not satisfied',
+              },
+            ];
+
+            for (const label of labelDefinitions) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: labelDefinitions.map((label) => label.name),
+            });
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+            if (!comments.some((comment) => comment.body?.includes(marker))) {
+              const decisionText = accepted
+                ? '**FIT_APPROVED_FOR_SCOPE_DRAFT** — the request may proceed to private, nonbinding scope and work-package drafting.'
+                : '**NEEDS_JP_REVIEW** — automated fit criteria were incomplete or outside the bounded scope.';
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: `${marker}
+            **Automated Fardarter Drive™ v6 fit receipt**
+
+            ${decisionText}
+
+            This decision is **not** an order, capacity reservation, contract, signature, invoice, payment obligation, deadline promise, indemnity agreement, waiver, release, or paid work start. Fardarter Drive v6 provides 1,000 total planning slots. Under the standard ceiling, no more than 100 deliveries may be ACTIVE; operation above 100 requires an active capacity override receipt. Final commercial acceptance requires identified parties, exact written terms, buyer consent, and JP approval. Only an agreed external provider can establish \`PAID_SETTLED\` evidence.
+
+            Do not post credentials, payment records, private customer data, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, counsel notes, or private capacity-readiness evidence in this public issue.`,
+              });
+            }
+            core.notice(
+              `Issue #${issue_number} v6 fit state: ${accepted ? 'FIT_APPROVED_FOR_SCOPE_DRAFT' : 'NEEDS_JP_REVIEW'}`,
+            );
