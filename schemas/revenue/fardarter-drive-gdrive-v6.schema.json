@@ -16,7 +16,7 @@
     "publicFileIdsExposed": { "const": false },
     "documents": {
       "type": "array",
-      "minItems": 2,
+      "minItems": 3,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -33,10 +33,11 @@
     "automation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["createPrivateWorkPackageAfterFitApproval", "validateCapacityOverride", "activateOverrideWithoutCompleteReceipt", "publicReceiptMayExposeDriveUrl", "publicReceiptMayExposeDriveFileId", "publicReceiptMayExposeBuyerIdentity", "workPackageCreatesContract", "workPackageCreatesPaymentObligation", "workPackageStartsPaidDelivery"],
+      "required": ["createPrivateWorkPackageAfterFitApproval", "validateCapacityOverride", "maintainOperationalCapacityLedger", "activateOverrideWithoutCompleteReceipt", "publicReceiptMayExposeDriveUrl", "publicReceiptMayExposeDriveFileId", "publicReceiptMayExposeBuyerIdentity", "workPackageCreatesContract", "workPackageCreatesPaymentObligation", "workPackageStartsPaidDelivery"],
       "properties": {
         "createPrivateWorkPackageAfterFitApproval": { "const": true },
         "validateCapacityOverride": { "const": true },
+        "maintainOperationalCapacityLedger": { "const": true },
         "activateOverrideWithoutCompleteReceipt": { "const": false },
         "publicReceiptMayExposeDriveUrl": { "const": false },
         "publicReceiptMayExposeDriveFileId": { "const": false },
