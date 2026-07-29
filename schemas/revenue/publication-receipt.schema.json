@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/publication-receipt.schema.json",
+  "title": "Revenue Publication Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "experimentId",
+    "channel",
+    "issueNumber",
+    "publicationUrl",
+    "publishedAt",
+    "publicationAuthorized",
+    "directOutreachSent",
+    "orders",
+    "grossRevenueUsd",
+    "settledCashUsd",
+    "externalActionsPerformed",
+    "excludedActions",
+    "publicDataBoundary",
+    "result",
+    "nextControlledAction"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "receiptId": { "type": "string", "pattern": "^JP-REV-[A-Z0-9-]+$" },
+    "experimentId": { "type": "string", "pattern": "^JP-REV-[A-Z0-9-]+$" },
+    "channel": { "const": "GITHUB_INBOUND_ISSUE" },
+    "issueNumber": { "type": "integer", "const": 133 },
+    "publicationUrl": { "type": "string", "const": "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/133" },
+    "publishedAt": { "type": "string", "format": "date-time" },
+    "publicationAuthorized": { "const": true },
+    "directOutreachSent": { "type": "integer", "minimum": 0, "maximum": 0 },
+    "orders": { "type": "integer", "minimum": 0, "maximum": 5 },
+    "grossRevenueUsd": { "type": "number", "minimum": 0 },
+    "settledCashUsd": { "type": "number", "minimum": 0 },
+    "externalActionsPerformed": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 3 }
+    },
+    "excludedActions": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 3 }
+    },
+    "publicDataBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["containsCredentials", "containsPaymentData", "containsCustomerIdentity", "containsConfidentialRecords"],
+      "properties": {
+        "containsCredentials": { "const": false },
+        "containsPaymentData": { "const": false },
+        "containsCustomerIdentity": { "const": false },
+        "containsConfidentialRecords": { "const": false }
+      }
+    },
+    "result": { "const": "PUBLISHED" },
+    "nextControlledAction": { "type": "string", "minLength": 20 }
+  }
+}
