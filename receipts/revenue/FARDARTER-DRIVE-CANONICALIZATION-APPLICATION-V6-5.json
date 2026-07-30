@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "1.0.0",
+  "applicationId": "FARDARTER-CANONICALIZATION-APPLICATION-ISSUE-159-V6-5",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "controllerVersion": "6.5.0",
+  "controllingIssues": [168, 169],
+  "source": {
+    "entityIssue": 159,
+    "proposalIssue": 162,
+    "previewIssue": 167,
+    "fromState": "FIT_APPROVED_FOR_SCOPE_DRAFT",
+    "toState": "SCOPE_DRAFTED",
+    "proposalDecision": "READY_FOR_REVIEW",
+    "previewDecision": "PREVIEW_READY"
+  },
+  "review": {
+    "decision": "APPROVED_FOR_REVIEWED_MERGE",
+    "decisionMaker": "JP",
+    "repositoryChecksRequired": true,
+    "immutableSourceReadbackRequired": true,
+    "deploymentReadbackRequiredForPublicLiveClaim": true
+  },
+  "canonicalEvent": {
+    "chainId": "FARDARTER-DRIVE-STATE-EVENTS-V6-2",
+    "sequence": 1,
+    "eventId": "FARDARTER-CANONICAL-ISSUE-159-V6-5",
+    "eventDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "previousEventDigest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b",
+    "canonical": true,
+    "applied": true
+  },
+  "reconciliation": {
+    "snapshotId": "FARDARTER-RECONCILIATION-ISSUE-159-V6-5",
+    "sequence": 1,
+    "snapshotDigest": "7c7f47f40868f4879942406274b01710af74539d5b840f0edb18d24400ddbdf3",
+    "previousSnapshotDigest": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22"
+  },
+  "previewEvidence": {
+    "preparedCandidateEventDigest": "2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174",
+    "preparedCandidateSnapshotDigest": "4e7e2ead4c466704ad0559fed73cc01cf028722d701ffe47669626858a96c8de",
+    "preparedReviewBundleDigest": "3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2",
+    "preparedPreviewLedgerDigest": "9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c",
+    "runtimeCandidateEventDigest": "7190d54bcefbe94e28c000912e37085ff15edce05a60b65fb3b6f622a74846e9",
+    "runtimeCandidateSnapshotDigest": "d914b9d5a73a3caa3869cd03d13e055b0769ca4e2f094c589fba08b0650eb486",
+    "runtimeReviewBundleDigest": "e10840594ba62657c47b83cc86b07ee4279d5346d93350cc77e60645c8cb33bd",
+    "runtimeDuplicateSuppressed": true
+  },
+  "effects": {
+    "stateCountDelta": {
+      "SCOPE_DRAFTED": 1
+    },
+    "activeDeliveryDelta": 0,
+    "orderDelta": 0,
+    "grossRevenueDeltaUsd": 0,
+    "settledCashDeltaUsd": 0,
+    "capacityHeadroomAfter": 100,
+    "settlementStateAfter": "UNKNOWN"
+  },
+  "evidenceBoundary": {
+    "createsCustomer": false,
+    "createsOrder": false,
+    "createsContract": false,
+    "createsPaymentObligation": false,
+    "provesPayment": false,
+    "startsPaidWork": false,
+    "usesActiveCapacity": false,
+    "changesCapacityCeiling": false,
+    "resolvesDispute": false,
+    "selectsLegalTerms": false,
+    "isIndemnityProof": false,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "googleDriveContinuity": {
+    "state": "CONNECTED_PRIVATE",
+    "documentTitles": [
+      "Fardarter Drive™ v6.5 — Canonical Event Application Charter",
+      "Fardarter Drive™ v6.5 — Canonical Event Application Register"
+    ],
+    "publicReferencesExposed": false
+  },
+  "generatedAt": "2026-07-30T08:50:16Z",
+  "applicationDigest": "6692334b17fae5e26d973b92d6476a52d4f316489e085eba76971173f03f156f"
+}
