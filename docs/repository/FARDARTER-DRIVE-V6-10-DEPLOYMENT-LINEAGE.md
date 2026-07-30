@@ -81,7 +81,7 @@ A latest-target production promotion is complete only when every gate passes:
 - immutable route readback passes route by route;
 - rollback reference is recorded;
 - durable receipts are posted to Issues #190, #141, and #133;
-- no private Google Drive URL or ID is exposed;
+- No private Google Drive URL or ID is exposed;
 - human approval remains present;
 - automatic promotion remains prohibited.
 
