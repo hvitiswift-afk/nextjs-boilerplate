@@ -1,0 +1,122 @@
+name: Fardarter Canonicalization Preview v6.4
+description: Request a deterministic, noncanonical next-event and reconciliation preview under Fardarter Drive v6.4.
+title: "[FD preview]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form creates a **noncanonical preview bundle only**. It cannot append an event, create an order or contract, prove payment, start work, consume ACTIVE capacity, activate an override, or expose private evidence. `PREVIEW_READY` means the dry-run is internally consistent; application still requires a separately reviewed merge and immutable readback.
+
+  - type: input
+    id: proposal_issue
+    attributes:
+      label: Source READY_FOR_REVIEW proposal issue
+      placeholder: "Issue #162"
+    validations:
+      required: true
+
+  - type: input
+    id: entity_issue
+    attributes:
+      label: Source public-state entity issue
+      placeholder: "Issue #159"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: expected_state
+    attributes:
+      label: Expected current public signal state
+      options:
+        - REQUESTED
+        - FIT_APPROVED_FOR_SCOPE_DRAFT
+        - SCOPE_DRAFTED
+        - HUMAN_ACCEPTED
+        - PAID_PENDING
+        - PAID_SETTLED
+        - WORK_START_APPROVED
+        - ACTIVE
+        - DELIVERED
+        - ACCEPTED
+        - CANCELLED
+        - REFUNDED
+        - DISPUTED
+    validations:
+      required: true
+
+  - type: dropdown
+    id: candidate_state
+    attributes:
+      label: Candidate canonical to-state
+      options:
+        - FIT_APPROVED_FOR_SCOPE_DRAFT
+        - SCOPE_DRAFTED
+        - HUMAN_ACCEPTED
+        - PAID_PENDING
+        - PAID_SETTLED
+        - WORK_START_APPROVED
+        - ACTIVE
+        - DELIVERED
+        - ACCEPTED
+        - CANCELLED
+        - REFUNDED
+        - DISPUTED
+    validations:
+      required: true
+
+  - type: input
+    id: bundle_id
+    attributes:
+      label: Review bundle ID
+      placeholder: "FARDARTER-CANONICALIZATION-BUNDLE-ISSUE-162-V6-4"
+    validations:
+      required: true
+
+  - type: input
+    id: idempotency_key
+    attributes:
+      label: Public-safe preview idempotency key
+      placeholder: "issue-162-canonicalization-preview-v6-4"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Public-safe evidence references
+      description: List GitHub issues, pull requests, commits, blobs, or public-safe digests. Do not post private evidence, identities, signatures, provider IDs, bank data, counsel notes, or confidential materials.
+    validations:
+      required: true
+
+  - type: input
+    id: review_by
+    attributes:
+      label: Review-by or expiry time
+      description: ISO-8601 UTC timestamp. Expired previews are BLOCKED.
+      placeholder: "2026-07-31T23:59:59Z"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Preview, canonicalization, privacy, and financial boundaries
+      options:
+        - label: I understand this preview is noncanonical and cannot apply itself.
+          required: true
+        - label: I understand PREVIEW_READY does not create an order, contract, payment, settlement, work start, acceptance, refund, or dispute resolution.
+          required: true
+        - label: I understand the candidate event and candidate reconciliation snapshot must be recomputed during a separately reviewed merge.
+          required: true
+        - label: I have not posted private or sensitive evidence.
+          required: true
+        - label: I understand received cash requires provider-confirmed PAID_SETTLED evidence.
+          required: true
+        - label: I understand source drift, multiple or unknown state labels, duplicate keys, expired evidence, broken digests, capacity overflow, skipped gates, or unsupported money effects cause BLOCKED.
+          required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional public-safe context
+      description: Optional non-sensitive context. The preview controller will not copy private data into its receipt.
