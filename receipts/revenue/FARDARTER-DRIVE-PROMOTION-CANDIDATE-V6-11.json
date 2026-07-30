@@ -1,1 +1,118 @@
-{}
+{
+  "controlId": "FARDARTER-DRIVE-PROMOTION-CANDIDATE-V6-11",
+  "controllerVersion": "6.11.0",
+  "controllingIssue": 192,
+  "candidate": {
+    "applicationVersion": "6.10.0",
+    "targetSourceCommit": "88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334",
+    "targetDescription": "FARDARTER_DRIVE_V6_10_DEPLOYMENT_LINEAGE_MERGE",
+    "repositoryStateAtCreation": "MAIN_HEAD",
+    "candidateState": "PREPARED_NOT_DEPLOYED",
+    "latestClaimAllowed": false,
+    "targetMustRemainAuthorizedAtExecution": true,
+    "reauthorizationRequiredIfMainMoves": true
+  },
+  "controlPlane": {
+    "controlBranch": "feature/fardarter-v6-11-promotion-candidate",
+    "controlArtifactsAreOutOfBandFromTargetSource": true,
+    "controlMergeDoesNotRewriteTargetSource": true
+  },
+  "providerTarget": {
+    "provider": "NETLIFY",
+    "siteId": "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f",
+    "siteName": "lichburn-v0-2-8",
+    "newSiteCreationAllowed": false,
+    "providerDeployId": null,
+    "immutableUrl": null
+  },
+  "rollbackAnchor": {
+    "applicationVersion": "6.4.0",
+    "sourceCommit": "e482004bfff1bb90aba2d67b8da62a524f18cdb4",
+    "deployId": "6a6b6a709e0a6d5ff2ca7759",
+    "immutableUrl": "https://6a6b6a709e0a6d5ff2ca7759--lichburn-v0-2-8.netlify.app",
+    "verificationState": "DEPLOYED_AND_VERIFIED",
+    "verifiedRouteCount": 12
+  },
+  "routeContract": {
+    "contractVersion": "6.11.0",
+    "requiredRouteCount": 18,
+    "routes": [
+      "/",
+      "/github-control-tower-audit",
+      "/github-control-tower-audit/operations",
+      "/github-control-tower-audit/reconciliation",
+      "/github-control-tower-audit/canonicalization-preview",
+      "/github-control-tower-audit/canonicalization-application",
+      "/github-control-tower-audit/successor-readiness",
+      "/github-control-tower-audit/consent-evidence",
+      "/api/revenue/pilot",
+      "/api/revenue/capacity",
+      "/api/revenue/operations",
+      "/api/revenue/reconciliation",
+      "/api/revenue/canonicalization-preview",
+      "/api/revenue/canonicalization-application",
+      "/api/revenue/successor-readiness",
+      "/api/revenue/consent-evidence",
+      "/sitemap.xml",
+      "/robots.txt"
+    ],
+    "allRoutesRequireHttpSuccess": true,
+    "allBodiesRequireNonemptyReadback": true,
+    "apiBodiesRequireDeterministicValidation": true,
+    "sitemapAndRobotsRequired": true
+  },
+  "promotionGate": {
+    "requiresTargetCommitExistence": true,
+    "requiresTargetStillAuthorizedAtExecution": true,
+    "requiresAllRepositoryVerifiers": true,
+    "requiresProviderDeployId": true,
+    "requiresAuthoritativeImmutableUrl": true,
+    "requiresCompleteRouteReadback": true,
+    "requiresRollbackReference": true,
+    "requiresDurableReceipts": true,
+    "requiredReceiptIssues": [192, 190, 141, 133],
+    "requiresNoPrivateReferenceExposure": true,
+    "requiresHumanApproval": true,
+    "automaticPromotionAllowed": false
+  },
+  "preflight": {
+    "targetCommitExists": true,
+    "targetWasMainHeadAtCreation": true,
+    "reviewedPredecessorPr": 191,
+    "reviewedPredecessorHead": "53350003099a680ade4b166fe317434605820740",
+    "reviewedPredecessorMerge": "88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334",
+    "repositoryOwnedGatesAtPredecessorReview": "PASS",
+    "postMergeTargetReverificationRequired": true,
+    "providerDeployIdAvailable": false,
+    "immutableUrlAvailable": false,
+    "completedRouteReadbacks": 0,
+    "promotionDecision": "HOLD_FOR_EXACT_DEPLOY_AND_READBACK"
+  },
+  "canonicalBoundaries": {
+    "canonicalEventHeadSequence": 1,
+    "canonicalEventHeadDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "reconciliationSequence": 1,
+    "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+    "scopeDrafted": 1,
+    "humanAccepted": 0,
+    "active": 0,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "actualEffects": {
+    "providerDeploymentCreated": false,
+    "latestApplicationPromoted": false,
+    "canonicalMutation": false,
+    "orderCreated": false,
+    "capacityReserved": false,
+    "paymentConfirmed": false,
+    "revenueRecognized": false,
+    "settledCashRecognized": false,
+    "buyerConsentProven": false,
+    "workStarted": false,
+    "privateDriveReferenceExposed": false
+  },
+  "manifestDigest": "4c8b682e9d52905f20a8cef8ef4f78d937bfd11f850f27df79498739ff032dad"
+}
