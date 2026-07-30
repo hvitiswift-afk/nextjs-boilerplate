@@ -21,5 +21,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.85,
     },
+    {
+      url: `${siteUrl}/github-control-tower-audit/reconciliation`,
+      changeFrequency: "daily",
+      priority: 0.82,
+    },
   ];
 }
