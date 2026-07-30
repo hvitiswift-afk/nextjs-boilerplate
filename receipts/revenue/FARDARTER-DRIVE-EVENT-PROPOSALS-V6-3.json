@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "proposalLedgerId": "FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "controllerVersion": "6.3.0",
+  "controllingIssue": 160,
+  "canonicalHead": {
+    "chainId": "FARDARTER-DRIVE-STATE-EVENTS-V6-2",
+    "sequence": 0,
+    "digest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b",
+    "canonicalBusinessEventCount": 0
+  },
+  "lifecycle": [
+    "PROPOSED",
+    "READY_FOR_REVIEW",
+    "QUARANTINED",
+    "REJECTED",
+    "CANONICALIZED_BY_REVIEWED_MERGE"
+  ],
+  "proposalCount": 0,
+  "decisionCounts": {
+    "PROPOSED": 0,
+    "READY_FOR_REVIEW": 0,
+    "QUARANTINED": 0,
+    "REJECTED": 0,
+    "CANONICALIZED_BY_REVIEWED_MERGE": 0
+  },
+  "proposals": [],
+  "quarantinePolicy": {
+    "freezeCanonicalMutation": true,
+    "canonicalEventMayBeAppendedByWorkflow": false,
+    "releaseRequiresHumanOrProviderDecision": true,
+    "releaseRequiresNewReconciliationSnapshot": true
+  },
+  "evidenceBoundary": {
+    "proposalIsCanonicalEvent": false,
+    "readyProposalCreatesOrder": false,
+    "readyProposalCreatesContract": false,
+    "readyProposalProvesPayment": false,
+    "readyProposalStartsPaidWork": false,
+    "publicLabelProvesPrivateEvidence": false,
+    "canonicalizationRequiresReviewedMerge": true,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "googleDriveContinuity": {
+    "state": "CONNECTED_PRIVATE",
+    "documentTitles": [
+      "Fardarter Drive™ v6.3 — Event Proposal and Reconciliation Charter",
+      "Fardarter Drive™ v6.3 — Proposal Quarantine and Reconciliation Register"
+    ],
+    "publicReferencesExposed": false
+  },
+  "nextControlledAction": "Validate one public-safe proposal for Issue #159, keep it noncanonical, prove duplicate suppression, and generate a new reconciliation snapshot only after reviewed source changes.",
+  "ledgerDigest": "3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e"
+}
