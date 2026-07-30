@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-event-proposals-v6-3.schema.json",
+  "title": "Fardarter Drive Event Proposal Ledger v6.3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "proposalLedgerId", "driveId", "controllerVersion", "controllingIssue", "canonicalHead", "lifecycle", "proposalCount", "decisionCounts", "proposals", "quarantinePolicy", "evidenceBoundary", "googleDriveContinuity", "nextControlledAction", "ledgerDigest"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "proposalLedgerId": { "const": "FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3" },
+    "driveId": { "const": "FARDARTER-DRIVE-V6" },
+    "controllerVersion": { "const": "6.3.0" },
+    "controllingIssue": { "const": 160 },
+    "canonicalHead": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chainId", "sequence", "digest", "canonicalBusinessEventCount"],
+      "properties": {
+        "chainId": { "const": "FARDARTER-DRIVE-STATE-EVENTS-V6-2" },
+        "sequence": { "const": 0 },
+        "digest": { "const": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b" },
+        "canonicalBusinessEventCount": { "const": 0 }
+      }
+    },
+    "lifecycle": {
+      "const": ["PROPOSED", "READY_FOR_REVIEW", "QUARANTINED", "REJECTED", "CANONICALIZED_BY_REVIEWED_MERGE"]
+    },
+    "proposalCount": { "type": "integer", "minimum": 0 },
+    "decisionCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["PROPOSED", "READY_FOR_REVIEW", "QUARANTINED", "REJECTED", "CANONICALIZED_BY_REVIEWED_MERGE"],
+      "properties": {
+        "PROPOSED": { "type": "integer", "minimum": 0 },
+        "READY_FOR_REVIEW": { "type": "integer", "minimum": 0 },
+        "QUARANTINED": { "type": "integer", "minimum": 0 },
+        "REJECTED": { "type": "integer", "minimum": 0 },
+        "CANONICALIZED_BY_REVIEWED_MERGE": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "proposals": {
+      "type": "array",
+      "items": { "$ref": "fardarter-drive-event-proposal-v6-3.schema.json" }
+    },
+    "quarantinePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["freezeCanonicalMutation", "canonicalEventMayBeAppendedByWorkflow", "releaseRequiresHumanOrProviderDecision", "releaseRequiresNewReconciliationSnapshot"],
+      "properties": {
+        "freezeCanonicalMutation": { "const": true },
+        "canonicalEventMayBeAppendedByWorkflow": { "const": false },
+        "releaseRequiresHumanOrProviderDecision": { "const": true },
+        "releaseRequiresNewReconciliationSnapshot": { "const": true }
+      }
+    },
+    "evidenceBoundary": { "type": "object" },
+    "googleDriveContinuity": { "type": "object" },
+    "nextControlledAction": { "type": "string", "minLength": 40 },
+    "ledgerDigest": { "const": "3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e" }
+  }
+}
