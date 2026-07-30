@@ -4,6 +4,10 @@ import { getCanonicalConsentEvidence } from "@/lib/revenue/canonical-consent-evi
 
 export const dynamic = "force-dynamic";
 
+const authorityBoundary = "System-development authorization is not buyer consent.";
+const digestBoundary =
+  "The digest alone does not prove consent, create an order, accept a contract, prove payment, start paid work, consume ACTIVE capacity, or append a canonical event.";
+
 export default function ConsentEvidencePage() {
   const data = getCanonicalConsentEvidence();
   const missing = data.derived.missingRequiredEvidence;
@@ -18,8 +22,7 @@ export default function ConsentEvidencePage() {
       </h1>
       <p className="mt-4 max-w-3xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">
         This surface reports evidence states without exposing buyer identity,
-        signatures, private file references, or consent contents. System-development
-        authorization is not buyer consent.
+        signatures, private file references, or consent contents. {authorityBoundary}
       </p>
 
       <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -61,9 +64,7 @@ export default function ConsentEvidencePage() {
         <h2 className="text-2xl font-semibold">Attestation boundaries</h2>
         <p className="mt-3 text-zinc-600 dark:text-zinc-300">
           A public-safe attestation digest proves only that a metadata package was
-          reviewed. The digest alone does not prove consent, create an order, accept a
-          contract, prove payment, start paid work, consume ACTIVE capacity, or append
-          a canonical event.
+          reviewed. {digestBoundary}
         </p>
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
