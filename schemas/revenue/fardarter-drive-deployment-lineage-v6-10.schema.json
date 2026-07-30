@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jp.systems/schemas/revenue/fardarter-drive-deployment-lineage-v6-10.schema.json",
+  "title": "Fardarter Drive v6.10 Deployment Lineage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "controlId",
+    "controllerVersion",
+    "controllingIssue",
+    "createdFromApplicationHead",
+    "verifiedHistoricalDeployment",
+    "latestApplicationTarget",
+    "lineageDistinctions",
+    "promotionGate",
+    "stateClassification",
+    "canonicalBoundaries",
+    "actualEffects",
+    "manifestDigest"
+  ],
+  "properties": {
+    "controlId": {
+      "const": "FARDARTER-DRIVE-DEPLOYMENT-LINEAGE-V6-10"
+    },
+    "controllerVersion": {
+      "const": "6.10.0"
+    },
+    "controllingIssue": {
+      "const": 190
+    },
+    "createdFromApplicationHead": {
+      "const": "760d198316c392a7de3af36faffa93df42ecca64"
+    },
+    "verifiedHistoricalDeployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicationVersion",
+        "sourceCommit",
+        "provider",
+        "siteId",
+        "siteName",
+        "deployId",
+        "immutableUrl",
+        "workflowRunId",
+        "artifactName",
+        "artifactId",
+        "artifactDigest",
+        "verificationState",
+        "verifiedRouteCount",
+        "readbackContractVersion",
+        "materializationMode",
+        "runtimeFunctionsRequiredForVerifiedRoutes"
+      ],
+      "properties": {
+        "applicationVersion": { "const": "6.4.0" },
+        "sourceCommit": { "const": "e482004bfff1bb90aba2d67b8da62a524f18cdb4" },
+        "provider": { "const": "NETLIFY" },
+        "siteId": { "const": "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f" },
+        "siteName": { "const": "lichburn-v0-2-8" },
+        "deployId": { "const": "6a6b6a709e0a6d5ff2ca7759" },
+        "immutableUrl": { "const": "https://6a6b6a709e0a6d5ff2ca7759--lichburn-v0-2-8.netlify.app" },
+        "workflowRunId": { "const": 30554925086 },
+        "artifactName": { "const": "fardarter-v6-4-static-materialized-30554925086" },
+        "artifactId": { "const": 8764697374 },
+        "artifactDigest": { "const": "sha256:e45290adf2e8b85089d0bf9a375ca63154859ddfd451d3977aa49c297fee5dd2" },
+        "verificationState": { "const": "DEPLOYED_AND_VERIFIED" },
+        "verifiedRouteCount": { "const": 12 },
+        "readbackContractVersion": { "const": "6.4.0" },
+        "materializationMode": { "const": "NETLIFY_V1_ROUTE_BLOBS_TO_STATIC_PACKAGE" },
+        "runtimeFunctionsRequiredForVerifiedRoutes": { "const": false }
+      }
+    },
+    "latestApplicationTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicationVersion",
+        "sourceCommit",
+        "capability",
+        "repositoryState",
+        "productionPromotionState",
+        "providerDeployId",
+        "immutableUrl",
+        "routeReadbackState",
+        "claimLiveAllowed"
+      ],
+      "properties": {
+        "applicationVersion": { "const": "6.9.0" },
+        "sourceCommit": { "const": "760d198316c392a7de3af36faffa93df42ecca64" },
+        "capability": { "const": "AUTHORIZED_GITHUB_FIRST_RESPONSE" },
+        "repositoryState": { "const": "MERGED" },
+        "productionPromotionState": { "const": "NOT_PROMOTED" },
+        "providerDeployId": { "type": "null" },
+        "immutableUrl": { "type": "null" },
+        "routeReadbackState": { "const": "NOT_PERFORMED" },
+        "claimLiveAllowed": { "const": false }
+      }
+    },
+    "lineageDistinctions": {
+      "type": "object",
+      "additionalProperties": { "const": false },
+      "minProperties": 6,
+      "maxProperties": 6
+    },
+    "promotionGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiresExactTargetCommit",
+        "requiresAllRepositoryVerifiers",
+        "requiresProviderDeployId",
+        "requiresImmutableUrl",
+        "requiresRouteByRouteReadback",
+        "requiresDurableIssueReceipts",
+        "requiresRollbackReference",
+        "requiresNoPrivateReferenceExposure",
+        "requiredReceiptIssues",
+        "automaticPromotionAllowed",
+        "humanApprovalRequired"
+      ],
+      "properties": {
+        "requiresExactTargetCommit": { "const": true },
+        "requiresAllRepositoryVerifiers": { "const": true },
+        "requiresProviderDeployId": { "const": true },
+        "requiresImmutableUrl": { "const": true },
+        "requiresRouteByRouteReadback": { "const": true },
+        "requiresDurableIssueReceipts": { "const": true },
+        "requiresRollbackReference": { "const": true },
+        "requiresNoPrivateReferenceExposure": { "const": true },
+        "requiredReceiptIssues": {
+          "const": [190, 141, 133]
+        },
+        "automaticPromotionAllowed": { "const": false },
+        "humanApprovalRequired": { "const": true }
+      }
+    },
+    "stateClassification": {
+      "const": {
+        "historicalDeployment": "VERIFIED_HISTORICAL",
+        "latestRepository": "MERGED_NOT_DEPLOYED",
+        "latestProduction": "UNVERIFIED",
+        "drift": "EXPECTED_VERSION_GAP"
+      }
+    },
+    "canonicalBoundaries": {
+      "type": "object"
+    },
+    "actualEffects": {
+      "type": "object",
+      "additionalProperties": { "const": false },
+      "minProperties": 10,
+      "maxProperties": 10
+    },
+    "manifestDigest": {
+      "const": "a63ea73acbb8bc1ec06dfdda7721333ad54cd8492ac163aebf3d15d4ed14556e"
+    }
+  }
+}
