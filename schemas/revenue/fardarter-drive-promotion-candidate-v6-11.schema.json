@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jp.systems/schemas/revenue/fardarter-drive-promotion-candidate-v6-11.schema.json",
+  "title": "Fardarter Drive v6.11 Promotion Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "controlId",
+    "controllerVersion",
+    "controllingIssue",
+    "candidate",
+    "controlPlane",
+    "providerTarget",
+    "rollbackAnchor",
+    "routeContract",
+    "promotionGate",
+    "preflight",
+    "canonicalBoundaries",
+    "actualEffects",
+    "manifestDigest"
+  ],
+  "properties": {
+    "controlId": { "const": "FARDARTER-DRIVE-PROMOTION-CANDIDATE-V6-11" },
+    "controllerVersion": { "const": "6.11.0" },
+    "controllingIssue": { "const": 192 },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicationVersion",
+        "targetSourceCommit",
+        "targetDescription",
+        "repositoryStateAtCreation",
+        "candidateState",
+        "latestClaimAllowed",
+        "targetMustRemainAuthorizedAtExecution",
+        "reauthorizationRequiredIfMainMoves"
+      ],
+      "properties": {
+        "applicationVersion": { "const": "6.10.0" },
+        "targetSourceCommit": { "const": "88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334" },
+        "targetDescription": { "const": "FARDARTER_DRIVE_V6_10_DEPLOYMENT_LINEAGE_MERGE" },
+        "repositoryStateAtCreation": { "const": "MAIN_HEAD" },
+        "candidateState": { "const": "PREPARED_NOT_DEPLOYED" },
+        "latestClaimAllowed": { "const": false },
+        "targetMustRemainAuthorizedAtExecution": { "const": true },
+        "reauthorizationRequiredIfMainMoves": { "const": true }
+      }
+    },
+    "controlPlane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["controlBranch", "controlArtifactsAreOutOfBandFromTargetSource", "controlMergeDoesNotRewriteTargetSource"],
+      "properties": {
+        "controlBranch": { "const": "feature/fardarter-v6-11-promotion-candidate" },
+        "controlArtifactsAreOutOfBandFromTargetSource": { "const": true },
+        "controlMergeDoesNotRewriteTargetSource": { "const": true }
+      }
+    },
+    "providerTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "siteId", "siteName", "newSiteCreationAllowed", "providerDeployId", "immutableUrl"],
+      "properties": {
+        "provider": { "const": "NETLIFY" },
+        "siteId": { "const": "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f" },
+        "siteName": { "const": "lichburn-v0-2-8" },
+        "newSiteCreationAllowed": { "const": false },
+        "providerDeployId": { "type": "null" },
+        "immutableUrl": { "type": "null" }
+      }
+    },
+    "rollbackAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicationVersion", "sourceCommit", "deployId", "immutableUrl", "verificationState", "verifiedRouteCount"],
+      "properties": {
+        "applicationVersion": { "const": "6.4.0" },
+        "sourceCommit": { "const": "e482004bfff1bb90aba2d67b8da62a524f18cdb4" },
+        "deployId": { "const": "6a6b6a709e0a6d5ff2ca7759" },
+        "immutableUrl": { "const": "https://6a6b6a709e0a6d5ff2ca7759--lichburn-v0-2-8.netlify.app" },
+        "verificationState": { "const": "DEPLOYED_AND_VERIFIED" },
+        "verifiedRouteCount": { "const": 12 }
+      }
+    },
+    "routeContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "requiredRouteCount",
+        "routes",
+        "allRoutesRequireHttpSuccess",
+        "allBodiesRequireNonemptyReadback",
+        "apiBodiesRequireDeterministicValidation",
+        "sitemapAndRobotsRequired"
+      ],
+      "properties": {
+        "contractVersion": { "const": "6.11.0" },
+        "requiredRouteCount": { "const": 18 },
+        "routes": {
+          "type": "array",
+          "minItems": 18,
+          "maxItems": 18,
+          "uniqueItems": true,
+          "prefixItems": [
+            { "const": "/" },
+            { "const": "/github-control-tower-audit" },
+            { "const": "/github-control-tower-audit/operations" },
+            { "const": "/github-control-tower-audit/reconciliation" },
+            { "const": "/github-control-tower-audit/canonicalization-preview" },
+            { "const": "/github-control-tower-audit/canonicalization-application" },
+            { "const": "/github-control-tower-audit/successor-readiness" },
+            { "const": "/github-control-tower-audit/consent-evidence" },
+            { "const": "/api/revenue/pilot" },
+            { "const": "/api/revenue/capacity" },
+            { "const": "/api/revenue/operations" },
+            { "const": "/api/revenue/reconciliation" },
+            { "const": "/api/revenue/canonicalization-preview" },
+            { "const": "/api/revenue/canonicalization-application" },
+            { "const": "/api/revenue/successor-readiness" },
+            { "const": "/api/revenue/consent-evidence" },
+            { "const": "/sitemap.xml" },
+            { "const": "/robots.txt" }
+          ],
+          "items": false
+        },
+        "allRoutesRequireHttpSuccess": { "const": true },
+        "allBodiesRequireNonemptyReadback": { "const": true },
+        "apiBodiesRequireDeterministicValidation": { "const": true },
+        "sitemapAndRobotsRequired": { "const": true }
+      }
+    },
+    "promotionGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiresTargetCommitExistence",
+        "requiresTargetStillAuthorizedAtExecution",
+        "requiresAllRepositoryVerifiers",
+        "requiresProviderDeployId",
+        "requiresAuthoritativeImmutableUrl",
+        "requiresCompleteRouteReadback",
+        "requiresRollbackReference",
+        "requiresDurableReceipts",
+        "requiredReceiptIssues",
+        "requiresNoPrivateReferenceExposure",
+        "requiresHumanApproval",
+        "automaticPromotionAllowed"
+      ],
+      "properties": {
+        "requiresTargetCommitExistence": { "const": true },
+        "requiresTargetStillAuthorizedAtExecution": { "const": true },
+        "requiresAllRepositoryVerifiers": { "const": true },
+        "requiresProviderDeployId": { "const": true },
+        "requiresAuthoritativeImmutableUrl": { "const": true },
+        "requiresCompleteRouteReadback": { "const": true },
+        "requiresRollbackReference": { "const": true },
+        "requiresDurableReceipts": { "const": true },
+        "requiredReceiptIssues": {
+          "const": [192, 190, 141, 133]
+        },
+        "requiresNoPrivateReferenceExposure": { "const": true },
+        "requiresHumanApproval": { "const": true },
+        "automaticPromotionAllowed": { "const": false }
+      }
+    },
+    "preflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetCommitExists",
+        "targetWasMainHeadAtCreation",
+        "reviewedPredecessorPr",
+        "reviewedPredecessorHead",
+        "reviewedPredecessorMerge",
+        "repositoryOwnedGatesAtPredecessorReview",
+        "postMergeTargetReverificationRequired",
+        "providerDeployIdAvailable",
+        "immutableUrlAvailable",
+        "completedRouteReadbacks",
+        "promotionDecision"
+      ],
+      "properties": {
+        "targetCommitExists": { "const": true },
+        "targetWasMainHeadAtCreation": { "const": true },
+        "reviewedPredecessorPr": { "const": 191 },
+        "reviewedPredecessorHead": { "const": "53350003099a680ade4b166fe317434605820740" },
+        "reviewedPredecessorMerge": { "const": "88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334" },
+        "repositoryOwnedGatesAtPredecessorReview": { "const": "PASS" },
+        "postMergeTargetReverificationRequired": { "const": true },
+        "providerDeployIdAvailable": { "const": false },
+        "immutableUrlAvailable": { "const": false },
+        "completedRouteReadbacks": { "const": 0 },
+        "promotionDecision": { "const": "HOLD_FOR_EXACT_DEPLOY_AND_READBACK" }
+      }
+    },
+    "canonicalBoundaries": {
+      "type": "object",
+      "required": ["canonicalEventHeadSequence", "canonicalEventHeadDigest", "reconciliationSequence", "reconciliationDigest", "scopeDrafted", "humanAccepted", "active", "orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd", "receivedCashRequires"]
+    },
+    "actualEffects": {
+      "type": "object",
+      "additionalProperties": { "const": false }
+    },
+    "manifestDigest": { "const": "4c8b682e9d52905f20a8cef8ef4f78d937bfd11f850f27df79498739ff032dad" }
+  }
+}
