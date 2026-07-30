@@ -42,6 +42,20 @@
       "nativeGoogleDoc": true,
       "referenceStoredPrivately": true,
       "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v6.3 — Event Proposal and Reconciliation Charter",
+      "purpose": "Private proposal lifecycle, reconciliation digest, canonicalization, expiry, recovery, and authority controls",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v6.3 — Proposal Quarantine and Reconciliation Register",
+      "purpose": "Private event proposals, reconciliation snapshots, quarantine decisions, recovery actions, and evidence locations",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
     }
   ],
   "automation": {
@@ -50,6 +64,8 @@
     "maintainOperationalCapacityLedger": true,
     "maintainAppendOnlyReceiptMesh": true,
     "maintainTransitionConflictRegister": true,
+    "maintainProposalReconciliation": true,
+    "maintainProposalQuarantineRegister": true,
     "activateOverrideWithoutCompleteReceipt": false,
     "publicReceiptMayExposeDriveUrl": false,
     "publicReceiptMayExposeDriveFileId": false,
@@ -66,7 +82,9 @@
     "confidentialDeliveryDataPublic": false,
     "overrideReadinessEvidencePublic": false,
     "transitionConflictEvidencePublic": false,
+    "proposalEvidencePublic": false,
+    "quarantineEvidencePublic": false,
     "disputeRecordsPublic": false
   },
-  "nextControlledAction": "Keep v6 capacity, override, operational-ledger, state-transition, receipt-chain, and conflict evidence private; expose only CONNECTED_PRIVATE state and document titles publicly; create canonical events only through reviewed merges."
+  "nextControlledAction": "Keep v6 capacity, state, proposal, reconciliation, quarantine, and conflict evidence private; expose only CONNECTED_PRIVATE state and document titles publicly; canonicalize proposals only through reviewed merges."
 }
