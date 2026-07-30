@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0.0",
+  "controlId": "FARDARTER-DRIVE-SUCCESSOR-CONTROL-V6-6",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "controllerVersion": "6.6.0",
+  "controllingIssue": 173,
+  "currentCanonical": {
+    "eventChainId": "FARDARTER-DRIVE-STATE-EVENTS-V6-2",
+    "headSequence": 1,
+    "headDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "eventCount": 2,
+    "canonicalBusinessEventCount": 1,
+    "reconciliationSequence": 1,
+    "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+    "applicationDigest": "f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d",
+    "stateCounts": {
+      "REQUESTED": 0,
+      "FIT_APPROVED_FOR_SCOPE_DRAFT": 0,
+      "SCOPE_DRAFTED": 1,
+      "HUMAN_ACCEPTED": 0,
+      "PAID_PENDING": 0,
+      "PAID_SETTLED": 0,
+      "WORK_START_APPROVED": 0,
+      "ACTIVE": 0,
+      "DELIVERED": 0,
+      "ACCEPTED": 0,
+      "CANCELLED": 0,
+      "REFUNDED": 0,
+      "DISPUTED": 0
+    },
+    "totalPlanningSlots": 1000,
+    "effectiveActiveCeiling": 100,
+    "activeDeliveries": 0,
+    "activeHeadroom": 100,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "overrideState": "INACTIVE_NO_RECEIPT",
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "nextCandidate": {
+    "eventSequence": 2,
+    "previousEventDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "reconciliationSequence": 2,
+    "previousSnapshotDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+    "deriveAtRuntime": true,
+    "hardcodedHeadAllowed": false,
+    "automaticCanonicalization": false,
+    "reviewedMergeRequired": true
+  },
+  "successorReview": {
+    "bundlePath": "receipts/revenue/FARDARTER-DRIVE-SUCCESSOR-REVIEW-BUNDLE-V6-6.sample.json",
+    "bundleDigest": "8f3312568414fcad5d33bc8ee44d4c04f6d54117dce250c62d31c4491b6638f2",
+    "transition": "SCOPE_DRAFTED->HUMAN_ACCEPTED",
+    "allowedTransition": true,
+    "authorityGate": "HUMAN_APPROVAL_AND_BUYER_CONSENT",
+    "decision": "BLOCKED_MISSING_GATE_EVIDENCE",
+    "candidateEventDigest": "6e9ec1a02d85b2894d8388bfc3bcc7d4d79147703d3ea68b2bbc9b358a3829b2",
+    "candidateSnapshotDigest": "5891a56c76f102573461c64d281f4cac6e785d2737b3ec8d5b5d170cfbd7b245",
+    "canonicalEventAppended": false
+  },
+  "conflictPolicy": {
+    "freezeCanonicalMutation": true,
+    "types": [
+      "STALE_HEAD_SEQUENCE",
+      "STALE_PREVIOUS_EVENT_DIGEST",
+      "STALE_PREVIOUS_SNAPSHOT_DIGEST",
+      "DUPLICATE_SUCCESSOR_KEY",
+      "MISSING_GATE_EVIDENCE",
+      "UNSUPPORTED_ORDER_DELTA",
+      "UNSUPPORTED_MONEY_DELTA",
+      "ACTIVE_CAPACITY_OVERFLOW",
+      "PUBLIC_PRIVATE_EVIDENCE_MISMATCH",
+      "SENSITIVE_PUBLIC_CONTENT"
+    ]
+  },
+  "evidenceBoundary": {
+    "successorReviewCreatesCanonicalEvent": false,
+    "blockedCandidateCreatesOrder": false,
+    "blockedCandidateCreatesContract": false,
+    "blockedCandidateProvesPayment": false,
+    "blockedCandidateStartsPaidWork": false,
+    "blockedCandidateUsesActiveCapacity": false,
+    "blockedCandidateChangesCapacityCeiling": false,
+    "systemAuthorizationEqualsBuyerConsent": false,
+    "receivedCashRequires": "PAID_SETTLED",
+    "templateIsIndemnityProof": false
+  },
+  "googleDriveContinuity": {
+    "state": "CONNECTED_PRIVATE",
+    "documentTitles": [
+      "Fardarter Drive™ v6.6 — Dynamic Head and Successor Event Charter",
+      "Fardarter Drive™ v6.6 — Successor Review and Gate Register"
+    ],
+    "publicReferencesExposed": false
+  },
+  "deployment": {
+    "state": "UNVERIFIED",
+    "deployId": null,
+    "immutableUrl": null
+  },
+  "nextControlledAction": "Merge and verify dynamic-head successor control, then prove the blocked HUMAN_ACCEPTED candidate cannot append event 2 without exact JP application approval and buyer consent.",
+  "generatedAt": "2026-07-30T10:18:00Z",
+  "controlDigest": "d9e2ecfb97b33e547e87c7c092c25ef37f251e91e7549c1e23f41782987db1ae"
+}

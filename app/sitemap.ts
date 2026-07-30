@@ -12,5 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/github-control-tower-audit/reconciliation`, changeFrequency: "daily", priority: 0.82 },
     { url: `${siteUrl}/github-control-tower-audit/canonicalization-preview`, changeFrequency: "daily", priority: 0.8 },
     { url: `${siteUrl}/github-control-tower-audit/canonicalization-application`, changeFrequency: "daily", priority: 0.84 },
+    { url: `${siteUrl}/github-control-tower-audit/successor-readiness`, changeFrequency: "daily", priority: 0.83 },
   ];
 }

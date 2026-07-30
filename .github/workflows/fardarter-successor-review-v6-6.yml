@@ -1,0 +1,88 @@
+name: Fardarter Successor Review v6.6
+
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: fardarter-successor-v6-6-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  review:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (startsWith(github.event.issue.title, '[FD successor review]:') &&
+       contains(github.event.issue.labels.*.name, 'fd-successor-approved-v6-6'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const chain = JSON.parse(fs.readFileSync('receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json','utf8'));
+            const reconciliation = JSON.parse(fs.readFileSync('receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-5.json','utf8'));
+            const machine = JSON.parse(fs.readFileSync('receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json','utf8'));
+            const issue = context.payload.issue;
+            if (!issue) return;
+            const body = issue.body || '';
+            const section = (label) => {
+              const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const match = body.match(new RegExp(`### ${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n### |$)`));
+              return match?.[1]?.trim() || '';
+            };
+            const issueNumber = Number((section('Source entity issue').match(/#?(\\d+)/) || [])[1]);
+            const expectedState = section('Expected current canonical state').split(/\\s+/)[0];
+            const candidateState = section('Candidate successor state').split(/\\s+/)[0];
+            const key = section('Public-safe successor idempotency key');
+            const evidence = section('Public-safe evidence references');
+            const reviewBy = section('Review-by or expiry time');
+            const marker = `jp-fardarter-successor-v6-6-${issueNumber}-${expectedState}-${candidateState}-${key}`
+              .replace(/[^A-Za-z0-9:_-]+/g,'-').slice(0,220);
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, per_page: 100,
+            });
+            if (comments.some((comment) => comment.body?.includes(marker))) return;
+
+            const entityEvents = chain.events.filter((event) => event.entityType === 'GITHUB_ISSUE' && Number(event.entityId) === issueNumber);
+            const currentState = entityEvents.at(-1)?.toState || null;
+            const transition = machine.allowedTransitions.find((item) => item.fromState === currentState && item.toState === candidateState);
+            const expired = !reviewBy || Number.isNaN(Date.parse(reviewBy)) || Date.parse(reviewBy) <= Date.now();
+            const unsafe = /(?:password|secret|token|routing|account number|provider transaction|signature|counsel note|private evidence)/i.test(body);
+            const keyValid = /^[A-Za-z0-9:_-]{8,160}$/.test(key);
+            const baseValid = issueNumber > 0 && currentState === expectedState && transition && keyValid && evidence && !expired && !unsafe;
+            const humanGate = transition?.gate !== 'AUTOMATED_NONBINDING';
+            const decision = !baseValid ? 'BLOCKED_INVALID_OR_STALE' : humanGate ? 'BLOCKED_HUMAN_GATE_REQUIRED' : 'READY_FOR_PREVIEW';
+            const labels = decision === 'READY_FOR_PREVIEW'
+              ? ['fd-successor-ready-v6-6','fd-successor-noncanonical']
+              : ['fd-successor-blocked-v6-6','fd-successor-noncanonical','needs-jp-review'];
+            for (const name of labels) {
+              try { await github.rest.issues.getLabel({owner:context.repo.owner,repo:context.repo.repo,name}); }
+              catch { await github.rest.issues.createLabel({owner:context.repo.owner,repo:context.repo.repo,name,color:name.includes('blocked')?'B60205':'D4C5F9'}); }
+            }
+            await github.rest.issues.addLabels({owner:context.repo.owner,repo:context.repo.repo,issue_number:issue.number,labels});
+            const message = [
+              `<!-- ${marker} -->`,
+              '**Fardarter Drive™ v6.6 dynamic-head successor receipt**',
+              `- Decision: **${decision}**`,
+              `- Source entity: **Issue #${issueNumber || 'UNKNOWN'}**`,
+              `- Canonical state: **${currentState || 'UNKNOWN'}**`,
+              `- Candidate transition: \`${currentState || 'UNKNOWN'} → ${candidateState || 'UNKNOWN'}\``,
+              `- Required gate: **${transition?.gate || 'INVALID_TRANSITION'}**`,
+              `- Current event head: **${chain.headSequence}** / \`${chain.headDigest}\``,
+              `- Candidate event sequence: **${chain.headSequence + 1}**`,
+              `- Current reconciliation: **${reconciliation.sequence}** / \`${reconciliation.snapshotDigest}\``,
+              `- Candidate reconciliation sequence: **${reconciliation.sequence + 1}**`,
+              '- Canonical event appended: **NO**',
+              '- Current order / gross / settled: **0 / $0 / $0**',
+              '- Contract / payment / paid work / ACTIVE / capacity change: **NONE**',
+              '',
+              'A consequential gate is never satisfied by broad system-development authorization. Buyer consent and exact application evidence must be independently verified before a reviewed merge may append the next event.',
+            ].join('\\n');
+            await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:issue.number,body:message});
