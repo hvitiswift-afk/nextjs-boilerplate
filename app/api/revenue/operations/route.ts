@@ -1,6 +1,8 @@
+import application from "@/receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-APPLICATION-V6-5.json";
 import capacityLedger from "@/receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json";
 import eventChain from "@/receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json";
 import googleDriveReceipt from "@/receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json";
+import reconciliation from "@/receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-5.json";
 import stateMachine from "@/receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json";
 import { getPublicStateLedger } from "@/lib/revenue/public-state-ledger";
 
@@ -27,14 +29,18 @@ export async function GET() {
 
   return Response.json(
     {
-      schemaVersion: "1.0.0",
+      schemaVersion: "1.1.0",
       stateMachineId: stateMachine.stateMachineId,
       chainId: eventChain.chainId,
       driveId: stateMachine.driveId,
       authorityVersion: stateMachine.authorityVersion,
-      controllerVersion: stateMachine.controllerVersion,
-      controllingIssue: stateMachine.controllingIssue,
-      canonicalBaseline: stateMachine.baseline,
+      stateControllerVersion: stateMachine.controllerVersion,
+      applicationControllerVersion: application.controllerVersion,
+      controllingIssues: {
+        stateMachine: stateMachine.controllingIssue,
+        canonicalApplication: application.controllingIssues,
+      },
+      planningBaseline: stateMachine.baseline,
       capacity: {
         totalPlanningSlots: capacityLedger.canonicalCapacity.totalPlanningSlots,
         standardActiveCeiling:
@@ -42,10 +48,8 @@ export async function GET() {
         effectiveActiveCeiling:
           capacityLedger.canonicalCapacity.effectiveActiveCeiling,
         activeDeliveries: capacityLedger.canonicalCapacity.activeDeliveries,
-        activeHeadroom:
-          capacityLedger.canonicalCapacity.effectiveActiveCeiling -
-          capacityLedger.canonicalCapacity.activeDeliveries,
-        backpressureActive: false,
+        activeHeadroom: capacityLedger.arithmetic.effectiveActiveHeadroom,
+        backpressureActive: capacityLedger.arithmetic.backpressureActive,
         overrideState: capacityLedger.canonicalCapacity.overrideState,
       },
       receiptChain: {
@@ -59,6 +63,24 @@ export async function GET() {
         digestChainConnected,
         headMatches,
         genesisOnly: eventChain.canonicalBusinessEventCount === 0,
+        currentStage: "SEQUENCE_1_APPLIED",
+      },
+      currentApplication: {
+        id: application.applicationId,
+        digest: application.applicationDigest,
+        decision: application.review.decision,
+        source: application.source,
+        canonicalEvent: application.canonicalEvent,
+        reconciliation: application.reconciliation,
+        effects: application.effects,
+        evidenceBoundary: application.evidenceBoundary,
+      },
+      currentReconciliation: {
+        id: reconciliation.snapshotId,
+        sequence: reconciliation.sequence,
+        digest: reconciliation.snapshotDigest,
+        previousSnapshotDigest: reconciliation.previousSnapshotDigest,
+        application: reconciliation.application,
       },
       canonicalCounts: eventChain.currentCanonicalCounts,
       stateDefinitions: stateMachine.states,
@@ -79,6 +101,8 @@ export async function GET() {
           googleDriveReceipt.automation.maintainAppendOnlyReceiptMesh,
         conflictRegisterMaintained:
           googleDriveReceipt.automation.maintainTransitionConflictRegister,
+        canonicalApplicationsMaintained:
+          googleDriveReceipt.automation.maintainCanonicalEventApplications,
       },
       evidenceBoundary: {
         publicSignalCreatesCanonicalEvent: false,
@@ -86,15 +110,20 @@ export async function GET() {
         transitionWorkflowCreatesContract: false,
         transitionWorkflowProvesPayment: false,
         transitionWorkflowStartsPaidWork: false,
+        reviewedApplicationCreatedOrder: false,
+        reviewedApplicationProvedPayment: false,
+        reviewedApplicationStartedPaidWork: false,
         driveFileCreatesContract: false,
         publicCommentProvesPrivateEvidence: false,
-        canonicalEventRequiresReviewedMerge: true,
+        laterStateChangeRequiresNewAppendOnlyEvent: true,
         receivedCashRequires: "PAID_SETTLED",
         activeStateRequiresCapacityHeadroom: true,
         automaticPaidWorkStart: false,
         templateIsIndemnityProof: false,
       },
-      nextControlledAction: stateMachine.nextControlledAction,
+      deployment: reconciliation.deployment,
+      nextControlledAction:
+        "Preserve sequence 1 and reconcile any later change through a new reviewed append-only event.",
     },
     {
       headers: {
