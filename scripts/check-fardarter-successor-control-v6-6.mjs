@@ -68,7 +68,7 @@ assert(gdrive.automation.maintainDynamicHeadSuccessorControl===true && gdrive.au
 assert(gdrive.privacyBoundary.successorGateEvidencePublic===false && gdrive.privacyBoundary.buyerConsentEvidencePublic===false,"successor evidence privacy mismatch");
 
 for (const required of ["eventChain.headSequence + 1","reconciliation.sequence + 1","eventChain.headDigest","reconciliation.snapshotDigest"]) assert(text.lib.includes(required),`dynamic library missing ${required}`);
-for (const required of ["BLOCKED_MISSING_GATE_EVIDENCE","matchesCanonicalControl","hardcodedHeadAllowed: false","actualEffects"]) assert(text.api.includes(required),`API missing ${required}`);
+for (const required of ["successorBundle.decision","matchesCanonicalControl","hardcodedHeadAllowed: false","actualEffects"]) assert(text.api.includes(required),`API missing ${required}`);
 for (const required of ["Dynamic-head successor control","BLOCKED_MISSING_GATE_EVIDENCE","Projection is not current truth","Broad system-development authorization is not buyer consent"]) assert(text.page.includes(required),`page missing ${required}`);
 for (const required of ["[FD successor review]:","Expected current canonical state","HUMAN_ACCEPTED requires exact human approval and buyer consent"]) assert(text.template.includes(required),`template missing ${required}`);
 for (const required of ["chain.headSequence + 1","reconciliation.sequence + 1","BLOCKED_HUMAN_GATE_REQUIRED","Canonical event appended: **NO**","contents: read","issues: write"]) assert(text.workflow.includes(required),`workflow missing ${required}`);
