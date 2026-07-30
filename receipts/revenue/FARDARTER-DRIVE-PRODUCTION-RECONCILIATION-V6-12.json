@@ -1,0 +1,94 @@
+{
+  "controlId": "FARDARTER-DRIVE-PRODUCTION-RECONCILIATION-V6-12",
+  "controllerVersion": "6.12.0",
+  "controllingIssue": 195,
+  "repository": {
+    "reconciliationBaseHead": "f5d3261bb513764fe14601ef9d0fc53e71ea83b3",
+    "deployedApplicationSource": "88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334",
+    "deploymentControlMerge": "f5d3261bb513764fe14601ef9d0fc53e71ea83b3",
+    "currentMainAtCreation": "f5d3261bb513764fe14601ef9d0fc53e71ea83b3",
+    "currentMainContainsControlOnlyAfterDeployedSource": true
+  },
+  "verifiedProduction": {
+    "provider": "NETLIFY",
+    "siteId": "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f",
+    "siteName": "lichburn-v0-2-8",
+    "deployId": "6a6ba0366ebec6650d843ac3",
+    "immutableUrl": "https://6a6ba0366ebec6650d843ac3--lichburn-v0-2-8.netlify.app",
+    "providerState": "READY",
+    "providerUploadRunId": 30572898948,
+    "recoveryVerificationRunId": 30573526190,
+    "readbackContractVersion": "6.11.0",
+    "requiredRouteCount": 18,
+    "verifiedRouteCount": 18,
+    "exactBodyMatchCount": 18,
+    "staticPackageSha256": "d8a876dfc9b5156bef118fae6487c18358c884d4aa326235286152e38dddb104",
+    "evidenceSha256": "d0a5f072f7b6dd544f47eeba28c93461aeab2ccb9cedd85b00ead83d19eb23ee",
+    "artifactName": "fardarter-v6-11-deployed-and-verified-30573526190",
+    "artifactId": 8771747385,
+    "artifactDigest": "sha256:009217308c48b1cfbc4cc00ab46f2b9199d72617ff1ed32dc8b367f29785a981",
+    "materializationMode": "NETLIFY_V1_ROUTE_BLOBS_PLUS_FROZEN_DYNAMIC_RESPONSES_TO_STATIC_PACKAGE",
+    "runtimeFunctionsRequiredForVerifiedRoutes": false,
+    "verificationState": "DEPLOYED_AND_VERIFIED"
+  },
+  "rollbackAnchor": {
+    "applicationVersion": "6.4.0",
+    "sourceCommit": "e482004bfff1bb90aba2d67b8da62a524f18cdb4",
+    "deployId": "6a6b6a709e0a6d5ff2ca7759",
+    "immutableUrl": "https://6a6b6a709e0a6d5ff2ca7759--lichburn-v0-2-8.netlify.app",
+    "verificationState": "DEPLOYED_AND_VERIFIED",
+    "verifiedRouteCount": 12
+  },
+  "stateClassification": {
+    "productionApplication": "DEPLOYED_AND_VERIFIED",
+    "productionControlState": "RECONCILED",
+    "repositoryHead": "CONTROL_AHEAD_OF_DEPLOYED_APPLICATION_SOURCE",
+    "sourceGap": "EXPECTED_CONTROL_ONLY_GAP",
+    "liveClaimAllowed": true
+  },
+  "truthDistinctions": {
+    "controlCommitEqualsDeployedApplicationSource": false,
+    "repositoryHeadEqualsProviderDeployId": false,
+    "providerReadyAloneEqualsVerification": false,
+    "reconciliationCreatesNewDeployment": false,
+    "deploymentReceiptCreatesOrderPaymentRevenueConsentOrWorkStart": false
+  },
+  "futurePromotionGate": {
+    "automaticPromotionAllowed": false,
+    "humanApprovalRequired": true,
+    "requiresExactTargetCommit": true,
+    "requiresProviderDeployId": true,
+    "requiresAuthoritativeImmutableUrl": true,
+    "requiresCompleteRouteReadback": true,
+    "requiresRollbackReference": true,
+    "requiresNoPrivateReferenceExposure": true
+  },
+  "canonicalBoundaries": {
+    "canonicalEventHeadSequence": 1,
+    "canonicalEventHeadDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "reconciliationSequence": 1,
+    "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+    "scopeDrafted": 1,
+    "humanAccepted": 0,
+    "active": 0,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "actualEffects": {
+    "recordsExistingVerifiedProduction": true,
+    "providerDeploymentCreatedByReconciliation": false,
+    "providerDeploymentChangedByReconciliation": false,
+    "canonicalMutation": false,
+    "orderCreated": false,
+    "capacityReserved": false,
+    "paymentConfirmed": false,
+    "revenueRecognized": false,
+    "settledCashRecognized": false,
+    "buyerConsentProven": false,
+    "workStarted": false,
+    "privateDriveReferenceExposed": false
+  },
+  "manifestDigest": "1e8aa2af8bb3af332185b7419c63e2c1ad8c19c866e45b62fe04a2fc969932ee"
+}
