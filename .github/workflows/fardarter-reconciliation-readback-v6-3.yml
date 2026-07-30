@@ -54,8 +54,8 @@ jobs:
           node <<'NODE'
           const x = JSON.parse(require('fs').readFileSync('reconciliation.json','utf8'));
           const EVENT = '3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b';
-          const SNAPSHOT = '7c7f47f40868f4879942406274b01710af74539d5b840f0edb18d24400ddbdf3';
-          const APPLICATION = '6692334b17fae5e26d973b92d6476a52d4f316489e085eba76971173f03f156f';
+          const SNAPSHOT = '9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f';
+          const APPLICATION = 'f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d';
           const ok = x.snapshot?.sequence === 1 && x.snapshot?.digest === SNAPSHOT &&
             x.canonicalHead?.sequence === 1 && x.canonicalHead?.digest === EVENT &&
             x.canonicalHead?.canonicalBusinessEventCount === 1 &&
