@@ -99,6 +99,8 @@ jobs:
             [x.previewLedger?.digest === '9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c', 'previewLedgerDigest'],
             [x.previewLedger?.previewCount === 1, 'previewCount'],
             [x.previewLedger?.decisionCounts?.PREPARED === 1, 'preparedCount'],
+            [Array.isArray(x.previewLedger?.lifecycle) && x.previewLedger.lifecycle.includes('PREVIEW_READY'), 'previewReadyLifecycle'],
+            [Array.isArray(x.previewLedger?.lifecycle) && x.previewLedger.lifecycle.includes('BLOCKED'), 'blockedLifecycle'],
             [x.previewLedger?.applicationPolicy?.automaticCanonicalization === false, 'automaticCanonicalization'],
             [x.previewLedger?.applicationPolicy?.reviewedMergeRequired === true, 'reviewedMergeRequired'],
             [x.preparedReviewBundle?.id === 'FARDARTER-CANONICALIZATION-BUNDLE-ISSUE-162-V6-4', 'bundleId'],
