@@ -1,0 +1,289 @@
+name: Fardarter GitHub First Response v6.9
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - edited
+      - labeled
+  issue_comment:
+    types:
+      - created
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: audit-request-first-response-v6-9-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  respond:
+    name: Post one authorized public-safe response
+    if: >-
+      (github.event_name == 'issues' || github.event_name == 'issue_comment') &&
+      startsWith(github.event.issue.title, '[Audit request]:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate authorization and post one bounded response
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const responseMarker = '<!-- jp-audit-github-first-response-v1 -->';
+            const contactMarker = '<!-- jp-audit-github-contact-v1 -->';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue = context.payload.issue;
+            const issue_number = issue?.number;
+
+            if (!issue || !issue_number || issue.pull_request) {
+              core.notice('Not an eligible GitHub issue.');
+              return;
+            }
+            if (issue.state !== 'open' || !issue.title?.startsWith('[Audit request]:')) {
+              core.notice('Audit request is not open or does not use the exact prefix.');
+              return;
+            }
+
+            const labelName = (label) => typeof label === 'string' ? label : label?.name;
+            const labels = new Set((issue.labels || []).map(labelName).filter(Boolean));
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+
+            const definitions = [
+              {
+                name: 'contact-github-replied',
+                color: '0E8A16',
+                description: 'One authorized GitHub first response was posted idempotently',
+              },
+              {
+                name: 'contact-github-reply-blocked',
+                color: 'B60205',
+                description: 'Automatic GitHub first response is blocked pending JP review',
+              },
+              {
+                name: 'needs-jp-review',
+                color: 'FBCA04',
+                description: 'Requires JP review before scope, agreement, payment, or delivery',
+              },
+            ];
+            for (const label of definitions) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const removeLabel = async (name) => {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            };
+            const markBlocked = async (reason) => {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: ['contact-github-reply-blocked', 'needs-jp-review'],
+              });
+              await removeLabel('contact-github-replied');
+              core.warning(`GitHub first response blocked: ${reason}`);
+            };
+
+            if (comments.some((comment) => comment.body?.includes(responseMarker))) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: ['contact-github-replied'],
+              });
+              await removeLabel('contact-github-reply-blocked');
+              core.notice('Versioned first-response marker already exists; duplicate suppressed.');
+              return;
+            }
+
+            const hasRequiredLabels =
+              labels.has('audit-fit-check') &&
+              labels.has('contact-github-authorized') &&
+              !labels.has('contact-channel-unresolved');
+            const hasContactReceipt = comments.some(
+              (comment) => comment.body?.includes(contactMarker),
+            );
+            if (!hasRequiredLabels || !hasContactReceipt) {
+              core.notice('Waiting for the complete v6.8 contact authorization gate.');
+              return;
+            }
+
+            const author = issue.user;
+            const login = author?.login || '';
+            const normalizedLogin = login.toLowerCase();
+            const externalHuman =
+              author?.type === 'User' &&
+              normalizedLogin !== owner.toLowerCase() &&
+              !normalizedLogin.endsWith('[bot]') &&
+              !['github-actions', 'dependabot', 'renovate'].includes(normalizedLogin);
+            if (!externalHuman) {
+              await markBlocked('request author is not a verified external human');
+              return;
+            }
+
+            const issueBody = issue.body || '';
+            const publicEmail = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+            const credentialAssignment =
+              /(?:api[_ -]?key|access[_ -]?token|secret|password|passwd|client[_ -]?secret)\s*[:=]\s*(?!\[(?:redacted|removed)\])\S+/i;
+            const privateKeyBlock =
+              /-----BEGIN (?:RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----/i;
+            const providerIdentifier =
+              /(?:provider|payment|transaction)[ _-]?(?:id|identifier|reference)\s*[:=]\s*\S+/i;
+            const bankingNumber =
+              /(?:routing|account|iban|swift)[ _-]?(?:number|code)?\s*[:=]\s*[A-Z0-9-]{4,}/i;
+            const sensitivePattern = [
+              publicEmail,
+              credentialAssignment,
+              privateKeyBlock,
+              providerIdentifier,
+              bankingNumber,
+            ].find((pattern) => pattern.test(issueBody));
+            if (sensitivePattern) {
+              await markBlocked('public issue contains a sensitive-data pattern');
+              return;
+            }
+
+            const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const section = (label) => {
+              const match = issueBody.match(
+                new RegExp(
+                  `###\\s+${escapeRegex(label)}\\s*\\n+([\\s\\S]*?)(?=\\n###\\s+|$)`,
+                  'i',
+                ),
+              );
+              const value = match?.[1]?.trim() || '';
+              return value === '_No response_' ? '' : value;
+            };
+
+            const repositoryUrl = section('Repository URL');
+            const relationship = section('Your relationship to the repository');
+            const problem = section('Current operating problem');
+            const outcome = section('Desired outcome');
+            const size = section('Approximate review size');
+            const timing = section('Timing or deadline');
+            const packageChoice = section('Package being considered');
+
+            const repositoryPattern =
+              /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?$/;
+            const relationships = new Set([
+              'Owner or administrator',
+              'Maintainer or authorized contributor',
+              'Client representative with authority to request review',
+              'Evaluating fit before obtaining authority',
+            ]);
+            const sizes = new Set([
+              'Up to 10 open pull requests and 25 open issues',
+              'Up to 25 open pull requests and 50 open issues',
+              'Larger than the published scope',
+              'Not sure',
+            ]);
+            const packages = new Set([
+              '$100 USD Control Tower Audit',
+              '$250 USD Implementation Pack after audit',
+              'Audit first; implementation undecided',
+              'Fit check only',
+            ]);
+
+            const validRepository = repositoryPattern.test(repositoryUrl);
+            const validRelationship = relationships.has(relationship);
+            const validSize = sizes.has(size);
+            const validPackage = packages.has(packageChoice);
+            const clarifications = [];
+
+            if (!validRepository) {
+              clarifications.push(
+                'Replace the repository field with one exact public GitHub URL in the form `https://github.com/owner/repository`.',
+              );
+            }
+            if (!validRelationship) {
+              clarifications.push('Clarify your authority or relationship to the repository.');
+            } else if (relationship === 'Evaluating fit before obtaining authority') {
+              clarifications.push(
+                'Confirm when an owner, administrator, maintainer, or authorized client representative approves the request.',
+              );
+            }
+            if (!problem) {
+              clarifications.push('Add a short public-safe description of the current operating problem.');
+            }
+            if (!outcome) {
+              clarifications.push('Add the public-safe outcome you want from the audit.');
+            }
+            if (!validSize) {
+              clarifications.push('Choose one published review-size option.');
+            } else if (size === 'Larger than the published scope') {
+              clarifications.push(
+                'Confirm whether a smaller public subset can be reviewed first or whether a separate scope is needed.',
+              );
+            }
+            if (!timing) {
+              clarifications.push('State a real deadline or write `No fixed deadline`.');
+            }
+            if (!validPackage) {
+              clarifications.push('Choose one published package or fit-check option.');
+            } else if (packageChoice === '$250 USD Implementation Pack after audit') {
+              clarifications.push(
+                'Confirm that the audit remains the first stage and that implementation would require a separate written scope.',
+              );
+            }
+
+            const limitedClarifications = clarifications.slice(0, 6);
+            const repositoryLine = validRepository
+              ? `[${repositoryUrl}](${repositoryUrl})`
+              : '**NEEDS CORRECTION**';
+            const relationshipLine = validRelationship ? relationship : '**NEEDS CLARIFICATION**';
+            const sizeLine = validSize ? size : '**NEEDS CLARIFICATION**';
+            const packageLine = validPackage ? packageChoice : '**NEEDS CLARIFICATION**';
+            const clarificationBlock = limitedClarifications.length
+              ? `**Public-safe clarifications needed**\n${limitedClarifications
+                  .map((item) => `- ${item}`)
+                  .join('\n')}`
+              : '**Public-safe clarification status**\nNo additional form clarification is required. JP review and private nonbinding scope drafting are the next controlled steps.';
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: `${responseMarker}
+            **Authorized GitHub first response — v6.9**
+
+            Thanks @${login}. You authorized one bounded, public-safe response in this exact issue thread.
+
+            **Validated intake**
+            - Repository: ${repositoryLine}
+            - Relationship: **${relationshipLine}**
+            - Review size: **${sizeLine}**
+            - Package: **${packageLine}**
+            - Timing field: **${timing ? 'PROVIDED' : 'MISSING'}**
+
+            ${clarificationBlock}
+
+            Do not post private email addresses, credentials, signatures, authentication data, payment information, customer-private data, provider identifiers, banking data, or confidential records here.
+
+            This response does not accept scope, create an order, reserve capacity, confirm payment, start work, prove consent, or append a canonical event. No repeated unsolicited follow-up will be sent.`,
+            });
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: ['contact-github-replied'],
+            });
+            await removeLabel('contact-github-reply-blocked');
+            core.notice(`One authorized GitHub first response posted to issue #${issue_number}.`);
