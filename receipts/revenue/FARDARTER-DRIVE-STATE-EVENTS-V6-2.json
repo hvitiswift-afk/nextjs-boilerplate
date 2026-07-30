@@ -6,10 +6,10 @@
   "digestAlgorithm": "SHA-256",
   "canonicalization": "JSON_SORTED_KEYS_UTF8",
   "appendOnly": true,
-  "headSequence": 0,
-  "headDigest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b",
-  "eventCount": 1,
-  "canonicalBusinessEventCount": 0,
+  "headSequence": 1,
+  "headDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+  "eventCount": 2,
+  "canonicalBusinessEventCount": 1,
   "events": [
     {
       "schemaVersion": "1.0.0",
@@ -22,14 +22,62 @@
       "fromState": null,
       "toState": null,
       "classification": "CANONICAL_GENESIS",
-      "sourceEvidence": ["GitHub Issue #156","Fardarter Drive v6.1 capacity ledger baseline"],
+      "sourceEvidence": [
+        "GitHub Issue #156",
+        "Fardarter Drive v6.1 capacity ledger baseline"
+      ],
       "authorityGate": "SYSTEM_GENESIS",
-      "capacityEffect": {"usesActiveCapacity":false,"activeDelta":0},
-      "financialEffect": {"createsOrder":false,"grossRevenueDeltaUsd":0,"settledCashDeltaUsd":0,"settlementState":"UNKNOWN"},
+      "capacityEffect": {
+        "usesActiveCapacity": false,
+        "activeDelta": 0
+      },
+      "financialEffect": {
+        "createsOrder": false,
+        "grossRevenueDeltaUsd": 0,
+        "settledCashDeltaUsd": 0,
+        "settlementState": "UNKNOWN"
+      },
       "previousEventDigest": null,
       "eventDigest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b",
       "occurredAt": "2026-07-30T00:14:42Z",
       "recordedAt": "2026-07-30T00:14:42Z",
+      "canonical": true,
+      "publicSafe": true,
+      "sensitiveDataPresent": false
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "eventId": "FARDARTER-CANONICAL-ISSUE-159-V6-5",
+      "sequence": 1,
+      "eventType": "STATE_TRANSITION",
+      "idempotencyKey": "issue-159-fit-to-scope-canonical-v6-5",
+      "entityType": "GITHUB_ISSUE",
+      "entityId": "159",
+      "fromState": "FIT_APPROVED_FOR_SCOPE_DRAFT",
+      "toState": "SCOPE_DRAFTED",
+      "classification": "CANONICAL_BUSINESS_EVENT",
+      "sourceEvidence": [
+        "GitHub Issue #159",
+        "GitHub Issue #162",
+        "GitHub Issue #167",
+        "GitHub Issue #168",
+        "Fardarter Drive v6.4 PREVIEW_READY runtime receipt"
+      ],
+      "authorityGate": "JP_REVIEWED_MERGE",
+      "capacityEffect": {
+        "usesActiveCapacity": false,
+        "activeDelta": 0
+      },
+      "financialEffect": {
+        "createsOrder": false,
+        "grossRevenueDeltaUsd": 0,
+        "settledCashDeltaUsd": 0,
+        "settlementState": "UNKNOWN"
+      },
+      "previousEventDigest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b",
+      "eventDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+      "occurredAt": "2026-07-30T08:08:52Z",
+      "recordedAt": "2026-07-30T08:50:16Z",
       "canonical": true,
       "publicSafe": true,
       "sensitiveDataPresent": false
@@ -38,7 +86,7 @@
   "currentCanonicalCounts": {
     "REQUESTED": 0,
     "FIT_APPROVED_FOR_SCOPE_DRAFT": 0,
-    "SCOPE_DRAFTED": 0,
+    "SCOPE_DRAFTED": 1,
     "HUMAN_ACCEPTED": 0,
     "PAID_PENDING": 0,
     "PAID_SETTLED": 0,
@@ -50,7 +98,19 @@
     "REFUNDED": 0,
     "DISPUTED": 0
   },
-  "financialEvidence": {"orders":0,"verifiedGrossRevenueUsd":0,"verifiedSettledCashUsd":0,"settlementState":"UNKNOWN","receivedCashRequires":"PAID_SETTLED"},
-  "capacityEvidence": {"totalPlanningSlots":1000,"effectiveActiveCeiling":100,"activeDeliveries":0,"activeHeadroom":100,"overrideState":"INACTIVE_NO_RECEIPT"},
-  "nextControlledAction": "Keep the canonical chain genesis-only until a reviewed merge records a supported business event; public transition workflow receipts remain SIGNAL_ONLY."
+  "financialEvidence": {
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "settlementState": "UNKNOWN",
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "capacityEvidence": {
+    "totalPlanningSlots": 1000,
+    "effectiveActiveCeiling": 100,
+    "activeDeliveries": 0,
+    "activeHeadroom": 100,
+    "overrideState": "INACTIVE_NO_RECEIPT"
+  },
+  "nextControlledAction": "Preserve the reviewed sequence-1 SCOPE_DRAFTED event as canonical; any later correction, cancellation, recovery, or reversal must append a new linked event without rewriting genesis or event 1."
 }
