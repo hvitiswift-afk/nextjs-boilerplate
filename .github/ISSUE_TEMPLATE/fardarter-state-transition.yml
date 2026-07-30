@@ -1,0 +1,96 @@
+name: Fardarter State Transition Request v6.2
+description: Request a public-safe state signal under the append-only Fardarter Drive receipt mesh.
+title: "[FD transition]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form requests a **public operational signal**, not a canonical business event. Only `REQUESTED → FIT_APPROVED_FOR_SCOPE_DRAFT` and `FIT_APPROVED_FOR_SCOPE_DRAFT → SCOPE_DRAFTED` may be automated, and both remain nonbinding. Every canonical event requires a separately reviewed merge. Do not post identities, signatures, credentials, payment records, provider transaction IDs, counsel notes, confidential delivery materials, or private conflict evidence.
+
+  - type: input
+    id: entity
+    attributes:
+      label: Controlling issue or public-safe entity reference
+      placeholder: "Issue #123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: current_state
+    attributes:
+      label: Current public signal state
+      options:
+        - REQUESTED
+        - FIT_APPROVED_FOR_SCOPE_DRAFT
+        - SCOPE_DRAFTED
+        - HUMAN_ACCEPTED
+        - PAID_PENDING
+        - PAID_SETTLED
+        - WORK_START_APPROVED
+        - ACTIVE
+        - DELIVERED
+        - ACCEPTED
+        - CANCELLED
+        - REFUNDED
+        - DISPUTED
+    validations:
+      required: true
+
+  - type: dropdown
+    id: requested_state
+    attributes:
+      label: Requested next public signal state
+      options:
+        - FIT_APPROVED_FOR_SCOPE_DRAFT
+        - SCOPE_DRAFTED
+        - HUMAN_ACCEPTED
+        - PAID_PENDING
+        - PAID_SETTLED
+        - WORK_START_APPROVED
+        - ACTIVE
+        - DELIVERED
+        - ACCEPTED
+        - CANCELLED
+        - REFUNDED
+        - DISPUTED
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Public-safe evidence references
+      description: List issue, pull request, receipt, or other public-safe references. Do not include private evidence.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason for the transition request
+      description: Explain the operational reason without including sensitive data.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Receipt, authority, and evidence boundaries
+      options:
+        - label: I understand this request and any workflow comment are SIGNAL_ONLY until a reviewed canonical event is merged.
+          required: true
+        - label: I understand a public label or comment does not create an order, contract, payment, settlement, work start, acceptance, refund, or dispute resolution.
+          required: true
+        - label: I have not posted identities, signatures, credentials, payment records, provider IDs, counsel notes, confidential materials, or private conflict evidence.
+          required: true
+        - label: I understand HUMAN_ACCEPTED and later consequential states retain their exact buyer, JP, provider, capacity, or counsel gates.
+          required: true
+        - label: I understand received cash requires provider-confirmed PAID_SETTLED evidence.
+          required: true
+        - label: I understand duplicate, backwards, skipped-gate, conflicting-label, and capacity-overflow transitions are rejected into NEEDS_JP_REVIEW.
+          required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional public-safe context

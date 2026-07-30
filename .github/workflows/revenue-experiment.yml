@@ -12,6 +12,7 @@ on:
       - "app/github-control-tower-audit/**"
       - "app/api/revenue/pilot/**"
       - "app/api/revenue/capacity/**"
+      - "app/api/revenue/operations/**"
       - "app/page.tsx"
       - "app/sitemap.ts"
       - "app/robots.ts"
@@ -25,6 +26,7 @@ on:
       - "scripts/check-revenue-*.mjs"
       - "scripts/check-fardarter-drive*.mjs"
       - "scripts/check-fardarter-capacity*.mjs"
+      - "scripts/check-fardarter-state*.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
       - "templates/github-control-tower-audit*.md"
@@ -42,6 +44,7 @@ on:
       - "app/github-control-tower-audit/**"
       - "app/api/revenue/pilot/**"
       - "app/api/revenue/capacity/**"
+      - "app/api/revenue/operations/**"
       - "app/page.tsx"
       - "app/sitemap.ts"
       - "app/robots.ts"
@@ -55,6 +58,7 @@ on:
       - "scripts/check-revenue-*.mjs"
       - "scripts/check-fardarter-drive*.mjs"
       - "scripts/check-fardarter-capacity*.mjs"
+      - "scripts/check-fardarter-state*.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
       - "templates/github-control-tower-audit*.md"
@@ -70,7 +74,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify Fardarter Drive v6.1 capacity ledger and override rail
+    name: Verify Fardarter Drive v6.2 receipt mesh and state controller
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -83,42 +87,33 @@ jobs:
         with:
           node-version: 20
 
-      - name: Validate v6.1 authority, capacity, override, acceptance, execution, Drive, ledger, and product
+      - name: Validate v6.2 authority, capacity, state machine, receipt chain, Drive, and product
         run: npm run revenue:verify
 
       - name: Verify JSON syntax
         run: |
-          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "receipts/revenue/JP-REV-001-AUTHORITY.json", "receipts/revenue/FARDARTER-DRIVE-V6.json", "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json", "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json", "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json", "receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json", "schemas/revenue/authority-receipt.schema.json", "schemas/revenue/fardarter-drive-v6.schema.json", "schemas/revenue/fardarter-drive-authority-v6.schema.json", "schemas/revenue/fardarter-drive-gdrive-v6.schema.json", "schemas/revenue/fardarter-drive-capacity-override-v6.schema.json", "schemas/revenue/fardarter-drive-capacity-ledger-v6-1.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.1 JSON syntax: PASS")'
+          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "receipts/revenue/JP-REV-001-AUTHORITY.json", "receipts/revenue/FARDARTER-DRIVE-V6.json", "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json", "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json", "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json", "receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json", "receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json", "receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json", "schemas/revenue/authority-receipt.schema.json", "schemas/revenue/fardarter-drive-v6.schema.json", "schemas/revenue/fardarter-drive-authority-v6.schema.json", "schemas/revenue/fardarter-drive-gdrive-v6.schema.json", "schemas/revenue/fardarter-drive-capacity-override-v6.schema.json", "schemas/revenue/fardarter-drive-capacity-ledger-v6-1.schema.json", "schemas/revenue/fardarter-drive-state-machine-v6-2.schema.json", "schemas/revenue/fardarter-drive-state-event-v6-2.schema.json", "schemas/revenue/fardarter-drive-state-events-v6-2.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.2 JSON syntax: PASS")'
 
       - name: Emit non-financial receipt
         run: |
           echo "result=PASS"
           echo "drive_id=FARDARTER-DRIVE-V6"
+          echo "controller_version=6.2.0"
+          echo "state_machine=FARDARTER-DRIVE-STATE-MACHINE-V6-2"
+          echo "event_chain=FARDARTER-DRIVE-STATE-EVENTS-V6-2"
+          echo "genesis_digest=4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b"
+          echo "canonical_business_events=0"
+          echo "operations_api=/api/revenue/operations"
           echo "capacity_ledger=FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1"
-          echo "experiment_state=PUBLISHED"
-          echo "publication_issue=133"
-          echo "control_issue=153"
-          echo "authority_version=6.0.0"
-          echo "product_route=/github-control-tower-audit"
-          echo "status_api=/api/revenue/pilot"
-          echo "capacity_api=/api/revenue/capacity"
-          echo "price_usd=100"
-          echo "first_milestone_usd=1000"
-          echo "gross_capacity_target_usd=100000"
+          echo "control_issue=156"
           echo "total_slots=1000"
-          echo "standard_active_ceiling=100"
           echo "effective_active_ceiling=100"
-          echo "active_headroom=100"
-          echo "above_100_allowed=TRUE_WITH_COMPLETE_RECEIPT"
-          echo "capacity_override_state=INACTIVE_NO_RECEIPT"
-          echo "override_request_result=APPROVED_NOT_ACTIVE_ONLY"
-          echo "public_dynamic_counts=OPERATIONAL_SIGNALS_NOT_COMMERCIAL_EVIDENCE"
           echo "active_deliveries=0"
           echo "orders=0"
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
-          echo "google_drive_ledger=CONNECTED_PRIVATE"
-          echo "contract_acceptance=HUMAN_APPROVAL_REQUIRED"
-          echo "payment_execution=EXTERNAL_PROVIDER_ONLY"
-          echo "indemnity_terms=COUNSEL_REVIEW_REQUIRED"
+          echo "automated_transitions=NONBINDING_SIGNAL_ONLY"
+          echo "canonical_event_requires_reviewed_merge=TRUE"
+          echo "received_cash_requires=PAID_SETTLED"
+          echo "google_drive_receipt_mesh=CONNECTED_PRIVATE"
           echo "indemnity_proof_claim=FALSE"

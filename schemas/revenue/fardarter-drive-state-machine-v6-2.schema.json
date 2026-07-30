@@ -1,0 +1,30 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-state-machine-v6-2.schema.json",
+  "title":"Fardarter Drive State Machine v6.2",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["schemaVersion","stateMachineId","driveId","authorityVersion","controllerVersion","controllingIssue","canonicalEventChainPath","baseline","states","automatedPublicTransitions","allowedTransitions","receiptMesh","conflictPolicy","evidenceBoundaries","googleDriveContinuity","nextControlledAction"],
+  "properties":{
+    "schemaVersion":{"const":"1.0.0"},
+    "stateMachineId":{"const":"FARDARTER-DRIVE-STATE-MACHINE-V6-2"},
+    "driveId":{"const":"FARDARTER-DRIVE-V6"},
+    "authorityVersion":{"const":"6.0.0"},
+    "controllerVersion":{"const":"6.2.0"},
+    "controllingIssue":{"const":156},
+    "canonicalEventChainPath":{"const":"receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json"},
+    "baseline":{
+      "type":"object","additionalProperties":false,
+      "required":["totalPlanningSlots","standardActiveCeiling","effectiveActiveCeiling","activeDeliveries","orders","verifiedGrossRevenueUsd","verifiedSettledCashUsd","overrideState","deploymentState"],
+      "properties":{"totalPlanningSlots":{"const":1000},"standardActiveCeiling":{"const":100},"effectiveActiveCeiling":{"const":100},"activeDeliveries":{"const":0},"orders":{"const":0},"verifiedGrossRevenueUsd":{"const":0},"verifiedSettledCashUsd":{"const":0},"overrideState":{"const":"INACTIVE_NO_RECEIPT"},"deploymentState":{"const":"UNVERIFIED"}}
+    },
+    "states":{"type":"array","minItems":13,"maxItems":13,"uniqueItems":true,"items":{"type":"object","required":["stateId","publicLabel","countsAsOrder","usesActiveCapacity","authorityGate","terminal"]}},
+    "automatedPublicTransitions":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"object","required":["fromState","toState","classification"]}},
+    "allowedTransitions":{"type":"array","minItems":20,"uniqueItems":true,"items":{"type":"object","required":["fromState","toState","gate"]}},
+    "receiptMesh":{"type":"object","required":["digestAlgorithm","canonicalization","appendOnly","publicWorkflowReceiptsAreCanonical","canonicalEventRequiresReviewedMerge","duplicateIdempotencyKeyAllowed"]},
+    "conflictPolicy":{"type":"object","required":["state","freezeCanonicalMutation","types"]},
+    "evidenceBoundaries":{"type":"object"},
+    "googleDriveContinuity":{"type":"object","required":["state","documentTitles","publicReferencesExposed"]},
+    "nextControlledAction":{"type":"string","minLength":40}
+  }
+}

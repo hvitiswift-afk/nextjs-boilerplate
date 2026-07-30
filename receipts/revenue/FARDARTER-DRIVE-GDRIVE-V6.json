@@ -28,12 +28,28 @@
       "nativeGoogleDoc": true,
       "referenceStoredPrivately": true,
       "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v6.2 — Receipt Mesh and State Transition Charter",
+      "purpose": "Private append-only event authority, transition gates, digest-chain rules, evidence boundaries, and recovery policy",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v6.2 — Transition and Conflict Register",
+      "purpose": "Private transition requests, canonical event references, conflicts, recoveries, and sensitive evidence locations",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
     }
   ],
   "automation": {
     "createPrivateWorkPackageAfterFitApproval": true,
     "validateCapacityOverride": true,
     "maintainOperationalCapacityLedger": true,
+    "maintainAppendOnlyReceiptMesh": true,
+    "maintainTransitionConflictRegister": true,
     "activateOverrideWithoutCompleteReceipt": false,
     "publicReceiptMayExposeDriveUrl": false,
     "publicReceiptMayExposeDriveFileId": false,
@@ -49,7 +65,8 @@
     "counselNotesPublic": false,
     "confidentialDeliveryDataPublic": false,
     "overrideReadinessEvidencePublic": false,
+    "transitionConflictEvidencePublic": false,
     "disputeRecordsPublic": false
   },
-  "nextControlledAction": "Keep v6 capacity, override, and operational-ledger evidence private; expose only CONNECTED_PRIVATE state and document titles publicly; create private work packages after qualifying nonbinding fit approval and valid override requests."
+  "nextControlledAction": "Keep v6 capacity, override, operational-ledger, state-transition, receipt-chain, and conflict evidence private; expose only CONNECTED_PRIVATE state and document titles publicly; create canonical events only through reviewed merges."
 }

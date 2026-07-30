@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "1.0.0",
+  "stateMachineId": "FARDARTER-DRIVE-STATE-MACHINE-V6-2",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "authorityVersion": "6.0.0",
+  "controllerVersion": "6.2.0",
+  "controllingIssue": 156,
+  "canonicalEventChainPath": "receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json",
+  "baseline": {
+    "totalPlanningSlots": 1000,
+    "standardActiveCeiling": 100,
+    "effectiveActiveCeiling": 100,
+    "activeDeliveries": 0,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "overrideState": "INACTIVE_NO_RECEIPT",
+    "deploymentState": "UNVERIFIED"
+  },
+  "states": [
+    {"stateId":"REQUESTED","publicLabel":"fd-state-requested","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"PUBLIC_REQUEST","terminal":false},
+    {"stateId":"FIT_APPROVED_FOR_SCOPE_DRAFT","publicLabel":"fd-state-fit-approved-for-scope-draft","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"AUTOMATED_NONBINDING","terminal":false},
+    {"stateId":"SCOPE_DRAFTED","publicLabel":"fd-state-scope-drafted","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"AUTOMATED_NONBINDING","terminal":false},
+    {"stateId":"HUMAN_ACCEPTED","publicLabel":"fd-state-human-accepted","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"HUMAN_APPROVAL_AND_BUYER_CONSENT","terminal":false},
+    {"stateId":"PAID_PENDING","publicLabel":"fd-state-paid-pending","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"EXTERNAL_PROVIDER_EVENT","terminal":false},
+    {"stateId":"PAID_SETTLED","publicLabel":"fd-state-paid-settled","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"EXTERNAL_PROVIDER_SETTLEMENT","terminal":false},
+    {"stateId":"WORK_START_APPROVED","publicLabel":"fd-state-work-start-approved","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"JP_APPROVAL_AND_CAPACITY","terminal":false},
+    {"stateId":"ACTIVE","publicLabel":"fd-state-active","countsAsOrder":true,"usesActiveCapacity":true,"authorityGate":"APPROVED_START_RECEIPT","terminal":false},
+    {"stateId":"DELIVERED","publicLabel":"fd-state-delivered","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"DELIVERY_RECEIPT","terminal":false},
+    {"stateId":"ACCEPTED","publicLabel":"fd-state-accepted","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"BUYER_ACCEPTANCE_RECEIPT","terminal":true},
+    {"stateId":"CANCELLED","publicLabel":"fd-state-cancelled","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"HUMAN_OR_REQUESTER_CANCELLATION","terminal":true},
+    {"stateId":"REFUNDED","publicLabel":"fd-state-refunded","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"EXTERNAL_PROVIDER_REFUND_AND_HUMAN_APPROVAL","terminal":true},
+    {"stateId":"DISPUTED","publicLabel":"fd-state-disputed","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"HUMAN_REVIEW_REQUIRED","terminal":false}
+  ],
+  "automatedPublicTransitions": [
+    {"fromState":"REQUESTED","toState":"FIT_APPROVED_FOR_SCOPE_DRAFT","classification":"SIGNAL_ONLY_NONBINDING"},
+    {"fromState":"FIT_APPROVED_FOR_SCOPE_DRAFT","toState":"SCOPE_DRAFTED","classification":"SIGNAL_ONLY_NONBINDING"}
+  ],
+  "allowedTransitions": [
+    {"fromState":"REQUESTED","toState":"FIT_APPROVED_FOR_SCOPE_DRAFT","gate":"AUTOMATED_NONBINDING"},
+    {"fromState":"REQUESTED","toState":"CANCELLED","gate":"HUMAN_OR_REQUESTER_CANCELLATION"},
+    {"fromState":"FIT_APPROVED_FOR_SCOPE_DRAFT","toState":"SCOPE_DRAFTED","gate":"AUTOMATED_NONBINDING"},
+    {"fromState":"FIT_APPROVED_FOR_SCOPE_DRAFT","toState":"CANCELLED","gate":"HUMAN_OR_REQUESTER_CANCELLATION"},
+    {"fromState":"SCOPE_DRAFTED","toState":"HUMAN_ACCEPTED","gate":"HUMAN_APPROVAL_AND_BUYER_CONSENT"},
+    {"fromState":"SCOPE_DRAFTED","toState":"CANCELLED","gate":"HUMAN_OR_REQUESTER_CANCELLATION"},
+    {"fromState":"HUMAN_ACCEPTED","toState":"PAID_PENDING","gate":"EXTERNAL_PROVIDER_EVENT"},
+    {"fromState":"HUMAN_ACCEPTED","toState":"CANCELLED","gate":"HUMAN_OR_REQUESTER_CANCELLATION"},
+    {"fromState":"PAID_PENDING","toState":"PAID_SETTLED","gate":"EXTERNAL_PROVIDER_SETTLEMENT"},
+    {"fromState":"PAID_PENDING","toState":"CANCELLED","gate":"HUMAN_OR_REQUESTER_CANCELLATION"},
+    {"fromState":"PAID_PENDING","toState":"DISPUTED","gate":"HUMAN_REVIEW_REQUIRED"},
+    {"fromState":"PAID_SETTLED","toState":"WORK_START_APPROVED","gate":"JP_APPROVAL_AND_CAPACITY"},
+    {"fromState":"PAID_SETTLED","toState":"REFUNDED","gate":"EXTERNAL_PROVIDER_REFUND_AND_HUMAN_APPROVAL"},
+    {"fromState":"PAID_SETTLED","toState":"DISPUTED","gate":"HUMAN_REVIEW_REQUIRED"},
+    {"fromState":"WORK_START_APPROVED","toState":"ACTIVE","gate":"APPROVED_START_RECEIPT"},
+    {"fromState":"WORK_START_APPROVED","toState":"CANCELLED","gate":"HUMAN_OR_REQUESTER_CANCELLATION"},
+    {"fromState":"ACTIVE","toState":"DELIVERED","gate":"DELIVERY_RECEIPT"},
+    {"fromState":"ACTIVE","toState":"CANCELLED","gate":"HUMAN_OR_REQUESTER_CANCELLATION"},
+    {"fromState":"ACTIVE","toState":"DISPUTED","gate":"HUMAN_REVIEW_REQUIRED"},
+    {"fromState":"DELIVERED","toState":"ACCEPTED","gate":"BUYER_ACCEPTANCE_RECEIPT"},
+    {"fromState":"DELIVERED","toState":"DISPUTED","gate":"HUMAN_REVIEW_REQUIRED"},
+    {"fromState":"DISPUTED","toState":"ACCEPTED","gate":"BUYER_ACCEPTANCE_RECEIPT"},
+    {"fromState":"DISPUTED","toState":"REFUNDED","gate":"EXTERNAL_PROVIDER_REFUND_AND_HUMAN_APPROVAL"},
+    {"fromState":"DISPUTED","toState":"CANCELLED","gate":"HUMAN_REVIEW_REQUIRED"}
+  ],
+  "receiptMesh": {
+    "digestAlgorithm": "SHA-256",
+    "canonicalization": "JSON_SORTED_KEYS_UTF8",
+    "appendOnly": true,
+    "publicWorkflowReceiptsAreCanonical": false,
+    "canonicalEventRequiresReviewedMerge": true,
+    "duplicateIdempotencyKeyAllowed": false
+  },
+  "conflictPolicy": {
+    "state": "NEEDS_JP_REVIEW",
+    "freezeCanonicalMutation": true,
+    "types": ["MULTIPLE_STATE_LABELS","BACKWARDS_TRANSITION","SKIPPED_GATE","DUPLICATE_IDEMPOTENCY_KEY","BROKEN_DIGEST_CHAIN","ACTIVE_CAPACITY_OVERFLOW","ORDER_WITHOUT_HUMAN_ACCEPTANCE","SETTLEMENT_WITHOUT_PROVIDER_EVIDENCE","WORK_START_WITHOUT_APPROVAL","PUBLIC_PRIVATE_EVIDENCE_MISMATCH","SENSITIVE_PUBLIC_CONTENT"]
+  },
+  "evidenceBoundaries": {
+    "publicSignalCreatesCanonicalEvent": false,
+    "publicLabelCreatesOrder": false,
+    "publicCommentProvesPayment": false,
+    "driveFileCreatesContract": false,
+    "pendingTransferEqualsSettledCash": false,
+    "receivedCashRequires": "PAID_SETTLED",
+    "activeStateRequiresCapacityHeadroom": true,
+    "automaticPaidWorkStart": false,
+    "templateIsIndemnityProof": false
+  },
+  "googleDriveContinuity": {
+    "state": "CONNECTED_PRIVATE",
+    "documentTitles": ["Fardarter Drive™ v6.2 — Receipt Mesh and State Transition Charter","Fardarter Drive™ v6.2 — Transition and Conflict Register"],
+    "publicReferencesExposed": false
+  },
+  "nextControlledAction": "Merge and verify the v6.2 receipt mesh, then run an idempotent public-safe REQUESTED to FIT_APPROVED_FOR_SCOPE_DRAFT signal self-test without changing canonical events or money."
+}
