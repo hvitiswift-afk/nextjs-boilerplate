@@ -3,6 +3,9 @@ name: Fardarter Event Proposal v6.3
 on:
   issues:
     types:
+      - opened
+      - edited
+      - reopened
       - labeled
   workflow_dispatch:
 
@@ -17,13 +20,7 @@ concurrency:
 jobs:
   proposal:
     name: Validate noncanonical event proposal
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (
-        github.event_name == 'issues' &&
-        github.event.label.name == 'fd-proposal-approved-v6-3' &&
-        startsWith(github.event.issue.title, '[FD event proposal]:')
-      )
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'issues'
     runs-on: ubuntu-latest
     timeout-minutes: 8
 
@@ -40,7 +37,21 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issue_number = context.issue.number;
-            const body = context.payload.issue.body || '';
+            const issuePayload = context.payload.issue;
+            const title = issuePayload.title || '';
+            const issueLabels = (issuePayload.labels || [])
+              .map((label) => typeof label === 'string' ? label : label.name)
+              .filter(Boolean);
+            const approved = issueLabels.includes('fd-proposal-approved-v6-3');
+            const titleMatches = title.startsWith('[FD event proposal]:');
+            if (!approved || !titleMatches) {
+              core.notice(
+                `Proposal controller skipped issue #${issue_number}: approved=${approved}, titleMatches=${titleMatches}`,
+              );
+              return;
+            }
+
+            const body = issuePayload.body || '';
             const section = (label) => {
               const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
               const match = body.match(new RegExp(`### ${escaped}\\s*\\n\\n([\\s\\S]*?)(?=\\n### |$)`));
