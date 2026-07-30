@@ -31,11 +31,11 @@ This internal canonical state receipt is not a customer, order, reservation, con
 Genesis event       4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b
 Canonical event     3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b
 v6.3 snapshot       4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22
-v6.5 snapshot       7c7f47f40868f4879942406274b01710af74539d5b840f0edb18d24400ddbdf3
-Application receipt 6692334b17fae5e26d973b92d6476a52d4f316489e085eba76971173f03f156f
+v6.5 snapshot       9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f
+Application receipt f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d
 ```
 
-Short receipt anchors: `3859eac9`, `7c7f47f4`, and `6692334b`.
+Short receipt anchors: `3859eac9`, `9f4f878c`, and `f2285c4c`.
 
 ## Historical preview evidence
 
