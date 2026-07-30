@@ -67,14 +67,11 @@ assert(
   "v6.9 manifest digest lock mismatch",
 );
 assert(
-  schema.properties?.manifestDigest?.const === manifest.manifestDigest,
-  "v6.9 schema digest lock mismatch",
-);
-assert(
-  schema.properties?.controlId?.const === manifest.controlId &&
+  schema.properties?.manifestDigest?.const === manifest.manifestDigest &&
+    schema.properties?.controlId?.const === manifest.controlId &&
     schema.properties?.controllerVersion?.const === manifest.controllerVersion &&
     schema.properties?.controllingIssue?.const === manifest.controllingIssue,
-  "v6.9 schema identity mismatch",
+  "v6.9 schema lock mismatch",
 );
 
 assert(
@@ -137,6 +134,7 @@ assert(
 );
 assert(
   manifest.response.maxResponsesPerIssue === 1 &&
+    manifest.response.maxClarificationItems === 6 &&
     manifest.response.emailRequired === false &&
     manifest.response.emailAllowed === false &&
     manifest.response.repeatedUnsolicitedFollowUpAllowed === false &&
@@ -176,21 +174,25 @@ for (const required of [
   "privateKeyBlock",
   "providerIdentifier",
   "bankingNumber",
-  "free-form",
   "contact-github-replied",
   "contact-github-reply-blocked",
+  "const limitedClarifications = clarifications.slice(0, 6);",
   "No repeated unsolicited follow-up will be sent.",
 ]) {
   assert(text.workflow.includes(required), `v6.9 workflow missing ${required}`);
 }
+
+const duplicateCheckIndex = text.workflow.indexOf(
+  "if (comments.some((comment) => comment.body?.includes(responseMarker)))",
+);
+const responseBodyIndex = text.workflow.indexOf("body: `${responseMarker}");
 assert(
-  text.workflow.includes("comments.some((comment) => comment.body?.includes(responseMarker))"),
-  "v6.9 response marker is not checked before sending",
+  duplicateCheckIndex >= 0 && responseBodyIndex > duplicateCheckIndex,
+  "v6.9 duplicate check must precede the bounded response body",
 );
 assert(
-  text.workflow.indexOf("comments.some((comment) => comment.body?.includes(responseMarker))") <
-    text.workflow.indexOf("github.rest.issues.createComment({", text.workflow.indexOf("Authorized GitHub first response")),
-  "v6.9 duplicate check must precede the bounded response",
+  text.workflow.split("body: `${responseMarker}").length - 1 === 1,
+  "v6.9 workflow must define exactly one automatic response body",
 );
 assert(
   text.workflow.includes("labels: ['contact-github-replied']") &&
@@ -210,8 +212,10 @@ assert(
   text.workflow.includes("const problem = section('Current operating problem');") &&
     text.workflow.includes("const outcome = section('Desired outcome');") &&
     !text.workflow.includes("Problem: ${problem}") &&
-    !text.workflow.includes("Outcome: ${outcome}"),
-  "v6.9 workflow must validate but never echo free-form problem/outcome text",
+    !text.workflow.includes("Outcome: ${outcome}") &&
+    !text.workflow.includes("Priorities: ${") &&
+    !text.workflow.includes("Notes: ${"),
+  "v6.9 workflow must validate but never echo free-form issue text",
 );
 
 for (const required of [
