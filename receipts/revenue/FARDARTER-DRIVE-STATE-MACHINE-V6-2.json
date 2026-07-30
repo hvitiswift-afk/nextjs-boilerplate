@@ -19,7 +19,7 @@
   },
   "states": [
     {"stateId":"REQUESTED","publicLabel":"fd-state-requested","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"PUBLIC_REQUEST","terminal":false},
-    {"stateId":"FIT_APPROVED_FOR_SCOPE_DRAFT","publicLabel":"fd-state-fit-approved","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"AUTOMATED_NONBINDING","terminal":false},
+    {"stateId":"FIT_APPROVED_FOR_SCOPE_DRAFT","publicLabel":"fd-state-fit-approved-for-scope-draft","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"AUTOMATED_NONBINDING","terminal":false},
     {"stateId":"SCOPE_DRAFTED","publicLabel":"fd-state-scope-drafted","countsAsOrder":false,"usesActiveCapacity":false,"authorityGate":"AUTOMATED_NONBINDING","terminal":false},
     {"stateId":"HUMAN_ACCEPTED","publicLabel":"fd-state-human-accepted","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"HUMAN_APPROVAL_AND_BUYER_CONSENT","terminal":false},
     {"stateId":"PAID_PENDING","publicLabel":"fd-state-paid-pending","countsAsOrder":true,"usesActiveCapacity":false,"authorityGate":"EXTERNAL_PROVIDER_EVENT","terminal":false},
