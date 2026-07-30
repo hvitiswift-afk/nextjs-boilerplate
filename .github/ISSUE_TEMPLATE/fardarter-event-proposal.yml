@@ -1,0 +1,135 @@
+name: Fardarter Event Proposal v6.3
+description: Propose a reviewed canonical event without appending it automatically.
+title: "[FD event proposal]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form creates a **noncanonical proposal**. A valid proposal may become `READY_FOR_REVIEW`, but only a separately reviewed merge may append a canonical event. Do not post identities, signatures, credentials, payment records, provider transaction IDs, counsel notes, confidential delivery evidence, private proposal evidence, quarantine evidence, or dispute records.
+
+  - type: input
+    id: source_entity
+    attributes:
+      label: Source issue or public-safe entity reference
+      placeholder: "Issue #159"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: expected_public_state
+    attributes:
+      label: Expected current public signal state
+      options:
+        - REQUESTED
+        - FIT_APPROVED_FOR_SCOPE_DRAFT
+        - SCOPE_DRAFTED
+        - HUMAN_ACCEPTED
+        - PAID_PENDING
+        - PAID_SETTLED
+        - WORK_START_APPROVED
+        - ACTIVE
+        - DELIVERED
+        - ACCEPTED
+        - CANCELLED
+        - REFUNDED
+        - DISPUTED
+    validations:
+      required: true
+
+  - type: dropdown
+    id: proposed_from_state
+    attributes:
+      label: Proposed canonical from-state
+      options:
+        - REQUESTED
+        - FIT_APPROVED_FOR_SCOPE_DRAFT
+        - SCOPE_DRAFTED
+        - HUMAN_ACCEPTED
+        - PAID_PENDING
+        - PAID_SETTLED
+        - WORK_START_APPROVED
+        - ACTIVE
+        - DELIVERED
+        - ACCEPTED
+        - CANCELLED
+        - REFUNDED
+        - DISPUTED
+    validations:
+      required: true
+
+  - type: dropdown
+    id: proposed_to_state
+    attributes:
+      label: Proposed canonical to-state
+      options:
+        - FIT_APPROVED_FOR_SCOPE_DRAFT
+        - SCOPE_DRAFTED
+        - HUMAN_ACCEPTED
+        - PAID_PENDING
+        - PAID_SETTLED
+        - WORK_START_APPROVED
+        - ACTIVE
+        - DELIVERED
+        - ACCEPTED
+        - CANCELLED
+        - REFUNDED
+        - DISPUTED
+    validations:
+      required: true
+
+  - type: input
+    id: idempotency_key
+    attributes:
+      label: Public-safe idempotency key
+      description: Use a stable unique key for this source entity and transition.
+      placeholder: "issue-159-fit-to-scope-v1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Public-safe evidence references
+      description: List issue, pull request, receipt, or other public-safe evidence. Private evidence belongs only in the connected private Drive register.
+    validations:
+      required: true
+
+  - type: input
+    id: authority_gate
+    attributes:
+      label: Required authority gate
+      placeholder: "AUTOMATED_NONBINDING or HUMAN_APPROVAL_AND_BUYER_CONSENT"
+    validations:
+      required: true
+
+  - type: input
+    id: review_by
+    attributes:
+      label: Review-by or expiry time
+      description: Use an ISO-8601 timestamp.
+      placeholder: "2026-07-31T23:59:59Z"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Proposal, canonicalization, privacy, and financial boundaries
+      options:
+        - label: I understand this proposal is not a canonical event and cannot be appended automatically.
+          required: true
+        - label: I understand READY_FOR_REVIEW does not create an order, contract, payment, settlement, work start, acceptance, refund, or dispute resolution.
+          required: true
+        - label: I understand a reviewed merge must recompute the digest, preserve chain linkage, and reconcile counts, capacity, and money effects.
+          required: true
+        - label: I have not posted private or sensitive evidence.
+          required: true
+        - label: I understand received cash requires provider-confirmed PAID_SETTLED evidence.
+          required: true
+        - label: I understand conflicts, duplicate keys, stale evidence, skipped gates, or public/private mismatch cause QUARANTINED.
+          required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional public-safe context
