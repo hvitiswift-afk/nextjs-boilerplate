@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-canonicalization-application-v6-5.schema.json",
+  "title": "Fardarter Drive Canonicalization Application v6.5",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "applicationId", "driveId", "controllerVersion", "controllingIssues", "source", "review", "canonicalEvent", "reconciliation", "previewEvidence", "effects", "evidenceBoundary", "googleDriveContinuity", "generatedAt", "applicationDigest"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "applicationId": { "const": "FARDARTER-CANONICALIZATION-APPLICATION-ISSUE-159-V6-5" },
+    "driveId": { "const": "FARDARTER-DRIVE-V6" },
+    "controllerVersion": { "const": "6.5.0" },
+    "controllingIssues": { "const": [168, 169] },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entityIssue", "proposalIssue", "previewIssue", "fromState", "toState", "proposalDecision", "previewDecision"],
+      "properties": {
+        "entityIssue": { "const": 159 },
+        "proposalIssue": { "const": 162 },
+        "previewIssue": { "const": 167 },
+        "fromState": { "const": "FIT_APPROVED_FOR_SCOPE_DRAFT" },
+        "toState": { "const": "SCOPE_DRAFTED" },
+        "proposalDecision": { "const": "READY_FOR_REVIEW" },
+        "previewDecision": { "const": "PREVIEW_READY" }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "decisionMaker", "repositoryChecksRequired", "immutableSourceReadbackRequired", "deploymentReadbackRequiredForPublicLiveClaim"],
+      "properties": {
+        "decision": { "const": "APPROVED_FOR_REVIEWED_MERGE" },
+        "decisionMaker": { "const": "JP" },
+        "repositoryChecksRequired": { "const": true },
+        "immutableSourceReadbackRequired": { "const": true },
+        "deploymentReadbackRequiredForPublicLiveClaim": { "const": true }
+      }
+    },
+    "canonicalEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chainId", "sequence", "eventId", "eventDigest", "previousEventDigest", "canonical", "applied"],
+      "properties": {
+        "chainId": { "const": "FARDARTER-DRIVE-STATE-EVENTS-V6-2" },
+        "sequence": { "const": 1 },
+        "eventId": { "const": "FARDARTER-CANONICAL-ISSUE-159-V6-5" },
+        "eventDigest": { "const": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b" },
+        "previousEventDigest": { "const": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b" },
+        "canonical": { "const": true },
+        "applied": { "const": true }
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snapshotId", "sequence", "snapshotDigest", "previousSnapshotDigest"],
+      "properties": {
+        "snapshotId": { "const": "FARDARTER-RECONCILIATION-ISSUE-159-V6-5" },
+        "sequence": { "const": 1 },
+        "snapshotDigest": { "const": "7c7f47f40868f4879942406274b01710af74539d5b840f0edb18d24400ddbdf3" },
+        "previousSnapshotDigest": { "const": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22" }
+      }
+    },
+    "previewEvidence": { "type": "object" },
+    "effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stateCountDelta", "activeDeliveryDelta", "orderDelta", "grossRevenueDeltaUsd", "settledCashDeltaUsd", "capacityHeadroomAfter", "settlementStateAfter"],
+      "properties": {
+        "stateCountDelta": { "const": { "SCOPE_DRAFTED": 1 } },
+        "activeDeliveryDelta": { "const": 0 },
+        "orderDelta": { "const": 0 },
+        "grossRevenueDeltaUsd": { "const": 0 },
+        "settledCashDeltaUsd": { "const": 0 },
+        "capacityHeadroomAfter": { "const": 100 },
+        "settlementStateAfter": { "const": "UNKNOWN" }
+      }
+    },
+    "evidenceBoundary": { "type": "object" },
+    "googleDriveContinuity": { "type": "object" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "applicationDigest": { "const": "6692334b17fae5e26d973b92d6476a52d4f316489e085eba76971173f03f156f" }
+  }
+}
