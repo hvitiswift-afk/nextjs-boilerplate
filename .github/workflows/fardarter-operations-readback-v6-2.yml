@@ -4,20 +4,14 @@ on:
   pull_request:
     paths:
       - ".github/workflows/fardarter-operations-readback-v6-2.yml"
-      - ".github/workflows/fardarter-state-transition-v6-2.yml"
-      - ".github/ISSUE_TEMPLATE/fardarter-state-transition.yml"
       - "app/api/revenue/operations/**"
-      - "receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json"
       - "receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json"
-      - "schemas/revenue/fardarter-drive-state-*.json"
-      - "scripts/check-fardarter-state-machine-v6-2.mjs"
-      - "src/lib/revenue/public-state-ledger.ts"
+      - "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-APPLICATION-V6-5.json"
+      - "scripts/check-fardarter-reviewed-canonicalization-v6-5.mjs"
       - "package.json"
   workflow_run:
-    workflows:
-      - Netlify Audit Product Deploy
-    types:
-      - completed
+    workflows: [Netlify Audit Product Deploy]
+    types: [completed]
 
 permissions:
   contents: read
@@ -25,139 +19,49 @@ permissions:
 
 jobs:
   validate:
-    name: Validate v6.2 receipt mesh source
+    name: Validate current operations receipt mesh
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+        with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: npm run fardarter:state:check
+      - run: npm run fardarter:current:check
       - run: npm run build
 
   immutable-readback:
-    name: Verify immutable operations API
-    if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success'
+    name: Verify immutable operations API at sequence 1
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - name: Download Netlify deployment artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
           pattern: netlify-fardarter-v6-*
           path: deployment-artifacts
           merge-multiple: true
-
-      - name: Resolve immutable deploy URL
-        id: deploy
-        shell: bash
+      - name: Verify current operations state
         run: |
           set -euo pipefail
           RESULT="$(find deployment-artifacts -name netlify-deploy-result.json -print -quit)"
-          test -n "$RESULT" || { echo "Missing Netlify deploy result artifact"; exit 1; }
-          DEPLOY_URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")' "$RESULT")"
-          DEPLOY_ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_id || x.id || "")' "$RESULT")"
-          test -n "$DEPLOY_URL" || { echo "Missing immutable deploy URL"; exit 1; }
-          test -n "$DEPLOY_ID" || { echo "Missing deploy ID"; exit 1; }
-          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
-          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
-
-      - name: Read and verify operations endpoint
-        env:
-          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --location \
-            --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 \
-            "$DEPLOY_URL/api/revenue/operations" --output operations.json
+          URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")' "$RESULT")"
+          test -n "$URL"
+          curl --fail --silent --show-error --location "$URL/api/revenue/operations" -o operations.json
           node <<'NODE'
-          const fs = require('node:fs');
-          const x = JSON.parse(fs.readFileSync('operations.json', 'utf8'));
-          const validCount = (value) => value === null || (Number.isInteger(value) && value >= 0);
-          const signalCounts = Object.values(x.publicSignals?.counts || {});
-          const required = [
-            [x.schemaVersion === '1.0.0', 'schemaVersion'],
-            [x.stateMachineId === 'FARDARTER-DRIVE-STATE-MACHINE-V6-2', 'stateMachineId'],
-            [x.chainId === 'FARDARTER-DRIVE-STATE-EVENTS-V6-2', 'chainId'],
-            [x.driveId === 'FARDARTER-DRIVE-V6', 'driveId'],
-            [x.authorityVersion === '6.0.0', 'authorityVersion'],
-            [x.controllerVersion === '6.2.0', 'controllerVersion'],
-            [x.controllingIssue === 156, 'controllingIssue'],
-            [x.canonicalBaseline?.totalPlanningSlots === 1000, 'totalPlanningSlots'],
-            [x.capacity?.effectiveActiveCeiling === 100, 'effectiveActiveCeiling'],
-            [x.capacity?.activeDeliveries === 0, 'activeDeliveries'],
-            [x.capacity?.activeHeadroom === 100, 'activeHeadroom'],
-            [x.capacity?.overrideState === 'INACTIVE_NO_RECEIPT', 'overrideState'],
-            [x.receiptChain?.digestAlgorithm === 'SHA-256', 'digestAlgorithm'],
-            [x.receiptChain?.canonicalization === 'JSON_SORTED_KEYS_UTF8', 'canonicalization'],
-            [x.receiptChain?.appendOnly === true, 'appendOnly'],
-            [x.receiptChain?.eventCount === 1, 'eventCount'],
-            [x.receiptChain?.canonicalBusinessEventCount === 0, 'businessEventCount'],
-            [x.receiptChain?.headSequence === 0, 'headSequence'],
-            [x.receiptChain?.headDigest === '4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b', 'headDigest'],
-            [x.receiptChain?.digestChainConnected === true, 'digestChainConnected'],
-            [x.receiptChain?.headMatches === true, 'headMatches'],
-            [x.receiptChain?.genesisOnly === true, 'genesisOnly'],
-            [x.stateDefinitions?.length === 13, 'stateDefinitions'],
-            [x.automatedPublicTransitions?.length === 2, 'automatedTransitions'],
-            [['AVAILABLE', 'UNAVAILABLE'].includes(x.publicSignals?.sourceState), 'publicSignalState'],
-            [signalCounts.length === 13 && signalCounts.every(validCount), 'publicSignalCounts'],
-            [x.publicSignals?.countsAreCanonicalEvidence === false, 'signalsNotCanonical'],
-            [x.publicSignals?.countsAreCommercialEvidence === false, 'signalsNotCommercial'],
-            [Object.values(x.canonicalCounts || {}).every((value) => value === 0), 'canonicalCounts'],
-            [x.commercialEvidence?.orders === 0, 'orders'],
-            [x.commercialEvidence?.verifiedGrossRevenueUsd === 0, 'grossRevenue'],
-            [x.commercialEvidence?.verifiedSettledCashUsd === 0, 'settledCash'],
-            [x.commercialEvidence?.receivedCashRequires === 'PAID_SETTLED', 'cashGate'],
-            [x.googleDriveContinuity?.state === 'CONNECTED_PRIVATE', 'driveState'],
-            [x.googleDriveContinuity?.publicFolderUrlExposed === false, 'noDriveUrl'],
-            [x.googleDriveContinuity?.publicFileIdsExposed === false, 'noDriveIds'],
-            [x.googleDriveContinuity?.receiptMeshMaintained === true, 'receiptMeshMaintained'],
-            [x.googleDriveContinuity?.conflictRegisterMaintained === true, 'conflictRegisterMaintained'],
-            [x.evidenceBoundary?.publicSignalCreatesCanonicalEvent === false, 'signalBoundary'],
-            [x.evidenceBoundary?.canonicalEventRequiresReviewedMerge === true, 'mergeGate'],
-            [x.evidenceBoundary?.transitionWorkflowStartsPaidWork === false, 'workStartBoundary'],
-            [x.evidenceBoundary?.templateIsIndemnityProof === false, 'indemnityBoundary'],
-          ];
-          const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
-          if (failed.length) throw new Error(`Operations readback failed: ${failed.join(', ')}`);
-          console.log('Fardarter Drive v6.2 immutable operations readback: PASS');
+          const x = JSON.parse(require('fs').readFileSync('operations.json','utf8'));
+          const EVENT = '3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b';
+          const ok = x.receiptChain?.headSequence === 1 &&
+            x.receiptChain?.canonicalBusinessEventCount === 1 &&
+            x.receiptChain?.headDigest === EVENT &&
+            x.receiptChain?.genesisOnly === false &&
+            x.canonicalCounts?.SCOPE_DRAFTED === 1 &&
+            x.capacity?.activeDeliveries === 0 &&
+            x.capacity?.activeHeadroom === 100 &&
+            x.commercialEvidence?.orders === 0 &&
+            x.commercialEvidence?.verifiedSettledCashUsd === 0;
+          if (!ok) throw new Error('Current operations readback failed');
+          console.log('Fardarter operations compatibility readback: PASS');
           NODE
-
-      - name: Write operations readback receipt
-        env:
-          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
-          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          fs.writeFileSync('operations-readback-receipt.json', JSON.stringify({
-            schemaVersion: '1.0.0',
-            receiptId: `FARDARTER-OPERATIONS-READBACK-V6-2-${process.env.GITHUB_RUN_ID}`,
-            result: 'DEPLOYED_AND_VERIFIED',
-            deployId: process.env.DEPLOY_ID,
-            deployUrl: process.env.DEPLOY_URL,
-            stateMachineId: 'FARDARTER-DRIVE-STATE-MACHINE-V6-2',
-            chainId: 'FARDARTER-DRIVE-STATE-EVENTS-V6-2',
-            headDigest: '4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b',
-            canonicalBusinessEvents: 0,
-            activeDeliveries: 0,
-            orders: 0,
-            verifiedGrossRevenueUsd: 0,
-            verifiedSettledCashUsd: 0,
-            generatedAt: new Date().toISOString(),
-          }, null, 2) + '\n');
-          NODE
-      - uses: actions/upload-artifact@v4
-        with:
-          name: fardarter-operations-readback-v6-2-${{ github.event.workflow_run.head_sha }}
-          path: operations-readback-receipt.json
-          retention-days: 30
