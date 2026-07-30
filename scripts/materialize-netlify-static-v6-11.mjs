@@ -2,13 +2,14 @@ import { createHash } from "node:crypto";
 import { access, cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const [targetDirArg, outputDirArg] = process.argv.slice(2);
+const [targetDirArg, outputDirArg, localBaseUrlArg] = process.argv.slice(2);
 if (!targetDirArg || !outputDirArg) {
-  throw new Error("usage: node materialize-netlify-static-v6-11.mjs <target-dir> <output-dir>");
+  throw new Error("usage: node materialize-netlify-static-v6-11.mjs <target-dir> <output-dir> [local-base-url]");
 }
 
 const targetDir = path.resolve(targetDirArg);
 const outputDir = path.resolve(outputDirArg);
+const localBaseUrl = localBaseUrlArg?.replace(/\/+$/, "");
 
 const requiredRoutes = [
   "/",
@@ -32,6 +33,7 @@ const requiredRoutes = [
 ];
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const exists = async (candidate) => {
   try {
@@ -79,6 +81,51 @@ const writeBody = async (destination, body) => {
   await writeFile(destination, body);
 };
 
+const materializeRoute = async ({
+  route,
+  kind,
+  body,
+  contentType,
+  status = 200,
+  sourceBlob = null,
+  sourceCapture = null,
+}) => {
+  let outputRelative;
+  if (kind === "APP_PAGE") {
+    outputRelative = route === "/" ? "index.html" : path.posix.join(safeRoutePath(route), "index.html");
+    await writeBody(path.join(outputDir, outputRelative), body);
+  } else if (kind === "APP_ROUTE") {
+    if (route === "/robots.txt" || route === "/sitemap.xml" || route === "/favicon.ico") {
+      outputRelative = safeRoutePath(route);
+      await writeBody(path.join(outputDir, outputRelative), body);
+    } else if (route === "404.html" || route === "500.html") {
+      outputRelative = route;
+      await writeBody(path.join(outputDir, outputRelative), body);
+    } else {
+      const extension = contentExtension(contentType);
+      outputRelative = path.posix.join("__payload", `${safeRoutePath(route)}${extension}`);
+      await writeBody(path.join(outputDir, outputRelative), body);
+      redirects.push(`${route} /${outputRelative} 200!`);
+      headers.push(`/${outputRelative}\n  Content-Type: ${contentType}`);
+    }
+  } else {
+    throw new Error(`unsupported route kind ${kind} for ${route}`);
+  }
+
+  routes.push({
+    route,
+    kind,
+    sourceBlob,
+    sourceCapture,
+    output: `/${outputRelative}`,
+    contentType,
+    status,
+    bytes: body.length,
+    sha256: sha256(body),
+    required: requiredRoutes.includes(route),
+  });
+};
+
 for (const name of (await readdir(blobDir)).sort()) {
   const blobPath = path.join(blobDir, name);
   if (!(await stat(blobPath)).isFile()) continue;
@@ -104,47 +151,65 @@ for (const name of (await readdir(blobDir)).sort()) {
   if (route === "/index") route = "/";
   if (!route.startsWith("/") && route !== "404.html" && route !== "500.html") continue;
 
-  let body;
-  let contentType;
-  let outputRelative;
-
   if (value.kind === "APP_PAGE") {
-    body = Buffer.from(value.html || "", "utf8");
-    contentType = "text/html; charset=utf-8";
-    outputRelative = route === "/" ? "index.html" : path.posix.join(safeRoutePath(route), "index.html");
-    await writeBody(path.join(outputDir, outputRelative), body);
+    await materializeRoute({
+      route,
+      kind: "APP_PAGE",
+      body: Buffer.from(value.html || "", "utf8"),
+      contentType: "text/html; charset=utf-8",
+      status: value.status ?? 200,
+      sourceBlob: name,
+    });
   } else if (value.kind === "APP_ROUTE") {
-    body = Buffer.from(value.body || "", "base64");
-    contentType = value.headers?.["content-type"] || "application/octet-stream";
+    await materializeRoute({
+      route,
+      kind: "APP_ROUTE",
+      body: Buffer.from(value.body || "", "base64"),
+      contentType: value.headers?.["content-type"] || "application/octet-stream",
+      status: value.status ?? 200,
+      sourceBlob: name,
+    });
+  }
+}
 
-    if (route === "/robots.txt" || route === "/sitemap.xml" || route === "/favicon.ico") {
-      outputRelative = safeRoutePath(route);
-      await writeBody(path.join(outputDir, outputRelative), body);
-    } else if (route === "404.html" || route === "500.html") {
-      outputRelative = route;
-      await writeBody(path.join(outputDir, outputRelative), body);
-    } else {
-      const extension = contentExtension(contentType);
-      outputRelative = path.posix.join("__payload", `${safeRoutePath(route)}${extension}`);
-      await writeBody(path.join(outputDir, outputRelative), body);
-      redirects.push(`${route} /${outputRelative} 200!`);
-      headers.push(`/${outputRelative}\n  Content-Type: ${contentType}`);
-    }
-  } else {
-    continue;
+const routeMapBeforeCapture = new Map(routes.map((entry) => [entry.route, entry]));
+const dynamicMissing = requiredRoutes.filter((route) => !routeMapBeforeCapture.has(route));
+if (dynamicMissing.length) {
+  if (!localBaseUrl) {
+    throw new Error(`required route blobs missing and no local server supplied: ${dynamicMissing.join(", ")}`);
   }
 
-  routes.push({
-    route,
-    kind: value.kind,
-    sourceBlob: name,
-    output: `/${outputRelative}`,
-    contentType,
-    status: value.status ?? 200,
-    bytes: body.length,
-    sha256: sha256(body),
-    required: requiredRoutes.includes(route),
-  });
+  for (const route of dynamicMissing) {
+    let response;
+    let body;
+    let lastError;
+    for (let attempt = 1; attempt <= 30; attempt += 1) {
+      try {
+        response = await fetch(`${localBaseUrl}${route}`, { redirect: "follow" });
+        body = Buffer.from(await response.arrayBuffer());
+        if (response.status >= 200 && response.status < 300 && body.length > 0) break;
+        lastError = new Error(`HTTP ${response.status}, ${body.length} bytes`);
+      } catch (error) {
+        lastError = error;
+      }
+      await sleep(1000);
+    }
+    if (!response || response.status < 200 || response.status >= 300 || !body?.length) {
+      throw new Error(`dynamic route capture failed ${route}: ${lastError?.message || "no response"}`);
+    }
+
+    const contentType = response.headers.get("content-type") ||
+      (route.startsWith("/api/") ? "application/json" : "text/html; charset=utf-8");
+    await materializeRoute({
+      route,
+      kind: route.startsWith("/api/") ? "APP_ROUTE" : "APP_PAGE",
+      body,
+      contentType,
+      status: response.status,
+      sourceCapture: "LOCAL_EXACT_TARGET_PRODUCTION_SERVER",
+    });
+    console.log(`CAPTURED ${response.status} ${body.length} ${route}`);
+  }
 }
 
 const staticSource = path.join(targetDir, ".next", "static");
@@ -157,7 +222,7 @@ await cp(staticSource, path.join(outputDir, "_next", "static"), { recursive: tru
 const routeMap = new Map(routes.map((entry) => [entry.route, entry]));
 const missing = requiredRoutes.filter((route) => !routeMap.has(route));
 if (missing.length) {
-  throw new Error(`required route blobs missing: ${missing.join(", ")}`);
+  throw new Error(`required route materialization missing: ${missing.join(", ")}`);
 }
 for (const route of requiredRoutes) {
   const entry = routeMap.get(route);
@@ -180,6 +245,7 @@ const manifest = {
   fixedSiteName: "lichburn-v0-2-8",
   rollbackDeployId: "6a6b6a709e0a6d5ff2ca7759",
   postProcessingDisabled: true,
+  dynamicCaptureBase: localBaseUrl ? "LOCAL_EXACT_TARGET_PRODUCTION_SERVER" : null,
   requiredRouteCount: requiredRoutes.length,
   requiredRoutes,
   blobDirectory: path.relative(targetDir, blobDir),
@@ -195,5 +261,6 @@ console.log(JSON.stringify({
   outputDir,
   routeCount: routes.length,
   requiredRouteCount: requiredRoutes.length,
+  dynamicCapturedRoutes: routes.filter((entry) => entry.sourceCapture).map((entry) => entry.route),
   materializationDigest: sha256(manifestBytes),
 }, null, 2));
