@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "1.0.0",
+  "snapshotId": "FARDARTER-RECONCILIATION-GENESIS-V6-3",
+  "sequence": 0,
+  "previousSnapshotDigest": null,
+  "controllerVersion": "6.3.0",
+  "controllingIssue": 160,
+  "sources": {
+    "stateMachine": {
+      "id": "FARDARTER-DRIVE-STATE-MACHINE-V6-2",
+      "path": "receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json",
+      "blob": "43aa8859d04bf0242c33851cc51e283c02ad5cdc"
+    },
+    "eventChain": {
+      "id": "FARDARTER-DRIVE-STATE-EVENTS-V6-2",
+      "path": "receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json",
+      "blob": "3a2e915b13387e47b732da2c6772d30f1838d7e2",
+      "headSequence": 0,
+      "headDigest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b"
+    },
+    "capacityLedger": {
+      "id": "FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1",
+      "path": "receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json",
+      "blob": "0fb885bf155dc2bd491f898e8a65697f404e35c2"
+    },
+    "proposalLedger": {
+      "id": "FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3",
+      "path": "receipts/revenue/FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3.json",
+      "ledgerDigest": "3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e"
+    }
+  },
+  "canonical": {
+    "eventChainHealthy": true,
+    "canonicalBusinessEventCount": 0,
+    "stateCounts": {
+      "REQUESTED": 0,
+      "FIT_APPROVED_FOR_SCOPE_DRAFT": 0,
+      "SCOPE_DRAFTED": 0,
+      "HUMAN_ACCEPTED": 0,
+      "PAID_PENDING": 0,
+      "PAID_SETTLED": 0,
+      "WORK_START_APPROVED": 0,
+      "ACTIVE": 0,
+      "DELIVERED": 0,
+      "ACCEPTED": 0,
+      "CANCELLED": 0,
+      "REFUNDED": 0,
+      "DISPUTED": 0
+    },
+    "totalPlanningSlots": 1000,
+    "effectiveActiveCeiling": 100,
+    "activeDeliveries": 0,
+    "activeHeadroom": 100,
+    "overrideState": "INACTIVE_NO_RECEIPT",
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "settlementState": "UNKNOWN",
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "publicSignals": {
+    "sourceState": "UNAVAILABLE",
+    "stateCounts": {
+      "REQUESTED": null,
+      "FIT_APPROVED_FOR_SCOPE_DRAFT": null,
+      "SCOPE_DRAFTED": null,
+      "HUMAN_ACCEPTED": null,
+      "PAID_PENDING": null,
+      "PAID_SETTLED": null,
+      "WORK_START_APPROVED": null,
+      "ACTIVE": null,
+      "DELIVERED": null,
+      "ACCEPTED": null,
+      "CANCELLED": null,
+      "REFUNDED": null,
+      "DISPUTED": null
+    },
+    "countsAreCanonicalEvidence": false,
+    "countsAreCommercialEvidence": false
+  },
+  "proposals": {
+    "proposalCount": 0,
+    "decisionCounts": {
+      "PROPOSED": 0,
+      "READY_FOR_REVIEW": 0,
+      "QUARANTINED": 0,
+      "REJECTED": 0,
+      "CANONICALIZED_BY_REVIEWED_MERGE": 0
+    },
+    "duplicateKeyCount": 0,
+    "staleOrExpiredCount": 0
+  },
+  "conflicts": {
+    "total": 0,
+    "quarantined": 0,
+    "types": []
+  },
+  "deployment": {
+    "state": "UNVERIFIED",
+    "deployId": null,
+    "immutableUrl": null
+  },
+  "googleDriveContinuity": {
+    "state": "CONNECTED_PRIVATE",
+    "documentTitles": [
+      "Fardarter Drive™ v6.3 — Event Proposal and Reconciliation Charter",
+      "Fardarter Drive™ v6.3 — Proposal Quarantine and Reconciliation Register"
+    ],
+    "publicReferencesExposed": false
+  },
+  "reviewStatus": "PREPARED_NOT_MERGED",
+  "generatedAt": "2026-07-30T01:33:39Z",
+  "snapshotDigest": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22"
+}
