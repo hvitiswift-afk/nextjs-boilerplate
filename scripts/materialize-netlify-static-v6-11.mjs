@@ -166,6 +166,11 @@ for (const route of requiredRoutes) {
 
 if (redirects.length) await writeFile(path.join(outputDir, "_redirects"), `${redirects.join("\n")}\n`, "utf8");
 if (headers.length) await writeFile(path.join(outputDir, "_headers"), `${headers.join("\n\n")}\n`, "utf8");
+await writeFile(
+  path.join(outputDir, "netlify.toml"),
+  `[build]\n  publish = "."\n\n[build.processing]\n  skip_processing = true\n`,
+  "utf8",
+);
 
 const manifest = {
   schemaVersion: "1.0.0",
@@ -174,6 +179,7 @@ const manifest = {
   fixedSiteId: "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f",
   fixedSiteName: "lichburn-v0-2-8",
   rollbackDeployId: "6a6b6a709e0a6d5ff2ca7759",
+  postProcessingDisabled: true,
   requiredRouteCount: requiredRoutes.length,
   requiredRoutes,
   blobDirectory: path.relative(targetDir, blobDir),
