@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-reconciliation-v6-5.schema.json",
+  "title": "Fardarter Drive Reconciliation v6.5",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "snapshotId", "sequence", "previousSnapshotDigest", "controllerVersion", "controllingIssue", "sources", "canonical", "application", "conflicts", "deployment", "googleDriveContinuity", "generatedAt", "snapshotDigest"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "snapshotId": { "const": "FARDARTER-RECONCILIATION-ISSUE-159-V6-5" },
+    "sequence": { "const": 1 },
+    "previousSnapshotDigest": { "const": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22" },
+    "controllerVersion": { "const": "6.5.0" },
+    "controllingIssue": { "const": 168 },
+    "sources": { "type": "object" },
+    "canonical": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventChainHealthy", "canonicalBusinessEventCount", "stateCounts", "totalPlanningSlots", "effectiveActiveCeiling", "activeDeliveries", "activeHeadroom", "overrideState", "orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd", "settlementState", "receivedCashRequires"],
+      "properties": {
+        "eventChainHealthy": { "const": true },
+        "canonicalBusinessEventCount": { "const": 1 },
+        "stateCounts": {
+          "const": {
+            "REQUESTED": 0,
+            "FIT_APPROVED_FOR_SCOPE_DRAFT": 0,
+            "SCOPE_DRAFTED": 1,
+            "HUMAN_ACCEPTED": 0,
+            "PAID_PENDING": 0,
+            "PAID_SETTLED": 0,
+            "WORK_START_APPROVED": 0,
+            "ACTIVE": 0,
+            "DELIVERED": 0,
+            "ACCEPTED": 0,
+            "CANCELLED": 0,
+            "REFUNDED": 0,
+            "DISPUTED": 0
+          }
+        },
+        "totalPlanningSlots": { "const": 1000 },
+        "effectiveActiveCeiling": { "const": 100 },
+        "activeDeliveries": { "const": 0 },
+        "activeHeadroom": { "const": 100 },
+        "overrideState": { "const": "INACTIVE_NO_RECEIPT" },
+        "orders": { "const": 0 },
+        "verifiedGrossRevenueUsd": { "const": 0 },
+        "verifiedSettledCashUsd": { "const": 0 },
+        "settlementState": { "const": "UNKNOWN" },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entityIssue", "fromState", "toState", "eventSequence", "eventDigest", "reviewedMergeRequired", "reviewStatus", "postMergeReadbackRequired"],
+      "properties": {
+        "entityIssue": { "const": 159 },
+        "fromState": { "const": "FIT_APPROVED_FOR_SCOPE_DRAFT" },
+        "toState": { "const": "SCOPE_DRAFTED" },
+        "eventSequence": { "const": 1 },
+        "eventDigest": { "const": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b" },
+        "reviewedMergeRequired": { "const": true },
+        "reviewStatus": { "const": "APPROVED_AND_APPLIED_TO_SOURCE" },
+        "postMergeReadbackRequired": { "const": true }
+      }
+    },
+    "conflicts": { "const": { "total": 0, "quarantined": 0, "types": [] } },
+    "deployment": { "type": "object" },
+    "googleDriveContinuity": { "type": "object" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "snapshotDigest": { "const": "7c7f47f40868f4879942406274b01710af74539d5b840f0edb18d24400ddbdf3" }
+  }
+}
