@@ -1,0 +1,400 @@
+name: Fardarter Drive v6.4 Secure Proxy Deploy
+
+on:
+  push:
+    branches:
+      - deploy/fardarter-v6-4-exact-20260730
+    paths:
+      - .github/workflows/fardarter-v6-4-secure-proxy-deploy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: fardarter-v6-4-secure-proxy-deploy
+  cancel-in-progress: true
+
+env:
+  EXACT_SOURCE_COMMIT: e482004bfff1bb90aba2d67b8da62a524f18cdb4
+  NETLIFY_SITE_ID: 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f
+  NETLIFY_SITE_NAME: lichburn-v0-2-8
+
+jobs:
+  secure-deploy:
+    name: Secure exact v6.4 deployment and immutable readback
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Set up Node
+        id: setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Check out exact v6.4 source
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: e482004bfff1bb90aba2d67b8da62a524f18cdb4
+          path: source
+          fetch-depth: 1
+
+      - name: Verify exact source and locked blobs
+        id: source_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source
+          test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_COMMIT"
+          check_blob() {
+            local path="$1" expected="$2" actual
+            actual="$(git hash-object "$path")"
+            printf '%s  %s\n' "$actual" "$path"
+            test "$actual" = "$expected" || { echo "Blob mismatch for $path: expected $expected, got $actual"; exit 1; }
+          }
+          check_blob receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4.json 99a4bb840df5630efdf55d7e5fd4d6bdd0b62996
+          check_blob receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json e55188c34b34dddbe22652442b1ed6d0d932f25b
+          check_blob receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json bd24a05b0372ef77c97d520609baef73d0b778c6
+          check_blob app/api/revenue/canonicalization-preview/route.ts 95cf068221fd49fc6ddba755f8d47f72dc3da55e
+          check_blob .github/workflows/fardarter-canonicalization-preview-v6-4.yml 6d2a32710a00bdb2a8fa49275447699fe8e2c7b3
+
+      - name: Generate ephemeral proxy encryption key
+        id: key
+        shell: bash
+        run: |
+          set -euo pipefail
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$RUNNER_TEMP/proxy-private.pem" 2>/dev/null
+          openssl pkey -in "$RUNNER_TEMP/proxy-private.pem" -pubout -out "$RUNNER_TEMP/proxy-public.pem" 2>/dev/null
+          chmod 600 "$RUNNER_TEMP/proxy-private.pem"
+          base64 -w0 "$RUNNER_TEMP/proxy-public.pem" > "$RUNNER_TEMP/proxy-public.b64"
+
+      - name: Publish ephemeral public key
+        id: publish_key
+        uses: actions/github-script@v7
+        env:
+          PUBLIC_KEY_B64: ${{ steps.key.outputs.unused }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const { owner, repo } = context.repo;
+            const key = fs.readFileSync(process.env.RUNNER_TEMP + '/proxy-public.b64', 'utf8').trim();
+            const marker = `<!-- FARDARTER-V6-4-PROXY-KEY-${context.runId} -->`;
+            const body = `${marker}\n\n## Exact v6.4 secure proxy handoff\n\n` +
+              `- Workflow run: https://github.com/${owner}/${repo}/actions/runs/${context.runId}\n` +
+              `- Exact source: \`${process.env.EXACT_SOURCE_COMMIT}\`\n` +
+              `- Public key (base64 PEM; private key remains only in this live runner):\n\n` +
+              `\`\`\`text\n${key}\n\`\`\``;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: 136, per_page: 100 });
+            if (!comments.some((comment) => comment.body?.includes(marker))) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: 136, body });
+            }
+
+      - name: Await encrypted one-time proxy
+        id: await_cipher
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const marker = `<!-- FARDARTER-V6-4-PROXY-CIPHER-${process.env.RUN_ID} -->`;
+          const endpoint = `https://api.github.com/repos/${process.env.REPOSITORY}/issues/136/comments?per_page=100`;
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+          for (let attempt = 1; attempt <= 180; attempt++) {
+            const response = await fetch(endpoint, {
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${process.env.GH_TOKEN}`,
+                'X-GitHub-Api-Version': '2022-11-28',
+                'User-Agent': 'fardarter-v6-4-secure-proxy-deploy',
+              },
+            });
+            if (!response.ok) throw new Error(`Issue comment poll failed: ${response.status}`);
+            const comments = await response.json();
+            const match = [...comments].reverse().find((comment) =>
+              comment?.user?.login === 'hvitiswift-afk' && comment?.body?.includes(marker));
+            if (match) {
+              const fenced = match.body.match(/```json\s*([\s\S]*?)```/i);
+              if (!fenced) throw new Error('Encrypted proxy comment is missing JSON code fence');
+              const payload = JSON.parse(fenced[1]);
+              for (const key of ['encryptedKey','nonce','ciphertext']) {
+                if (typeof payload[key] !== 'string' || payload[key].length < 8) throw new Error(`Invalid encrypted payload field: ${key}`);
+              }
+              fs.writeFileSync(process.env.RUNNER_TEMP + '/proxy-cipher.json', JSON.stringify(payload));
+              console.log(`Encrypted proxy received on poll ${attempt}.`);
+              process.exit(0);
+            }
+            if (attempt % 12 === 0) console.log(`Awaiting encrypted proxy: poll ${attempt}/180`);
+            await sleep(5000);
+          }
+          throw new Error('Timed out awaiting encrypted proxy payload');
+          NODE
+
+      - name: Decrypt proxy in runner memory
+        id: decrypt
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const payload = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/proxy-cipher.json', 'utf8'));
+          const privateKey = fs.readFileSync(process.env.RUNNER_TEMP + '/proxy-private.pem');
+          const key = crypto.privateDecrypt({
+            key: privateKey,
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: 'sha256',
+          }, Buffer.from(payload.encryptedKey, 'base64'));
+          const nonce = Buffer.from(payload.nonce, 'base64');
+          const packed = Buffer.from(payload.ciphertext, 'base64');
+          if (key.length !== 32 || nonce.length !== 12 || packed.length < 17) throw new Error('Encrypted proxy payload sizes are invalid');
+          const tag = packed.subarray(packed.length - 16);
+          const encrypted = packed.subarray(0, packed.length - 16);
+          const decipher = crypto.createDecipheriv('aes-256-gcm', key, nonce);
+          decipher.setAuthTag(tag);
+          const proxy = Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
+          if (!proxy.startsWith('https://netlify-mcp.netlify.app/proxy/') || proxy.length > 2000 || /\s/.test(proxy)) {
+            throw new Error('Decrypted proxy URL failed boundary validation');
+          }
+          fs.writeFileSync(process.env.RUNNER_TEMP + '/proxy-url', proxy, { mode: 0o600 });
+          console.log('Encrypted proxy decrypted and boundary-validated.');
+          NODE
+          rm -f "$RUNNER_TEMP/proxy-cipher.json"
+
+      - name: Deploy exact source through authenticated Netlify proxy
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROXY_PATH="$(cat "$RUNNER_TEMP/proxy-url")"
+          cd source
+          set +e
+          npx --yes --registry=https://registry.npmjs.org @netlify/mcp@1.15.1 \
+            --site-id "$NETLIFY_SITE_ID" --proxy-path "$PROXY_PATH" > "$RUNNER_TEMP/netlify-deploy.log" 2>&1
+          STATUS=$?
+          set -e
+          cat "$RUNNER_TEMP/netlify-deploy.log"
+          rm -f "$RUNNER_TEMP/proxy-url" "$RUNNER_TEMP/proxy-private.pem" "$RUNNER_TEMP/proxy-public.pem" "$RUNNER_TEMP/proxy-public.b64"
+          test "$STATUS" -eq 0 || exit "$STATUS"
+          READY_JSON="$(grep 'Deploy is ready!' "$RUNNER_TEMP/netlify-deploy.log" | tail -1 | sed 's/^.*Deploy is ready! //')"
+          test -n "$READY_JSON" || { echo 'Missing ready deployment JSON'; exit 1; }
+          DEPLOY_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.deployId || "")' "$READY_JSON")"
+          PROVIDER_URL="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.siteUrl || "")' "$READY_JSON")"
+          test -n "$DEPLOY_ID" || { echo 'Missing real deploy ID'; exit 1; }
+          IMMUTABLE_URL="https://${DEPLOY_ID}--${NETLIFY_SITE_NAME}.netlify.app"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+          echo "provider_url=$PROVIDER_URL" >> "$GITHUB_OUTPUT"
+          echo "immutable_url=$IMMUTABLE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Read back all required immutable routes
+        id: readback
+        shell: bash
+        env:
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          IMMUTABLE_URL: ${{ steps.deploy.outputs.immutable_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          cp "$RUNNER_TEMP/netlify-deploy.log" artifacts/netlify-deploy.log
+          get() {
+            local route="$1" output="$2"
+            echo "GET $IMMUTABLE_URL$route"
+            curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 45 \
+              "$IMMUTABLE_URL$route" --output "$output"
+            test -s "$output"
+          }
+          get / artifacts/home.html
+          get /github-control-tower-audit artifacts/audit.html
+          get /github-control-tower-audit/operations artifacts/operations.html
+          get /github-control-tower-audit/reconciliation artifacts/reconciliation.html
+          get /github-control-tower-audit/canonicalization-preview artifacts/canonicalization-preview.html
+          get /api/revenue/pilot artifacts/pilot.json
+          get /api/revenue/capacity artifacts/capacity.json
+          get /api/revenue/operations artifacts/operations.json
+          get /api/revenue/reconciliation artifacts/reconciliation.json
+          get /api/revenue/canonicalization-preview artifacts/canonicalization-preview.json
+          get /sitemap.xml artifacts/sitemap.xml
+          get /robots.txt artifacts/robots.txt
+
+      - name: Validate exact v6.4 deployment contract
+        id: validate
+        shell: bash
+        env:
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          IMMUTABLE_URL: ${{ steps.deploy.outputs.immutable_url }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const read = (p) => fs.readFileSync(p, 'utf8');
+          const json = (p) => JSON.parse(read(p));
+          const preview = json('artifacts/canonicalization-preview.json');
+          const pilot = json('artifacts/pilot.json');
+          const capacity = json('artifacts/capacity.json');
+          const operations = json('artifacts/operations.json');
+          const reconciliation = json('artifacts/reconciliation.json');
+          const pages = {
+            home: read('artifacts/home.html'), audit: read('artifacts/audit.html'),
+            operations: read('artifacts/operations.html'), reconciliation: read('artifacts/reconciliation.html'),
+            preview: read('artifacts/canonicalization-preview.html'), sitemap: read('artifacts/sitemap.xml'), robots: read('artifacts/robots.txt'),
+          };
+          const GENESIS='4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b';
+          const PROPOSAL='3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e';
+          const RECON='4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22';
+          const EVENT='2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174';
+          const SNAPSHOT='4e7e2ead4c466704ad0559fed73cc01cf028722d701ffe47669626858a96c8de';
+          const BUNDLE='3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2';
+          const LEDGER='9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c';
+          const validCount=(v)=>v===null||(Number.isInteger(v)&&v>=0);
+          const checks=[]; const check=(ok,label)=>checks.push([Boolean(ok),label]);
+          check(preview.schemaVersion==='1.0.0','schemaVersion');
+          check(preview.controllerVersion==='6.4.0','controllerVersion');
+          check(preview.controllingIssue===165,'controllingIssue');
+          check(preview.previewLedger?.id==='FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4','ledgerId');
+          check(preview.previewLedger?.digest===LEDGER,'ledgerDigest');
+          check(preview.previewLedger?.previewCount===1,'previewCount');
+          check(preview.previewLedger?.decisionCounts?.PREPARED===1,'preparedCount');
+          for(const state of ['PREPARED','PREVIEW_READY','BLOCKED','EXPIRED','REJECTED','APPLIED_BY_REVIEWED_MERGE']) check(preview.previewLedger?.lifecycle?.includes(state),`lifecycle.${state}`);
+          check(preview.previewLedger?.applicationPolicy?.automaticCanonicalization===false,'automaticCanonicalization');
+          check(preview.previewLedger?.applicationPolicy?.reviewedMergeRequired===true,'reviewedMergeRequired');
+          const bundle=preview.preparedReviewBundle;
+          check(bundle?.id==='FARDARTER-CANONICALIZATION-BUNDLE-ISSUE-162-V6-4','bundleId');
+          check(bundle?.source?.proposalIssue===162&&bundle?.source?.entityIssue===159,'bundleSources');
+          check(bundle?.state==='PREPARED'&&bundle?.expectedDecision==='PREVIEW_READY','bundleStateDecision');
+          check(bundle?.digest===BUNDLE,'bundleDigest');
+          check(bundle?.candidateEvent?.sequence===1,'candidateSequence');
+          check(bundle?.candidateEvent?.previousEventDigest===GENESIS,'candidatePreviousGenesis');
+          check(bundle?.candidateEvent?.digest===EVENT,'candidateEventDigest');
+          check(bundle?.candidateEvent?.canonical===false&&bundle?.candidateEvent?.applied===false,'candidateNotApplied');
+          check(bundle?.candidateEvent?.capacityEffect?.activeDelta===0,'activeDelta');
+          check(bundle?.candidateEvent?.financialEffect?.createsOrder===false,'orderDelta');
+          check(bundle?.candidateEvent?.financialEffect?.grossRevenueDeltaUsd===0,'grossDelta');
+          check(bundle?.candidateEvent?.financialEffect?.settledCashDeltaUsd===0,'settledDelta');
+          check(bundle?.candidateProjection?.activeDeliveries===0&&bundle?.candidateProjection?.orders===0,'projectionActiveOrders');
+          check(bundle?.candidateProjection?.verifiedGrossRevenueUsd===0&&bundle?.candidateProjection?.verifiedSettledCashUsd===0,'projectionMoney');
+          check(bundle?.candidateReconciliation?.sequence===1,'snapshotSequence');
+          check(bundle?.candidateReconciliation?.previousSnapshotDigest===RECON,'snapshotPrevious');
+          check(bundle?.candidateReconciliation?.digest===SNAPSHOT,'snapshotDigest');
+          const current=preview.canonicalCurrentState;
+          check(current?.headSequence===0&&current?.headDigest===GENESIS,'canonicalHead');
+          check(current?.eventCount===1&&current?.canonicalBusinessEventCount===0,'genesisAndBusinessEvents');
+          check(current?.healthy===true&&current?.genesisOnly===true,'genesisHealth');
+          check(Object.values(current?.stateCounts||{}).every((value)=>value===0),'allCanonicalStateCountsZero');
+          check(current?.totalPlanningSlots===1000&&current?.effectiveActiveCeiling===100,'capacityEnvelope');
+          check(current?.activeDeliveries===0&&current?.activeHeadroom===100,'activeHeadroom');
+          check(current?.orders===0&&current?.verifiedGrossRevenueUsd===0&&current?.verifiedSettledCashUsd===0,'canonicalMoney');
+          check(current?.receivedCashRequires==='PAID_SETTLED','cashGate');
+          check(preview.sourceDigests?.canonicalEventHead===GENESIS,'sourceHeadDigest');
+          check(preview.sourceDigests?.proposalLedger===PROPOSAL,'proposalDigest');
+          check(preview.sourceDigests?.reconciliation===RECON,'reconciliationDigest');
+          check(preview.sourceDigests?.preparedCandidateEvent===EVENT,'sourceEventDigest');
+          check(preview.sourceDigests?.preparedCandidateSnapshot===SNAPSHOT,'sourceSnapshotDigest');
+          check(preview.sourceDigests?.preparedReviewBundle===BUNDLE,'sourceBundleDigest');
+          check(preview.sourceDigests?.previewLedger===LEDGER,'sourceLedgerDigest');
+          const counts=preview.publicCounts||{};
+          check(['AVAILABLE','UNAVAILABLE'].includes(counts.sourceState),'publicCountSource');
+          for(const key of ['openPreviewRequests','previewReady','blocked','needsReview']) check(validCount(counts[key]),`publicCounts.${key}`);
+          check(counts.countsAreCanonicalEvidence===false&&counts.countsAreCommercialEvidence===false,'publicCountsBoundary');
+          const drive=preview.googleDriveContinuity||{};
+          check(drive.state==='CONNECTED_PRIVATE','driveState');
+          check(drive.publicFolderUrlExposed===false&&drive.publicFileIdsExposed===false,'driveNonexposure');
+          check(drive.canonicalizationPreviewsMaintained===true&&drive.reviewBundlesMaintained===true,'driveMaintenance');
+          check(drive.automaticCanonicalEventApplication===false,'driveNoAutomaticApplication');
+          check(preview.evidenceBoundary?.applicationRequiresReviewedMerge===true,'applicationReviewedMerge');
+          check(preview.evidenceBoundary?.templateIsIndemnityProof===false,'notIndemnityProof');
+          check(pilot&&capacity&&operations&&reconciliation,'supportingApisJson');
+          check(pages.home.includes('/github-control-tower-audit')||pages.home.includes('GitHub Control Tower'),'homePage');
+          check(pages.audit.includes('Fardarter Drive'),'auditPage');
+          check(pages.operations.toLowerCase().includes('operations'),'operationsPage');
+          check(pages.reconciliation.toLowerCase().includes('reconciliation'),'reconciliationPage');
+          check(pages.preview.toLowerCase().includes('canonicalization'),'previewPage');
+          for(const route of ['/github-control-tower-audit','/github-control-tower-audit/operations','/github-control-tower-audit/reconciliation','/github-control-tower-audit/canonicalization-preview']) check(pages.sitemap.includes(route),`sitemap.${route}`);
+          check(pages.robots.includes('/sitemap.xml')||pages.robots.toLowerCase().includes('sitemap:'),'robotsSitemap');
+          const failed=checks.filter(([ok])=>!ok).map(([,label])=>label);
+          if(failed.length) throw new Error(`Exact v6.4 immutable readback failed: ${failed.join(', ')}`);
+          const receipt={
+            schemaVersion:'1.0.0',result:'DEPLOYED_AND_VERIFIED',repository:process.env.GITHUB_REPOSITORY,
+            sourceCommit:process.env.EXACT_SOURCE_COMMIT,runId:process.env.GITHUB_RUN_ID,siteId:process.env.NETLIFY_SITE_ID,
+            deployId:process.env.DEPLOY_ID,immutableUrl:process.env.IMMUTABLE_URL,
+            blobs:{previewLedger:'99a4bb840df5630efdf55d7e5fd4d6bdd0b62996',preparedReviewBundle:'e55188c34b34dddbe22652442b1ed6d0d932f25b',privateDriveContinuity:'bd24a05b0372ef77c97d520609baef73d0b778c6',previewApi:'95cf068221fd49fc6ddba755f8d47f72dc3da55e',previewController:'6d2a32710a00bdb2a8fa49275447699fe8e2c7b3'},
+            digests:{canonicalHead:GENESIS,proposal:PROPOSAL,reconciliation:RECON,candidateEvent:EVENT,candidateSnapshot:SNAPSHOT,reviewBundle:BUNDLE,previewLedger:LEDGER},
+            routes:['/','/github-control-tower-audit','/github-control-tower-audit/operations','/github-control-tower-audit/reconciliation','/github-control-tower-audit/canonicalization-preview','/api/revenue/pilot','/api/revenue/capacity','/api/revenue/operations','/api/revenue/reconciliation','/api/revenue/canonicalization-preview','/sitemap.xml','/robots.txt'],
+            verifiedAt:new Date().toISOString(),
+          };
+          fs.writeFileSync('artifacts/fardarter-v6-4-secure-deploy-receipt.json',JSON.stringify(receipt,null,2)+'\n');
+          console.log('Exact Fardarter Drive v6.4 deployment contract: PASS');
+          NODE
+
+      - name: Upload durable deployment evidence
+        id: upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-v6-4-secure-deploy-${{ github.run_id }}
+          path: artifacts
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish exact rollout outcome
+        id: report
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          SETUP_OUTCOME: ${{ steps.setup.outcome }}
+          CHECKOUT_OUTCOME: ${{ steps.checkout.outcome }}
+          SOURCE_GATE_OUTCOME: ${{ steps.source_gate.outcome }}
+          KEY_OUTCOME: ${{ steps.key.outcome }}
+          PUBLISH_KEY_OUTCOME: ${{ steps.publish_key.outcome }}
+          AWAIT_CIPHER_OUTCOME: ${{ steps.await_cipher.outcome }}
+          DECRYPT_OUTCOME: ${{ steps.decrypt.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          READBACK_OUTCOME: ${{ steps.readback.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          IMMUTABLE_URL: ${{ steps.deploy.outputs.immutable_url }}
+        with:
+          script: |
+            const { owner, repo }=context.repo;
+            const stages=[
+              ['set up Node',process.env.SETUP_OUTCOME],['checkout exact commit',process.env.CHECKOUT_OUTCOME],
+              ['verify exact source and blobs',process.env.SOURCE_GATE_OUTCOME],['generate ephemeral key',process.env.KEY_OUTCOME],
+              ['publish public key',process.env.PUBLISH_KEY_OUTCOME],['receive encrypted proxy',process.env.AWAIT_CIPHER_OUTCOME],
+              ['decrypt proxy in runner memory',process.env.DECRYPT_OUTCOME],['Netlify proxy upload/build',process.env.DEPLOY_OUTCOME],
+              ['immutable route readback',process.env.READBACK_OUTCOME],['exact v6.4 validation',process.env.VALIDATE_OUTCOME],
+              ['upload evidence artifact',process.env.UPLOAD_OUTCOME],
+            ];
+            const success=stages.every(([,outcome])=>outcome==='success');
+            const failing=stages.find(([,outcome])=>outcome!=='success');
+            const deployId=process.env.DEPLOY_ID||'UNAVAILABLE';
+            const immutableUrl=process.env.IMMUTABLE_URL||'UNAVAILABLE';
+            const marker=success?`<!-- FARDARTER-V6-4-VERIFIED-${deployId} -->`:`<!-- FARDARTER-V6-4-SECURE-FAIL-${context.runId} -->`;
+            let body=`${marker}\n\n## Fardarter Drive v6.4 secure rollout ${success?'receipt':'failure receipt'}\n\n`+
+              `- Exact source commit: \`${process.env.EXACT_SOURCE_COMMIT}\`\n`+
+              `- Workflow run: https://github.com/${owner}/${repo}/actions/runs/${context.runId}\n`+
+              `- Fixed Netlify site: \`${process.env.NETLIFY_SITE_ID}\` / \`${process.env.NETLIFY_SITE_NAME}\`\n`+
+              `- Deploy ID: \`${deployId}\`\n`+
+              `- Immutable deploy URL: ${immutableUrl==='UNAVAILABLE'?'**UNAVAILABLE**':immutableUrl}\n`;
+            if(success){
+              body+=`\nResult: **DEPLOYED_AND_VERIFIED**. All 12 requested routes and the exact v6.4 contract passed.\n\n`+
+                `Blobs: \`99a4bb840df5630efdf55d7e5fd4d6bdd0b62996\`, \`e55188c34b34dddbe22652442b1ed6d0d932f25b\`, \`bd24a05b0372ef77c97d520609baef73d0b778c6\`, \`95cf068221fd49fc6ddba755f8d47f72dc3da55e\`, \`6d2a32710a00bdb2a8fa49275447699fe8e2c7b3\`.\n\n`+
+                `Digests: \`4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b\`, \`3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e\`, \`4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22\`, \`2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174\`, \`4e7e2ead4c466704ad0559fed73cc01cf028722d701ffe47669626858a96c8de\`, \`3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2\`, \`9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c\`.\n\n`+
+                `Canonical state remains sequence 0, one genesis event, zero business events, zero ACTIVE/orders, and $0 gross/$0 settled.`;
+            }else{
+              body+=`\nResult: **FAILED**. Exact failing step: **${failing?.[0]||'unknown'}** (outcome \`${failing?.[1]||'unknown'}\`).\n\nNo downstream success receipts were written; #136 and #143 remain open.`;
+            }
+            const targets=success?[136,143,133,141,151,153,156,160,165]:[136,143];
+            for(const issue_number of targets){
+              const comments=await github.paginate(github.rest.issues.listComments,{owner,repo,issue_number,per_page:100});
+              if(!comments.some((comment)=>comment.body?.includes(marker))) await github.rest.issues.createComment({owner,repo,issue_number,body});
+            }
+            if(success){
+              for(const issue_number of [136,143]) await github.rest.issues.update({owner,repo,issue_number,state:'closed',state_reason:'completed'});
+            }
