@@ -93,7 +93,28 @@ jobs:
         run: |
           set -Eeuo pipefail
           echo "static-route-materialization" > /tmp/fardarter-v6-11-step
-          node scripts/materialize-netlify-static-v6-11.mjs target site | tee /tmp/fardarter-materialization-summary.json
+          cd target
+          PORT=3011 npm start > /tmp/fardarter-v6-11-local-server.log 2>&1 &
+          SERVER_PID=$!
+          cd ..
+          cleanup_server() {
+            kill "$SERVER_PID" >/dev/null 2>&1 || true
+            wait "$SERVER_PID" >/dev/null 2>&1 || true
+          }
+          trap cleanup_server EXIT
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3011/api/revenue/consent-evidence >/tmp/fardarter-v6-11-consent-probe.json; then
+              break
+            fi
+            if [ "$attempt" -eq 40 ]; then
+              cat /tmp/fardarter-v6-11-local-server.log
+              exit 1
+            fi
+            sleep 1
+          done
+          node scripts/materialize-netlify-static-v6-11.mjs target site http://127.0.0.1:3011 | tee /tmp/fardarter-materialization-summary.json
+          cleanup_server
+          trap - EXIT
           tar -C site -czf /tmp/fardarter-v6-11-static-site.tar.gz .
           sha256sum /tmp/fardarter-v6-11-static-site.tar.gz | tee /tmp/fardarter-v6-11-static-site.tar.gz.sha256
 
@@ -262,7 +283,7 @@ jobs:
             const evidence = JSON.parse(fs.readFileSync('evidence/FARDARTER-V6-11-NETLIFY-READBACK.json', 'utf8'));
             const evidenceDigest = fs.readFileSync('evidence/FARDARTER-V6-11-NETLIFY-READBACK.sha256', 'utf8').trim();
             const marker = `<!-- FARDARTER-V6-11-VERIFIED-${process.env.DEPLOY_ID} -->`;
-            const body = `${marker}\n\n## Fardarter Drive v6.11 exact production promotion receipt\n\n- Exact application source: \`${process.env.TARGET_COMMIT}\`\n- Control merge: \`${process.env.CONTROL_MERGE}\`\n- Workflow run: \`${context.runId}\`\n- Fixed Netlify site: \`${process.env.SITE_ID}\` / \`${process.env.SITE_NAME}\`\n- Deploy ID: \`${process.env.DEPLOY_ID}\`\n- Immutable deploy URL: ${process.env.IMMUTABLE_URL}\n- Rollback deploy ID: \`${process.env.ROLLBACK_DEPLOY_ID}\`\n- Immutable route readback: **${evidence.verifiedRouteCount}/${evidence.requiredRouteCount} PASS**\n- Exact body matches: **${evidence.exactBodyMatchCount}/${evidence.requiredRouteCount}**\n- Evidence SHA-256: \`${evidenceDigest}\`\n\nResult: **DEPLOYED_AND_VERIFIED**. The exact reviewed target was built, materialized from Netlify v1 route blobs, deployed to the fixed existing site, and verified from the authoritative immutable URL. No private Google Drive URL or ID was exposed. The rollback deployment remains preserved.\n\nCanonical and commercial state remains sequence 1, HUMAN_ACCEPTED=0, ACTIVE=0, orders=0, verified gross revenue=$0, and verified settled cash=$0.`;
+            const body = `${marker}\n\n## Fardarter Drive v6.11 exact production promotion receipt\n\n- Exact application source: \`${process.env.TARGET_COMMIT}\`\n- Control merge: \`${process.env.CONTROL_MERGE}\`\n- Workflow run: \`${context.runId}\`\n- Fixed Netlify site: \`${process.env.SITE_ID}\` / \`${process.env.SITE_NAME}\`\n- Deploy ID: \`${process.env.DEPLOY_ID}\`\n- Immutable deploy URL: ${process.env.IMMUTABLE_URL}\n- Rollback deploy ID: \`${process.env.ROLLBACK_DEPLOY_ID}\`\n- Immutable route readback: **${evidence.verifiedRouteCount}/${evidence.requiredRouteCount} PASS**\n- Exact body matches: **${evidence.exactBodyMatchCount}/${evidence.requiredRouteCount}**\n- Evidence SHA-256: \`${evidenceDigest}\`\n\nResult: **DEPLOYED_AND_VERIFIED**. The exact reviewed target was built, materialized from Netlify v1 route blobs plus exact local production captures for its two dynamic consent surfaces, deployed to the fixed existing site, and verified from the authoritative immutable URL. No private Google Drive URL or ID was exposed. The rollback deployment remains preserved.\n\nCanonical and commercial state remains sequence 1, HUMAN_ACCEPTED=0, ACTIVE=0, orders=0, verified gross revenue=$0, and verified settled cash=$0.`;
             for (const issue_number of [194, 192, 190, 141, 133]) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
