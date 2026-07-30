@@ -74,7 +74,9 @@ for (const required of ["[FD successor review]:","Expected current canonical sta
 for (const required of ["chain.headSequence + 1","reconciliation.sequence + 1","BLOCKED_HUMAN_GATE_REQUIRED","Canonical event appended: **NO**","contents: read","issues: write"]) assert(text.workflow.includes(required),`workflow missing ${required}`);
 assert(!text.workflow.includes("contents: write"),"successor workflow must not write canonical source");
 assert(pkg.scripts["fardarter:successor:check"]==="node scripts/check-fardarter-successor-control-v6-6.mjs","successor script missing");
+assert(pkg.scripts["fardarter:successor-safety:check"]==="node scripts/check-fardarter-successor-safety-v6-6-2.mjs","successor safety script missing");
 assert(pkg.scripts["revenue:verify"].includes("fardarter:successor:check"),"revenue verifier must include successor check");
+assert(pkg.scripts["revenue:verify"].includes("fardarter:successor-safety:check"),"revenue verifier must include successor safety check");
 assert(text.readback.includes("/api/revenue/successor-readiness") && text.readback.includes("/github-control-tower-audit/successor-readiness"),"successor immutable readback routes missing");
 assert(text.sitemap.includes("/github-control-tower-audit/successor-readiness"),"sitemap successor route missing");
 assert(text.doc.includes(control.controlDigest) && text.doc.includes(bundle.bundleDigest),"operating doc digest receipt missing");
