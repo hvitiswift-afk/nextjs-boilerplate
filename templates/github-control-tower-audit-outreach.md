@@ -1,16 +1,24 @@
 # GitHub Control Tower Audit Outreach Pack
 
-**Status:** prepared only; direct outreach remains unauthorized unless a separate exact-recipient or exact-channel approval exists  
-**Active inbound channel:** GitHub Issue `#133`  
+**Status:** GitHub-native request replies are authorized only when the requester explicitly grants bounded issue-thread contact; email or other direct outreach still requires an exact verified recipient and channel  
+**Active inbound channel:** GitHub Issue `#133` and qualifying `[Audit request]:` issues  
 **Offer:** fixed-scope GitHub Control Tower Audit  
 **Pilot price:** $100 USD  
 **Pilot capacity:** ten total audits, no more than two active deliveries  
 **First milestone:** five settled audits / $500 USD gross  
 **Expanded target:** ten settled audits / $1,000 USD gross
 
-The exact-prefix GitHub intake acknowledgement is authorized separately. It is not direct outreach and may run only after a requester opens an issue titled `[Audit request]:`.
+The exact-prefix GitHub intake acknowledgement is authorized separately. It is not an order or direct email outreach. When the requester checks the bounded GitHub-contact permission in the issue form, the requester’s GitHub identity and that issue thread become the verified identity/channel for one public-safe clarification reply.
 
-Use any outbound wording below only with a relevant recipient or audience and a separate authorization. Verify the recipient and channel before sending. Do not mass-message, scrape contacts, impersonate anyone, conceal that the message is commercial, or imply a prior relationship that does not exist.
+Use any outbound wording below only with a relevant recipient or audience and the required channel authority. Verify the recipient and channel before sending. Do not mass-message, scrape contacts, impersonate anyone, conceal that the message is commercial, or imply a prior relationship that does not exist.
+
+## GitHub-native request reply
+
+Thanks for opening this public-safe fit check. I can use this issue thread for one bounded clarification because you authorized GitHub contact in the request form.
+
+Before treating anything as an order, please confirm only the public-safe items that remain unclear: your authority to request the review, the exact repository, the primary operating problem, the desired outcome, the published scope size, and whether there is a real deadline.
+
+Do not post private email addresses, credentials, signatures, authentication data, payment information, customer-private data, or confidential records here. This reply does not accept scope, create an order, reserve capacity, confirm payment, or start work. I will not send repeated unsolicited follow-up.
 
 ## Warm professional contact
 
@@ -57,7 +65,7 @@ No credentials are required. The audit does not include merges, destructive clea
 
 Pilot scope: up to 25 open pull requests and 50 open issues, with a proposed three-business-day delivery window after written scope, exact due date, active capacity, and payment settlement are confirmed.
 
-Interested project owners can open a public-safe **Control Tower Audit Request** issue. The automated acknowledgement marks it as a fit check only; it does not create an order, reserve capacity, or prove payment. Please do not post credentials, payment information, customer-private data, or confidential records.
+Interested project owners can open a public-safe **Control Tower Audit Request** issue. The automated acknowledgement marks it as a fit check only; it does not create an order, reserve capacity, or prove payment. The request form can authorize one bounded reply in the GitHub issue without exposing an email address. Please do not post credentials, payment information, customer-private data, private email addresses, or confidential records.
 
 The $500 first milestone and $1,000 expanded gross target are experiment parameters, not guaranteed earnings.
 
@@ -80,7 +88,7 @@ Thanks for the interest. Before either of us treats this as an order, I need to 
 5. the $100 USD price, cancellation/refund terms, and external payment method;
 6. that active delivery capacity is available under the two-active limit.
 
-Please keep credentials, payment information, private customer data, and confidential records out of the public GitHub issue. A request, automated acknowledgement, label, or conversation is not a contract, order, capacity reservation, or payment obligation.
+Please keep credentials, payment information, private customer data, private email addresses, and confidential records out of the public GitHub issue. A request, automated acknowledgement, label, or conversation is not a contract, order, capacity reservation, or payment obligation.
 
 ## Not-fit reply
 

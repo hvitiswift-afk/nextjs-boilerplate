@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   acknowledge:
-    name: Label and acknowledge exact audit requests
+    name: Label, acknowledge, and resolve bounded contact
     if: >-
       github.event_name == 'issues' &&
       startsWith(github.event.issue.title, '[Audit request]:')
@@ -26,14 +26,19 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Apply bounded intake receipt
+      - name: Apply bounded intake and contact receipt
         uses: actions/github-script@v7
         with:
           script: |
-            const marker = '<!-- jp-audit-intake-v1 -->';
+            const intakeMarker = '<!-- jp-audit-intake-v1 -->';
+            const contactMarker = '<!-- jp-audit-github-contact-v1 -->';
+            const contactPermissionPhrase =
+              'I authorize one bounded, public-safe reply in this GitHub issue';
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issue_number = context.issue.number;
+            const issueBody = context.payload.issue?.body || '';
+            const githubContactAuthorized = issueBody.includes(contactPermissionPhrase);
 
             const labels = [
               {
@@ -51,6 +56,16 @@ jobs:
                 color: 'D4C5F9',
                 description: 'Interest evidence only; does not reserve capacity or prove payment',
               },
+              {
+                name: 'contact-github-authorized',
+                color: '1D76DB',
+                description: 'One bounded public-safe reply is authorized in the issue thread',
+              },
+              {
+                name: 'contact-channel-unresolved',
+                color: 'FBCA04',
+                description: 'No verified bounded contact channel is established',
+              },
             ];
 
             for (const label of labels) {
@@ -66,28 +81,79 @@ jobs:
               owner,
               repo,
               issue_number,
-              labels: labels.map((label) => label.name),
+              labels: ['audit-fit-check', 'needs-jp-review', 'not-an-order'],
             });
+
+            const addContactLabel = githubContactAuthorized
+              ? 'contact-github-authorized'
+              : 'contact-channel-unresolved';
+            const removeContactLabel = githubContactAuthorized
+              ? 'contact-channel-unresolved'
+              : 'contact-github-authorized';
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: [addContactLabel],
+            });
+
+            try {
+              await github.rest.issues.removeLabel({
+                owner,
+                repo,
+                issue_number,
+                name: removeContactLabel,
+              });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
 
             const comments = await github.paginate(
               github.rest.issues.listComments,
               { owner, repo, issue_number, per_page: 100 },
             );
 
-            if (!comments.some((comment) => comment.body?.includes(marker))) {
+            if (!comments.some((comment) => comment.body?.includes(intakeMarker))) {
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
-                body: `${marker}
+                body: `${intakeMarker}
             **Automated public-safe intake receipt**
 
             This issue is recorded as a **fit check only**. It is not an order, capacity reservation, contract, invoice, proof of payment, delivery commitment, or acceptance of scope.
 
             JP must separately review fit and approve the exact repository scope, price, due date, cancellation terms, delivery destination, and work start. Only an agreed external provider can confirm payment, and only provider-confirmed \`PAID_SETTLED\` evidence counts as received cash.
 
-            Do not post credentials, tokens, private customer data, payment records, confidential business records, protected health information, or other sensitive material in this public issue.`,
+            Do not post credentials, tokens, private email addresses, private customer data, payment records, confidential business records, protected health information, signatures, authentication data, or other sensitive material in this public issue.`,
               });
             }
 
-            core.notice(`Audit intake receipt applied to issue #${issue_number}`);
+            if (
+              githubContactAuthorized &&
+              !comments.some((comment) => comment.body?.includes(contactMarker))
+            ) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: `${contactMarker}
+            **GitHub-native contact channel authorized**
+
+            The requester explicitly authorized **one bounded, public-safe reply in this issue thread** for fit, authority, scope, timing, or missing-information clarification.
+
+            - Verified identity: the GitHub issue author.
+            - Authorized channel: this GitHub issue only.
+            - Email address required: **NO**.
+            - Email outreach authorized by this receipt: **NO**.
+            - Repeated unsolicited follow-up: **NOT AUTHORIZED**.
+            - Contract, payment, work start, capacity, or canonical-state effect: **NONE**.
+
+            A later private channel must be independently verified and separately authorized. Silence, reactions, labels, files, or message delivery do not prove consent.`,
+              });
+            }
+
+            core.notice(
+              `Audit intake receipt applied to issue #${issue_number}; GitHub contact authorized=${githubContactAuthorized}`,
+            );

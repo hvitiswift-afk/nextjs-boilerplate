@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This public issue is a fit-check request. A qualifying exact-prefix request may automatically enter **FIT_APPROVED_FOR_SCOPE_DRAFT**, receive bounded labels and one receipt, and trigger preparation of a private Google Drive work package. That state is nonbinding: it is not an order, capacity reservation, contract, signature, invoice, payment request, deadline, indemnity agreement, waiver, release, or paid work start. Fardarter Drive v6 provides **1,000 total slots** with a standard maximum of **100 ACTIVE deliveries**. Operation above 100 requires a complete active capacity-override receipt. Do not post credentials, payment records, private customer information, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, counsel notes, or private capacity-readiness evidence.
+        This public issue is a fit-check request. A qualifying exact-prefix request may automatically enter **FIT_APPROVED_FOR_SCOPE_DRAFT**, receive bounded labels and one receipt, and trigger preparation of a private Google Drive work package. That state is nonbinding: it is not an order, capacity reservation, contract, signature, invoice, payment request, deadline, indemnity agreement, waiver, release, or paid work start. Fardarter Drive v6 provides **1,000 total slots** with a standard maximum of **100 ACTIVE deliveries**. Operation above 100 requires a complete active capacity-override receipt. Do not post credentials, payment records, private customer information, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, counsel notes, private email addresses, or private capacity-readiness evidence.
 
   - type: input
     id: repository
@@ -83,12 +83,36 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: contact_channel
+    attributes:
+      label: Preferred contact channel for this fit check
+      description: Keep the initial fit discussion in this GitHub issue. Do not post an email address or other private contact detail here.
+      options:
+        - GitHub issue only (recommended)
+        - GitHub issue now; I may later provide a verified private channel
+        - GitHub issue only; do not email me
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contact_permission
+    attributes:
+      label: Bounded GitHub contact permission
+      options:
+        - label: I authorize one bounded, public-safe reply in this GitHub issue to clarify fit, authority, scope, timing, or missing information.
+          required: true
+        - label: I understand that this permission applies only to this issue thread and does not authorize email, repeated unsolicited follow-up, contract acceptance, payment confirmation, or work start.
+          required: true
+        - label: I will not post private email addresses, signatures, authentication data, payment information, customer-private data, confidential records, or other sensitive evidence in this public issue.
+          required: true
+
   - type: checkboxes
     id: boundaries
     attributes:
       label: Public, automation, capacity, Google Drive, and transaction boundaries
       options:
-        - label: I have not posted credentials, payment records, private customer data, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, counsel notes, or private capacity-readiness evidence.
+        - label: I have not posted credentials, payment records, private customer data, protected health information, confidential records, bank or payout data, provider transaction IDs, signatures, counsel notes, private email addresses, or private capacity-readiness evidence.
           required: true
         - label: I understand that this public request does not create an order, capacity reservation, contract, invoice, payment obligation, deadline, indemnity agreement, waiver, release, or work start.
           required: true
