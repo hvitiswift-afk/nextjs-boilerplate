@@ -50,6 +50,8 @@ const digestEvent = (event) => {
   const { eventDigest: _ignored, ...payload } = event;
   return createHash("sha256").update(stableStringify(payload), "utf8").digest("hex");
 };
+const expectedPublicLabel = (stateId) =>
+  `fd-state-${stateId.toLowerCase().replaceAll("_", "-")}`;
 
 const machine = parse(text.machine, "state machine");
 const machineSchema = parse(text.machineSchema, "state-machine schema");
@@ -91,6 +93,12 @@ assert(machine.baseline.overrideState === "INACTIVE_NO_RECEIPT", "override must 
 assert(machine.states.length === expectedStates.length, "exactly 13 states are required");
 assert(machine.states.map((state) => state.stateId).join(",") === expectedStates.join(","), "state order is incorrect");
 assert(new Set(machine.states.map((state) => state.publicLabel)).size === expectedStates.length, "state labels must be unique");
+for (const state of machine.states) {
+  assert(
+    state.publicLabel === expectedPublicLabel(state.stateId),
+    `${state.stateId} public label must match runtime derivation`,
+  );
+}
 const active = machine.states.find((state) => state.stateId === "ACTIVE");
 assert(active?.usesActiveCapacity === true && active?.countsAsOrder === true, "ACTIVE must use capacity and count as an order");
 for (const state of machine.states.filter((entry) => entry.stateId !== "ACTIVE")) {
@@ -154,11 +162,12 @@ for (const required of ["jp-fardarter-transition-v6-2-", "Duplicate transition s
 }
 assert(!text.transitionWorkflow.includes("contents: write"), "transition workflow must not write canonical source");
 assert(text.transitionWorkflow.indexOf("comments.some") < text.transitionWorkflow.indexOf("removeLabel"), "idempotency guard must precede state mutation");
+assert(text.transitionWorkflow.includes("replaceAll('_', '-')"), "transition workflow must derive exact canonical state labels");
 
 for (const required of ["FARDARTER-DRIVE-STATE-MACHINE-V6-2.json", "FARDARTER-DRIVE-STATE-EVENTS-V6-2.json", "getPublicStateLedger", "digestChainConnected", "genesisOnly", "canonicalEventRequiresReviewedMerge", "receivedCashRequires: \"PAID_SETTLED\""]) {
   assert(text.api.includes(required), `operations API missing: ${required}`);
 }
-for (const required of ["fardarterStateIds", "countsAreCanonicalEvidence: false", "countsAreCommercialEvidence: false", "UNAVAILABLE"]) {
+for (const required of ["fardarterStateIds", "countsAreCanonicalEvidence: false", "countsAreCommercialEvidence: false", "UNAVAILABLE", "replaceAll(\"_\", \"-\")"]) {
   assert(text.publicLedger.includes(required), `public state ledger missing: ${required}`);
 }
 assert(packageJson.scripts["fardarter:state:check"] === "node scripts/check-fardarter-state-machine-v6-2.mjs", "package script is missing");
