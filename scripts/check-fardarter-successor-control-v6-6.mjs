@@ -74,13 +74,18 @@ for (const required of ["[FD successor review]:","Expected current canonical sta
 for (const required of ["chain.headSequence + 1","reconciliation.sequence + 1","BLOCKED_HUMAN_GATE_REQUIRED","Canonical event appended: **NO**","contents: read","issues: write"]) assert(text.workflow.includes(required),`workflow missing ${required}`);
 assert(!text.workflow.includes("contents: write"),"successor workflow must not write canonical source");
 assert(pkg.scripts["fardarter:successor:check"]==="node scripts/check-fardarter-successor-control-v6-6.mjs","successor script missing");
+assert(pkg.scripts["fardarter:successor-safety:check"]==="node scripts/check-fardarter-successor-safety-v6-6-2.mjs","successor safety script missing");
 assert(pkg.scripts["revenue:verify"].includes("fardarter:successor:check"),"revenue verifier must include successor check");
+assert(pkg.scripts["revenue:verify"].includes("fardarter:successor-safety:check"),"revenue verifier must include successor safety check");
 assert(text.readback.includes("/api/revenue/successor-readiness") && text.readback.includes("/github-control-tower-audit/successor-readiness"),"successor immutable readback routes missing");
 assert(text.sitemap.includes("/github-control-tower-audit/successor-readiness"),"sitemap successor route missing");
 assert(text.doc.includes(control.controlDigest) && text.doc.includes(bundle.bundleDigest),"operating doc digest receipt missing");
 
-const forbidden=/(?:drive\.google\.com|docs\.google\.com|providerTransactionId|routingNumber|bankAccount|customerEmail|customerName|buyerEmail|signatureValue|privateKey)/i;
-for (const [name,value] of [["control",text.control],["bundle",text.bundle],["api",text.api],["workflow",text.workflow]]) assert(!forbidden.test(value),`${name} exposes private data or references`);
+const publicSourceForbidden=/(?:drive\.google\.com|docs\.google\.com|providerTransactionId|routingNumber|bankAccount|customerEmail|customerName|buyerEmail|signatureValue|privateKey)/i;
+for (const [name,value] of [["control",text.control],["bundle",text.bundle],["api",text.api]]) assert(!publicSourceForbidden.test(value),`${name} exposes private data or references`);
+assert(!/(?:drive\.google\.com|docs\.google\.com)/i.test(text.workflow),"workflow exposes private Drive references");
+const embeddedSecretValue=/(?:providerTransactionId|routingNumber|bankAccount|customerEmail|customerName|buyerEmail|signatureValue)\s*[:=]\s*["'`][^"'`\n]+/i;
+assert(!embeddedSecretValue.test(text.workflow),"workflow embeds a private value rather than a detector");
 
 console.log("Fardarter Drive v6.6 dynamic successor control: PASS");
 console.log(`Current head: ${chain.headSequence} / ${chain.headDigest}`);
