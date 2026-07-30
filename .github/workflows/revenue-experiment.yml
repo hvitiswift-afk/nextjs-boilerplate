@@ -13,6 +13,7 @@ on:
       - "app/api/revenue/pilot/**"
       - "app/api/revenue/capacity/**"
       - "app/api/revenue/operations/**"
+      - "app/api/revenue/reconciliation/**"
       - "app/page.tsx"
       - "app/sitemap.ts"
       - "app/robots.ts"
@@ -24,9 +25,7 @@ on:
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-*.mjs"
-      - "scripts/check-fardarter-drive*.mjs"
-      - "scripts/check-fardarter-capacity*.mjs"
-      - "scripts/check-fardarter-state*.mjs"
+      - "scripts/check-fardarter-*.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
       - "templates/github-control-tower-audit*.md"
@@ -45,6 +44,7 @@ on:
       - "app/api/revenue/pilot/**"
       - "app/api/revenue/capacity/**"
       - "app/api/revenue/operations/**"
+      - "app/api/revenue/reconciliation/**"
       - "app/page.tsx"
       - "app/sitemap.ts"
       - "app/robots.ts"
@@ -56,9 +56,7 @@ on:
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-*.mjs"
-      - "scripts/check-fardarter-drive*.mjs"
-      - "scripts/check-fardarter-capacity*.mjs"
-      - "scripts/check-fardarter-state*.mjs"
+      - "scripts/check-fardarter-*.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
       - "templates/github-control-tower-audit*.md"
@@ -74,9 +72,9 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify Fardarter Drive v6.2 receipt mesh and state controller
+    name: Verify Fardarter Drive v6.3 proposals, reconciliation, and quarantine
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
 
     steps:
       - name: Checkout
@@ -87,33 +85,37 @@ jobs:
         with:
           node-version: 20
 
-      - name: Validate v6.2 authority, capacity, state machine, receipt chain, Drive, and product
+      - name: Validate v6.3 authority, capacity, state, proposal, reconciliation, Drive, and product
         run: npm run revenue:verify
 
       - name: Verify JSON syntax
         run: |
-          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "receipts/revenue/JP-REV-001-AUTHORITY.json", "receipts/revenue/FARDARTER-DRIVE-V6.json", "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json", "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json", "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json", "receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json", "receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json", "receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json", "schemas/revenue/authority-receipt.schema.json", "schemas/revenue/fardarter-drive-v6.schema.json", "schemas/revenue/fardarter-drive-authority-v6.schema.json", "schemas/revenue/fardarter-drive-gdrive-v6.schema.json", "schemas/revenue/fardarter-drive-capacity-override-v6.schema.json", "schemas/revenue/fardarter-drive-capacity-ledger-v6-1.schema.json", "schemas/revenue/fardarter-drive-state-machine-v6-2.schema.json", "schemas/revenue/fardarter-drive-state-event-v6-2.schema.json", "schemas/revenue/fardarter-drive-state-events-v6-2.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.2 JSON syntax: PASS")'
+          node -e 'for (const path of ["examples/revenue-experiment.sample.json", "examples/github-control-tower-audit-receipt.sample.json", "receipts/revenue/JP-REV-001-PUBLICATION.json", "receipts/revenue/JP-REV-001-AUTHORITY.json", "receipts/revenue/FARDARTER-DRIVE-V6.json", "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json", "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json", "receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json", "receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json", "receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json", "receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json", "receipts/revenue/FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3.json", "receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json", "schemas/revenue/revenue-experiment.schema.json", "schemas/revenue/audit-receipt.schema.json", "schemas/revenue/publication-receipt.schema.json", "schemas/revenue/authority-receipt.schema.json", "schemas/revenue/fardarter-drive-v6.schema.json", "schemas/revenue/fardarter-drive-authority-v6.schema.json", "schemas/revenue/fardarter-drive-gdrive-v6.schema.json", "schemas/revenue/fardarter-drive-capacity-override-v6.schema.json", "schemas/revenue/fardarter-drive-capacity-ledger-v6-1.schema.json", "schemas/revenue/fardarter-drive-state-machine-v6-2.schema.json", "schemas/revenue/fardarter-drive-state-event-v6-2.schema.json", "schemas/revenue/fardarter-drive-state-events-v6-2.schema.json", "schemas/revenue/fardarter-drive-event-proposal-v6-3.schema.json", "schemas/revenue/fardarter-drive-event-proposals-v6-3.schema.json", "schemas/revenue/fardarter-drive-reconciliation-v6-3.schema.json"]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.3 JSON syntax: PASS")'
 
       - name: Emit non-financial receipt
         run: |
           echo "result=PASS"
           echo "drive_id=FARDARTER-DRIVE-V6"
-          echo "controller_version=6.2.0"
+          echo "controller_version=6.3.0"
           echo "state_machine=FARDARTER-DRIVE-STATE-MACHINE-V6-2"
           echo "event_chain=FARDARTER-DRIVE-STATE-EVENTS-V6-2"
           echo "genesis_digest=4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b"
           echo "canonical_business_events=0"
-          echo "operations_api=/api/revenue/operations"
-          echo "capacity_ledger=FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1"
-          echo "control_issue=156"
+          echo "proposal_ledger=FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3"
+          echo "proposal_ledger_digest=3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e"
+          echo "reconciliation_snapshot=FARDARTER-RECONCILIATION-GENESIS-V6-3"
+          echo "snapshot_digest=4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22"
+          echo "reconciliation_api=/api/revenue/reconciliation"
+          echo "control_issue=160"
           echo "total_slots=1000"
           echo "effective_active_ceiling=100"
           echo "active_deliveries=0"
           echo "orders=0"
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
-          echo "automated_transitions=NONBINDING_SIGNAL_ONLY"
+          echo "proposal_auto_canonicalization=FALSE"
+          echo "quarantine_freezes_canonical_mutation=TRUE"
           echo "canonical_event_requires_reviewed_merge=TRUE"
           echo "received_cash_requires=PAID_SETTLED"
-          echo "google_drive_receipt_mesh=CONNECTED_PRIVATE"
+          echo "google_drive_reconciliation=CONNECTED_PRIVATE"
           echo "indemnity_proof_claim=FALSE"

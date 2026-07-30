@@ -1,0 +1,188 @@
+name: Fardarter Event Proposal v6.3
+
+on:
+  issues:
+    types:
+      - labeled
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: fardarter-event-proposal-v6-3-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  proposal:
+    name: Validate noncanonical event proposal
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'issues' &&
+        github.event.label.name == 'fd-proposal-approved-v6-3' &&
+        startsWith(github.event.issue.title, '[FD event proposal]:')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Validate proposal and preserve canonical chain
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName !== 'issues') {
+              core.notice('Manual dispatch validates workflow availability only; no proposal or canonical event was written.');
+              return;
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const body = context.payload.issue.body || '';
+            const section = (label) => {
+              const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const match = body.match(new RegExp(`### ${escaped}\\s*\\n\\n([\\s\\S]*?)(?=\\n### |$)`));
+              return match?.[1]?.trim() || '';
+            };
+
+            const sourceReference = section('Source issue or public-safe entity reference');
+            const sourceIssue = Number(sourceReference.match(/Issue\s*#(\d+)/i)?.[1] || 0);
+            const expectedState = section('Expected current public signal state');
+            const fromState = section('Proposed canonical from-state');
+            const toState = section('Proposed canonical to-state');
+            const idempotencyKey = section('Public-safe idempotency key');
+            const evidence = section('Public-safe evidence references');
+            const authorityGate = section('Required authority gate');
+            const reviewByText = section('Review-by or expiry time');
+            const reviewBy = Date.parse(reviewByText);
+            const markerKey = `${sourceIssue}-${fromState}-${toState}-${idempotencyKey}`
+              .replace(/[^A-Za-z0-9_-]/g, '-')
+              .slice(0, 180);
+            const marker = `<!-- jp-fardarter-proposal-v6-3-${markerKey} -->`;
+
+            const states = [
+              'REQUESTED','FIT_APPROVED_FOR_SCOPE_DRAFT','SCOPE_DRAFTED','HUMAN_ACCEPTED',
+              'PAID_PENDING','PAID_SETTLED','WORK_START_APPROVED','ACTIVE','DELIVERED',
+              'ACCEPTED','CANCELLED','REFUNDED','DISPUTED',
+            ];
+            const allowed = new Set([
+              'REQUESTED->FIT_APPROVED_FOR_SCOPE_DRAFT','REQUESTED->CANCELLED',
+              'FIT_APPROVED_FOR_SCOPE_DRAFT->SCOPE_DRAFTED','FIT_APPROVED_FOR_SCOPE_DRAFT->CANCELLED',
+              'SCOPE_DRAFTED->HUMAN_ACCEPTED','SCOPE_DRAFTED->CANCELLED',
+              'HUMAN_ACCEPTED->PAID_PENDING','HUMAN_ACCEPTED->CANCELLED',
+              'PAID_PENDING->PAID_SETTLED','PAID_PENDING->CANCELLED','PAID_PENDING->DISPUTED',
+              'PAID_SETTLED->WORK_START_APPROVED','PAID_SETTLED->REFUNDED','PAID_SETTLED->DISPUTED',
+              'WORK_START_APPROVED->ACTIVE','WORK_START_APPROVED->CANCELLED',
+              'ACTIVE->DELIVERED','ACTIVE->CANCELLED','ACTIVE->DISPUTED',
+              'DELIVERED->ACCEPTED','DELIVERED->DISPUTED',
+              'DISPUTED->ACCEPTED','DISPUTED->REFUNDED','DISPUTED->CANCELLED',
+            ]);
+            const labelFor = (state) => `fd-state-${state.toLowerCase().replaceAll('_', '-')}`;
+
+            const labelDefinitions = [
+              { name: 'fd-proposal-approved-v6-3', color: '5319E7', description: 'Approved to validate a noncanonical v6.3 event proposal' },
+              { name: ['fd-proposal', 'ready-for-review'].join('-'), color: '0E8A16', description: 'Structurally valid proposal; reviewed canonical merge still required' },
+              { name: 'fd-proposal-quarantined', color: 'B60205', description: 'Proposal conflict or missing evidence; canonical mutation frozen' },
+              { name: 'fd-proposal-noncanonical', color: 'D4C5F9', description: 'Proposal only; not a canonical event or commercial evidence' },
+              { name: 'needs-jp-review', color: 'FBCA04', description: 'Requires JP review before consequential action' },
+            ];
+            for (const label of labelDefinitions) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+            if (comments.some((comment) => comment.body?.includes(marker))) {
+              core.notice(`Duplicate proposal suppressed for issue #${issue_number}: ${idempotencyKey}`);
+              return;
+            }
+
+            const prohibitedPatterns = [
+              /password\s*[:=]/i,/private[_ -]?key\s*[:=]/i,/secret\s*[:=]/i,
+              /routing\s*number\s*[:=]/i,/bank\s*account\s*[:=]/i,
+              /social\s*security\s*[:=]/i,/provider\s*transaction\s*id\s*[:=]/i,
+              /signature\s*[:=]/i,
+            ];
+            const sensitive = prohibitedPatterns.some((pattern) => pattern.test(body));
+            const transitionKey = `${fromState}->${toState}`;
+            const invalidInput =
+              !Number.isInteger(sourceIssue) || sourceIssue <= 0 ||
+              !states.includes(expectedState) || !states.includes(fromState) || !states.includes(toState) ||
+              expectedState !== fromState || !allowed.has(transitionKey) ||
+              !/^[A-Za-z0-9._:-]{8,160}$/.test(idempotencyKey) ||
+              evidence.length < 3 || authorityGate.length < 3 ||
+              !Number.isFinite(reviewBy) || reviewBy <= Date.now();
+
+            let targetStateLabels = [];
+            let targetUnavailable = false;
+            if (!invalidInput && !sensitive) {
+              try {
+                const target = await github.rest.issues.get({ owner, repo, issue_number: sourceIssue });
+                targetStateLabels = (target.data.labels || [])
+                  .map((label) => typeof label === 'string' ? label : label.name)
+                  .filter((label) => label?.startsWith('fd-state-'));
+              } catch {
+                targetUnavailable = true;
+              }
+            }
+
+            const stateConflict =
+              targetUnavailable ||
+              targetStateLabels.length !== 1 ||
+              targetStateLabels[0] !== labelFor(expectedState);
+            const quarantined = sensitive || invalidInput || stateConflict;
+
+            if (quarantined) {
+              await github.rest.issues.addLabels({
+                owner, repo, issue_number,
+                labels: ['fd-proposal-quarantined', 'fd-proposal-noncanonical', 'needs-jp-review'],
+              });
+              await github.rest.issues.createComment({
+                owner, repo, issue_number,
+                body: `${marker}
+**Fardarter Drive™ v6.3 proposal quarantine receipt**
+
+- Decision: **QUARANTINED**
+- Source entity: **Issue #${sourceIssue || 'MISSING'}**
+- Proposed transition: \`${fromState || 'MISSING'} → ${toState || 'MISSING'}\`
+- Canonical event appended: **NO**
+- Canonical chain remains: **GENESIS_ONLY**
+- Canonical mutation: **FROZEN**
+- Order / contract / payment / work start / capacity effect: **NONE**
+
+The proposal contains a structural, state, idempotency, expiry, sensitivity, or public/canonical consistency conflict. Review privately without copying sensitive evidence.`,
+              });
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number,
+              labels: ['fd-proposal-ready-for-review', 'fd-proposal-noncanonical'],
+            });
+            await github.rest.issues.createComment({
+              owner, repo, issue_number,
+              body: `${marker}
+**Fardarter Drive™ v6.3 noncanonical proposal receipt**
+
+- Decision: **READY_FOR_REVIEW**
+- Source entity: **Issue #${sourceIssue}**
+- Expected public state: \`${expectedState}\`
+- Proposed canonical transition: \`${fromState} → ${toState}\`
+- Idempotency key: \`${idempotencyKey}\`
+- Canonical head: \`0 / 4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b\`
+- Canonical event appended: **NO**
+- Canonical chain remains: **GENESIS_ONLY**
+- Order / contract / payment / paid work start / active-capacity effect: **NONE**
+- Orders / verified gross / settled cash: **0 / $0 / $0 canonical baseline**
+
+READY_FOR_REVIEW confirms only proposal consistency. A separately reviewed merge must recompute the event digest, preserve chain linkage, reconcile counts/capacity/money, and generate a new reconciliation snapshot. Repeating this identical proposal is suppressed by its marker.`,
+            });

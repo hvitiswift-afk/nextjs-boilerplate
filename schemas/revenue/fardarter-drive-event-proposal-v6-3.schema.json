@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-event-proposal-v6-3.schema.json",
+  "title": "Fardarter Drive Event Proposal v6.3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "proposalId", "idempotencyKey", "lifecycleState", "sourceEntity", "expectedPublicState", "proposedFromState", "proposedToState", "canonicalHead", "sourceEvidence", "authorityGate", "capacityEffect", "financialEffect", "reviewBy", "proposalDigest", "canonicalEventId", "canonical", "publicSafe", "sensitiveDataPresent"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "proposalId": { "type": "string", "pattern": "^FARDARTER-PROPOSAL-V6-3-[A-Z0-9-]+$" },
+    "idempotencyKey": { "type": "string", "minLength": 12 },
+    "lifecycleState": { "enum": ["PROPOSED", "READY_FOR_REVIEW", "QUARANTINED", "REJECTED", "CANONICALIZED_BY_REVIEWED_MERGE"] },
+    "sourceEntity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "publicUrl"],
+      "properties": {
+        "type": { "enum": ["GITHUB_ISSUE", "GITHUB_PULL_REQUEST", "SYSTEM", "DELIVERY", "PAYMENT_PROVIDER"] },
+        "id": { "type": "string", "minLength": 1 },
+        "publicUrl": { "type": ["string", "null"] }
+      }
+    },
+    "expectedPublicState": { "$ref": "#/$defs/state" },
+    "proposedFromState": { "$ref": "#/$defs/state" },
+    "proposedToState": { "$ref": "#/$defs/state" },
+    "canonicalHead": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "digest"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "sourceEvidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 3 } },
+    "authorityGate": { "type": "string", "minLength": 3 },
+    "capacityEffect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["usesActiveCapacity", "activeDelta"],
+      "properties": {
+        "usesActiveCapacity": { "type": "boolean" },
+        "activeDelta": { "type": "integer" }
+      }
+    },
+    "financialEffect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["createsOrder", "grossRevenueDeltaUsd", "settledCashDeltaUsd"],
+      "properties": {
+        "createsOrder": { "type": "boolean" },
+        "grossRevenueDeltaUsd": { "type": "number" },
+        "settledCashDeltaUsd": { "type": "number" }
+      }
+    },
+    "reviewBy": { "type": "string", "format": "date-time" },
+    "proposalDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalEventId": { "type": ["string", "null"] },
+    "canonical": { "const": false },
+    "publicSafe": { "const": true },
+    "sensitiveDataPresent": { "const": false }
+  },
+  "$defs": {
+    "state": {
+      "enum": ["REQUESTED", "FIT_APPROVED_FOR_SCOPE_DRAFT", "SCOPE_DRAFTED", "HUMAN_ACCEPTED", "PAID_PENDING", "PAID_SETTLED", "WORK_START_APPROVED", "ACTIVE", "DELIVERED", "ACCEPTED", "CANCELLED", "REFUNDED", "DISPUTED"]
+    }
+  }
+}

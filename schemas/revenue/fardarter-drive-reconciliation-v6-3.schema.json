@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-reconciliation-v6-3.schema.json",
+  "title": "Fardarter Drive Reconciliation Snapshot v6.3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "snapshotId", "sequence", "previousSnapshotDigest", "controllerVersion", "controllingIssue", "sources", "canonical", "publicSignals", "proposals", "conflicts", "deployment", "googleDriveContinuity", "reviewStatus", "generatedAt", "snapshotDigest"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "snapshotId": { "const": "FARDARTER-RECONCILIATION-GENESIS-V6-3" },
+    "sequence": { "const": 0 },
+    "previousSnapshotDigest": { "type": "null" },
+    "controllerVersion": { "const": "6.3.0" },
+    "controllingIssue": { "const": 160 },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stateMachine", "eventChain", "capacityLedger", "proposalLedger"],
+      "properties": {
+        "stateMachine": { "type": "object" },
+        "eventChain": { "type": "object" },
+        "capacityLedger": { "type": "object" },
+        "proposalLedger": { "type": "object" }
+      }
+    },
+    "canonical": {
+      "type": "object",
+      "required": ["eventChainHealthy", "canonicalBusinessEventCount", "stateCounts", "totalPlanningSlots", "effectiveActiveCeiling", "activeDeliveries", "activeHeadroom", "overrideState", "orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd", "settlementState", "receivedCashRequires"],
+      "properties": {
+        "eventChainHealthy": { "const": true },
+        "canonicalBusinessEventCount": { "const": 0 },
+        "stateCounts": { "type": "object" },
+        "totalPlanningSlots": { "const": 1000 },
+        "effectiveActiveCeiling": { "const": 100 },
+        "activeDeliveries": { "const": 0 },
+        "activeHeadroom": { "const": 100 },
+        "overrideState": { "const": "INACTIVE_NO_RECEIPT" },
+        "orders": { "const": 0 },
+        "verifiedGrossRevenueUsd": { "const": 0 },
+        "verifiedSettledCashUsd": { "const": 0 },
+        "settlementState": { "const": "UNKNOWN" },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "publicSignals": { "type": "object" },
+    "proposals": { "type": "object" },
+    "conflicts": { "type": "object" },
+    "deployment": {
+      "type": "object",
+      "required": ["state", "deployId", "immutableUrl"],
+      "properties": {
+        "state": { "const": "UNVERIFIED" },
+        "deployId": { "type": "null" },
+        "immutableUrl": { "type": "null" }
+      }
+    },
+    "googleDriveContinuity": { "type": "object" },
+    "reviewStatus": { "const": "PREPARED_NOT_MERGED" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "snapshotDigest": { "const": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22" }
+  }
+}
