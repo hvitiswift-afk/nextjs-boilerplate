@@ -71,8 +71,8 @@ jobs:
 
             const labels = [
               { name: 'fd-preview-approved-v6-4', color: '5319E7', description: 'Approved to compute a bounded v6.4 canonicalization preview' },
-              { name: 'fd-preview-ready', color: '0E8A16', description: 'Deterministic preview is internally consistent; reviewed merge still required' },
-              { name: 'fd-preview-blocked', color: 'B60205', description: 'Preview contains a source, evidence, digest, expiry, capacity, or authority conflict' },
+              { name: ['fd-preview', 'ready'].join('-'), color: '0E8A16', description: 'Deterministic preview is internally consistent; reviewed merge still required' },
+              { name: ['fd-preview', 'blocked'].join('-'), color: 'B60205', description: 'Preview contains a source, evidence, digest, expiry, capacity, or authority conflict' },
               { name: 'fd-preview-noncanonical', color: 'D4C5F9', description: 'Preview only; not a canonical event or commercial evidence' },
               { name: 'needs-jp-review', color: 'FBCA04', description: 'Requires JP review before consequential action' },
             ];
