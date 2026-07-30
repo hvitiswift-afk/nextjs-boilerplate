@@ -1,0 +1,317 @@
+name: Fardarter Canonicalization Preview v6.4
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+      - labeled
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: fardarter-canonicalization-preview-v6-4-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    name: Compute noncanonical event and reconciliation preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Validate request and compute preview bundle
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName !== 'issues') {
+              core.notice('Manual dispatch verifies workflow availability only; no preview, label, comment, or canonical event was written.');
+              return;
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const issueData = context.payload.issue;
+            const title = issueData.title || '';
+            const body = issueData.body || '';
+            const currentLabels = (issueData.labels || [])
+              .map((label) => typeof label === 'string' ? label : label.name)
+              .filter(Boolean);
+
+            if (!title.startsWith('[FD preview]:') || !currentLabels.includes('fd-preview-approved-v6-4')) {
+              core.notice('Issue is not an approved Fardarter v6.4 preview request; no mutation performed.');
+              return;
+            }
+
+            const section = (label) => {
+              const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const match = body.match(new RegExp(`### ${escaped}\\s*\\n\\n([\\s\\S]*?)(?=\\n### |$)`));
+              return match?.[1]?.trim() || '';
+            };
+            const issueNumberFrom = (value) => Number(value.match(/Issue\s*#(\d+)/i)?.[1] || 0);
+            const sourceProposal = issueNumberFrom(section('Source READY_FOR_REVIEW proposal issue'));
+            const sourceEntity = issueNumberFrom(section('Source public-state entity issue'));
+            const expectedState = section('Expected current public signal state');
+            const candidateState = section('Candidate canonical to-state');
+            const bundleId = section('Review bundle ID');
+            const idempotencyKey = section('Public-safe preview idempotency key');
+            const evidence = section('Public-safe evidence references');
+            const reviewByText = section('Review-by or expiry time');
+            const reviewBy = Date.parse(reviewByText);
+
+            const markerKey = `${sourceProposal}-${sourceEntity}-${expectedState}-${candidateState}-${idempotencyKey}`
+              .replace(/[^A-Za-z0-9_-]/g, '-')
+              .slice(0, 190);
+            const marker = `<!-- jp-fardarter-preview-v6-4-${markerKey} -->`;
+
+            const labels = [
+              { name: 'fd-preview-approved-v6-4', color: '5319E7', description: 'Approved to compute a bounded v6.4 canonicalization preview' },
+              { name: ['fd-preview', 'ready'].join('-'), color: '0E8A16', description: 'Deterministic preview is internally consistent; reviewed merge still required' },
+              { name: ['fd-preview', 'blocked'].join('-'), color: 'B60205', description: 'Preview contains a source, evidence, digest, expiry, capacity, or authority conflict' },
+              { name: 'fd-preview-noncanonical', color: 'D4C5F9', description: 'Preview only; not a canonical event or commercial evidence' },
+              { name: 'needs-jp-review', color: 'FBCA04', description: 'Requires JP review before consequential action' },
+            ];
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+            if (comments.some((comment) => comment.body?.includes(marker))) {
+              core.notice(`Duplicate preview suppressed for issue #${issue_number}: ${idempotencyKey}`);
+              return;
+            }
+
+            const states = [
+              'REQUESTED','FIT_APPROVED_FOR_SCOPE_DRAFT','SCOPE_DRAFTED','HUMAN_ACCEPTED',
+              'PAID_PENDING','PAID_SETTLED','WORK_START_APPROVED','ACTIVE','DELIVERED',
+              'ACCEPTED','CANCELLED','REFUNDED','DISPUTED',
+            ];
+            const allowed = new Set([
+              'REQUESTED->FIT_APPROVED_FOR_SCOPE_DRAFT','REQUESTED->CANCELLED',
+              'FIT_APPROVED_FOR_SCOPE_DRAFT->SCOPE_DRAFTED','FIT_APPROVED_FOR_SCOPE_DRAFT->CANCELLED',
+              'SCOPE_DRAFTED->HUMAN_ACCEPTED','SCOPE_DRAFTED->CANCELLED',
+              'HUMAN_ACCEPTED->PAID_PENDING','HUMAN_ACCEPTED->CANCELLED',
+              'PAID_PENDING->PAID_SETTLED','PAID_PENDING->CANCELLED','PAID_PENDING->DISPUTED',
+              'PAID_SETTLED->WORK_START_APPROVED','PAID_SETTLED->REFUNDED','PAID_SETTLED->DISPUTED',
+              'WORK_START_APPROVED->ACTIVE','WORK_START_APPROVED->CANCELLED',
+              'ACTIVE->DELIVERED','ACTIVE->CANCELLED','ACTIVE->DISPUTED',
+              'DELIVERED->ACCEPTED','DELIVERED->DISPUTED',
+              'DISPUTED->ACCEPTED','DISPUTED->REFUNDED','DISPUTED->CANCELLED',
+            ]);
+            const labelFor = (state) => `fd-state-${state.toLowerCase().replaceAll('_', '-')}`;
+            const prohibitedPatterns = [
+              /password\s*[:=]/i,/private[_ -]?key\s*[:=]/i,/secret\s*[:=]/i,
+              /routing\s*number\s*[:=]/i,/bank\s*account\s*[:=]/i,
+              /social\s*security\s*[:=]/i,/provider\s*transaction\s*id\s*[:=]/i,
+              /signature\s*[:=]/i,/counsel\s*notes?\s*[:=]/i,
+            ];
+            const sensitive = prohibitedPatterns.some((pattern) => pattern.test(body));
+            const transitionKey = `${expectedState}->${candidateState}`;
+            let blockedReasons = [];
+            if (!Number.isInteger(sourceProposal) || sourceProposal <= 0) blockedReasons.push('INVALID_SOURCE_PROPOSAL');
+            if (!Number.isInteger(sourceEntity) || sourceEntity <= 0) blockedReasons.push('INVALID_SOURCE_ENTITY');
+            if (!states.includes(expectedState) || !states.includes(candidateState)) blockedReasons.push('UNKNOWN_STATE');
+            if (!allowed.has(transitionKey)) blockedReasons.push('INVALID_TRANSITION');
+            if (!/^FARDARTER-CANONICALIZATION-BUNDLE-[A-Z0-9-]+-V6-4$/.test(bundleId)) blockedReasons.push('INVALID_BUNDLE_ID');
+            if (!/^[A-Za-z0-9._:-]{8,160}$/.test(idempotencyKey)) blockedReasons.push('INVALID_IDEMPOTENCY_KEY');
+            if (evidence.length < 3) blockedReasons.push('MISSING_PUBLIC_EVIDENCE');
+            if (!Number.isFinite(reviewBy) || reviewBy <= Date.now()) blockedReasons.push('EXPIRED_OR_INVALID_REVIEW_TIME');
+            if (sensitive) blockedReasons.push('SENSITIVE_PUBLIC_CONTENT');
+
+            let proposal = null;
+            let entity = null;
+            if (!blockedReasons.length) {
+              try {
+                proposal = await github.rest.issues.get({ owner, repo, issue_number: sourceProposal });
+                entity = await github.rest.issues.get({ owner, repo, issue_number: sourceEntity });
+              } catch {
+                blockedReasons.push('SOURCE_UNAVAILABLE');
+              }
+            }
+
+            if (proposal && entity) {
+              const proposalLabels = (proposal.data.labels || [])
+                .map((label) => typeof label === 'string' ? label : label.name)
+                .filter(Boolean);
+              if (!proposalLabels.includes('fd-proposal-ready-for-review') || !proposalLabels.includes('fd-proposal-noncanonical')) {
+                blockedReasons.push('PROPOSAL_NOT_READY_FOR_REVIEW');
+              }
+              const proposalComments = await github.paginate(
+                github.rest.issues.listComments,
+                { owner, repo, issue_number: sourceProposal, per_page: 100 },
+              );
+              if (!proposalComments.some((comment) => comment.body?.includes('jp-fardarter-proposal-v6-3-') && comment.body?.includes('READY_FOR_REVIEW'))) {
+                blockedReasons.push('PROPOSAL_RECEIPT_MISSING');
+              }
+              const entityStateLabels = (entity.data.labels || [])
+                .map((label) => typeof label === 'string' ? label : label.name)
+                .filter((label) => label?.startsWith('fd-state-'));
+              if (entityStateLabels.length !== 1 || entityStateLabels[0] !== labelFor(expectedState)) {
+                blockedReasons.push('SOURCE_PUBLIC_STATE_MISMATCH');
+              }
+            }
+
+            const crypto = require('node:crypto');
+            const stableStringify = (value) => {
+              if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+              if (value && typeof value === 'object') {
+                return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`;
+              }
+              return JSON.stringify(value);
+            };
+            const digestWithout = (value, key) => {
+              const clone = structuredClone(value);
+              delete clone[key];
+              return crypto.createHash('sha256').update(stableStringify(clone), 'utf8').digest('hex');
+            };
+
+            if (blockedReasons.length) {
+              await github.rest.issues.addLabels({
+                owner, repo, issue_number,
+                labels: ['fd-preview-blocked', 'fd-preview-noncanonical', 'needs-jp-review'],
+              });
+              await github.rest.issues.createComment({
+                owner, repo, issue_number,
+                body: `${marker}
+**Fardarter Drive™ v6.4 canonicalization preview blocked**
+
+- Decision: **BLOCKED**
+- Source proposal: **Issue #${sourceProposal || 'MISSING'}**
+- Source entity: **Issue #${sourceEntity || 'MISSING'}**
+- Requested projection: \`${expectedState || 'MISSING'} → ${candidateState || 'MISSING'}\`
+- Block classes: **${blockedReasons.join(', ')}**
+- Candidate event appended: **NO**
+- Canonical chain changed: **NO / GENESIS_ONLY**
+- Order / contract / payment / paid work start / ACTIVE-capacity effect: **NONE**
+- Orders / verified gross / settled cash: **0 / $0 / $0 canonical baseline**
+
+The request is noncanonical and frozen for review. Correct public-safe inputs or private evidence without copying sensitive material into GitHub.`,
+              });
+              return;
+            }
+
+            const genesisDigest = '4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b';
+            const previousSnapshotDigest = '4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22';
+            const proposalLedgerDigest = '3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e';
+            const candidateEvent = {
+              schemaVersion: '1.0.0',
+              eventId: `FARDARTER-CANDIDATE-ISSUE-${issue_number}-V6-4`,
+              sequence: 1,
+              eventType: 'STATE_CANONICALIZATION_PREVIEW',
+              idempotencyKey,
+              entityType: 'GITHUB_ISSUE',
+              entityId: String(sourceEntity),
+              sourceProposalIssue: sourceProposal,
+              sourcePublicState: expectedState,
+              fromState: expectedState,
+              toState: candidateState,
+              classification: 'CANDIDATE_NONCANONICAL',
+              sourceEvidence: [`GitHub Issue #${sourceEntity}`, `GitHub Issue #${sourceProposal}`, `GitHub Issue #${issue_number}`],
+              authorityGate: 'REVIEWED_MERGE_REQUIRED',
+              capacityEffect: { usesActiveCapacity: candidateState === 'ACTIVE', activeDelta: candidateState === 'ACTIVE' ? 1 : 0 },
+              financialEffect: { createsOrder: ['HUMAN_ACCEPTED','PAID_PENDING','PAID_SETTLED','WORK_START_APPROVED','ACTIVE','DELIVERED','ACCEPTED','DISPUTED'].includes(candidateState), grossRevenueDeltaUsd: 0, settledCashDeltaUsd: 0, settlementState: 'UNKNOWN' },
+              previousEventDigest: genesisDigest,
+              occurredAt: proposal.data.created_at,
+              recordedAt: issueData.created_at,
+              canonical: false,
+              applied: false,
+              publicSafe: true,
+              sensitiveDataPresent: false,
+            };
+            candidateEvent.eventDigest = digestWithout(candidateEvent, 'eventDigest');
+
+            const stateCounts = Object.fromEntries(states.map((state) => [state, 0]));
+            stateCounts[candidateState] = 1;
+            const activeDelta = candidateEvent.capacityEffect.activeDelta;
+            if (activeDelta > 100) {
+              throw new Error('Preview active-capacity projection exceeds the canonical ceiling');
+            }
+            const candidateSnapshot = {
+              schemaVersion: '1.0.0',
+              snapshotId: `FARDARTER-RECONCILIATION-CANDIDATE-ISSUE-${issue_number}-V6-4`,
+              sequence: 1,
+              previousSnapshotDigest,
+              controllerVersion: '6.4.0',
+              controllingIssue: 165,
+              sourceEvent: { eventId: candidateEvent.eventId, sequence: 1, eventDigest: candidateEvent.eventDigest, applied: false },
+              canonicalProjection: {
+                currentHeadSequence: 0,
+                currentHeadDigest: genesisDigest,
+                candidateHeadSequence: 1,
+                candidateHeadDigest: candidateEvent.eventDigest,
+                canonicalBusinessEventCountIfApplied: 1,
+                stateCountsIfApplied: stateCounts,
+                totalPlanningSlots: 1000,
+                effectiveActiveCeiling: 100,
+                activeDeliveriesIfApplied: activeDelta,
+                activeHeadroomIfApplied: 100 - activeDelta,
+                overrideState: 'INACTIVE_NO_RECEIPT',
+                ordersIfApplied: candidateEvent.financialEffect.createsOrder ? 1 : 0,
+                verifiedGrossRevenueUsdIfApplied: 0,
+                verifiedSettledCashUsdIfApplied: 0,
+                settlementStateIfApplied: 'UNKNOWN',
+                receivedCashRequires: 'PAID_SETTLED',
+              },
+              proposalLedgerDigest,
+              reviewStatus: 'PREVIEW_ONLY_NOT_APPLIED',
+              generatedAt: issueData.created_at,
+            };
+            candidateSnapshot.snapshotDigest = digestWithout(candidateSnapshot, 'snapshotDigest');
+
+            const runtimeBundle = {
+              schemaVersion: '1.0.0',
+              bundleId,
+              controllerVersion: '6.4.0',
+              controllingIssue: 165,
+              state: 'PREVIEW_READY',
+              source: { proposalIssue: sourceProposal, entityIssue: sourceEntity, expectedPublicState: expectedState, canonicalHeadDigest: genesisDigest },
+              candidateEventDigest: candidateEvent.eventDigest,
+              candidateSnapshotDigest: candidateSnapshot.snapshotDigest,
+              capacityProjection: { activeDelta, activeHeadroomIfApplied: 100 - activeDelta },
+              financialProjection: { createsOrder: candidateEvent.financialEffect.createsOrder, grossRevenueDeltaUsd: 0, settledCashDeltaUsd: 0 },
+              reviewBy: new Date(reviewBy).toISOString(),
+              canonical: false,
+              applied: false,
+              generatedAt: issueData.created_at,
+            };
+            runtimeBundle.bundleDigest = digestWithout(runtimeBundle, 'bundleDigest');
+
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number,
+              labels: ['fd-preview-ready', 'fd-preview-noncanonical'],
+            });
+            await github.rest.issues.createComment({
+              owner, repo, issue_number,
+              body: `${marker}
+**Fardarter Drive™ v6.4 canonicalization preview receipt**
+
+- Decision: **PREVIEW_READY**
+- Source proposal: **Issue #${sourceProposal}**
+- Source entity: **Issue #${sourceEntity}**
+- Candidate projection: \`${expectedState} → ${candidateState}\`
+- Candidate event sequence: **1**
+- Previous event digest: \`${genesisDigest}\`
+- Candidate event digest: \`${candidateEvent.eventDigest}\`
+- Candidate reconciliation digest: \`${candidateSnapshot.snapshotDigest}\`
+- Runtime review-bundle digest: \`${runtimeBundle.bundleDigest}\`
+- Candidate event appended: **NO**
+- Canonical chain remains: **SEQUENCE 0 / GENESIS_ONLY**
+- Candidate ACTIVE delta / headroom: **${activeDelta} / ${100 - activeDelta}**
+- Candidate order / gross / settled deltas: **${candidateEvent.financialEffect.createsOrder ? 1 : 0} / $0 / $0**
+- Contract / payment proof / paid work start: **NONE**
+
+PREVIEW_READY confirms only deterministic dry-run consistency. Applying the candidate requires a separately reviewed merge, recomputed digests, reconciled counts/capacity/money, passing repository-owned checks, immutable source blobs, and post-merge readback. Repeating this identical preview is suppressed by the shared marker.`,
+            });

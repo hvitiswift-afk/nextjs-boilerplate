@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-canonicalization-previews-v6-4.schema.json",
+  "title": "Fardarter Drive canonicalization preview ledger v6.4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "previewLedgerId",
+    "driveId",
+    "controllerVersion",
+    "controllingIssue",
+    "canonicalHead",
+    "proposalLedgerDigest",
+    "reconciliationDigest",
+    "lifecycle",
+    "previewCount",
+    "decisionCounts",
+    "bundles",
+    "applicationPolicy",
+    "evidenceBoundary",
+    "googleDriveContinuity",
+    "nextControlledAction",
+    "ledgerDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "previewLedgerId": { "const": "FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4" },
+    "driveId": { "const": "FARDARTER-DRIVE-V6" },
+    "controllerVersion": { "const": "6.4.0" },
+    "controllingIssue": { "const": 165 },
+    "canonicalHead": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "digest", "canonicalBusinessEventCount"],
+      "properties": {
+        "sequence": { "const": 0 },
+        "digest": { "const": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b" },
+        "canonicalBusinessEventCount": { "const": 0 }
+      }
+    },
+    "proposalLedgerDigest": { "const": "3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e" },
+    "reconciliationDigest": { "const": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22" },
+    "lifecycle": {
+      "const": ["PREPARED", "PREVIEW_READY", "BLOCKED", "EXPIRED", "REJECTED", "APPLIED_BY_REVIEWED_MERGE"]
+    },
+    "previewCount": { "const": 1 },
+    "decisionCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["PREPARED", "PREVIEW_READY", "BLOCKED", "EXPIRED", "REJECTED", "APPLIED_BY_REVIEWED_MERGE"],
+      "properties": {
+        "PREPARED": { "const": 1 },
+        "PREVIEW_READY": { "const": 0 },
+        "BLOCKED": { "const": 0 },
+        "EXPIRED": { "const": 0 },
+        "REJECTED": { "const": 0 },
+        "APPLIED_BY_REVIEWED_MERGE": { "const": 0 }
+      }
+    },
+    "bundles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["bundleId", "path", "bundleDigest", "state", "canonical", "applied"],
+        "properties": {
+          "bundleId": { "const": "FARDARTER-CANONICALIZATION-BUNDLE-ISSUE-162-V6-4" },
+          "path": { "const": "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json" },
+          "bundleDigest": { "const": "3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2" },
+          "state": { "const": "PREPARED" },
+          "canonical": { "const": false },
+          "applied": { "const": false }
+        }
+      }
+    },
+    "applicationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["automaticCanonicalization", "reviewedMergeRequired", "recomputeDigestsAtMerge", "reconcileCountsCapacityMoney", "immutableReadbackRequired"],
+      "properties": {
+        "automaticCanonicalization": { "const": false },
+        "reviewedMergeRequired": { "const": true },
+        "recomputeDigestsAtMerge": { "const": true },
+        "reconcileCountsCapacityMoney": { "const": true },
+        "immutableReadbackRequired": { "const": true }
+      }
+    },
+    "evidenceBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["previewIsCanonicalEvent", "previewCreatesOrder", "previewCreatesContract", "previewProvesPayment", "previewStartsPaidWork", "receivedCashRequires"],
+      "properties": {
+        "previewIsCanonicalEvent": { "const": false },
+        "previewCreatesOrder": { "const": false },
+        "previewCreatesContract": { "const": false },
+        "previewProvesPayment": { "const": false },
+        "previewStartsPaidWork": { "const": false },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "googleDriveContinuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "documentTitles", "publicReferencesExposed"],
+      "properties": {
+        "state": { "const": "CONNECTED_PRIVATE" },
+        "documentTitles": {
+          "const": [
+            "Fardarter Drive™ v6.4 — Canonicalization Preview and Review Charter",
+            "Fardarter Drive™ v6.4 — Canonicalization Review Bundle Register"
+          ]
+        },
+        "publicReferencesExposed": { "const": false }
+      }
+    },
+    "nextControlledAction": { "type": "string", "minLength": 80 },
+    "ledgerDigest": { "const": "9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c" }
+  }
+}

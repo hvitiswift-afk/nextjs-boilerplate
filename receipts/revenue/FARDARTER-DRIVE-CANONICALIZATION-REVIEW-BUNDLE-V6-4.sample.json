@@ -1,0 +1,258 @@
+{
+  "schemaVersion": "1.0.0",
+  "bundleId": "FARDARTER-CANONICALIZATION-BUNDLE-ISSUE-162-V6-4",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "controllerVersion": "6.4.0",
+  "controllingIssue": 165,
+  "state": "PREPARED",
+  "expectedDecision": "PREVIEW_READY",
+  "source": {
+    "proposalIssue": 162,
+    "entityIssue": 159,
+    "proposalDecision": "READY_FOR_REVIEW",
+    "expectedPublicState": "FIT_APPROVED_FOR_SCOPE_DRAFT",
+    "proposalLedgerDigest": "3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e",
+    "reconciliationDigest": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22",
+    "canonicalHeadSequence": 0,
+    "canonicalHeadDigest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b"
+  },
+  "candidateEvent": {
+    "schemaVersion": "1.0.0",
+    "eventId": "FARDARTER-CANDIDATE-ISSUE-162-V6-4",
+    "sequence": 1,
+    "eventType": "STATE_CANONICALIZATION_PREVIEW",
+    "idempotencyKey": "issue-162-canonicalization-preview-v6-4",
+    "entityType": "GITHUB_ISSUE",
+    "entityId": "159",
+    "sourceProposalIssue": 162,
+    "sourcePublicState": "FIT_APPROVED_FOR_SCOPE_DRAFT",
+    "fromState": "FIT_APPROVED_FOR_SCOPE_DRAFT",
+    "toState": "SCOPE_DRAFTED",
+    "classification": "CANDIDATE_NONCANONICAL",
+    "sourceEvidence": [
+      "GitHub Issue #159",
+      "GitHub Issue #162",
+      "GitHub Issue #165"
+    ],
+    "authorityGate": "REVIEWED_MERGE_REQUIRED",
+    "capacityEffect": {
+      "usesActiveCapacity": false,
+      "activeDelta": 0
+    },
+    "financialEffect": {
+      "createsOrder": false,
+      "grossRevenueDeltaUsd": 0,
+      "settledCashDeltaUsd": 0,
+      "settlementState": "UNKNOWN"
+    },
+    "previousEventDigest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b",
+    "occurredAt": "2026-07-30T02:05:10Z",
+    "recordedAt": "2026-07-30T03:24:56Z",
+    "canonical": false,
+    "applied": false,
+    "publicSafe": true,
+    "sensitiveDataPresent": false,
+    "eventDigest": "2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174"
+  },
+  "candidateProjection": {
+    "stateCounts": {
+      "REQUESTED": 0,
+      "FIT_APPROVED_FOR_SCOPE_DRAFT": 0,
+      "SCOPE_DRAFTED": 1,
+      "HUMAN_ACCEPTED": 0,
+      "PAID_PENDING": 0,
+      "PAID_SETTLED": 0,
+      "WORK_START_APPROVED": 0,
+      "ACTIVE": 0,
+      "DELIVERED": 0,
+      "ACCEPTED": 0,
+      "CANCELLED": 0,
+      "REFUNDED": 0,
+      "DISPUTED": 0
+    },
+    "activeDeliveries": 0,
+    "activeHeadroom": 100,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "settlementState": "UNKNOWN"
+  },
+  "evidenceMatrix": [
+    {
+      "evidenceId": "EV-PUBLIC-PROPOSAL",
+      "type": "GITHUB_PUBLIC",
+      "reference": "GitHub Issue #162",
+      "classification": "PUBLIC_SAFE",
+      "verificationState": "VERIFIED",
+      "expiresAt": "2026-07-31T23:59:59Z",
+      "contradictionState": "NONE",
+      "privateLocationRequired": false
+    },
+    {
+      "evidenceId": "EV-PUBLIC-STATE",
+      "type": "GITHUB_PUBLIC",
+      "reference": "GitHub Issue #159 / fd-state-fit-approved-for-scope-draft",
+      "classification": "PUBLIC_SAFE",
+      "verificationState": "VERIFIED",
+      "expiresAt": null,
+      "contradictionState": "NONE",
+      "privateLocationRequired": false
+    },
+    {
+      "evidenceId": "EV-CANONICAL-HEAD",
+      "type": "REPOSITORY_BLOB",
+      "reference": "FARDARTER-DRIVE-STATE-EVENTS-V6-2 / 4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b",
+      "classification": "PUBLIC_SAFE",
+      "verificationState": "VERIFIED",
+      "expiresAt": null,
+      "contradictionState": "NONE",
+      "privateLocationRequired": false
+    },
+    {
+      "evidenceId": "EV-PRIVATE-REVIEW",
+      "type": "GOOGLE_DRIVE_PRIVATE",
+      "reference": "CONNECTED_PRIVATE_CANONICALIZATION_REVIEW",
+      "classification": "PRIVATE",
+      "verificationState": "PREPARED",
+      "expiresAt": null,
+      "contradictionState": "NONE",
+      "privateLocationRequired": true
+    }
+  ],
+  "authorityMatrix": [
+    {
+      "gate": "NONBINDING_PREVIEW",
+      "decisionMaker": "AUTOMATION",
+      "status": "AUTHORIZED_ACTIVE",
+      "evidence": "Authority v6 + Issue #165",
+      "blocker": null
+    },
+    {
+      "gate": "CANONICAL_EVENT_APPEND",
+      "decisionMaker": "JP_REVIEWED_MERGE",
+      "status": "NOT_AUTHORIZED_BY_PREVIEW",
+      "evidence": "Reviewed merge required",
+      "blocker": "NO_REVIEWED_CANONICALIZATION_MERGE"
+    },
+    {
+      "gate": "CONTRACT_ACCEPTANCE",
+      "decisionMaker": "JP_AND_BUYER",
+      "status": "NOT_APPLICABLE",
+      "evidence": "No contract effect",
+      "blocker": null
+    },
+    {
+      "gate": "PAYMENT_SETTLEMENT",
+      "decisionMaker": "EXTERNAL_PROVIDER",
+      "status": "NOT_APPLICABLE",
+      "evidence": "No financial delta",
+      "blocker": null
+    },
+    {
+      "gate": "PAID_WORK_START",
+      "decisionMaker": "JP_AND_CAPACITY",
+      "status": "NOT_APPLICABLE",
+      "evidence": "No ACTIVE transition",
+      "blocker": null
+    },
+    {
+      "gate": "LEGAL_TERMS",
+      "decisionMaker": "COUNSEL_AND_PARTIES",
+      "status": "NOT_APPLICABLE",
+      "evidence": "No legal term selection",
+      "blocker": null
+    }
+  ],
+  "review": {
+    "reviewBy": "2026-07-31T23:59:59Z",
+    "reviewers": [
+      {
+        "role": "JP",
+        "status": "PENDING",
+        "decision": null
+      },
+      {
+        "role": "REPOSITORY_CHECKS",
+        "status": "PENDING",
+        "decision": null
+      },
+      {
+        "role": "EVIDENCE_RECONCILIATION",
+        "status": "PENDING",
+        "decision": null
+      }
+    ],
+    "unresolvedBlockers": [
+      "NO_REVIEWED_CANONICALIZATION_MERGE"
+    ],
+    "rollbackInstruction": "Discard the candidate bundle and preserve canonical head sequence 0 if any source, digest, gate, or evidence condition changes."
+  },
+  "candidateReconciliation": {
+    "schemaVersion": "1.0.0",
+    "snapshotId": "FARDARTER-RECONCILIATION-CANDIDATE-ISSUE-162-V6-4",
+    "sequence": 1,
+    "previousSnapshotDigest": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22",
+    "controllerVersion": "6.4.0",
+    "controllingIssue": 165,
+    "sourceEvent": {
+      "eventId": "FARDARTER-CANDIDATE-ISSUE-162-V6-4",
+      "sequence": 1,
+      "eventDigest": "2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174",
+      "applied": false
+    },
+    "canonicalProjection": {
+      "currentHeadSequence": 0,
+      "currentHeadDigest": "4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b",
+      "candidateHeadSequence": 1,
+      "candidateHeadDigest": "2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174",
+      "canonicalBusinessEventCountIfApplied": 1,
+      "stateCountsIfApplied": {
+        "REQUESTED": 0,
+        "FIT_APPROVED_FOR_SCOPE_DRAFT": 0,
+        "SCOPE_DRAFTED": 1,
+        "HUMAN_ACCEPTED": 0,
+        "PAID_PENDING": 0,
+        "PAID_SETTLED": 0,
+        "WORK_START_APPROVED": 0,
+        "ACTIVE": 0,
+        "DELIVERED": 0,
+        "ACCEPTED": 0,
+        "CANCELLED": 0,
+        "REFUNDED": 0,
+        "DISPUTED": 0
+      },
+      "totalPlanningSlots": 1000,
+      "effectiveActiveCeiling": 100,
+      "activeDeliveriesIfApplied": 0,
+      "activeHeadroomIfApplied": 100,
+      "overrideState": "INACTIVE_NO_RECEIPT",
+      "ordersIfApplied": 0,
+      "verifiedGrossRevenueUsdIfApplied": 0,
+      "verifiedSettledCashUsdIfApplied": 0,
+      "settlementStateIfApplied": "UNKNOWN",
+      "receivedCashRequires": "PAID_SETTLED"
+    },
+    "proposalLedgerDigest": "3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e",
+    "reviewStatus": "PREVIEW_ONLY_NOT_APPLIED",
+    "generatedAt": "2026-07-30T03:24:56Z",
+    "snapshotDigest": "4e7e2ead4c466704ad0559fed73cc01cf028722d701ffe47669626858a96c8de"
+  },
+  "privacyBoundary": {
+    "publicDriveReferencesExposed": false,
+    "buyerIdentityPublic": false,
+    "providerReceiptPublic": false,
+    "counselNotesPublic": false,
+    "privateReviewDeliberationsPublic": false
+  },
+  "applicationBoundary": {
+    "previewCreatesCanonicalEvent": false,
+    "previewCreatesOrder": false,
+    "previewCreatesContract": false,
+    "previewProvesPayment": false,
+    "previewStartsPaidWork": false,
+    "applicationRequiresReviewedMerge": true,
+    "canonicalSourceChanged": false
+  },
+  "generatedAt": "2026-07-30T03:24:56Z",
+  "bundleDigest": "3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2"
+}
