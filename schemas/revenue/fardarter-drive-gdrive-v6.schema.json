@@ -16,7 +16,7 @@
     "publicFileIdsExposed": { "const": false },
     "documents": {
       "type": "array",
-      "minItems": 5,
+      "minItems": 7,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -33,13 +33,15 @@
     "automation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["createPrivateWorkPackageAfterFitApproval", "validateCapacityOverride", "maintainOperationalCapacityLedger", "maintainAppendOnlyReceiptMesh", "maintainTransitionConflictRegister", "activateOverrideWithoutCompleteReceipt", "publicReceiptMayExposeDriveUrl", "publicReceiptMayExposeDriveFileId", "publicReceiptMayExposeBuyerIdentity", "workPackageCreatesContract", "workPackageCreatesPaymentObligation", "workPackageStartsPaidDelivery"],
+      "required": ["createPrivateWorkPackageAfterFitApproval", "validateCapacityOverride", "maintainOperationalCapacityLedger", "maintainAppendOnlyReceiptMesh", "maintainTransitionConflictRegister", "maintainProposalReconciliation", "maintainProposalQuarantineRegister", "activateOverrideWithoutCompleteReceipt", "publicReceiptMayExposeDriveUrl", "publicReceiptMayExposeDriveFileId", "publicReceiptMayExposeBuyerIdentity", "workPackageCreatesContract", "workPackageCreatesPaymentObligation", "workPackageStartsPaidDelivery"],
       "properties": {
         "createPrivateWorkPackageAfterFitApproval": { "const": true },
         "validateCapacityOverride": { "const": true },
         "maintainOperationalCapacityLedger": { "const": true },
         "maintainAppendOnlyReceiptMesh": { "const": true },
         "maintainTransitionConflictRegister": { "const": true },
+        "maintainProposalReconciliation": { "const": true },
+        "maintainProposalQuarantineRegister": { "const": true },
         "activateOverrideWithoutCompleteReceipt": { "const": false },
         "publicReceiptMayExposeDriveUrl": { "const": false },
         "publicReceiptMayExposeDriveFileId": { "const": false },
@@ -52,7 +54,7 @@
     "privacyBoundary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["buyerIdentityPublic", "signaturePublic", "providerReceiptPublic", "counselNotesPublic", "confidentialDeliveryDataPublic", "overrideReadinessEvidencePublic", "transitionConflictEvidencePublic", "disputeRecordsPublic"],
+      "required": ["buyerIdentityPublic", "signaturePublic", "providerReceiptPublic", "counselNotesPublic", "confidentialDeliveryDataPublic", "overrideReadinessEvidencePublic", "transitionConflictEvidencePublic", "proposalEvidencePublic", "quarantineEvidencePublic", "disputeRecordsPublic"],
       "properties": {
         "buyerIdentityPublic": { "const": false },
         "signaturePublic": { "const": false },
@@ -61,6 +63,8 @@
         "confidentialDeliveryDataPublic": { "const": false },
         "overrideReadinessEvidencePublic": { "const": false },
         "transitionConflictEvidencePublic": { "const": false },
+        "proposalEvidencePublic": { "const": false },
+        "quarantineEvidencePublic": { "const": false },
         "disputeRecordsPublic": { "const": false }
       }
     },
