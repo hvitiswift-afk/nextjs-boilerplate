@@ -24,7 +24,10 @@ export default async function CanonicalizationPreviewPage() {
   const event = reviewBundle.candidateEvent;
   const projection = reviewBundle.candidateProjection;
   const snapshot = reviewBundle.candidateReconciliation;
-  const previewReadyState: "PREVIEW_READY" = reviewBundle.expectedDecision;
+  if (reviewBundle.expectedDecision !== "PREVIEW_READY") {
+    throw new Error("The canonical review bundle must expect PREVIEW_READY.");
+  }
+  const previewReadyState = reviewBundle.expectedDecision;
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-14">
