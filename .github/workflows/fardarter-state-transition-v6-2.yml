@@ -1,0 +1,187 @@
+name: Fardarter State Transition v6.2
+
+on:
+  issues:
+    types:
+      - labeled
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: fardarter-transition-v6-2-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  transition:
+    name: Validate and apply a public-safe transition signal
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'issues' &&
+        github.event.label.name == 'fd-transition-approved-v6-2' &&
+        startsWith(github.event.issue.title, '[FD transition]:')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Validate transition and preserve canonical boundary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName !== 'issues') {
+              core.notice('Manual dispatch validates workflow availability only; no issue state was mutated.');
+              return;
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const body = context.payload.issue.body || '';
+            const section = (label) => {
+              const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const match = body.match(new RegExp(`### ${escaped}\\s*\\n\\n([\\s\\S]*?)(?=\\n### |$)`));
+              return match?.[1]?.trim() || '';
+            };
+
+            const fromState = section('Current public signal state');
+            const toState = section('Requested next public signal state');
+            const marker = `<!-- jp-fardarter-transition-v6-2-${fromState}-${toState} -->`;
+            const states = [
+              'REQUESTED','FIT_APPROVED_FOR_SCOPE_DRAFT','SCOPE_DRAFTED','HUMAN_ACCEPTED',
+              'PAID_PENDING','PAID_SETTLED','WORK_START_APPROVED','ACTIVE','DELIVERED',
+              'ACCEPTED','CANCELLED','REFUNDED','DISPUTED',
+            ];
+            const labelsByState = Object.fromEntries(
+              states.map((state) => [state, `fd-state-${state.toLowerCase().replaceAll('_', '-')}`]),
+            );
+            const automated = new Set([
+              'REQUESTED->FIT_APPROVED_FOR_SCOPE_DRAFT',
+              'FIT_APPROVED_FOR_SCOPE_DRAFT->SCOPE_DRAFTED',
+            ]);
+
+            const prohibitedPatterns = [
+              /password\s*[:=]/i,
+              /private[_ -]?key\s*[:=]/i,
+              /secret\s*[:=]/i,
+              /routing\s*number\s*[:=]/i,
+              /bank\s*account\s*[:=]/i,
+              /social\s*security\s*[:=]/i,
+              /provider\s*transaction\s*id\s*[:=]/i,
+              /signature\s*[:=]/i,
+            ];
+            const sensitive = prohibitedPatterns.some((pattern) => pattern.test(body));
+
+            const labelDefinitions = [
+              ...states.map((state) => ({
+                name: labelsByState[state],
+                color: state === 'ACTIVE' ? 'B60205' : '1D76DB',
+                description: `Fardarter v6.2 public operational signal: ${state}`,
+              })),
+              { name: 'fd-transition-approved-v6-2', color: '5319E7', description: 'Approved to evaluate a bounded v6.2 public transition signal' },
+              { name: 'fd-transition-signal-only', color: 'D4C5F9', description: 'Public signal only; not a canonical event or commercial evidence' },
+              { name: 'fd-transition-conflict-v6-2', color: 'B60205', description: 'Transition conflict; canonical mutation frozen' },
+              { name: 'needs-jp-review', color: 'FBCA04', description: 'Requires JP review before consequential action' },
+            ];
+            for (const label of labelDefinitions) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+            if (comments.some((comment) => comment.body?.includes(marker))) {
+              core.notice(`Duplicate transition suppressed for issue #${issue_number}: ${fromState} -> ${toState}`);
+              return;
+            }
+
+            const issue = await github.rest.issues.get({ owner, repo, issue_number });
+            const existingLabels = (issue.data.labels || [])
+              .map((label) => typeof label === 'string' ? label : label.name)
+              .filter(Boolean);
+            const currentStateLabels = existingLabels.filter((label) => Object.values(labelsByState).includes(label));
+            const expectedCurrentLabel = labelsByState[fromState];
+            const transitionKey = `${fromState}->${toState}`;
+            const invalidState = !states.includes(fromState) || !states.includes(toState);
+            const conflictingLabels = currentStateLabels.length > 1;
+            const currentMismatch =
+              fromState !== 'REQUESTED' &&
+              (!expectedCurrentLabel || !currentStateLabels.includes(expectedCurrentLabel));
+
+            if (sensitive || invalidState || conflictingLabels || currentMismatch) {
+              await github.rest.issues.addLabels({
+                owner, repo, issue_number,
+                labels: ['fd-transition-conflict-v6-2', 'needs-jp-review', 'fd-transition-signal-only'],
+              });
+              await github.rest.issues.createComment({
+                owner, repo, issue_number,
+                body: `${marker}
+            **Fardarter Drive™ v6.2 transition conflict receipt**
+
+            - Decision: **NEEDS_JP_REVIEW**
+            - Requested signal: \`${fromState || 'MISSING'} → ${toState || 'MISSING'}\`
+            - Canonical event written: **NO**
+            - Public state changed: **NO**
+            - Order / payment / work start / capacity effect: **NONE**
+
+            The request contained an invalid, conflicting, mismatched, or sensitive public condition. Canonical mutation is frozen. Review privately without copying sensitive data.`,
+              });
+              return;
+            }
+
+            if (!automated.has(transitionKey)) {
+              await github.rest.issues.addLabels({
+                owner, repo, issue_number,
+                labels: ['needs-jp-review', 'fd-transition-signal-only'],
+              });
+              await github.rest.issues.createComment({
+                owner, repo, issue_number,
+                body: `${marker}
+            **Fardarter Drive™ v6.2 gated transition receipt**
+
+            - Decision: **HUMAN_GATE_REQUIRED**
+            - Requested signal: \`${fromState} → ${toState}\`
+            - Canonical event written: **NO**
+            - Public state changed: **NO**
+            - Order / payment / work start / capacity effect: **NONE**
+
+            This consequential transition is not automated. It requires the exact buyer, JP, provider, capacity, delivery, acceptance, refund, dispute, or counsel evidence defined by the canonical state machine.`,
+              });
+              return;
+            }
+
+            for (const label of currentStateLabels) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name: label });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number,
+              labels: [labelsByState[toState], 'fd-transition-signal-only'],
+            });
+            await github.rest.issues.createComment({
+              owner, repo, issue_number,
+              body: `${marker}
+            **Fardarter Drive™ v6.2 public transition receipt**
+
+            - Decision: **SIGNAL_TRANSITION_APPLIED**
+            - Public signal: \`${fromState} → ${toState}\`
+            - Classification: **NONBINDING / SIGNAL_ONLY**
+            - Canonical event written: **NO**
+            - Canonical event chain remains: **GENESIS_ONLY**
+            - Order / contract / payment / paid work start / active-capacity effect: **NONE**
+            - Orders / verified gross / settled cash: **0 / $0 / $0 canonical baseline**
+
+            A reviewed canonical merge is required before this signal can become an append-only business event. Repeating the identical approval is suppressed by the transition-specific marker.`,
+            });
