@@ -4,12 +4,18 @@ import googleDriveReceipt from "@/receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.jso
 import stateMachine from "@/receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json";
 import { getPublicStateLedger } from "@/lib/revenue/public-state-ledger";
 
+type EventLink = {
+  sequence: number;
+  eventDigest: string;
+  previousEventDigest: string | null;
+};
+
 export const dynamic = "force-static";
 export const revalidate = 900;
 
 export async function GET() {
   const publicSignals = await getPublicStateLedger();
-  const events = eventChain.events;
+  const events = eventChain.events as EventLink[];
   const digestChainConnected = events.every((event, index) =>
     index === 0
       ? event.previousEventDigest === null
