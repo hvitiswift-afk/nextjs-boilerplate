@@ -53,7 +53,7 @@ jobs:
           curl --fail --silent --show-error --location "$URL/api/revenue/canonicalization-preview" -o preview.json
           node <<'NODE'
           const x = JSON.parse(require('fs').readFileSync('preview.json','utf8'));
-          const APPLICATION = '6692334b17fae5e26d973b92d6476a52d4f316489e085eba76971173f03f156f';
+          const APPLICATION = 'f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d';
           const ok = x.previewLedger?.historicalPreparedRecord === true &&
             x.preparedReviewBundle?.historicalOnly === true &&
             x.preparedReviewBundle?.candidateEvent?.canonical === false &&
