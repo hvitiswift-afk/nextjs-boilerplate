@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-canonicalization-review-bundle-v6-4.schema.json",
+  "title": "Fardarter Drive canonicalization review bundle v6.4",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "stateCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["REQUESTED", "FIT_APPROVED_FOR_SCOPE_DRAFT", "SCOPE_DRAFTED", "HUMAN_ACCEPTED", "PAID_PENDING", "PAID_SETTLED", "WORK_START_APPROVED", "ACTIVE", "DELIVERED", "ACCEPTED", "CANCELLED", "REFUNDED", "DISPUTED"],
+      "properties": {
+        "REQUESTED": { "type": "integer", "minimum": 0 },
+        "FIT_APPROVED_FOR_SCOPE_DRAFT": { "type": "integer", "minimum": 0 },
+        "SCOPE_DRAFTED": { "type": "integer", "minimum": 0 },
+        "HUMAN_ACCEPTED": { "type": "integer", "minimum": 0 },
+        "PAID_PENDING": { "type": "integer", "minimum": 0 },
+        "PAID_SETTLED": { "type": "integer", "minimum": 0 },
+        "WORK_START_APPROVED": { "type": "integer", "minimum": 0 },
+        "ACTIVE": { "type": "integer", "minimum": 0 },
+        "DELIVERED": { "type": "integer", "minimum": 0 },
+        "ACCEPTED": { "type": "integer", "minimum": 0 },
+        "CANCELLED": { "type": "integer", "minimum": 0 },
+        "REFUNDED": { "type": "integer", "minimum": 0 },
+        "DISPUTED": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "required": ["schemaVersion", "bundleId", "driveId", "controllerVersion", "controllingIssue", "state", "expectedDecision", "source", "candidateEvent", "candidateProjection", "evidenceMatrix", "authorityMatrix", "review", "candidateReconciliation", "privacyBoundary", "applicationBoundary", "generatedAt", "bundleDigest"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "bundleId": { "type": "string", "pattern": "^FARDARTER-CANONICALIZATION-BUNDLE-[A-Z0-9-]+-V6-4$" },
+    "driveId": { "const": "FARDARTER-DRIVE-V6" },
+    "controllerVersion": { "const": "6.4.0" },
+    "controllingIssue": { "const": 165 },
+    "state": { "enum": ["PREPARED", "PREVIEW_READY", "BLOCKED", "EXPIRED", "REJECTED", "APPLIED_BY_REVIEWED_MERGE"] },
+    "expectedDecision": { "enum": ["PREVIEW_READY", "BLOCKED"] },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposalIssue", "entityIssue", "proposalDecision", "expectedPublicState", "proposalLedgerDigest", "reconciliationDigest", "canonicalHeadSequence", "canonicalHeadDigest"],
+      "properties": {
+        "proposalIssue": { "type": "integer", "minimum": 1 },
+        "entityIssue": { "type": "integer", "minimum": 1 },
+        "proposalDecision": { "const": "READY_FOR_REVIEW" },
+        "expectedPublicState": { "type": "string", "minLength": 3 },
+        "proposalLedgerDigest": { "$ref": "#/$defs/sha256" },
+        "reconciliationDigest": { "$ref": "#/$defs/sha256" },
+        "canonicalHeadSequence": { "type": "integer", "minimum": 0 },
+        "canonicalHeadDigest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "candidateEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "eventId", "sequence", "eventType", "idempotencyKey", "entityType", "entityId", "sourceProposalIssue", "sourcePublicState", "fromState", "toState", "classification", "sourceEvidence", "authorityGate", "capacityEffect", "financialEffect", "previousEventDigest", "occurredAt", "recordedAt", "canonical", "applied", "publicSafe", "sensitiveDataPresent", "eventDigest"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "eventId": { "type": "string", "minLength": 12 },
+        "sequence": { "type": "integer", "minimum": 1 },
+        "eventType": { "const": "STATE_CANONICALIZATION_PREVIEW" },
+        "idempotencyKey": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{8,160}$" },
+        "entityType": { "const": "GITHUB_ISSUE" },
+        "entityId": { "type": "string", "pattern": "^[0-9]+$" },
+        "sourceProposalIssue": { "type": "integer", "minimum": 1 },
+        "sourcePublicState": { "type": "string", "minLength": 3 },
+        "fromState": { "type": "string", "minLength": 3 },
+        "toState": { "type": "string", "minLength": 3 },
+        "classification": { "const": "CANDIDATE_NONCANONICAL" },
+        "sourceEvidence": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 3 } },
+        "authorityGate": { "const": "REVIEWED_MERGE_REQUIRED" },
+        "capacityEffect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["usesActiveCapacity", "activeDelta"],
+          "properties": {
+            "usesActiveCapacity": { "type": "boolean" },
+            "activeDelta": { "type": "integer" }
+          }
+        },
+        "financialEffect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["createsOrder", "grossRevenueDeltaUsd", "settledCashDeltaUsd", "settlementState"],
+          "properties": {
+            "createsOrder": { "type": "boolean" },
+            "grossRevenueDeltaUsd": { "type": "number" },
+            "settledCashDeltaUsd": { "type": "number" },
+            "settlementState": { "enum": ["UNKNOWN", "PENDING", "PAID_SETTLED", "REFUNDED", "DISPUTED"] }
+          }
+        },
+        "previousEventDigest": { "$ref": "#/$defs/sha256" },
+        "occurredAt": { "type": "string", "format": "date-time" },
+        "recordedAt": { "type": "string", "format": "date-time" },
+        "canonical": { "const": false },
+        "applied": { "const": false },
+        "publicSafe": { "const": true },
+        "sensitiveDataPresent": { "const": false },
+        "eventDigest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "candidateProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stateCounts", "activeDeliveries", "activeHeadroom", "orders", "verifiedGrossRevenueUsd", "verifiedSettledCashUsd", "settlementState"],
+      "properties": {
+        "stateCounts": { "$ref": "#/$defs/stateCounts" },
+        "activeDeliveries": { "type": "integer", "minimum": 0 },
+        "activeHeadroom": { "type": "integer", "minimum": 0 },
+        "orders": { "type": "integer", "minimum": 0 },
+        "verifiedGrossRevenueUsd": { "type": "number", "minimum": 0 },
+        "verifiedSettledCashUsd": { "type": "number", "minimum": 0 },
+        "settlementState": { "type": "string" }
+      }
+    },
+    "evidenceMatrix": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidenceId", "type", "reference", "classification", "verificationState", "expiresAt", "contradictionState", "privateLocationRequired"],
+        "properties": {
+          "evidenceId": { "type": "string", "minLength": 4 },
+          "type": { "type": "string", "minLength": 3 },
+          "reference": { "type": "string", "minLength": 3 },
+          "classification": { "enum": ["PUBLIC_SAFE", "PRIVATE"] },
+          "verificationState": { "enum": ["PREPARED", "VERIFIED", "MISSING", "CONTRADICTED", "EXPIRED"] },
+          "expiresAt": { "type": ["string", "null"], "format": "date-time" },
+          "contradictionState": { "enum": ["NONE", "PRESENT", "UNRESOLVED"] },
+          "privateLocationRequired": { "type": "boolean" }
+        }
+      }
+    },
+    "authorityMatrix": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gate", "decisionMaker", "status", "evidence", "blocker"],
+        "properties": {
+          "gate": { "type": "string", "minLength": 3 },
+          "decisionMaker": { "type": "string", "minLength": 3 },
+          "status": { "type": "string", "minLength": 3 },
+          "evidence": { "type": "string", "minLength": 3 },
+          "blocker": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewBy", "reviewers", "unresolvedBlockers", "rollbackInstruction"],
+      "properties": {
+        "reviewBy": { "type": "string", "format": "date-time" },
+        "reviewers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role", "status", "decision"],
+            "properties": {
+              "role": { "type": "string", "minLength": 2 },
+              "status": { "enum": ["PENDING", "APPROVED", "REJECTED", "NOT_APPLICABLE"] },
+              "decision": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "unresolvedBlockers": { "type": "array", "items": { "type": "string" } },
+        "rollbackInstruction": { "type": "string", "minLength": 40 }
+      }
+    },
+    "candidateReconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "snapshotId", "sequence", "previousSnapshotDigest", "controllerVersion", "controllingIssue", "sourceEvent", "canonicalProjection", "proposalLedgerDigest", "reviewStatus", "generatedAt", "snapshotDigest"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "snapshotId": { "type": "string", "minLength": 12 },
+        "sequence": { "type": "integer", "minimum": 1 },
+        "previousSnapshotDigest": { "$ref": "#/$defs/sha256" },
+        "controllerVersion": { "const": "6.4.0" },
+        "controllingIssue": { "const": 165 },
+        "sourceEvent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["eventId", "sequence", "eventDigest", "applied"],
+          "properties": {
+            "eventId": { "type": "string" },
+            "sequence": { "type": "integer", "minimum": 1 },
+            "eventDigest": { "$ref": "#/$defs/sha256" },
+            "applied": { "const": false }
+          }
+        },
+        "canonicalProjection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["currentHeadSequence", "currentHeadDigest", "candidateHeadSequence", "candidateHeadDigest", "canonicalBusinessEventCountIfApplied", "stateCountsIfApplied", "totalPlanningSlots", "effectiveActiveCeiling", "activeDeliveriesIfApplied", "activeHeadroomIfApplied", "overrideState", "ordersIfApplied", "verifiedGrossRevenueUsdIfApplied", "verifiedSettledCashUsdIfApplied", "settlementStateIfApplied", "receivedCashRequires"],
+          "properties": {
+            "currentHeadSequence": { "type": "integer", "minimum": 0 },
+            "currentHeadDigest": { "$ref": "#/$defs/sha256" },
+            "candidateHeadSequence": { "type": "integer", "minimum": 1 },
+            "candidateHeadDigest": { "$ref": "#/$defs/sha256" },
+            "canonicalBusinessEventCountIfApplied": { "type": "integer", "minimum": 1 },
+            "stateCountsIfApplied": { "$ref": "#/$defs/stateCounts" },
+            "totalPlanningSlots": { "type": "integer", "minimum": 1 },
+            "effectiveActiveCeiling": { "type": "integer", "minimum": 1 },
+            "activeDeliveriesIfApplied": { "type": "integer", "minimum": 0 },
+            "activeHeadroomIfApplied": { "type": "integer", "minimum": 0 },
+            "overrideState": { "type": "string" },
+            "ordersIfApplied": { "type": "integer", "minimum": 0 },
+            "verifiedGrossRevenueUsdIfApplied": { "type": "number", "minimum": 0 },
+            "verifiedSettledCashUsdIfApplied": { "type": "number", "minimum": 0 },
+            "settlementStateIfApplied": { "type": "string" },
+            "receivedCashRequires": { "const": "PAID_SETTLED" }
+          }
+        },
+        "proposalLedgerDigest": { "$ref": "#/$defs/sha256" },
+        "reviewStatus": { "const": "PREVIEW_ONLY_NOT_APPLIED" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "snapshotDigest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "privacyBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publicDriveReferencesExposed", "buyerIdentityPublic", "providerReceiptPublic", "counselNotesPublic", "privateReviewDeliberationsPublic"],
+      "properties": {
+        "publicDriveReferencesExposed": { "const": false },
+        "buyerIdentityPublic": { "const": false },
+        "providerReceiptPublic": { "const": false },
+        "counselNotesPublic": { "const": false },
+        "privateReviewDeliberationsPublic": { "const": false }
+      }
+    },
+    "applicationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["previewCreatesCanonicalEvent", "previewCreatesOrder", "previewCreatesContract", "previewProvesPayment", "previewStartsPaidWork", "applicationRequiresReviewedMerge", "canonicalSourceChanged"],
+      "properties": {
+        "previewCreatesCanonicalEvent": { "const": false },
+        "previewCreatesOrder": { "const": false },
+        "previewCreatesContract": { "const": false },
+        "previewProvesPayment": { "const": false },
+        "previewStartsPaidWork": { "const": false },
+        "applicationRequiresReviewedMerge": { "const": true },
+        "canonicalSourceChanged": { "const": false }
+      }
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "bundleDigest": { "$ref": "#/$defs/sha256" }
+  }
+}
