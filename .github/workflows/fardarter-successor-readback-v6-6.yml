@@ -1,0 +1,94 @@
+name: Fardarter Successor Readback v6.6
+
+on:
+  pull_request:
+    paths:
+      - ".github/ISSUE_TEMPLATE/fardarter-successor-review.yml"
+      - ".github/workflows/fardarter-successor-review-v6-6.yml"
+      - ".github/workflows/fardarter-successor-readback-v6-6.yml"
+      - "app/api/revenue/successor-readiness/**"
+      - "app/github-control-tower-audit/successor-readiness/**"
+      - "receipts/revenue/FARDARTER-DRIVE-SUCCESSOR-*.json"
+      - "schemas/revenue/fardarter-drive-successor-*.json"
+      - "scripts/check-fardarter-successor-control-v6-6.mjs"
+      - "src/lib/revenue/canonical-successor.ts"
+      - "docs/repository/FARDARTER-DRIVE-V6-6-DYNAMIC-SUCCESSOR.md"
+      - "package.json"
+      - "app/sitemap.ts"
+  workflow_run:
+    workflows: [Netlify Audit Product Deploy]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    name: Validate v6.6 dynamic successor source
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm run fardarter:successor:check
+      - run: npm run build
+
+  immutable-readback:
+    name: Verify immutable v6.6 successor API
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          pattern: netlify-fardarter-v6-*
+          path: deployment-artifacts
+          merge-multiple: true
+      - name: Verify successor surfaces
+        run: |
+          set -euo pipefail
+          RESULT="$(find deployment-artifacts -name netlify-deploy-result.json -print -quit)"
+          test -n "$RESULT" || { echo "Missing Netlify deploy result"; exit 1; }
+          URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")' "$RESULT")"
+          ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_id || x.id || "")' "$RESULT")"
+          test -n "$URL" && test -n "$ID"
+          curl --fail --silent --show-error --location "$URL/api/revenue/successor-readiness" -o successor.json
+          curl --fail --silent --show-error --location "$URL/github-control-tower-audit/successor-readiness" -o successor.html
+          curl --fail --silent --show-error --location "$URL/sitemap.xml" -o sitemap.xml
+          node <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('successor.json','utf8'));
+          const html=fs.readFileSync('successor.html','utf8');
+          const sitemap=fs.readFileSync('sitemap.xml','utf8');
+          const required=[
+            [x.controllerVersion==='6.6.0','controllerVersion'],
+            [x.controllingIssue===173,'controllingIssue'],
+            [x.control?.digest==='d9e2ecfb97b33e547e87c7c092c25ef37f251e91e7549c1e23f41782987db1ae','controlDigest'],
+            [x.runtimeDerived?.current?.eventSequence===1,'currentEventSequence'],
+            [x.runtimeDerived?.current?.eventDigest==='3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b','currentEventDigest'],
+            [x.runtimeDerived?.next?.eventSequence===2,'nextEventSequence'],
+            [x.runtimeDerived?.next?.previousEventDigest==='3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b','previousEventDigest'],
+            [x.runtimeDerived?.next?.reconciliationSequence===2,'nextSnapshotSequence'],
+            [x.runtimeDerived?.next?.previousSnapshotDigest==='9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f','previousSnapshotDigest'],
+            [x.runtimeDerived?.matchesCanonicalControl===true,'runtimeMatches'],
+            [x.blockedReview?.digest==='8f3312568414fcad5d33bc8ee44d4c04f6d54117dce250c62d31c4491b6638f2','bundleDigest'],
+            [x.blockedReview?.decision==='BLOCKED_MISSING_GATE_EVIDENCE','decision'],
+            [x.blockedReview?.candidateEvent?.candidateDigest==='6e9ec1a02d85b2894d8388bfc3bcc7d4d79147703d3ea68b2bbc9b358a3829b2','candidateDigest'],
+            [x.blockedReview?.candidateReconciliation?.snapshotDigest==='5891a56c76f102573461c64d281f4cac6e785d2737b3ec8d5b5d170cfbd7b245','snapshotDigest'],
+            [x.blockedReview?.candidateReconciliation?.projectionIfApplied?.orders===1,'projectedOrder'],
+            [x.blockedReview?.actualEffects?.orderCreated===false,'actualOrder'],
+            [x.runtimeDerived?.current?.orders===0 && x.runtimeDerived?.current?.verifiedSettledCashUsd===0,'actualMoney'],
+            [html.includes('Dynamic-head successor control'),'page'],
+            [html.includes('BLOCKED_MISSING_GATE_EVIDENCE'),'blocked'],
+            [sitemap.includes('/github-control-tower-audit/successor-readiness'),'sitemap'],
+          ];
+          const failed=required.filter(([ok])=>!ok).map(([,label])=>label);
+          if(failed.length) throw new Error(`v6.6 successor readback failed: ${failed.join(', ')}`);
+          console.log('Fardarter v6.6 immutable successor readback: PASS');
+          NODE
