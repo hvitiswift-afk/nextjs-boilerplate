@@ -1,0 +1,318 @@
+name: Fardarter Drive v6.4 Exact Netlify Deploy
+
+on:
+  push:
+    branches:
+      - deploy/fardarter-v6-4-exact-20260730
+    paths:
+      - .github/workflows/fardarter-v6-4-exact-netlify-deploy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: fardarter-v6-4-exact-netlify-deploy
+  cancel-in-progress: false
+
+env:
+  EXACT_SOURCE_COMMIT: e482004bfff1bb90aba2d67b8da62a524f18cdb4
+  NETLIFY_SITE_ID: 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f
+  NETLIFY_PRIMARY_URL: https://lichburn-v0-2-8.netlify.app
+
+jobs:
+  deploy-and-readback:
+    name: Deploy exact v6.4 source and verify immutable routes
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+    steps:
+      - name: Check out exact merged v6.4 source
+        uses: actions/checkout@v4
+        with:
+          ref: e482004bfff1bb90aba2d67b8da62a524f18cdb4
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Require exact source and fixed site
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_COMMIT"
+          test "$NETLIFY_SITE_ID" = "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f"
+          test -n "$NETLIFY_AUTH_TOKEN" || { echo "Missing NETLIFY_AUTH_TOKEN"; exit 1; }
+
+      - name: Verify locked repository blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          check_blob() {
+            local path="$1"
+            local expected="$2"
+            local actual
+            actual="$(git hash-object "$path")"
+            printf '%s  %s\n' "$actual" "$path"
+            test "$actual" = "$expected" || { echo "Blob mismatch for $path: expected $expected, got $actual"; exit 1; }
+          }
+          check_blob receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4.json 99a4bb840df5630efdf55d7e5fd4d6bdd0b62996
+          check_blob receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json e55188c34b34dddbe22652442b1ed6d0d932f25b
+          check_blob receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json bd24a05b0372ef77c97d520609baef73d0b778c6
+          check_blob app/api/revenue/canonicalization-preview/route.ts 95cf068221fd49fc6ddba755f8d47f72dc3da55e
+          check_blob .github/workflows/fardarter-canonicalization-preview-v6-4.yml 6d2a32710a00bdb2a8fa49275447699fe8e2c7b3
+
+      - name: Install and verify exact v6.4 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run fardarter:preview:check
+          npm run build
+
+      - name: Deploy exact source to fixed Netlify site
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESULT="$(npx -y netlify-cli@latest deploy --build --prod --json --site "$NETLIFY_SITE_ID")"
+          printf '%s\n' "$RESULT" > netlify-deploy-result.json
+          DEPLOY_URL="$(node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("netlify-deploy-result.json","utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")')"
+          DEPLOY_ID="$(node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("netlify-deploy-result.json","utf8")); console.log(x.deploy_id || x.id || "")')"
+          test -n "$DEPLOY_URL" || { echo "Missing immutable deploy URL"; cat netlify-deploy-result.json; exit 1; }
+          test -n "$DEPLOY_ID" || { echo "Missing deploy ID"; cat netlify-deploy-result.json; exit 1; }
+          case "$DEPLOY_URL" in
+            https://*--lichburn-v0-2-8.netlify.app|http://*--lichburn-v0-2-8.netlify.app) ;;
+            *) echo "Deploy URL is not immutable for lichburn-v0-2-8: $DEPLOY_URL"; exit 1 ;;
+          esac
+          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Read back every required immutable route
+        id: readback
+        shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          get() {
+            local route="$1"
+            local output="$2"
+            echo "GET $DEPLOY_URL$route"
+            curl --fail --silent --show-error --location \
+              --retry 12 --retry-delay 5 --retry-all-errors --max-time 45 \
+              "$DEPLOY_URL$route" --output "$output"
+            test -s "$output"
+          }
+          get / artifacts/home.html
+          get /github-control-tower-audit artifacts/audit.html
+          get /github-control-tower-audit/operations artifacts/operations.html
+          get /github-control-tower-audit/reconciliation artifacts/reconciliation.html
+          get /github-control-tower-audit/canonicalization-preview artifacts/canonicalization-preview.html
+          get /api/revenue/pilot artifacts/pilot.json
+          get /api/revenue/capacity artifacts/capacity.json
+          get /api/revenue/operations artifacts/operations.json
+          get /api/revenue/reconciliation artifacts/reconciliation.json
+          get /api/revenue/canonicalization-preview artifacts/canonicalization-preview.json
+          get /sitemap.xml artifacts/sitemap.xml
+          get /robots.txt artifacts/robots.txt
+
+          DEPLOY_ID='${{ steps.deploy.outputs.deploy_id }}' node <<'NODE'
+          const fs = require('node:fs');
+          const read = (p) => fs.readFileSync(p, 'utf8');
+          const json = (p) => JSON.parse(read(p));
+          const preview = json('artifacts/canonicalization-preview.json');
+          const pilot = json('artifacts/pilot.json');
+          const capacity = json('artifacts/capacity.json');
+          const operations = json('artifacts/operations.json');
+          const reconciliation = json('artifacts/reconciliation.json');
+          const pages = {
+            home: read('artifacts/home.html'),
+            audit: read('artifacts/audit.html'),
+            operations: read('artifacts/operations.html'),
+            reconciliation: read('artifacts/reconciliation.html'),
+            preview: read('artifacts/canonicalization-preview.html'),
+            sitemap: read('artifacts/sitemap.xml'),
+            robots: read('artifacts/robots.txt'),
+          };
+          const GENESIS = '4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b';
+          const PROPOSAL = '3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e';
+          const RECON = '4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22';
+          const EVENT = '2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174';
+          const SNAPSHOT = '4e7e2ead4c466704ad0559fed73cc01cf028722d701ffe47669626858a96c8de';
+          const BUNDLE = '3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2';
+          const LEDGER = '9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c';
+          const validCount = (v) => v === null || (Number.isInteger(v) && v >= 0);
+          const checks = [];
+          const check = (ok, label) => checks.push([Boolean(ok), label]);
+
+          check(preview.schemaVersion === '1.0.0', 'preview.schemaVersion');
+          check(preview.controllerVersion === '6.4.0', 'preview.controllerVersion');
+          check(preview.controllingIssue === 165, 'preview.controllingIssue');
+          check(preview.previewLedger?.id === 'FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4', 'preview.ledger.id');
+          check(preview.previewLedger?.digest === LEDGER, 'preview.ledger.digest');
+          check(preview.previewLedger?.previewCount === 1, 'preview.ledger.previewCount');
+          check(preview.previewLedger?.decisionCounts?.PREPARED === 1, 'preview.ledger.preparedCount');
+          for (const state of ['PREPARED','PREVIEW_READY','BLOCKED','EXPIRED','REJECTED','APPLIED_BY_REVIEWED_MERGE']) {
+            check(preview.previewLedger?.lifecycle?.includes(state), `preview.lifecycle.${state}`);
+          }
+          check(preview.previewLedger?.applicationPolicy?.automaticCanonicalization === false, 'preview.automaticCanonicalization');
+          check(preview.previewLedger?.applicationPolicy?.reviewedMergeRequired === true, 'preview.reviewedMergeRequired');
+
+          const bundle = preview.preparedReviewBundle;
+          check(bundle?.id === 'FARDARTER-CANONICALIZATION-BUNDLE-ISSUE-162-V6-4', 'bundle.id');
+          check(bundle?.state === 'PREPARED', 'bundle.state');
+          check(bundle?.expectedDecision === 'PREVIEW_READY', 'bundle.expectedDecision');
+          check(bundle?.digest === BUNDLE, 'bundle.digest');
+          check(bundle?.source?.proposalIssue === 162, 'bundle.source.proposalIssue');
+          check(bundle?.source?.entityIssue === 159, 'bundle.source.entityIssue');
+          check(bundle?.candidateEvent?.sequence === 1, 'candidate.sequence');
+          check(bundle?.candidateEvent?.previousEventDigest === GENESIS, 'candidate.previousGenesis');
+          check(bundle?.candidateEvent?.digest === EVENT, 'candidate.digest');
+          check(bundle?.candidateEvent?.canonical === false, 'candidate.canonicalFalse');
+          check(bundle?.candidateEvent?.applied === false, 'candidate.appliedFalse');
+          check(bundle?.candidateEvent?.capacityEffect?.activeDelta === 0, 'candidate.activeDelta');
+          check(bundle?.candidateEvent?.financialEffect?.createsOrder === false, 'candidate.orderDelta');
+          check(bundle?.candidateEvent?.financialEffect?.grossRevenueDeltaUsd === 0, 'candidate.grossDelta');
+          check(bundle?.candidateEvent?.financialEffect?.settledCashDeltaUsd === 0, 'candidate.settledDelta');
+          check(bundle?.candidateProjection?.activeDeliveries === 0, 'projection.active');
+          check(bundle?.candidateProjection?.orders === 0, 'projection.orders');
+          check(bundle?.candidateProjection?.verifiedGrossRevenueUsd === 0, 'projection.gross');
+          check(bundle?.candidateProjection?.verifiedSettledCashUsd === 0, 'projection.settled');
+          check(bundle?.candidateReconciliation?.sequence === 1, 'snapshot.sequence');
+          check(bundle?.candidateReconciliation?.previousSnapshotDigest === RECON, 'snapshot.previous');
+          check(bundle?.candidateReconciliation?.digest === SNAPSHOT, 'snapshot.digest');
+
+          const current = preview.canonicalCurrentState;
+          check(current?.headSequence === 0, 'current.headSequence');
+          check(current?.headDigest === GENESIS, 'current.headDigest');
+          check(current?.eventCount === 1, 'current.oneGenesisEvent');
+          check(current?.canonicalBusinessEventCount === 0, 'current.zeroBusinessEvents');
+          check(current?.healthy === true && current?.genesisOnly === true, 'current.genesisHealthy');
+          check(Object.values(current?.stateCounts || {}).every((v) => v === 0), 'current.allStateCountsZero');
+          check(current?.totalPlanningSlots === 1000, 'current.totalSlots');
+          check(current?.effectiveActiveCeiling === 100, 'current.activeCeiling');
+          check(current?.activeDeliveries === 0, 'current.active');
+          check(current?.activeHeadroom === 100, 'current.headroom');
+          check(current?.orders === 0, 'current.orders');
+          check(current?.verifiedGrossRevenueUsd === 0, 'current.gross');
+          check(current?.verifiedSettledCashUsd === 0, 'current.settled');
+          check(current?.receivedCashRequires === 'PAID_SETTLED', 'current.cashGate');
+
+          check(preview.sourceDigests?.proposalLedger === PROPOSAL, 'digest.proposal');
+          check(preview.sourceDigests?.reconciliation === RECON, 'digest.reconciliation');
+          check(preview.sourceDigests?.canonicalEventHead === GENESIS, 'digest.head');
+          check(preview.sourceDigests?.preparedCandidateEvent === EVENT, 'digest.event');
+          check(preview.sourceDigests?.preparedCandidateSnapshot === SNAPSHOT, 'digest.snapshot');
+          check(preview.sourceDigests?.preparedReviewBundle === BUNDLE, 'digest.bundle');
+          check(preview.sourceDigests?.previewLedger === LEDGER, 'digest.ledger');
+
+          const counts = preview.publicCounts || {};
+          check(['AVAILABLE','UNAVAILABLE'].includes(counts.sourceState), 'counts.sourceState');
+          for (const key of ['openPreviewRequests','previewReady','blocked','needsReview']) {
+            check(validCount(counts[key]), `counts.${key}`);
+          }
+          check(counts.countsAreCanonicalEvidence === false, 'counts.noncanonical');
+          check(counts.countsAreCommercialEvidence === false, 'counts.noncommercial');
+
+          const drive = preview.googleDriveContinuity || {};
+          check(drive.state === 'CONNECTED_PRIVATE', 'drive.connectedPrivate');
+          check(drive.publicFolderUrlExposed === false, 'drive.noPublicUrl');
+          check(drive.publicFileIdsExposed === false, 'drive.noPublicIds');
+          check(drive.canonicalizationPreviewsMaintained === true, 'drive.previewMaintenance');
+          check(drive.reviewBundlesMaintained === true, 'drive.bundleMaintenance');
+          check(drive.automaticCanonicalEventApplication === false, 'drive.noAutomaticApplication');
+          check(preview.evidenceBoundary?.applicationRequiresReviewedMerge === true, 'boundary.reviewedMerge');
+          check(preview.evidenceBoundary?.templateIsIndemnityProof === false, 'boundary.notIndemnityProof');
+
+          check(pilot && typeof pilot === 'object', 'pilot.json');
+          check(capacity && typeof capacity === 'object', 'capacity.json');
+          check(operations && typeof operations === 'object', 'operations.json');
+          check(reconciliation && typeof reconciliation === 'object', 'reconciliation.json');
+          check(pages.home.includes('/github-control-tower-audit') || pages.home.includes('GitHub Control Tower'), 'page.home');
+          check(pages.audit.includes('Fardarter Drive'), 'page.audit');
+          check(pages.operations.includes('Operations') || pages.operations.includes('operations'), 'page.operations');
+          check(pages.reconciliation.includes('Reconciliation') || pages.reconciliation.includes('reconciliation'), 'page.reconciliation');
+          check(pages.preview.includes('Canonicalization') || pages.preview.includes('canonicalization'), 'page.preview');
+          for (const route of [
+            '/github-control-tower-audit',
+            '/github-control-tower-audit/operations',
+            '/github-control-tower-audit/reconciliation',
+            '/github-control-tower-audit/canonicalization-preview',
+          ]) check(pages.sitemap.includes(route), `sitemap.${route}`);
+          check(pages.robots.includes('/sitemap.xml') || pages.robots.toLowerCase().includes('sitemap:'), 'robots.sitemap');
+
+          const failed = checks.filter(([ok]) => !ok).map(([,label]) => label);
+          if (failed.length) throw new Error(`Exact v6.4 immutable readback failed: ${failed.join(', ')}`);
+          const receipt = {
+            schemaVersion: '1.0.0',
+            result: 'DEPLOYED_AND_VERIFIED',
+            repository: process.env.GITHUB_REPOSITORY,
+            sourceCommit: process.env.EXACT_SOURCE_COMMIT,
+            workflowCommit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            siteId: process.env.NETLIFY_SITE_ID,
+            deployId: process.env.DEPLOY_ID,
+            deployUrl: process.env.DEPLOY_URL,
+            mergeCommit: process.env.EXACT_SOURCE_COMMIT,
+            blobs: {
+              previewLedger: '99a4bb840df5630efdf55d7e5fd4d6bdd0b62996',
+              preparedReviewBundle: 'e55188c34b34dddbe22652442b1ed6d0d932f25b',
+              privateDriveContinuity: 'bd24a05b0372ef77c97d520609baef73d0b778c6',
+              previewApi: '95cf068221fd49fc6ddba755f8d47f72dc3da55e',
+              previewController: '6d2a32710a00bdb2a8fa49275447699fe8e2c7b3',
+            },
+            digests: { canonicalHead: GENESIS, proposal: PROPOSAL, reconciliation: RECON, candidateEvent: EVENT, candidateSnapshot: SNAPSHOT, reviewBundle: BUNDLE, previewLedger: LEDGER },
+            routes: ['/', '/github-control-tower-audit', '/github-control-tower-audit/operations', '/github-control-tower-audit/reconciliation', '/github-control-tower-audit/canonicalization-preview', '/api/revenue/pilot', '/api/revenue/capacity', '/api/revenue/operations', '/api/revenue/reconciliation', '/api/revenue/canonicalization-preview', '/sitemap.xml', '/robots.txt'],
+            verifiedAt: new Date().toISOString(),
+          };
+          fs.writeFileSync('artifacts/fardarter-v6-4-exact-deploy-receipt.json', JSON.stringify(receipt, null, 2) + '\n');
+          console.log('Exact Fardarter Drive v6.4 immutable readback: PASS');
+          NODE
+        env:
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+
+      - name: Preserve deploy and readback evidence
+        if: always()
+        shell: bash
+        env:
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          mkdir -p artifacts
+          if [ -f netlify-deploy-result.json ]; then cp netlify-deploy-result.json artifacts/; fi
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'artifacts/execution-state.json';
+          fs.writeFileSync(path, JSON.stringify({
+            schemaVersion: '1.0.0',
+            sourceCommit: process.env.EXACT_SOURCE_COMMIT,
+            workflowCommit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            siteId: process.env.NETLIFY_SITE_ID,
+            deployId: process.env.DEPLOY_ID || null,
+            deployUrl: process.env.DEPLOY_URL || null,
+            jobStatus: process.env.JOB_STATUS,
+            generatedAt: new Date().toISOString(),
+          }, null, 2) + '\n');
+          NODE
+        env:
+          JOB_STATUS: ${{ job.status }}
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+
+      - name: Upload exact deployment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-v6-4-exact-${{ github.run_id }}
+          path: artifacts
+          if-no-files-found: error
+          retention-days: 30
