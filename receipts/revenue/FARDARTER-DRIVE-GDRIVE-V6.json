@@ -56,6 +56,20 @@
       "nativeGoogleDoc": true,
       "referenceStoredPrivately": true,
       "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v6.4 — Canonicalization Preview and Review Charter",
+      "purpose": "Private deterministic next-event preview, evidence and authority matrices, digest projection, expiry, rollback, and reviewed-merge controls",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
+    },
+    {
+      "title": "Fardarter Drive™ v6.4 — Canonicalization Review Bundle Register",
+      "purpose": "Private preview bundles, candidate event and snapshot digests, reviewer decisions, blockers, application merges, and evidence locations",
+      "nativeGoogleDoc": true,
+      "referenceStoredPrivately": true,
+      "publicUrlExposed": false
     }
   ],
   "automation": {
@@ -66,7 +80,10 @@
     "maintainTransitionConflictRegister": true,
     "maintainProposalReconciliation": true,
     "maintainProposalQuarantineRegister": true,
+    "maintainCanonicalizationPreviews": true,
+    "maintainCanonicalizationReviewBundles": true,
     "activateOverrideWithoutCompleteReceipt": false,
+    "applyCanonicalEventWithoutReviewedMerge": false,
     "publicReceiptMayExposeDriveUrl": false,
     "publicReceiptMayExposeDriveFileId": false,
     "publicReceiptMayExposeBuyerIdentity": false,
@@ -84,7 +101,10 @@
     "transitionConflictEvidencePublic": false,
     "proposalEvidencePublic": false,
     "quarantineEvidencePublic": false,
+    "canonicalizationPreviewEvidencePublic": false,
+    "reviewBundleEvidencePublic": false,
+    "privateReviewDeliberationsPublic": false,
     "disputeRecordsPublic": false
   },
-  "nextControlledAction": "Keep v6 capacity, state, proposal, reconciliation, quarantine, and conflict evidence private; expose only CONNECTED_PRIVATE state and document titles publicly; canonicalize proposals only through reviewed merges."
+  "nextControlledAction": "Keep v6 capacity, state, proposal, reconciliation, quarantine, canonicalization-preview, review-bundle, and conflict evidence private; expose only CONNECTED_PRIVATE state, public-safe digests, and document titles; apply a candidate event only through a separately reviewed merge."
 }
