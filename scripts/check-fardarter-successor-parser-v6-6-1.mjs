@@ -6,10 +6,10 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(workflow.includes("name: Fardarter Successor Review v6.6.1"), "workflow version must be v6.6.1");
+assert(workflow.includes("name: Fardarter Successor Review v6.6.2"), "workflow version must be v6.6.2");
 assert(workflow.includes("match(/#?(\\d+)/)"), "workflow must use the real digit-class parser");
 assert(!workflow.includes("match(/#?(\\\\d+)/)"), "workflow must not use an over-escaped digit parser");
-assert(workflow.includes("jp-fardarter-successor-v6-6-1-"), "workflow must use the v6.6.1 receipt marker");
+assert(workflow.includes("jp-fardarter-successor-v6-6-2-"), "workflow must use the v6.6.2 receipt marker");
 assert(workflow.includes("BLOCKED_HUMAN_GATE_REQUIRED"), "workflow must preserve the human-gate decision");
 assert(workflow.includes("HUMAN_APPROVAL_AND_BUYER_CONSENT") || workflow.includes("transition?.gate"), "workflow must surface the exact transition gate");
 assert(!workflow.includes("contents: write"), "workflow must remain read-only for canonical source");
@@ -51,6 +51,6 @@ assert(issueNumber === 159, "sample issue number must parse as 159");
 assert(expectedState === "SCOPE_DRAFTED", "sample expected state parse failed");
 assert(candidateState === "HUMAN_ACCEPTED", "sample candidate state parse failed");
 
-console.log("Fardarter Drive v6.6.1 successor parser: PASS");
+console.log("Fardarter Drive v6.6.2 successor parser: PASS");
 console.log(`Parsed source issue: ${issueNumber}`);
 console.log(`Expected blocked transition: ${expectedState} -> ${candidateState}`);
