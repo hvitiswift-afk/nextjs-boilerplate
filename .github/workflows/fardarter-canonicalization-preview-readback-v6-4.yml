@@ -1,0 +1,196 @@
+name: Fardarter Canonicalization Preview Readback v6.4
+
+on:
+  pull_request:
+    paths:
+      - ".github/ISSUE_TEMPLATE/fardarter-canonicalization-preview.yml"
+      - ".github/workflows/fardarter-canonicalization-preview-v6-4.yml"
+      - ".github/workflows/fardarter-canonicalization-preview-readback-v6-4.yml"
+      - "app/api/revenue/canonicalization-preview/**"
+      - "app/github-control-tower-audit/canonicalization-preview/**"
+      - "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-*.json"
+      - "schemas/revenue/fardarter-drive-canonicalization-*.json"
+      - "scripts/check-fardarter-canonicalization-preview-v6-4.mjs"
+      - "src/lib/revenue/public-canonicalization-preview.ts"
+      - "docs/repository/FARDARTER-DRIVE-V6-4-CANONICALIZATION-PREVIEW.md"
+      - "package.json"
+      - "app/sitemap.ts"
+  workflow_run:
+    workflows:
+      - Netlify Audit Product Deploy
+    types:
+      - completed
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    name: Validate v6.4 preview source
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run fardarter:preview:check
+      - run: npm run build
+
+  immutable-readback:
+    name: Verify immutable canonicalization-preview API
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Download Netlify deployment artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          pattern: netlify-fardarter-v6-*
+          path: deployment-artifacts
+          merge-multiple: true
+
+      - name: Resolve immutable deploy URL
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESULT="$(find deployment-artifacts -name netlify-deploy-result.json -print -quit)"
+          test -n "$RESULT" || { echo "Missing Netlify deploy result artifact"; exit 1; }
+          DEPLOY_URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")' "$RESULT")"
+          DEPLOY_ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_id || x.id || "")' "$RESULT")"
+          test -n "$DEPLOY_URL" || { echo "Missing immutable deploy URL"; exit 1; }
+          test -n "$DEPLOY_ID" || { echo "Missing deploy ID"; exit 1; }
+          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Read preview API, dashboard, and sitemap
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 \
+            "$DEPLOY_URL/api/revenue/canonicalization-preview" --output preview.json
+          curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 \
+            "$DEPLOY_URL/github-control-tower-audit/canonicalization-preview" --output preview.html
+          curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 \
+            "$DEPLOY_URL/sitemap.xml" --output sitemap.xml
+
+          node <<'NODE'
+          const fs = require('node:fs');
+          const x = JSON.parse(fs.readFileSync('preview.json', 'utf8'));
+          const html = fs.readFileSync('preview.html', 'utf8');
+          const sitemap = fs.readFileSync('sitemap.xml', 'utf8');
+          const count = x.publicCounts || {};
+          const validCount = (value) => value === null || (Number.isInteger(value) && value >= 0);
+          const required = [
+            [x.schemaVersion === '1.0.0', 'schemaVersion'],
+            [x.controllerVersion === '6.4.0', 'controllerVersion'],
+            [x.controllingIssue === 165, 'controllingIssue'],
+            [x.previewLedger?.id === 'FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4', 'previewLedgerId'],
+            [x.previewLedger?.digest === '9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c', 'previewLedgerDigest'],
+            [x.previewLedger?.previewCount === 1, 'previewCount'],
+            [x.previewLedger?.decisionCounts?.PREPARED === 1, 'preparedCount'],
+            [x.previewLedger?.applicationPolicy?.automaticCanonicalization === false, 'automaticCanonicalization'],
+            [x.previewLedger?.applicationPolicy?.reviewedMergeRequired === true, 'reviewedMergeRequired'],
+            [x.preparedReviewBundle?.id === 'FARDARTER-CANONICALIZATION-BUNDLE-ISSUE-162-V6-4', 'bundleId'],
+            [x.preparedReviewBundle?.state === 'PREPARED', 'bundleState'],
+            [x.preparedReviewBundle?.expectedDecision === 'PREVIEW_READY', 'expectedDecision'],
+            [x.preparedReviewBundle?.digest === '3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2', 'bundleDigest'],
+            [x.preparedReviewBundle?.source?.proposalIssue === 162, 'sourceProposal'],
+            [x.preparedReviewBundle?.source?.entityIssue === 159, 'sourceEntity'],
+            [x.preparedReviewBundle?.candidateEvent?.sequence === 1, 'candidateSequence'],
+            [x.preparedReviewBundle?.candidateEvent?.previousEventDigest === '4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b', 'previousEventDigest'],
+            [x.preparedReviewBundle?.candidateEvent?.digest === '2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174', 'candidateEventDigest'],
+            [x.preparedReviewBundle?.candidateEvent?.canonical === false, 'candidateNotCanonical'],
+            [x.preparedReviewBundle?.candidateEvent?.applied === false, 'candidateNotApplied'],
+            [x.preparedReviewBundle?.candidateEvent?.capacityEffect?.activeDelta === 0, 'candidateActiveDelta'],
+            [x.preparedReviewBundle?.candidateEvent?.financialEffect?.createsOrder === false, 'candidateOrderDelta'],
+            [x.preparedReviewBundle?.candidateEvent?.financialEffect?.grossRevenueDeltaUsd === 0, 'candidateGrossDelta'],
+            [x.preparedReviewBundle?.candidateEvent?.financialEffect?.settledCashDeltaUsd === 0, 'candidateSettledDelta'],
+            [x.preparedReviewBundle?.candidateReconciliation?.sequence === 1, 'candidateSnapshotSequence'],
+            [x.preparedReviewBundle?.candidateReconciliation?.previousSnapshotDigest === '4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22', 'previousSnapshotDigest'],
+            [x.preparedReviewBundle?.candidateReconciliation?.digest === '4e7e2ead4c466704ad0559fed73cc01cf028722d701ffe47669626858a96c8de', 'candidateSnapshotDigest'],
+            [x.preparedReviewBundle?.candidateReconciliation?.reviewStatus === 'PREVIEW_ONLY_NOT_APPLIED', 'snapshotReviewStatus'],
+            [x.canonicalCurrentState?.headSequence === 0, 'canonicalHeadSequence'],
+            [x.canonicalCurrentState?.headDigest === '4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b', 'canonicalHeadDigest'],
+            [x.canonicalCurrentState?.canonicalBusinessEventCount === 0, 'canonicalBusinessEventCount'],
+            [x.canonicalCurrentState?.healthy === true && x.canonicalCurrentState?.genesisOnly === true, 'canonicalChainHealth'],
+            [x.canonicalCurrentState?.totalPlanningSlots === 1000, 'totalPlanningSlots'],
+            [x.canonicalCurrentState?.effectiveActiveCeiling === 100, 'effectiveActiveCeiling'],
+            [x.canonicalCurrentState?.activeDeliveries === 0 && x.canonicalCurrentState?.activeHeadroom === 100, 'activeBaseline'],
+            [x.canonicalCurrentState?.orders === 0, 'orders'],
+            [x.canonicalCurrentState?.verifiedGrossRevenueUsd === 0, 'grossRevenue'],
+            [x.canonicalCurrentState?.verifiedSettledCashUsd === 0, 'settledCash'],
+            [x.canonicalCurrentState?.receivedCashRequires === 'PAID_SETTLED', 'cashGate'],
+            [x.sourceDigests?.proposalLedger === '3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e', 'proposalDigest'],
+            [x.sourceDigests?.reconciliation === '4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22', 'reconciliationDigest'],
+            [['AVAILABLE','UNAVAILABLE'].includes(count.sourceState), 'publicCountState'],
+            [validCount(count.openPreviewRequests), 'openPreviewRequests'],
+            [validCount(count.previewReady), 'previewReady'],
+            [validCount(count.blocked), 'blocked'],
+            [validCount(count.needsReview), 'needsReview'],
+            [count.countsAreCanonicalEvidence === false, 'countsNotCanonical'],
+            [count.countsAreCommercialEvidence === false, 'countsNotCommercial'],
+            [x.googleDriveContinuity?.state === 'CONNECTED_PRIVATE', 'driveState'],
+            [x.googleDriveContinuity?.publicFolderUrlExposed === false, 'noDriveUrl'],
+            [x.googleDriveContinuity?.publicFileIdsExposed === false, 'noDriveIds'],
+            [x.googleDriveContinuity?.canonicalizationPreviewsMaintained === true, 'previewMaintenance'],
+            [x.googleDriveContinuity?.reviewBundlesMaintained === true, 'bundleMaintenance'],
+            [x.googleDriveContinuity?.automaticCanonicalEventApplication === false, 'noAutomaticApplication'],
+            [x.evidenceBoundary?.preparedBundleIsCanonical === false, 'preparedBundleBoundary'],
+            [x.evidenceBoundary?.publicPreviewReceiptIsCanonical === false, 'publicReceiptBoundary'],
+            [x.evidenceBoundary?.applicationRequiresReviewedMerge === true, 'mergeGate'],
+            [x.evidenceBoundary?.receivedCashRequires === 'PAID_SETTLED', 'evidenceCashGate'],
+            [x.evidenceBoundary?.templateIsIndemnityProof === false, 'indemnityBoundary'],
+            [html.includes('Fardarter Drive™ v6.4'), 'dashboardTitle'],
+            [html.includes('Canonicalization preview'), 'dashboardPreview'],
+            [html.includes('Candidate sequence'), 'dashboardSequence'],
+            [sitemap.includes('/github-control-tower-audit/canonicalization-preview'), 'sitemapPreviewRoute'],
+          ];
+          const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
+          if (failed.length) throw new Error(`Canonicalization preview readback failed: ${failed.join(', ')}`);
+          console.log('Fardarter Drive v6.4 immutable canonicalization-preview readback: PASS');
+          NODE
+
+      - name: Write preview readback receipt
+        env:
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          fs.writeFileSync('canonicalization-preview-readback-receipt.json', JSON.stringify({
+            schemaVersion: '1.0.0',
+            receiptId: `FARDARTER-CANONICALIZATION-PREVIEW-READBACK-V6-4-${process.env.GITHUB_RUN_ID}`,
+            result: 'DEPLOYED_AND_VERIFIED',
+            deployId: process.env.DEPLOY_ID,
+            deployUrl: process.env.DEPLOY_URL,
+            controllerVersion: '6.4.0',
+            controllingIssue: 165,
+            previewLedgerDigest: '9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c',
+            reviewBundleDigest: '3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2',
+            candidateEventDigest: '2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174',
+            candidateSnapshotDigest: '4e7e2ead4c466704ad0559fed73cc01cf028722d701ffe47669626858a96c8de',
+            canonicalHeadSequence: 0,
+            canonicalBusinessEvents: 0,
+            activeDeliveries: 0,
+            orders: 0,
+            verifiedGrossRevenueUsd: 0,
+            verifiedSettledCashUsd: 0,
+            generatedAt: new Date().toISOString(),
+          }, null, 2) + '\n');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-canonicalization-preview-readback-v6-4-${{ github.event.workflow_run.head_sha }}
+          path: canonicalization-preview-readback-receipt.json
+          retention-days: 30
