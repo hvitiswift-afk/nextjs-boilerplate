@@ -1,0 +1,65 @@
+name: Fardarter successor review v6.6
+description: Request a noncanonical dynamic-head review for the next append-only event.
+title: "[FD successor review]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form creates a **noncanonical successor review only**. It cannot append event 2, create an order or contract, prove payment, start work, consume ACTIVE capacity, change a capacity ceiling, select legal terms, or expose private evidence.
+  - type: input
+    id: entity_issue
+    attributes:
+      label: Source entity issue
+      placeholder: "Issue #159"
+    validations:
+      required: true
+  - type: dropdown
+    id: expected_state
+    attributes:
+      label: Expected current canonical state
+      options: [REQUESTED, FIT_APPROVED_FOR_SCOPE_DRAFT, SCOPE_DRAFTED, HUMAN_ACCEPTED, PAID_PENDING, PAID_SETTLED, WORK_START_APPROVED, ACTIVE, DELIVERED, ACCEPTED, CANCELLED, REFUNDED, DISPUTED]
+    validations:
+      required: true
+  - type: dropdown
+    id: candidate_state
+    attributes:
+      label: Candidate successor state
+      options: [FIT_APPROVED_FOR_SCOPE_DRAFT, SCOPE_DRAFTED, HUMAN_ACCEPTED, PAID_PENDING, PAID_SETTLED, WORK_START_APPROVED, ACTIVE, DELIVERED, ACCEPTED, CANCELLED, REFUNDED, DISPUTED]
+    validations:
+      required: true
+  - type: input
+    id: successor_key
+    attributes:
+      label: Public-safe successor idempotency key
+      placeholder: "issue-159-scope-to-human-accepted-v6-6"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Public-safe evidence references
+      description: Do not post identities, signatures, provider IDs, payment records, counsel notes, or confidential evidence.
+    validations:
+      required: true
+  - type: input
+    id: review_by
+    attributes:
+      label: Review-by or expiry time
+      placeholder: "2026-08-03T23:59:59Z"
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Successor and evidence boundaries
+      options:
+        - label: I understand this request is noncanonical and cannot append itself.
+          required: true
+        - label: I understand HUMAN_ACCEPTED requires exact human approval and buyer consent.
+          required: true
+        - label: I understand system-development authorization is not buyer consent.
+          required: true
+        - label: I understand received cash requires provider-confirmed PAID_SETTLED evidence.
+          required: true
+        - label: I have not posted private or sensitive evidence.
+          required: true
