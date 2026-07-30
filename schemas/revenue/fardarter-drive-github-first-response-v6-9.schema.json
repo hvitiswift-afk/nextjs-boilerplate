@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jp.systems/schemas/revenue/fardarter-drive-github-first-response-v6-9.schema.json",
+  "title": "Fardarter Drive v6.9 GitHub First Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "controlId",
+    "controllerVersion",
+    "controllingIssue",
+    "predecessor",
+    "currentCanonical",
+    "trigger",
+    "eligibility",
+    "publicFieldPolicy",
+    "response",
+    "decisionLabels",
+    "safety",
+    "actualEffects",
+    "manifestDigest"
+  ],
+  "properties": {
+    "controlId": {
+      "const": "FARDARTER-DRIVE-GITHUB-FIRST-RESPONSE-V6-9"
+    },
+    "controllerVersion": {
+      "const": "6.9.0"
+    },
+    "controllingIssue": {
+      "const": 185
+    },
+    "predecessor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controllerVersion",
+        "implementationMerge",
+        "identityModel",
+        "channelModel"
+      ],
+      "properties": {
+        "controllerVersion": { "const": "6.8.0" },
+        "implementationMerge": {
+          "const": "4cb63ed2e480e3719c1015e28db007b09aad7f30"
+        },
+        "identityModel": { "const": "GITHUB_ISSUE_AUTHOR" },
+        "channelModel": { "const": "EXACT_GITHUB_ISSUE_THREAD" }
+      }
+    },
+    "currentCanonical": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventHeadSequence",
+        "eventHeadDigest",
+        "reconciliationSequence",
+        "reconciliationDigest",
+        "stateCounts",
+        "orders",
+        "verifiedGrossRevenueUsd",
+        "verifiedSettledCashUsd",
+        "receivedCashRequires"
+      ],
+      "properties": {
+        "eventHeadSequence": { "const": 1 },
+        "eventHeadDigest": {
+          "const": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b"
+        },
+        "reconciliationSequence": { "const": 1 },
+        "reconciliationDigest": {
+          "const": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"
+        },
+        "stateCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["SCOPE_DRAFTED", "HUMAN_ACCEPTED", "ACTIVE"],
+          "properties": {
+            "SCOPE_DRAFTED": { "const": 1 },
+            "HUMAN_ACCEPTED": { "const": 0 },
+            "ACTIVE": { "const": 0 }
+          }
+        },
+        "orders": { "const": 0 },
+        "verifiedGrossRevenueUsd": { "const": 0 },
+        "verifiedSettledCashUsd": { "const": 0 },
+        "receivedCashRequires": { "const": "PAID_SETTLED" }
+      }
+    },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "events",
+        "titlePrefix",
+        "authorizationLabel",
+        "authorizationReceiptMarker"
+      ],
+      "properties": {
+        "events": {
+          "type": "array",
+          "const": [
+            "issues.opened",
+            "issues.edited",
+            "issues.reopened",
+            "issues.labeled",
+            "issue_comment.created"
+          ]
+        },
+        "titlePrefix": { "const": "[Audit request]:" },
+        "authorizationLabel": { "const": "contact-github-authorized" },
+        "authorizationReceiptMarker": {
+          "const": "<!-- jp-audit-github-contact-v1 -->"
+        }
+      }
+    },
+    "eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issueMustBeOpen",
+        "pullRequestAllowed",
+        "requiredLabels",
+        "authorType",
+        "repositoryOwnerAllowed",
+        "botsAllowed",
+        "authorizationReceiptRequired",
+        "sensitivePublicContentAllowed"
+      ],
+      "properties": {
+        "issueMustBeOpen": { "const": true },
+        "pullRequestAllowed": { "const": false },
+        "requiredLabels": {
+          "type": "array",
+          "const": ["audit-fit-check", "contact-github-authorized"]
+        },
+        "authorType": { "const": "User" },
+        "repositoryOwnerAllowed": { "const": false },
+        "botsAllowed": { "const": false },
+        "authorizationReceiptRequired": { "const": true },
+        "sensitivePublicContentAllowed": { "const": false }
+      }
+    },
+    "publicFieldPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repositoryUrlPattern",
+        "enumeratedFields",
+        "freeFormTextEchoAllowed"
+      ],
+      "properties": {
+        "repositoryUrlPattern": {
+          "const": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
+        },
+        "enumeratedFields": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["relationship", "size", "package"],
+          "properties": {
+            "relationship": {
+              "type": "array",
+              "minItems": 4,
+              "uniqueItems": true,
+              "items": { "type": "string" }
+            },
+            "size": {
+              "type": "array",
+              "minItems": 4,
+              "uniqueItems": true,
+              "items": { "type": "string" }
+            },
+            "package": {
+              "type": "array",
+              "minItems": 4,
+              "uniqueItems": true,
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "freeFormTextEchoAllowed": { "const": false }
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "responseMarker",
+        "responseVersion",
+        "maxResponsesPerIssue",
+        "maxClarificationItems",
+        "emailRequired",
+        "emailAllowed",
+        "repeatedUnsolicitedFollowUpAllowed",
+        "acceptsScope",
+        "createsOrder",
+        "reservesCapacity",
+        "confirmsPayment",
+        "startsWork",
+        "provesConsent"
+      ],
+      "properties": {
+        "responseMarker": {
+          "const": "<!-- jp-audit-github-first-response-v1 -->"
+        },
+        "responseVersion": { "const": "1.0.0" },
+        "maxResponsesPerIssue": { "const": 1 },
+        "maxClarificationItems": { "const": 6 },
+        "emailRequired": { "const": false },
+        "emailAllowed": { "const": false },
+        "repeatedUnsolicitedFollowUpAllowed": { "const": false },
+        "acceptsScope": { "const": false },
+        "createsOrder": { "const": false },
+        "reservesCapacity": { "const": false },
+        "confirmsPayment": { "const": false },
+        "startsWork": { "const": false },
+        "provesConsent": { "const": false }
+      }
+    },
+    "decisionLabels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["replied", "blocked", "mutuallyExclusive"],
+      "properties": {
+        "replied": { "const": "contact-github-replied" },
+        "blocked": { "const": "contact-github-reply-blocked" },
+        "mutuallyExclusive": { "const": true }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blockPublicEmailAddress",
+        "blockCredentialAssignment",
+        "blockPrivateKeyBlock",
+        "blockProviderTransactionIdentifier",
+        "blockBankingNumberDisclosure",
+        "ordinaryBoundaryLanguageAllowed",
+        "guessedRecipientAllowed",
+        "massOutreachAllowed",
+        "automaticEmailAllowed",
+        "automaticFollowUpAllowed"
+      ],
+      "properties": {
+        "blockPublicEmailAddress": { "const": true },
+        "blockCredentialAssignment": { "const": true },
+        "blockPrivateKeyBlock": { "const": true },
+        "blockProviderTransactionIdentifier": { "const": true },
+        "blockBankingNumberDisclosure": { "const": true },
+        "ordinaryBoundaryLanguageAllowed": { "const": true },
+        "guessedRecipientAllowed": { "const": false },
+        "massOutreachAllowed": { "const": false },
+        "automaticEmailAllowed": { "const": false },
+        "automaticFollowUpAllowed": { "const": false }
+      }
+    },
+    "actualEffects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "externalRequesterContactedByImplementation",
+        "emailSent",
+        "canonicalEventAppended",
+        "humanAcceptedCreated",
+        "orderCreated",
+        "contractAccepted",
+        "paymentConfirmed",
+        "paidWorkStarted",
+        "activeCapacityUsed",
+        "capacityChanged",
+        "legalTermSelected"
+      ],
+      "properties": {
+        "externalRequesterContactedByImplementation": { "const": false },
+        "emailSent": { "const": false },
+        "canonicalEventAppended": { "const": false },
+        "humanAcceptedCreated": { "const": false },
+        "orderCreated": { "const": false },
+        "contractAccepted": { "const": false },
+        "paymentConfirmed": { "const": false },
+        "paidWorkStarted": { "const": false },
+        "activeCapacityUsed": { "const": false },
+        "capacityChanged": { "const": false },
+        "legalTermSelected": { "const": false }
+      }
+    },
+    "manifestDigest": {
+      "const": "af6e9fd7c97dcb97f511f92b5d1f8baf907d6ea8b45c3ccdeef00a2d18eef3d9"
+    }
+  }
+}
