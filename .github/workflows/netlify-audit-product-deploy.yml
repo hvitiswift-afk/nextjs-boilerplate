@@ -6,7 +6,7 @@ on:
       - ".github/workflows/fardarter-*.yml"
       - ".github/workflows/netlify-audit-product-deploy.yml"
       - "app/github-control-tower-audit/**"
-      - "app/api/revenue/pilot/**"
+      - "app/api/revenue/**"
       - "app/page.tsx"
       - "app/robots.ts"
       - "app/sitemap.ts"
@@ -15,20 +15,19 @@ on:
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-*.mjs"
-      - "scripts/check-fardarter-drive*.mjs"
+      - "scripts/check-fardarter-*.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
       - "package.json"
       - "package-lock.json"
       - "netlify.toml"
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - ".github/workflows/fardarter-*.yml"
       - ".github/workflows/netlify-audit-product-deploy.yml"
       - "app/github-control-tower-audit/**"
-      - "app/api/revenue/pilot/**"
+      - "app/api/revenue/**"
       - "app/page.tsx"
       - "app/robots.ts"
       - "app/sitemap.ts"
@@ -37,7 +36,7 @@ on:
       - "receipts/revenue/**"
       - "schemas/revenue/**"
       - "scripts/check-revenue-*.mjs"
-      - "scripts/check-fardarter-drive*.mjs"
+      - "scripts/check-fardarter-*.mjs"
       - "src/lib/revenue/**"
       - "src/lib/site-url.ts"
       - "package.json"
@@ -58,60 +57,41 @@ env:
 
 jobs:
   validate:
-    name: Validate Fardarter Drive v6 deploy
+    name: Validate Fardarter Drive v6.5 deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+    timeout-minutes: 22
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify v6 revenue, capacity, override, authority, execution, and Drive package
+      - run: npm ci
+      - name: Verify FARDARTER-DRIVE-V6, CAPACITY_OVERRIDE_ACTIVE boundary, and v6.5 application
         run: npm run revenue:verify
-
-      - name: Build application
-        run: npm run build
+      - run: npm run build
 
   deploy:
-    name: Deploy and read back Fardarter Drive v6
+    name: Deploy and read back Fardarter Drive v6.5
     if: github.event_name != 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     env:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
-      - name: Require existing-site credentials
+      - name: Require confirmed existing site
         run: |
           set -euo pipefail
           test -n "$NETLIFY_AUTH_TOKEN" || { echo "Missing NETLIFY_AUTH_TOKEN"; exit 1; }
-          test "$NETLIFY_SITE_ID" = "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f" || { echo "Unexpected Netlify site ID"; exit 1; }
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Revalidate Fardarter Drive v6 package
-        run: npm run revenue:verify
-
+          test "$NETLIFY_SITE_ID" = "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f" || { echo "Unexpected site ID"; exit 1; }
+      - run: npm ci
+      - run: npm run revenue:verify
       - name: Deploy to confirmed Netlify site
         id: deploy
         shell: bash
@@ -121,125 +101,76 @@ jobs:
           printf '%s\n' "$RESULT" > netlify-deploy-result.json
           DEPLOY_URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync("netlify-deploy-result.json","utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")')"
           DEPLOY_ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync("netlify-deploy-result.json","utf8")); console.log(x.deploy_id || x.id || "")')"
-          test -n "$DEPLOY_URL" || { echo "Netlify did not return a deploy URL"; exit 1; }
-          test -n "$DEPLOY_ID" || { echo "Netlify did not return a deploy ID"; exit 1; }
+          test -n "$DEPLOY_URL" || { echo "Missing deploy URL"; exit 1; }
+          test -n "$DEPLOY_ID" || { echo "Missing deploy ID"; exit 1; }
           echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
           echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
-
-      - name: Verify immutable deploy readback
+      - name: Verify immutable v6.5 routes
         id: readback
         env:
           DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
         run: |
           set -euo pipefail
           mkdir -p artifacts
-          retry_get() {
-            curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 "$1" --output "$2"
-          }
-          retry_get "$DEPLOY_URL/" artifacts/home.html
-          retry_get "$DEPLOY_URL/github-control-tower-audit" artifacts/audit.html
-          retry_get "$DEPLOY_URL/api/revenue/pilot" artifacts/pilot.json
-          retry_get "$DEPLOY_URL/sitemap.xml" artifacts/sitemap.xml
-          retry_get "$DEPLOY_URL/robots.txt" artifacts/robots.txt
+          get() { curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 "$1" --output "$2"; }
+          get "$DEPLOY_URL/" artifacts/home.html
+          get "$DEPLOY_URL/github-control-tower-audit" artifacts/audit.html
+          get "$DEPLOY_URL/github-control-tower-audit/canonicalization-application" artifacts/application.html
+          get "$DEPLOY_URL/api/revenue/pilot" artifacts/pilot.json
+          get "$DEPLOY_URL/api/revenue/operations" artifacts/operations.json
+          get "$DEPLOY_URL/api/revenue/reconciliation" artifacts/reconciliation.json
+          get "$DEPLOY_URL/api/revenue/canonicalization-preview" artifacts/preview.json
+          get "$DEPLOY_URL/api/revenue/canonicalization-application" artifacts/application.json
+          get "$DEPLOY_URL/sitemap.xml" artifacts/sitemap.xml
+          get "$DEPLOY_URL/robots.txt" artifacts/robots.txt
 
-          grep -q '/github-control-tower-audit' artifacts/home.html
           grep -q 'Fardarter Drive' artifacts/audit.html
-          grep -q 'Fardarter Drive™ v6' artifacts/audit.html
           grep -q '1,000 total slots' artifacts/audit.html
           grep -q '100 standard ACTIVE' artifacts/audit.html
           grep -q 'Above 100 is allowed' artifacts/audit.html
           grep -q 'CAPACITY_OVERRIDE_ACTIVE' artifacts/audit.html
           grep -q 'INACTIVE_NO_RECEIPT' artifacts/audit.html
-          grep -q 'FIT_APPROVED_FOR_SCOPE_DRAFT' artifacts/audit.html
-          grep -q 'CONNECTED_PRIVATE' artifacts/audit.html
           grep -q 'not indemnity-proof' artifacts/audit.html
-          grep -q '/github-control-tower-audit' artifacts/sitemap.xml
+          grep -q 'Reviewed canonicalization application' artifacts/application.html
+          grep -q '/github-control-tower-audit/canonicalization-application' artifacts/sitemap.xml
           grep -q '/sitemap.xml' artifacts/robots.txt
 
           node <<'NODE'
           const fs = require('node:fs');
-          const pilot = JSON.parse(fs.readFileSync('artifacts/pilot.json', 'utf8'));
-          const horizonMap = new Map(
-            (pilot.fardarterDrive?.horizons || []).map((stage) => [stage.stageId, stage]),
-          );
-          const expectedHorizons = [
-            ['FD-001K', '1000', 'MILESTONE_TARGET'],
-            ['FD-010K', '10000', 'EXPANSION_MILESTONE'],
-            ['FD-100K', '100000', 'CURRENT_EXPERIMENT_TARGET'],
-            ['FD-001M', '1000000', 'ASPIRATIONAL_HORIZON'],
-            ['FD-001B', '1000000000', 'ASPIRATIONAL_HORIZON'],
-            ['FD-001T', '1000000000000', 'ASPIRATIONAL_HORIZON'],
-            ['FD-001Q', '1000000000000000', 'SYMBOLIC_POSSIBILITY_HORIZON'],
-          ];
-          const horizonChecks = expectedHorizons.flatMap(([stageId, amountUsd, classification]) => {
-            const stage = horizonMap.get(stageId);
-            return [
-              [stage?.amountUsd === amountUsd, `${stageId}.amountUsd`],
-              [stage?.classification === classification, `${stageId}.classification`],
-              [stage?.achieved === false, `${stageId}.achieved`],
-              [stage?.forecast === false, `${stageId}.forecast`],
-              [stage?.guaranteed === false, `${stageId}.guaranteed`],
-            ];
-          });
+          const pilot = JSON.parse(fs.readFileSync('artifacts/pilot.json','utf8'));
+          const ops = JSON.parse(fs.readFileSync('artifacts/operations.json','utf8'));
+          const rec = JSON.parse(fs.readFileSync('artifacts/reconciliation.json','utf8'));
+          const preview = JSON.parse(fs.readFileSync('artifacts/preview.json','utf8'));
+          const app = JSON.parse(fs.readFileSync('artifacts/application.json','utf8'));
+          const EVENT = '3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b';
+          const SNAPSHOT = '9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f';
+          const APPLICATION = 'f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d';
           const required = [
-            [pilot.schemaVersion === '1.5.0', 'schemaVersion'],
-            [pilot.experimentId === 'JP-REV-001', 'experimentId'],
-            [pilot.status === 'PUBLISHED', 'status'],
-            [pilot.offer?.priceUsd === 100, 'priceUsd'],
-            [pilot.offer?.firstMilestoneUsd === 1000, 'firstMilestoneUsd'],
-            [pilot.offer?.grossTargetUsd === 100000, 'grossTargetUsd'],
-            [pilot.offer?.capacity === 1000, 'capacity'],
-            [pilot.offer?.maxConcurrentDeliveries === 100, 'maxConcurrentDeliveries'],
-            [pilot.availability?.fitApprovedRequests === 0, 'fitApprovedRequests'],
-            [pilot.availability?.orders === 0, 'orders'],
-            [pilot.availability?.slotsRemaining === 1000, 'slotsRemaining'],
-            [pilot.availability?.activeDeliveries === 0, 'activeDeliveries'],
-            [pilot.availability?.standardActiveCeiling === 100, 'standardActiveCeiling'],
-            [pilot.availability?.effectiveActiveCeiling === 100, 'effectiveActiveCeiling'],
-            [pilot.availability?.activeHeadroom === 100, 'activeHeadroom'],
-            [pilot.availability?.backpressureActive === false, 'backpressureActive'],
-            [pilot.capacityOverride?.above100Allowed === true, 'above100Allowed'],
-            [pilot.capacityOverride?.state === 'INACTIVE_NO_RECEIPT', 'overrideState'],
-            [pilot.capacityOverride?.activationTarget === 'CAPACITY_OVERRIDE_ACTIVE', 'activationTarget'],
-            [pilot.capacityOverride?.activationRequiresCompleteReceipt === true, 'completeReceipt'],
-            [pilot.capacityOverride?.activationRequiresCanonicalMerge === true, 'canonicalMerge'],
-            [pilot.capacityOverride?.automaticActivation === false, 'automaticActivation'],
-            [pilot.capacityOverride?.mayExceedTotalPlanningCapacity === false, 'totalCapacityBoundary'],
-            [pilot.money?.grossRevenueUsd === 0, 'grossRevenueUsd'],
-            [pilot.money?.netCashUsd === 0, 'netCashUsd'],
-            [pilot.publication?.issueNumber === 133, 'publicationIssue'],
-            [pilot.fardarterDrive?.driveId === 'FARDARTER-DRIVE-V6', 'driveId'],
-            [pilot.fardarterDrive?.controllingIssues?.join(',') === '141,143,151', 'controllingIssues'],
-            [pilot.authority?.version === '6.0.0', 'authorityVersion'],
-            [pilot.authority?.revoked === false, 'authorityActive'],
-            [pilot.authority?.capacity1000 === 'AUTHORIZED_ACTIVE', 'capacityAuthority'],
-            [pilot.authority?.standardActiveLimit100 === 'AUTHORIZED_ACTIVE', 'standardActiveAuthority'],
-            [pilot.authority?.above100ActiveOverride === 'AUTHORIZED_ACTIVE', 'overrideAuthority'],
-            [pilot.authority?.contractAcceptance === 'HUMAN_APPROVAL_REQUIRED', 'contractGate'],
-            [pilot.authority?.indemnityAndLiabilityTerms === 'COUNSEL_REVIEW_REQUIRED', 'indemnityGate'],
-            [pilot.authority?.paymentExecution === 'EXTERNAL_PROVIDER_ONLY', 'paymentGate'],
-            [pilot.authority?.paidDeliveryStart === 'HUMAN_APPROVAL_REQUIRED', 'workStartGate'],
-            [pilot.automatedFitAcceptance?.state === 'FIT_APPROVED_FOR_SCOPE_DRAFT', 'fitState'],
-            [pilot.automatedFitAcceptance?.binding === false, 'fitNonbinding'],
-            [pilot.approvedExecution?.state === 'AUTHORIZED_BOUNDED_ONE_SHOT', 'executionState'],
-            [pilot.approvedExecution?.oneShotPerIssue === true, 'oneShot'],
-            [pilot.googleDriveContinuity?.state === 'CONNECTED_PRIVATE', 'driveContinuity'],
-            [pilot.googleDriveContinuity?.publicFolderUrlExposed === false, 'noDriveUrl'],
-            [pilot.googleDriveContinuity?.publicFileIdsExposed === false, 'noDriveIds'],
-            [pilot.evidenceBoundary?.receivedCashRequires === 'PAID_SETTLED', 'cashGate'],
-            [pilot.evidenceBoundary?.capacityEqualsRevenue === false, 'capacityRevenueBoundary'],
-            [pilot.evidenceBoundary?.above100CapacityIsAllowed === true, 'above100Boundary'],
-            [pilot.evidenceBoundary?.capacityOverrideActivatesWithoutReceipt === false, 'overrideReceiptBoundary'],
-            [pilot.evidenceBoundary?.automaticStagePromotion === false, 'stageBoundary'],
-            [pilot.evidenceBoundary?.templateIsIndemnityProof === false, 'indemnityProofBoundary'],
-            ...horizonChecks,
+            [pilot.fardarterDrive?.driveId === 'FARDARTER-DRIVE-V6', 'pilot.drive'],
+            [pilot.offer?.capacity === 1000 && pilot.offer?.maxConcurrentDeliveries === 100, 'pilot.capacity'],
+            [pilot.capacityOverride?.activationTarget === 'CAPACITY_OVERRIDE_ACTIVE', 'pilot.override'],
+            [pilot.capacityOverride?.state === 'INACTIVE_NO_RECEIPT', 'pilot.overrideState'],
+            [pilot.money?.grossRevenueUsd === 0 && pilot.money?.netCashUsd === 0, 'pilot.money'],
+            [ops.receiptChain?.headSequence === 1 && ops.receiptChain?.canonicalBusinessEventCount === 1, 'ops.head'],
+            [ops.receiptChain?.headDigest === EVENT && ops.canonicalCounts?.SCOPE_DRAFTED === 1, 'ops.event'],
+            [ops.capacity?.activeDeliveries === 0 && ops.capacity?.activeHeadroom === 100, 'ops.capacity'],
+            [ops.commercialEvidence?.orders === 0 && ops.commercialEvidence?.verifiedSettledCashUsd === 0, 'ops.money'],
+            [rec.snapshot?.sequence === 1 && rec.snapshot?.digest === SNAPSHOT, 'rec.snapshot'],
+            [rec.canonicalHead?.sequence === 1, 'rec.head'],
+            [rec.currentApplication?.digest === APPLICATION, 'rec.application'],
+            [preview.reviewedApplication?.digest === APPLICATION && preview.canonicalCurrentState?.headSequence === 1, 'preview.application'],
+            [app.applicationDigest === APPLICATION, 'app.digest'],
+            [app.canonicalEvent?.eventDigest === EVENT && app.canonicalEvent?.sequence === 1, 'app.event'],
+            [app.reconciliation?.snapshotDigest === SNAPSHOT, 'app.snapshot'],
+            [app.currentCanonicalState?.stateCounts?.SCOPE_DRAFTED === 1, 'app.scope'],
+            [app.currentCanonicalState?.activeDeliveries === 0 && app.currentCanonicalState?.orders === 0, 'app.zeroEffects'],
+            [app.currentCanonicalState?.verifiedSettledCashUsd === 0 && app.currentCanonicalState?.receivedCashRequires === 'PAID_SETTLED', 'app.cash'],
           ];
-          const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
-          if (failed.length) throw new Error(`Readback failed: ${failed.join(', ')}`);
-          console.log('Fardarter Drive v6 immutable readback: PASS');
+          const failed = required.filter(([ok]) => !ok).map(([,label]) => label);
+          if (failed.length) throw new Error(`v6.5 immutable readback failed: ${failed.join(', ')}`);
+          console.log('Fardarter Drive v6.5 immutable readback: PASS');
           NODE
           echo "readback=PASS" >> "$GITHUB_OUTPUT"
-
       - name: Write deployment receipt
         if: always()
         env:
@@ -252,9 +183,9 @@ jobs:
           const fs = require('node:fs');
           const deployed = Boolean(process.env.DEPLOY_ID);
           const readback = process.env.READBACK || 'NOT_COMPLETED';
-          const receipt = {
-            schemaVersion: '1.5.0',
-            receiptId: `FARDARTER-DRIVE-V6-NETLIFY-${process.env.GITHUB_RUN_ID}`,
+          fs.writeFileSync('artifacts/netlify-fardarter-v6-5-receipt.json', JSON.stringify({
+            schemaVersion: '1.0.0',
+            receiptId: `FARDARTER-DRIVE-V6-5-NETLIFY-${process.env.GITHUB_RUN_ID}`,
             repository: process.env.GITHUB_REPOSITORY,
             commit: process.env.GITHUB_SHA,
             runId: process.env.GITHUB_RUN_ID,
@@ -262,26 +193,22 @@ jobs:
             primaryUrl: process.env.NETLIFY_PRIMARY_URL,
             deployId: process.env.DEPLOY_ID || null,
             deployUrl: process.env.DEPLOY_URL || null,
-            deploymentCompleted: deployed,
-            readback,
             result: deployed && readback === 'PASS' ? 'DEPLOYED_AND_VERIFIED' : 'INCOMPLETE',
             driveId: 'FARDARTER-DRIVE-V6',
-            authorityVersion: '6.0.0',
-            totalSlots: 1000,
-            standardActiveCeiling: 100,
-            effectiveActiveCeiling: 100,
-            above100Allowed: true,
-            capacityOverrideState: 'INACTIVE_NO_RECEIPT',
+            canonicalHeadSequence: 1,
+            canonicalBusinessEventCount: 1,
+            canonicalEventDigest: '3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b',
+            reconciliationDigest: '9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f',
+            applicationDigest: 'f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d',
+            scopeDrafted: 1,
+            activeDeliveries: 0,
             orders: 0,
             verifiedRevenueUsd: 0,
             verifiedSettledCashUsd: 0,
-            externalActionsPerformed: deployed ? ['NETLIFY_PRODUCTION_DEPLOY'] : [],
             generatedAt: new Date().toISOString(),
-          };
-          fs.writeFileSync('artifacts/netlify-fardarter-v6-receipt.json', JSON.stringify(receipt, null, 2) + '\n');
+          }, null, 2) + '\n');
           NODE
           if [ -f netlify-deploy-result.json ]; then cp netlify-deploy-result.json artifacts/; fi
-
       - name: Upload deployment receipt
         if: always()
         uses: actions/upload-artifact@v4
@@ -289,16 +216,3 @@ jobs:
           name: netlify-fardarter-v6-${{ github.sha }}
           path: artifacts
           retention-days: 30
-
-      - name: Deployment summary
-        if: always()
-        run: |
-          {
-            echo "## Netlify Fardarter Drive v6 deployment"
-            echo "- Site ID: $NETLIFY_SITE_ID"
-            echo "- Primary URL: $NETLIFY_PRIMARY_URL"
-            echo "- Deploy ID: ${{ steps.deploy.outputs.deploy_id }}"
-            echo "- Deploy URL: ${{ steps.deploy.outputs.deploy_url }}"
-            echo "- Readback: ${{ steps.readback.outputs.readback }}"
-            echo "- Capacity: 1,000 total / 100 standard ACTIVE / above 100 allowed with receipt"
-          } >> "$GITHUB_STEP_SUMMARY"

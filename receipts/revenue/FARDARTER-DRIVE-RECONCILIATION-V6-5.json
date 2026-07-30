@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0.0",
+  "snapshotId": "FARDARTER-RECONCILIATION-ISSUE-159-V6-5",
+  "sequence": 1,
+  "previousSnapshotDigest": "4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22",
+  "controllerVersion": "6.5.0",
+  "controllingIssue": 168,
+  "sources": {
+    "stateMachine": { "id": "FARDARTER-DRIVE-STATE-MACHINE-V6-2", "path": "receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json" },
+    "eventChain": { "id": "FARDARTER-DRIVE-STATE-EVENTS-V6-2", "path": "receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json", "headSequence": 1, "headDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b" },
+    "capacityLedger": { "id": "FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1", "path": "receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json" },
+    "proposal": { "issue": 162, "decision": "READY_FOR_REVIEW", "ledgerDigest": "3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e" },
+    "preview": {
+      "issue": 167,
+      "decision": "PREVIEW_READY",
+      "preparedLedgerDigest": "9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c",
+      "runtimeEventDigest": "7190d54bcefbe94e28c000912e37085ff15edce05a60b65fb3b6f622a74846e9",
+      "runtimeSnapshotDigest": "d914b9d5a73a3caa3869cd03d13e055b0769ca4e2f094c589fba08b0650eb486",
+      "runtimeBundleDigest": "e10840594ba62657c47b83cc86b07ee4279d5346d93350cc77e60645c8cb33bd"
+    }
+  },
+  "canonical": {
+    "eventChainHealthy": true,
+    "canonicalBusinessEventCount": 1,
+    "stateCounts": { "REQUESTED": 0, "FIT_APPROVED_FOR_SCOPE_DRAFT": 0, "SCOPE_DRAFTED": 1, "HUMAN_ACCEPTED": 0, "PAID_PENDING": 0, "PAID_SETTLED": 0, "WORK_START_APPROVED": 0, "ACTIVE": 0, "DELIVERED": 0, "ACCEPTED": 0, "CANCELLED": 0, "REFUNDED": 0, "DISPUTED": 0 },
+    "totalPlanningSlots": 1000,
+    "effectiveActiveCeiling": 100,
+    "activeDeliveries": 0,
+    "activeHeadroom": 100,
+    "overrideState": "INACTIVE_NO_RECEIPT",
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "settlementState": "UNKNOWN",
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "application": { "entityIssue": 159, "fromState": "FIT_APPROVED_FOR_SCOPE_DRAFT", "toState": "SCOPE_DRAFTED", "eventSequence": 1, "eventDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b", "reviewedMergeRequired": true, "reviewStatus": "APPROVED_AND_APPLIED_TO_SOURCE", "postMergeReadbackRequired": true },
+  "conflicts": { "total": 0, "quarantined": 0, "types": [] },
+  "deployment": { "state": "UNVERIFIED", "deployId": null, "immutableUrl": null },
+  "googleDriveContinuity": { "state": "CONNECTED_PRIVATE", "documentTitles": ["Fardarter Drive™ v6.5 — Canonical Event Application Charter", "Fardarter Drive™ v6.5 — Canonical Event Application Register"], "publicReferencesExposed": false },
+  "generatedAt": "2026-07-30T08:50:16Z",
+  "snapshotDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"
+}

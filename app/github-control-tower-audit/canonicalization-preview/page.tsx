@@ -1,163 +1,92 @@
 import type { Metadata } from "next";
 
+import application from "@/receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-APPLICATION-V6-5.json";
 import previewLedger from "@/receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4.json";
 import reviewBundle from "@/receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json";
-import capacityLedger from "@/receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json";
-import eventChain from "@/receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json";
+import capacity from "@/receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json";
+import events from "@/receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json";
 import { getPublicCanonicalizationPreviewCounts } from "@/lib/revenue/public-canonicalization-preview";
 
 export const metadata: Metadata = {
-  title: "Fardarter Drive v6.4 Canonicalization Preview",
-  description:
-    "Inspect deterministic next-event and reconciliation previews without applying canonical, commercial, financial, or capacity effects.",
+  title: "Fardarter Drive v6.4 Preview History",
+  description: "Historical prepared preview and the reviewed v6.5 application that followed it.",
 };
-
-const money = (value: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
 
 export default async function CanonicalizationPreviewPage() {
   const counts = await getPublicCanonicalizationPreviewCounts();
   const event = reviewBundle.candidateEvent;
-  const projection = reviewBundle.candidateProjection;
   const snapshot = reviewBundle.candidateReconciliation;
-  if (reviewBundle.expectedDecision !== "PREVIEW_READY") {
-    throw new Error("The canonical review bundle must expect PREVIEW_READY.");
-  }
-  const previewReadyState = reviewBundle.expectedDecision;
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-14">
-      <header className="space-y-5 border-b border-neutral-800 pb-10">
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-neutral-400">
-          Fardarter Drive™ v6.4
-        </p>
-        <h1 className="max-w-4xl text-4xl font-semibold tracking-tight sm:text-6xl">
-          Canonicalization preview and review bundles
-        </h1>
+      <nav className="flex flex-wrap gap-4 border-b border-neutral-800 pb-5 text-sm text-neutral-400">
+        <a href="/github-control-tower-audit">Audit offer</a>
+        <a href="/github-control-tower-audit/canonicalization-application">Applied event</a>
+        <a href="/api/revenue/canonicalization-preview">Preview JSON</a>
+      </nav>
+
+      <header className="space-y-5 border-b border-neutral-800 py-12">
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-neutral-400">Fardarter Drive™ v6.4 → v6.5</p>
+        <h1 className="max-w-4xl text-4xl font-semibold tracking-tight sm:text-6xl">Historical preview, reviewed application</h1>
         <p className="max-w-3xl text-lg leading-8 text-neutral-300">
-          Compute the next event, projected state counts, capacity, money, and
-          reconciliation digest before a reviewed merge. A preview never applies
-          itself.
+          The v6.4 bundle remains an immutable noncanonical dry-run. v6.5 recomputed a new
+          canonical event and snapshot through a reviewed merge; it did not reuse the preview digest.
         </p>
-        <div className="flex flex-wrap gap-3">
-          <a
-            className="rounded-full border border-neutral-600 px-5 py-2 text-sm font-medium hover:border-neutral-300"
-            href="https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/new?template=fardarter-canonicalization-preview.yml"
-          >
-            Create preview request
-          </a>
-          <a
-            className="rounded-full border border-neutral-600 px-5 py-2 text-sm font-medium hover:border-neutral-300"
-            href="/api/revenue/canonicalization-preview"
-          >
-            Read preview API
-          </a>
-          <a
-            className="rounded-full border border-neutral-600 px-5 py-2 text-sm font-medium hover:border-neutral-300"
-            href="/github-control-tower-audit/reconciliation"
-          >
-            Reconciliation control
-          </a>
-        </div>
       </header>
 
       <section className="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          ["Planning slots", capacityLedger.canonicalCapacity.totalPlanningSlots],
-          ["Effective ACTIVE", capacityLedger.canonicalCapacity.effectiveActiveCeiling],
-          ["Active now", capacityLedger.canonicalCapacity.activeDeliveries],
-          ["Canonical events", eventChain.canonicalBusinessEventCount],
-        ].map(([label, value]) => (
-          <article key={String(label)} className="rounded-2xl border border-neutral-800 p-5">
-            <p className="text-sm text-neutral-400">{label}</p>
-            <p className="mt-2 text-3xl font-semibold">{String(value)}</p>
-          </article>
-        ))}
+        <Metric label="Prepared preview" value={reviewBundle.state} />
+        <Metric label="Expected decision" value={reviewBundle.expectedDecision} />
+        <Metric label="Current head" value={`#${events.headSequence}`} />
+        <Metric label="Canonical events" value={String(events.canonicalBusinessEventCount)} />
+        <Metric label="SCOPE_DRAFTED" value={String(events.currentCanonicalCounts.SCOPE_DRAFTED)} />
+        <Metric label="ACTIVE / headroom" value={`${capacity.canonicalCapacity.activeDeliveries}/${capacity.arithmetic.effectiveActiveHeadroom}`} />
+        <Metric label="Orders" value={String(capacity.canonicalCapacity.orders)} />
+        <Metric label="Settled cash" value="$0" />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <article className="rounded-3xl border border-neutral-800 p-7">
-          <p className="text-sm uppercase tracking-[0.2em] text-neutral-400">
-            Prepared review bundle
-          </p>
-          <h2 className="mt-3 text-2xl font-semibold">{previewReadyState}</h2>
-          <dl className="mt-6 space-y-3 text-sm">
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Bundle state</dt><dd>{reviewBundle.state}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Source proposal</dt><dd>Issue #{reviewBundle.source.proposalIssue}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Source entity</dt><dd>Issue #{reviewBundle.source.entityIssue}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Candidate sequence</dt><dd>{event.sequence}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Canonical / applied</dt><dd>NO / NO</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Evidence rows</dt><dd>{reviewBundle.evidenceMatrix.length}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Authority rows</dt><dd>{reviewBundle.authorityMatrix.length}</dd></div>
-          </dl>
-        </article>
+        <Panel title="Historical prepared preview">
+          <Row label="Transition" value={`${event.fromState} → ${event.toState}`} />
+          <Row label="Candidate sequence" value={String(event.sequence)} />
+          <Row label="Candidate event" value={event.eventDigest} mono />
+          <Row label="Candidate snapshot" value={snapshot.snapshotDigest} mono />
+          <Row label="Review bundle" value={reviewBundle.bundleDigest} mono />
+          <Row label="Preview ledger" value={previewLedger.ledgerDigest} mono />
+          <Row label="Canonical / applied" value="NO / NO" />
+        </Panel>
 
-        <article className="rounded-3xl border border-neutral-800 p-7">
-          <p className="text-sm uppercase tracking-[0.2em] text-neutral-400">
-            Candidate projection
-          </p>
-          <h2 className="mt-3 text-2xl font-semibold">
-            {event.fromState} → {event.toState}
-          </h2>
-          <dl className="mt-6 space-y-3 text-sm">
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">ACTIVE delta</dt><dd>{event.capacityEffect.activeDelta}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Headroom if applied</dt><dd>{projection.activeHeadroom}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Order delta</dt><dd>{event.financialEffect.createsOrder ? 1 : 0}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Gross delta</dt><dd>{money(event.financialEffect.grossRevenueDeltaUsd)}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Settled-cash delta</dt><dd>{money(event.financialEffect.settledCashDeltaUsd)}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-neutral-400">Canonical source changed</dt><dd>NO</dd></div>
-          </dl>
-        </article>
-      </section>
-
-      <section className="mt-8 rounded-3xl border border-neutral-800 p-7">
-        <h2 className="text-2xl font-semibold">Digest chain</h2>
-        <div className="mt-6 grid gap-5 text-sm lg:grid-cols-2">
-          {[
-            ["Current canonical head", event.previousEventDigest],
-            ["Candidate event", event.eventDigest],
-            ["Previous reconciliation", snapshot.previousSnapshotDigest],
-            ["Candidate reconciliation", snapshot.snapshotDigest],
-            ["Review bundle", reviewBundle.bundleDigest],
-            ["Preview ledger", previewLedger.ledgerDigest],
-          ].map(([label, digest]) => (
-            <div key={label} className="min-w-0">
-              <p className="text-neutral-400">{label}</p>
-              <code className="mt-1 block break-all text-xs leading-5">{digest}</code>
-            </div>
-          ))}
-        </div>
+        <Panel title="Reviewed v6.5 application">
+          <Row label="Decision" value={application.review.decision} />
+          <Row label="Applied sequence" value={String(application.canonicalEvent.sequence)} />
+          <Row label="Canonical event" value={application.canonicalEvent.eventDigest} mono />
+          <Row label="Reconciliation" value={application.reconciliation.snapshotDigest} mono />
+          <Row label="Application" value={application.applicationDigest} mono />
+          <Row label="Orders / gross / settled" value="0 / $0 / $0" />
+        </Panel>
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
-        <article className="rounded-3xl border border-neutral-800 p-7">
-          <h2 className="text-2xl font-semibold">Live public preview signals</h2>
-          <p className="mt-2 text-sm text-neutral-400">
-            Source: {counts.sourceState}. These counts are operational signals, not canonical or commercial evidence.
-          </p>
-          <dl className="mt-6 space-y-3 text-sm">
-            <div className="flex justify-between"><dt>Open requests</dt><dd>{counts.openPreviewRequests ?? "unavailable"}</dd></div>
-            <div className="flex justify-between"><dt>Preview ready</dt><dd>{counts.previewReady ?? "unavailable"}</dd></div>
-            <div className="flex justify-between"><dt>Blocked</dt><dd>{counts.blocked ?? "unavailable"}</dd></div>
-            <div className="flex justify-between"><dt>Needs review</dt><dd>{counts.needsReview ?? "unavailable"}</dd></div>
-          </dl>
-        </article>
-
-        <article className="rounded-3xl border border-neutral-800 p-7">
-          <h2 className="text-2xl font-semibold">Application boundary</h2>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-neutral-300">
-            <li>Preview receipts and Drive files are noncanonical.</li>
-            <li>A reviewed merge must recompute event, bundle, and snapshot digests.</li>
-            <li>Counts, capacity, orders, revenue, and settled cash must reconcile before application.</li>
-            <li>Received cash still requires provider-confirmed PAID_SETTLED evidence.</li>
-            <li>Deployment remains unverified without a real Netlify deploy ID and immutable readback.</li>
-          </ul>
-        </article>
+        <Panel title="Live public preview signals">
+          <Row label="Source" value={counts.sourceState} />
+          <Row label="Open" value={String(counts.openPreviewRequests ?? "unavailable")} />
+          <Row label="Preview ready" value={String(counts.previewReady ?? "unavailable")} />
+          <Row label="Blocked" value={String(counts.blocked ?? "unavailable")} />
+        </Panel>
+        <Panel title="Application boundary">
+          <Boundary text="Preview digest reused as canonical digest: FALSE" />
+          <Boundary text="Reviewed application creates order: FALSE" />
+          <Boundary text="Reviewed application proves payment: FALSE" />
+          <Boundary text="Reviewed application starts paid work: FALSE" />
+          <Boundary text="Later changes require new event: TRUE" />
+          <Boundary text="Public deployment verified: FALSE" />
+        </Panel>
       </section>
     </main>
   );
 }
+
+function Metric({ label, value }: { label: string; value: string }) { return <article className="rounded-2xl border border-neutral-800 p-5"><p className="text-sm text-neutral-400">{label}</p><p className="mt-2 break-words text-2xl font-semibold">{value}</p></article>; }
+function Panel({ title, children }: { title: string; children: React.ReactNode }) { return <article className="rounded-3xl border border-neutral-800 p-7"><h2 className="text-2xl font-semibold">{title}</h2><dl className="mt-6 space-y-4">{children}</dl></article>; }
+function Row({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) { return <div className="grid gap-1 border-t border-neutral-800 pt-4 sm:grid-cols-[155px_1fr]"><dt className="text-neutral-400">{label}</dt><dd className={mono ? "break-all font-mono text-xs" : "text-neutral-200"}>{value}</dd></div>; }
+function Boundary({ text }: { text: string }) { return <p className="rounded-2xl border border-neutral-800 p-4 text-sm text-neutral-300">{text}</p>; }

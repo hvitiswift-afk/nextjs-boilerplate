@@ -1,7 +1,9 @@
+import application from "@/receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-APPLICATION-V6-5.json";
 import capacityLedger from "@/receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json";
 import proposalLedger from "@/receipts/revenue/FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3.json";
 import googleDriveReceipt from "@/receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json";
-import reconciliation from "@/receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json";
+import historicalReconciliation from "@/receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json";
+import reconciliation from "@/receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-5.json";
 import eventChain from "@/receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json";
 import stateMachine from "@/receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json";
 import { getPublicReconciliationSignals } from "@/lib/revenue/public-reconciliation-ledger";
@@ -19,11 +21,11 @@ export async function GET() {
     eventChain.eventCount === eventChain.events.length &&
     eventChain.headSequence === eventChain.events.at(-1)?.sequence &&
     eventChain.headDigest === eventChain.events.at(-1)?.eventDigest &&
-    eventChain.canonicalBusinessEventCount === 0;
+    eventChain.canonicalBusinessEventCount === 1;
 
   return Response.json(
     {
-      schemaVersion: "1.0.0",
+      schemaVersion: "1.1.0",
       controllerVersion: reconciliation.controllerVersion,
       controllingIssue: reconciliation.controllingIssue,
       snapshot: {
@@ -31,8 +33,16 @@ export async function GET() {
         sequence: reconciliation.sequence,
         previousSnapshotDigest: reconciliation.previousSnapshotDigest,
         digest: reconciliation.snapshotDigest,
-        reviewStatus: reconciliation.reviewStatus,
         generatedAt: reconciliation.generatedAt,
+        application: reconciliation.application,
+      },
+      historicalGenesisSnapshot: {
+        id: historicalReconciliation.snapshotId,
+        sequence: historicalReconciliation.sequence,
+        previousSnapshotDigest:
+          historicalReconciliation.previousSnapshotDigest,
+        digest: historicalReconciliation.snapshotDigest,
+        reviewStatus: historicalReconciliation.reviewStatus,
       },
       canonicalHead: {
         stateMachineId: stateMachine.stateMachineId,
@@ -42,7 +52,15 @@ export async function GET() {
         eventCount: eventChain.eventCount,
         canonicalBusinessEventCount: eventChain.canonicalBusinessEventCount,
         healthy: canonicalHeadHealthy,
-        genesisOnly: eventChain.canonicalBusinessEventCount === 0,
+        genesisOnly: false,
+      },
+      currentApplication: {
+        id: application.applicationId,
+        digest: application.applicationDigest,
+        decision: application.review.decision,
+        source: application.source,
+        canonicalEvent: application.canonicalEvent,
+        effects: application.effects,
       },
       capacity: {
         totalPlanningSlots: capacityLedger.canonicalCapacity.totalPlanningSlots,
@@ -60,6 +78,7 @@ export async function GET() {
         proposalCount: proposalLedger.proposalCount,
         decisionCounts: proposalLedger.decisionCounts,
         quarantinePolicy: proposalLedger.quarantinePolicy,
+        historicalSource: true,
       },
       publicSignals: {
         states: publicStates,
@@ -92,21 +111,25 @@ export async function GET() {
           googleDriveReceipt.automation.maintainProposalReconciliation,
         quarantineRegisterMaintained:
           googleDriveReceipt.automation.maintainProposalQuarantineRegister,
+        canonicalApplicationsMaintained:
+          googleDriveReceipt.automation.maintainCanonicalEventApplications,
       },
       reconciliationPolicy: {
         proposalMayBecomeCanonicalAutomatically: false,
         canonicalEventRequiresReviewedMerge: true,
         snapshotUsesSha256: true,
         snapshotLinksToPreviousDigest: true,
-        quarantineFreezesCanonicalMutation: true,
-        quarantineIsReversible: true,
+        historicalSnapshotsRemainImmutable: true,
+        laterCorrectionRequiresNewEvent: true,
       },
       evidenceBoundary: {
         proposalIsCanonicalEvent: false,
         readyForReviewCreatesOrder: false,
         readyForReviewCreatesContract: false,
         readyForReviewProvesPayment: false,
-        readyForReviewStartsPaidWork: false,
+        reviewedApplicationCreatesOrder: false,
+        reviewedApplicationProvesPayment: false,
+        reviewedApplicationStartsPaidWork: false,
         publicSignalProvesPrivateEvidence: false,
         pendingTransferEqualsSettledCash: false,
         receivedCashRequires: "PAID_SETTLED",
@@ -114,7 +137,8 @@ export async function GET() {
         automaticPaidWorkStart: false,
         templateIsIndemnityProof: false,
       },
-      nextControlledAction: proposalLedger.nextControlledAction,
+      nextControlledAction:
+        "Preserve the sequence-1 reconciliation and append a new reviewed event for any later state change.",
     },
     {
       headers: {

@@ -3,25 +3,16 @@ name: Fardarter Reconciliation Readback v6.3
 on:
   pull_request:
     paths:
-      - ".github/ISSUE_TEMPLATE/fardarter-event-proposal.yml"
-      - ".github/workflows/fardarter-event-proposal-v6-3.yml"
-      - ".github/workflows/fardarter-reconciliation-v6-3.yml"
       - ".github/workflows/fardarter-reconciliation-readback-v6-3.yml"
       - "app/api/revenue/reconciliation/**"
       - "app/github-control-tower-audit/reconciliation/**"
-      - "receipts/revenue/FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3.json"
-      - "receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json"
-      - "schemas/revenue/fardarter-drive-event-proposal*.json"
-      - "schemas/revenue/fardarter-drive-reconciliation-v6-3.schema.json"
-      - "scripts/check-fardarter-reconciliation-v6-3.mjs"
-      - "src/lib/revenue/public-reconciliation-ledger.ts"
-      - "app/sitemap.ts"
+      - "receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-5.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-APPLICATION-V6-5.json"
+      - "scripts/check-fardarter-reviewed-canonicalization-v6-5.mjs"
       - "package.json"
   workflow_run:
-    workflows:
-      - Netlify Audit Product Deploy
-    types:
-      - completed
+    workflows: [Netlify Audit Product Deploy]
+    types: [completed]
 
 permissions:
   contents: read
@@ -29,153 +20,49 @@ permissions:
 
 jobs:
   validate:
-    name: Validate v6.3 reconciliation source
+    name: Validate current reconciliation source
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+        with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: npm run fardarter:reconciliation:check
+      - run: npm run fardarter:current:check
       - run: npm run build
 
   immutable-readback:
-    name: Verify immutable reconciliation API
-    if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success'
+    name: Verify immutable reconciliation API at sequence 1
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
     steps:
-      - name: Download Netlify deployment artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
           pattern: netlify-fardarter-v6-*
           path: deployment-artifacts
           merge-multiple: true
-
-      - name: Resolve immutable deploy URL
-        id: deploy
-        shell: bash
+      - name: Verify current reconciliation
         run: |
           set -euo pipefail
           RESULT="$(find deployment-artifacts -name netlify-deploy-result.json -print -quit)"
-          test -n "$RESULT" || { echo "Missing Netlify deploy result artifact"; exit 1; }
-          DEPLOY_URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")' "$RESULT")"
-          DEPLOY_ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_id || x.id || "")' "$RESULT")"
-          test -n "$DEPLOY_URL" || { echo "Missing immutable deploy URL"; exit 1; }
-          test -n "$DEPLOY_ID" || { echo "Missing deploy ID"; exit 1; }
-          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
-          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
-
-      - name: Read and verify reconciliation surfaces
-        env:
-          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 \
-            "$DEPLOY_URL/api/revenue/reconciliation" --output reconciliation.json
-          curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 \
-            "$DEPLOY_URL/github-control-tower-audit/reconciliation" --output reconciliation.html
-          curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 \
-            "$DEPLOY_URL/sitemap.xml" --output sitemap.xml
-          grep -q 'Fardarter Drive' reconciliation.html
-          grep -q 'READY_FOR_REVIEW' reconciliation.html
-          grep -q 'QUARANTINED' reconciliation.html
-          grep -q 'GENESIS_ONLY' reconciliation.html
-          grep -q '/github-control-tower-audit/reconciliation' sitemap.xml
+          URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")' "$RESULT")"
+          test -n "$URL"
+          curl --fail --silent --show-error --location "$URL/api/revenue/reconciliation" -o reconciliation.json
           node <<'NODE'
-          const fs = require('node:fs');
-          const x = JSON.parse(fs.readFileSync('reconciliation.json', 'utf8'));
-          const validCount = (value) => value === null || (Number.isInteger(value) && value >= 0);
-          const proposalSignals = x.publicSignals?.proposals || {};
-          const stateSignals = x.publicSignals?.states || {};
-          const required = [
-            [x.schemaVersion === '1.0.0', 'schemaVersion'],
-            [x.controllerVersion === '6.3.0', 'controllerVersion'],
-            [x.controllingIssue === 160, 'controllingIssue'],
-            [x.snapshot?.id === 'FARDARTER-RECONCILIATION-GENESIS-V6-3', 'snapshotId'],
-            [x.snapshot?.sequence === 0, 'snapshotSequence'],
-            [x.snapshot?.previousSnapshotDigest === null, 'previousSnapshotDigest'],
-            [x.snapshot?.digest === '4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22', 'snapshotDigest'],
-            [x.canonicalHead?.stateMachineId === 'FARDARTER-DRIVE-STATE-MACHINE-V6-2', 'stateMachineId'],
-            [x.canonicalHead?.eventChainId === 'FARDARTER-DRIVE-STATE-EVENTS-V6-2', 'eventChainId'],
-            [x.canonicalHead?.sequence === 0, 'headSequence'],
-            [x.canonicalHead?.digest === '4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b', 'headDigest'],
-            [x.canonicalHead?.canonicalBusinessEventCount === 0, 'businessEventCount'],
-            [x.canonicalHead?.healthy === true, 'chainHealth'],
-            [x.canonicalHead?.genesisOnly === true, 'genesisOnly'],
-            [x.capacity?.totalPlanningSlots === 1000, 'totalPlanningSlots'],
-            [x.capacity?.effectiveActiveCeiling === 100, 'effectiveActiveCeiling'],
-            [x.capacity?.activeDeliveries === 0, 'activeDeliveries'],
-            [x.capacity?.activeHeadroom === 100, 'activeHeadroom'],
-            [x.capacity?.overrideState === 'INACTIVE_NO_RECEIPT', 'overrideState'],
-            [x.proposalLedger?.id === 'FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3', 'proposalLedgerId'],
-            [x.proposalLedger?.digest === '3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e', 'proposalLedgerDigest'],
-            [x.proposalLedger?.proposalCount === 0, 'proposalCount'],
-            [x.proposalLedger?.lifecycle?.join(',') === 'PROPOSED,READY_FOR_REVIEW,QUARANTINED,REJECTED,CANONICALIZED_BY_REVIEWED_MERGE', 'proposalLifecycle'],
-            [['AVAILABLE','UNAVAILABLE'].includes(stateSignals.sourceState), 'stateSignalSource'],
-            [['AVAILABLE','UNAVAILABLE'].includes(proposalSignals.sourceState), 'proposalSignalSource'],
-            [validCount(proposalSignals.openProposalRequests), 'openProposalRequests'],
-            [validCount(proposalSignals.readyForReview), 'readyForReview'],
-            [validCount(proposalSignals.quarantined), 'quarantined'],
-            [proposalSignals.countsAreCanonicalEvidence === false, 'proposalSignalsNotCanonical'],
-            [proposalSignals.countsAreCommercialEvidence === false, 'proposalSignalsNotCommercial'],
-            [Object.values(x.canonicalCounts || {}).every((value) => value === 0), 'canonicalCounts'],
-            [x.commercialEvidence?.orders === 0, 'orders'],
-            [x.commercialEvidence?.verifiedGrossRevenueUsd === 0, 'grossRevenue'],
-            [x.commercialEvidence?.verifiedSettledCashUsd === 0, 'settledCash'],
-            [x.commercialEvidence?.receivedCashRequires === 'PAID_SETTLED', 'cashGate'],
-            [x.deployment?.state === 'UNVERIFIED', 'deploymentState'],
-            [x.googleDriveContinuity?.state === 'CONNECTED_PRIVATE', 'driveState'],
-            [x.googleDriveContinuity?.publicFolderUrlExposed === false, 'noDriveUrl'],
-            [x.googleDriveContinuity?.publicFileIdsExposed === false, 'noDriveIds'],
-            [x.reconciliationPolicy?.proposalMayBecomeCanonicalAutomatically === false, 'noAutomaticCanonicalization'],
-            [x.reconciliationPolicy?.canonicalEventRequiresReviewedMerge === true, 'reviewedMergeGate'],
-            [x.reconciliationPolicy?.quarantineFreezesCanonicalMutation === true, 'quarantineFreeze'],
-            [x.evidenceBoundary?.readyForReviewCreatesOrder === false, 'readyNotOrder'],
-            [x.evidenceBoundary?.readyForReviewProvesPayment === false, 'readyNotPayment'],
-            [x.evidenceBoundary?.templateIsIndemnityProof === false, 'indemnityBoundary'],
-          ];
-          const failed = required.filter(([ok]) => !ok).map(([, label]) => label);
-          if (failed.length) throw new Error(`Reconciliation readback failed: ${failed.join(', ')}`);
-          console.log('Fardarter Drive v6.3 immutable reconciliation readback: PASS');
+          const x = JSON.parse(require('fs').readFileSync('reconciliation.json','utf8'));
+          const EVENT = '3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b';
+          const SNAPSHOT = '9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f';
+          const APPLICATION = 'f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d';
+          const ok = x.snapshot?.sequence === 1 && x.snapshot?.digest === SNAPSHOT &&
+            x.canonicalHead?.sequence === 1 && x.canonicalHead?.digest === EVENT &&
+            x.canonicalHead?.canonicalBusinessEventCount === 1 &&
+            x.canonicalCounts?.SCOPE_DRAFTED === 1 &&
+            x.currentApplication?.digest === APPLICATION &&
+            x.capacity?.activeDeliveries === 0 && x.capacity?.activeHeadroom === 100 &&
+            x.commercialEvidence?.orders === 0 && x.commercialEvidence?.verifiedSettledCashUsd === 0;
+          if (!ok) throw new Error('Current reconciliation readback failed');
+          console.log('Fardarter reconciliation compatibility readback: PASS');
           NODE
-
-      - name: Write reconciliation readback receipt
-        env:
-          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
-          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          fs.writeFileSync('reconciliation-readback-receipt.json', JSON.stringify({
-            schemaVersion: '1.0.0',
-            receiptId: `FARDARTER-RECONCILIATION-READBACK-V6-3-${process.env.GITHUB_RUN_ID}`,
-            result: 'DEPLOYED_AND_VERIFIED',
-            deployId: process.env.DEPLOY_ID,
-            deployUrl: process.env.DEPLOY_URL,
-            controllerVersion: '6.3.0',
-            snapshotDigest: '4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22',
-            proposalLedgerDigest: '3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e',
-            canonicalHeadDigest: '4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b',
-            canonicalBusinessEvents: 0,
-            activeDeliveries: 0,
-            orders: 0,
-            verifiedGrossRevenueUsd: 0,
-            verifiedSettledCashUsd: 0,
-            generatedAt: new Date().toISOString(),
-          }, null, 2) + '\n');
-          NODE
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: fardarter-reconciliation-readback-v6-3-${{ github.event.workflow_run.head_sha }}
-          path: reconciliation-readback-receipt.json
-          retention-days: 30

@@ -1,9 +1,11 @@
+import application from "@/receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-APPLICATION-V6-5.json";
 import previewLedger from "@/receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4.json";
 import reviewBundle from "@/receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json";
 import capacityLedger from "@/receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json";
 import proposalLedger from "@/receipts/revenue/FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3.json";
 import googleDriveReceipt from "@/receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json";
-import reconciliation from "@/receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json";
+import historicalReconciliation from "@/receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json";
+import currentReconciliation from "@/receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-5.json";
 import eventChain from "@/receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json";
 import { getPublicCanonicalizationPreviewCounts } from "@/lib/revenue/public-canonicalization-preview";
 
@@ -16,11 +18,11 @@ export async function GET() {
     eventChain.eventCount === eventChain.events.length &&
     eventChain.headSequence === eventChain.events.at(-1)?.sequence &&
     eventChain.headDigest === eventChain.events.at(-1)?.eventDigest &&
-    eventChain.canonicalBusinessEventCount === 0;
+    eventChain.canonicalBusinessEventCount === 1;
 
   return Response.json(
     {
-      schemaVersion: "1.0.0",
+      schemaVersion: "1.1.0",
       controllerVersion: previewLedger.controllerVersion,
       controllingIssue: previewLedger.controllingIssue,
       previewLedger: {
@@ -30,6 +32,7 @@ export async function GET() {
         previewCount: previewLedger.previewCount,
         decisionCounts: previewLedger.decisionCounts,
         applicationPolicy: previewLedger.applicationPolicy,
+        historicalPreparedRecord: true,
       },
       preparedReviewBundle: {
         id: reviewBundle.bundleId,
@@ -53,9 +56,6 @@ export async function GET() {
           applied: reviewBundle.candidateEvent.applied,
         },
         candidateProjection: reviewBundle.candidateProjection,
-        evidenceMatrixRows: reviewBundle.evidenceMatrix.length,
-        authorityMatrixRows: reviewBundle.authorityMatrix.length,
-        review: reviewBundle.review,
         candidateReconciliation: {
           id: reviewBundle.candidateReconciliation.snapshotId,
           sequence: reviewBundle.candidateReconciliation.sequence,
@@ -63,10 +63,19 @@ export async function GET() {
             reviewBundle.candidateReconciliation.previousSnapshotDigest,
           digest: reviewBundle.candidateReconciliation.snapshotDigest,
           reviewStatus: reviewBundle.candidateReconciliation.reviewStatus,
-          sourceEvent: reviewBundle.candidateReconciliation.sourceEvent,
-          canonicalProjection:
-            reviewBundle.candidateReconciliation.canonicalProjection,
         },
+        historicalOnly: true,
+      },
+      reviewedApplication: {
+        id: application.applicationId,
+        digest: application.applicationDigest,
+        decision: application.review.decision,
+        source: application.source,
+        canonicalEvent: application.canonicalEvent,
+        reconciliation: application.reconciliation,
+        effects: application.effects,
+        previewEvidence: application.previewEvidence,
+        appliedByReviewedMerge: true,
       },
       canonicalCurrentState: {
         eventChainId: eventChain.chainId,
@@ -75,7 +84,7 @@ export async function GET() {
         eventCount: eventChain.eventCount,
         canonicalBusinessEventCount: eventChain.canonicalBusinessEventCount,
         healthy: canonicalHeadHealthy,
-        genesisOnly: eventChain.canonicalBusinessEventCount === 0,
+        genesisOnly: false,
         stateCounts: eventChain.currentCanonicalCounts,
         totalPlanningSlots: capacityLedger.canonicalCapacity.totalPlanningSlots,
         effectiveActiveCeiling:
@@ -94,13 +103,15 @@ export async function GET() {
       },
       sourceDigests: {
         proposalLedger: proposalLedger.ledgerDigest,
-        reconciliation: reconciliation.snapshotDigest,
+        historicalReconciliation: historicalReconciliation.snapshotDigest,
+        currentReconciliation: currentReconciliation.snapshotDigest,
         canonicalEventHead: eventChain.headDigest,
         preparedCandidateEvent: reviewBundle.candidateEvent.eventDigest,
         preparedCandidateSnapshot:
           reviewBundle.candidateReconciliation.snapshotDigest,
         preparedReviewBundle: reviewBundle.bundleDigest,
         previewLedger: previewLedger.ledgerDigest,
+        application: application.applicationDigest,
       },
       publicCounts,
       googleDriveContinuity: {
@@ -115,6 +126,8 @@ export async function GET() {
           googleDriveReceipt.automation.maintainCanonicalizationPreviews,
         reviewBundlesMaintained:
           googleDriveReceipt.automation.maintainCanonicalizationReviewBundles,
+        canonicalApplicationsMaintained:
+          googleDriveReceipt.automation.maintainCanonicalEventApplications,
         automaticCanonicalEventApplication:
           googleDriveReceipt.automation.applyCanonicalEventWithoutReviewedMerge,
       },
@@ -125,16 +138,17 @@ export async function GET() {
         previewCreatesContract: false,
         previewProvesPayment: false,
         previewStartsPaidWork: false,
-        previewConsumesActiveCapacity: false,
-        previewActivatesCapacityOverride: false,
-        applicationRequiresReviewedMerge: true,
-        applicationRequiresRecomputedDigests: true,
-        applicationRequiresReconciledCountsCapacityMoney: true,
+        reviewedApplicationCreatesOrder: false,
+        reviewedApplicationProvesPayment: false,
+        reviewedApplicationStartsPaidWork: false,
+        applicationWasReviewedMerge: true,
+        laterApplicationRequiresNewReviewedMerge: true,
         receivedCashRequires: "PAID_SETTLED",
         driveFileCreatesContract: false,
         templateIsIndemnityProof: false,
       },
-      nextControlledAction: previewLedger.nextControlledAction,
+      nextControlledAction:
+        "Retain the v6.4 preview as historical evidence and use the v6.5 application as the current canonical truth.",
     },
     {
       headers: {

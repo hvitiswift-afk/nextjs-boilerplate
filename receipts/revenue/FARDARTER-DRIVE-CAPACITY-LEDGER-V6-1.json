@@ -4,7 +4,7 @@
   "driveId": "FARDARTER-DRIVE-V6",
   "authorityVersion": "6.0.0",
   "controllingIssue": 153,
-  "asOf": "2026-07-29",
+  "asOf": "2026-07-30",
   "canonicalCapacity": {
     "totalPlanningSlots": 1000,
     "standardActiveCeiling": 100,
@@ -24,7 +24,7 @@
   "stateLedger": [
     { "state": "REQUESTED", "canonicalCount": 0, "countsAsOrder": false, "usesActiveCapacity": false },
     { "state": "FIT_APPROVED_FOR_SCOPE_DRAFT", "canonicalCount": 0, "countsAsOrder": false, "usesActiveCapacity": false },
-    { "state": "SCOPE_DRAFTED", "canonicalCount": 0, "countsAsOrder": false, "usesActiveCapacity": false },
+    { "state": "SCOPE_DRAFTED", "canonicalCount": 1, "countsAsOrder": false, "usesActiveCapacity": false },
     { "state": "HUMAN_ACCEPTED", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
     { "state": "PAID_PENDING", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
     { "state": "PAID_SETTLED", "canonicalCount": 0, "countsAsOrder": true, "usesActiveCapacity": false },
@@ -82,5 +82,5 @@
     "publicLabelProvesPrivateEvidence": false,
     "futureOutcomesGuaranteed": false
   },
-  "nextControlledAction": "Merge and verify the v6.1 capacity ledger, dynamic public count API, and override request rail; then prove a 250-ACTIVE request remains APPROVED_NOT_ACTIVE with the effective ceiling still 100."
+  "nextControlledAction": "Preserve one canonical SCOPE_DRAFTED entity with zero orders, zero active deliveries, and zero verified money; any later state change must append a reviewed event and reconcile this ledger again."
 }

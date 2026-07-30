@@ -16,7 +16,7 @@
     "publicFileIdsExposed": { "const": false },
     "documents": {
       "type": "array",
-      "minItems": 9,
+      "minItems": 11,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -33,7 +33,7 @@
     "automation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["createPrivateWorkPackageAfterFitApproval", "validateCapacityOverride", "maintainOperationalCapacityLedger", "maintainAppendOnlyReceiptMesh", "maintainTransitionConflictRegister", "maintainProposalReconciliation", "maintainProposalQuarantineRegister", "maintainCanonicalizationPreviews", "maintainCanonicalizationReviewBundles", "activateOverrideWithoutCompleteReceipt", "applyCanonicalEventWithoutReviewedMerge", "publicReceiptMayExposeDriveUrl", "publicReceiptMayExposeDriveFileId", "publicReceiptMayExposeBuyerIdentity", "workPackageCreatesContract", "workPackageCreatesPaymentObligation", "workPackageStartsPaidDelivery"],
+      "required": ["createPrivateWorkPackageAfterFitApproval", "validateCapacityOverride", "maintainOperationalCapacityLedger", "maintainAppendOnlyReceiptMesh", "maintainTransitionConflictRegister", "maintainProposalReconciliation", "maintainProposalQuarantineRegister", "maintainCanonicalizationPreviews", "maintainCanonicalizationReviewBundles", "maintainCanonicalEventApplications", "activateOverrideWithoutCompleteReceipt", "applyCanonicalEventWithoutReviewedMerge", "publicReceiptMayExposeDriveUrl", "publicReceiptMayExposeDriveFileId", "publicReceiptMayExposeBuyerIdentity", "workPackageCreatesContract", "workPackageCreatesPaymentObligation", "workPackageStartsPaidDelivery"],
       "properties": {
         "createPrivateWorkPackageAfterFitApproval": { "const": true },
         "validateCapacityOverride": { "const": true },
@@ -44,6 +44,7 @@
         "maintainProposalQuarantineRegister": { "const": true },
         "maintainCanonicalizationPreviews": { "const": true },
         "maintainCanonicalizationReviewBundles": { "const": true },
+        "maintainCanonicalEventApplications": { "const": true },
         "activateOverrideWithoutCompleteReceipt": { "const": false },
         "applyCanonicalEventWithoutReviewedMerge": { "const": false },
         "publicReceiptMayExposeDriveUrl": { "const": false },
@@ -57,7 +58,7 @@
     "privacyBoundary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["buyerIdentityPublic", "signaturePublic", "providerReceiptPublic", "counselNotesPublic", "confidentialDeliveryDataPublic", "overrideReadinessEvidencePublic", "transitionConflictEvidencePublic", "proposalEvidencePublic", "quarantineEvidencePublic", "canonicalizationPreviewEvidencePublic", "reviewBundleEvidencePublic", "privateReviewDeliberationsPublic", "disputeRecordsPublic"],
+      "required": ["buyerIdentityPublic", "signaturePublic", "providerReceiptPublic", "counselNotesPublic", "confidentialDeliveryDataPublic", "overrideReadinessEvidencePublic", "transitionConflictEvidencePublic", "proposalEvidencePublic", "quarantineEvidencePublic", "canonicalizationPreviewEvidencePublic", "reviewBundleEvidencePublic", "canonicalApplicationEvidencePublic", "privateReviewDeliberationsPublic", "disputeRecordsPublic"],
       "properties": {
         "buyerIdentityPublic": { "const": false },
         "signaturePublic": { "const": false },
@@ -70,10 +71,11 @@
         "quarantineEvidencePublic": { "const": false },
         "canonicalizationPreviewEvidencePublic": { "const": false },
         "reviewBundleEvidencePublic": { "const": false },
+        "canonicalApplicationEvidencePublic": { "const": false },
         "privateReviewDeliberationsPublic": { "const": false },
         "disputeRecordsPublic": { "const": false }
       }
     },
-    "nextControlledAction": { "type": "string", "minLength": 80 }
+    "nextControlledAction": { "type": "string", "minLength": 40 }
   }
 }
