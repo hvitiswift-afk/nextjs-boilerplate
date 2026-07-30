@@ -1,0 +1,88 @@
+{
+  "controlId": "FARDARTER-DRIVE-DEPLOYMENT-LINEAGE-V6-10",
+  "controllerVersion": "6.10.0",
+  "controllingIssue": 190,
+  "createdFromApplicationHead": "760d198316c392a7de3af36faffa93df42ecca64",
+  "verifiedHistoricalDeployment": {
+    "applicationVersion": "6.4.0",
+    "sourceCommit": "e482004bfff1bb90aba2d67b8da62a524f18cdb4",
+    "provider": "NETLIFY",
+    "siteId": "21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f",
+    "siteName": "lichburn-v0-2-8",
+    "deployId": "6a6b6a709e0a6d5ff2ca7759",
+    "immutableUrl": "https://6a6b6a709e0a6d5ff2ca7759--lichburn-v0-2-8.netlify.app",
+    "workflowRunId": 30554925086,
+    "artifactName": "fardarter-v6-4-static-materialized-30554925086",
+    "artifactId": 8764697374,
+    "artifactDigest": "sha256:e45290adf2e8b85089d0bf9a375ca63154859ddfd451d3977aa49c297fee5dd2",
+    "verificationState": "DEPLOYED_AND_VERIFIED",
+    "verifiedRouteCount": 12,
+    "readbackContractVersion": "6.4.0",
+    "materializationMode": "NETLIFY_V1_ROUTE_BLOBS_TO_STATIC_PACKAGE",
+    "runtimeFunctionsRequiredForVerifiedRoutes": false
+  },
+  "latestApplicationTarget": {
+    "applicationVersion": "6.9.0",
+    "sourceCommit": "760d198316c392a7de3af36faffa93df42ecca64",
+    "capability": "AUTHORIZED_GITHUB_FIRST_RESPONSE",
+    "repositoryState": "MERGED",
+    "productionPromotionState": "NOT_PROMOTED",
+    "providerDeployId": null,
+    "immutableUrl": null,
+    "routeReadbackState": "NOT_PERFORMED",
+    "claimLiveAllowed": false
+  },
+  "lineageDistinctions": {
+    "verifiedHistoricalDeployEqualsLatestRepositoryState": false,
+    "mergedRepositoryStateEqualsDeployedState": false,
+    "providerDeployIdAloneCompletesVerification": false,
+    "projectTimestampEqualsDeploymentReceipt": false,
+    "staticMaterializationMutatesLockedApplicationEvidence": false,
+    "deploymentReceiptCreatesOrderPaymentRevenueConsentOrWorkStart": false
+  },
+  "promotionGate": {
+    "requiresExactTargetCommit": true,
+    "requiresAllRepositoryVerifiers": true,
+    "requiresProviderDeployId": true,
+    "requiresImmutableUrl": true,
+    "requiresRouteByRouteReadback": true,
+    "requiresDurableIssueReceipts": true,
+    "requiresRollbackReference": true,
+    "requiresNoPrivateReferenceExposure": true,
+    "requiredReceiptIssues": [190, 141, 133],
+    "automaticPromotionAllowed": false,
+    "humanApprovalRequired": true
+  },
+  "stateClassification": {
+    "historicalDeployment": "VERIFIED_HISTORICAL",
+    "latestRepository": "MERGED_NOT_DEPLOYED",
+    "latestProduction": "UNVERIFIED",
+    "drift": "EXPECTED_VERSION_GAP"
+  },
+  "canonicalBoundaries": {
+    "canonicalEventHeadSequence": 1,
+    "canonicalEventHeadDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "reconciliationSequence": 1,
+    "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+    "scopeDrafted": 1,
+    "humanAccepted": 0,
+    "active": 0,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "actualEffects": {
+    "canonicalMutation": false,
+    "orderCreated": false,
+    "capacityReserved": false,
+    "paymentConfirmed": false,
+    "revenueRecognized": false,
+    "settledCashRecognized": false,
+    "buyerConsentProven": false,
+    "workStarted": false,
+    "privateDriveReferenceExposed": false,
+    "latestApplicationPromoted": false
+  },
+  "manifestDigest": "a63ea73acbb8bc1ec06dfdda7721333ad54cd8492ac163aebf3d15d4ed14556e"
+}
