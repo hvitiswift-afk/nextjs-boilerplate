@@ -143,8 +143,8 @@ jobs:
           const preview = JSON.parse(fs.readFileSync('artifacts/preview.json','utf8'));
           const app = JSON.parse(fs.readFileSync('artifacts/application.json','utf8'));
           const EVENT = '3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b';
-          const SNAPSHOT = '7c7f47f40868f4879942406274b01710af74539d5b840f0edb18d24400ddbdf3';
-          const APPLICATION = '6692334b17fae5e26d973b92d6476a52d4f316489e085eba76971173f03f156f';
+          const SNAPSHOT = '9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f';
+          const APPLICATION = 'f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d';
           const required = [
             [pilot.fardarterDrive?.driveId === 'FARDARTER-DRIVE-V6', 'pilot.drive'],
             [pilot.offer?.capacity === 1000 && pilot.offer?.maxConcurrentDeliveries === 100, 'pilot.capacity'],
@@ -156,7 +156,7 @@ jobs:
             [ops.capacity?.activeDeliveries === 0 && ops.capacity?.activeHeadroom === 100, 'ops.capacity'],
             [ops.commercialEvidence?.orders === 0 && ops.commercialEvidence?.verifiedSettledCashUsd === 0, 'ops.money'],
             [rec.snapshot?.sequence === 1 && rec.snapshot?.digest === SNAPSHOT, 'rec.snapshot'],
-            [rec.canonicalHead?.headSequence === undefined || rec.canonicalHead?.sequence === 1, 'rec.head'],
+            [rec.canonicalHead?.sequence === 1, 'rec.head'],
             [rec.currentApplication?.digest === APPLICATION, 'rec.application'],
             [preview.reviewedApplication?.digest === APPLICATION && preview.canonicalCurrentState?.headSequence === 1, 'preview.application'],
             [app.applicationDigest === APPLICATION, 'app.digest'],
@@ -198,8 +198,8 @@ jobs:
             canonicalHeadSequence: 1,
             canonicalBusinessEventCount: 1,
             canonicalEventDigest: '3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b',
-            reconciliationDigest: '7c7f47f40868f4879942406274b01710af74539d5b840f0edb18d24400ddbdf3',
-            applicationDigest: '6692334b17fae5e26d973b92d6476a52d4f316489e085eba76971173f03f156f',
+            reconciliationDigest: '9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f',
+            applicationDigest: 'f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d',
             scopeDrafted: 1,
             activeDeliveries: 0,
             orders: 0,
