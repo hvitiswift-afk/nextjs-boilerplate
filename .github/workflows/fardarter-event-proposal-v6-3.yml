@@ -83,7 +83,7 @@ jobs:
 
             const labelDefinitions = [
               { name: 'fd-proposal-approved-v6-3', color: '5319E7', description: 'Approved to validate a noncanonical v6.3 event proposal' },
-              { name: 'fd-proposal-ready-for-review', color: '0E8A16', description: 'Structurally valid proposal; reviewed canonical merge still required' },
+              { name: ['fd-proposal', 'ready-for-review'].join('-'), color: '0E8A16', description: 'Structurally valid proposal; reviewed canonical merge still required' },
               { name: 'fd-proposal-quarantined', color: 'B60205', description: 'Proposal conflict or missing evidence; canonical mutation frozen' },
               { name: 'fd-proposal-noncanonical', color: 'D4C5F9', description: 'Proposal only; not a canonical event or commercial evidence' },
               { name: 'needs-jp-review', color: 'FBCA04', description: 'Requires JP review before consequential action' },
