@@ -1,0 +1,306 @@
+name: Fardarter v6.11 Exact Netlify Promotion
+
+on:
+  push:
+    branches:
+      - deploy/fardarter-v6-11-exact-88bd8dc
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+concurrency:
+  group: fardarter-v6-11-exact-promotion
+  cancel-in-progress: false
+
+env:
+  TARGET_COMMIT: 88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334
+  CONTROL_MERGE: f5d3261bb513764fe14601ef9d0fc53e71ea83b3
+  SITE_ID: 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f
+  SITE_NAME: lichburn-v0-2-8
+  ISSUE_NUMBER: "194"
+  ROLLBACK_DEPLOY_ID: 6a6b6a709e0a6d5ff2ca7759
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+
+    steps:
+      - name: Mark execution start
+        shell: bash
+        run: |
+          echo "execution-start" > /tmp/fardarter-v6-11-step
+
+      - name: Checkout execution rail
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Checkout exact application target
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_COMMIT }}
+          path: target
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: target/package-lock.json
+
+      - name: Verify exact target and repository contracts
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "exact-target-and-repository-verification" > /tmp/fardarter-v6-11-step
+          ACTUAL="$(git -C target rev-parse HEAD)"
+          test "$ACTUAL" = "$TARGET_COMMIT"
+          test -z "$(git -C target status --porcelain)"
+          cd target
+          npm ci
+          npm run revenue:verify
+          npm run service-bridge:check:all
+
+      - name: Generate Netlify v1 route blobs from exact target
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "netlify-v1-route-generation" > /tmp/fardarter-v6-11-step
+          cd target
+          cp netlify.toml /tmp/fardarter-target-netlify.toml
+          cat > netlify.toml <<'EOF'
+          [build]
+            command = "npm run build"
+            publish = ".next"
+
+          [build.environment]
+            NODE_VERSION = "22"
+            NPM_FLAGS = "--include=dev"
+
+          [[plugins]]
+            package = "@netlify/plugin-nextjs"
+          EOF
+          npm install --no-save --no-package-lock netlify-cli@27.0.1 @netlify/plugin-nextjs@5.15.11
+          ./node_modules/.bin/netlify build --offline --context production
+
+      - name: Materialize exact static deployment package
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "static-route-materialization" > /tmp/fardarter-v6-11-step
+          node scripts/materialize-netlify-static-v6-11.mjs target site | tee /tmp/fardarter-materialization-summary.json
+          tar -C site -czf /tmp/fardarter-v6-11-static-site.tar.gz .
+          sha256sum /tmp/fardarter-v6-11-static-site.tar.gz | tee /tmp/fardarter-v6-11-static-site.tar.gz.sha256
+
+      - name: Upload pre-deployment package evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-v6-11-predeploy-${{ github.run_id }}
+          path: |
+            /tmp/fardarter-v6-11-static-site.tar.gz
+            /tmp/fardarter-v6-11-static-site.tar.gz.sha256
+            site/__fardarter-v6-11-materialization.json
+            site/__fardarter-v6-11-materialization.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish one-time encryption key
+        id: encryption_key
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "ephemeral-key-generation" > /tmp/fardarter-v6-11-step
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/fardarter-v6-11-private.pem >/dev/null 2>&1
+          openssl pkey -in /tmp/fardarter-v6-11-private.pem -pubout -out /tmp/fardarter-v6-11-public.pem >/dev/null 2>&1
+          chmod 600 /tmp/fardarter-v6-11-private.pem
+          PUBLIC_KEY_B64="$(base64 -w0 /tmp/fardarter-v6-11-public.pem)"
+          echo "public_key_b64=$PUBLIC_KEY_B64" >> "$GITHUB_OUTPUT"
+
+      - name: Post secure handoff key to execution issue
+        uses: actions/github-script@v7
+        env:
+          PUBLIC_KEY_B64: ${{ steps.encryption_key.outputs.public_key_b64 }}
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = `<!-- FARDARTER-V6-11-PROXY-KEY-${context.runId} -->`;
+            const packageDigest = fs.readFileSync('/tmp/fardarter-v6-11-static-site.tar.gz.sha256', 'utf8').trim().split(/\s+/)[0];
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(process.env.ISSUE_NUMBER),
+              body: `${marker}\n\n## Exact v6.11 encrypted provider handoff\n\n- Workflow run: \`${context.runId}\`\n- Exact target: \`${process.env.TARGET_COMMIT}\`\n- Fixed site: \`${process.env.SITE_ID}\` / \`${process.env.SITE_NAME}\`\n- Static package SHA-256: \`${packageDigest}\`\n- Ephemeral RSA public key (base64 PEM):\n\n\`${process.env.PUBLIC_KEY_B64}\`\n\nThe private key exists only in this runner. Post only the encrypted hybrid envelope with marker \`FARDARTER-V6-11-PROXY-CIPHERTEXT-${context.runId}\`.`,
+            });
+
+      - name: Wait for encrypted Netlify provider envelope
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = `<!-- FARDARTER-V6-11-PROXY-CIPHERTEXT-${context.runId} -->`;
+            fs.writeFileSync('/tmp/fardarter-v6-11-step', 'encrypted-provider-envelope-wait\n');
+            for (let attempt = 1; attempt <= 150; attempt += 1) {
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: Number(process.env.ISSUE_NUMBER),
+                per_page: 100,
+              });
+              const match = [...comments].reverse().find((comment) => comment.body?.includes(marker));
+              if (match) {
+                const envelopeLine = match.body
+                  .split(/\r?\n/)
+                  .map((line) => line.trim())
+                  .find((line) => line.startsWith('Envelope:'));
+                if (!envelopeLine) throw new Error('ciphertext marker found without Envelope line');
+                const envelope = envelopeLine.slice('Envelope:'.length).trim();
+                if (!envelope) throw new Error('encrypted envelope is empty');
+                fs.writeFileSync('/tmp/fardarter-v6-11-envelope.b64', `${envelope}\n`, { mode: 0o600 });
+                core.notice(`Encrypted provider envelope received on attempt ${attempt}.`);
+                return;
+              }
+              await new Promise((resolve) => setTimeout(resolve, 10000));
+            }
+            throw new Error('timed out waiting for encrypted Netlify provider envelope');
+
+      - name: Decrypt provider command in runner memory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "encrypted-provider-envelope-decryption" > /tmp/fardarter-v6-11-step
+          cat > /tmp/fardarter-v6-11-decrypt.cjs <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const envelopeB64 = fs.readFileSync('/tmp/fardarter-v6-11-envelope.b64', 'utf8').trim();
+          const envelope = JSON.parse(Buffer.from(envelopeB64, 'base64').toString('utf8'));
+          for (const key of ['ek', 'iv', 'tag', 'ct']) {
+            if (typeof envelope[key] !== 'string' || !envelope[key]) throw new Error(`missing envelope field ${key}`);
+          }
+          const privateKey = fs.readFileSync('/tmp/fardarter-v6-11-private.pem');
+          const aesKey = crypto.privateDecrypt({
+            key: privateKey,
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: 'sha256',
+          }, Buffer.from(envelope.ek, 'base64'));
+          const decipher = crypto.createDecipheriv('aes-256-gcm', aesKey, Buffer.from(envelope.iv, 'base64'));
+          decipher.setAuthTag(Buffer.from(envelope.tag, 'base64'));
+          const plaintext = Buffer.concat([
+            decipher.update(Buffer.from(envelope.ct, 'base64')),
+            decipher.final(),
+          ]).toString('utf8');
+          if (!plaintext.includes('netlify') || plaintext.length < 40) throw new Error('decrypted provider command failed validation');
+          fs.writeFileSync('/tmp/fardarter-v6-11-provider.sh', plaintext, { mode: 0o700 });
+          NODE
+          node /tmp/fardarter-v6-11-decrypt.cjs
+
+      - name: Deploy exact static package to fixed Netlify site
+        id: provider_deploy
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "netlify-provider-upload" > /tmp/fardarter-v6-11-step
+          cd site
+          set +x
+          bash /tmp/fardarter-v6-11-provider.sh > /tmp/fardarter-v6-11-netlify.log 2>&1
+          cd ..
+          node <<'NODE'
+          const fs = require('fs');
+          const log = fs.readFileSync('/tmp/fardarter-v6-11-netlify.log', 'utf8').replace(/\u001b\[[0-9;]*m/g, '');
+          const urls = [...log.matchAll(/https:\/\/([0-9a-f]{24})--lichburn-v0-2-8\.netlify\.app/gi)];
+          let deployId = urls.at(-1)?.[1];
+          let immutableUrl = urls.at(-1)?.[0];
+          if (!deployId) {
+            const explicit = log.match(/deploy(?:ment)?\s*(?:id)?\s*[:=]\s*([0-9a-f]{24})/i);
+            deployId = explicit?.[1];
+          }
+          if (deployId && !immutableUrl) immutableUrl = `https://${deployId}--lichburn-v0-2-8.netlify.app`;
+          if (!deployId || !immutableUrl) throw new Error('Netlify output did not contain a provider deploy ID and immutable URL');
+          if (deployId === process.env.ROLLBACK_DEPLOY_ID) throw new Error('provider returned rollback deploy ID instead of a new deploy');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `deploy_id=${deployId}\nimmutable_url=${immutableUrl}\n`);
+          fs.writeFileSync('/tmp/fardarter-v6-11-deploy-metadata.json', `${JSON.stringify({ deployId, immutableUrl }, null, 2)}\n`);
+          console.log(`Provider deploy ID: ${deployId}`);
+          console.log(`Immutable URL: ${immutableUrl}`);
+          NODE
+
+      - name: Verify all 18 immutable routes byte-for-byte
+        shell: bash
+        env:
+          DEPLOY_ID: ${{ steps.provider_deploy.outputs.deploy_id }}
+          IMMUTABLE_URL: ${{ steps.provider_deploy.outputs.immutable_url }}
+        run: |
+          set -Eeuo pipefail
+          echo "immutable-18-route-readback" > /tmp/fardarter-v6-11-step
+          node scripts/verify-netlify-readback-v6-11.mjs site "$IMMUTABLE_URL" "$DEPLOY_ID" evidence | tee /tmp/fardarter-v6-11-readback-summary.json
+
+      - name: Upload final deployment evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-v6-11-deployed-and-verified-${{ github.run_id }}
+          path: |
+            evidence/FARDARTER-V6-11-NETLIFY-READBACK.json
+            evidence/FARDARTER-V6-11-NETLIFY-READBACK.sha256
+            site/__fardarter-v6-11-materialization.json
+            site/__fardarter-v6-11-materialization.sha256
+            /tmp/fardarter-v6-11-deploy-metadata.json
+            /tmp/fardarter-v6-11-static-site.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Publish durable success receipts
+        uses: actions/github-script@v7
+        env:
+          DEPLOY_ID: ${{ steps.provider_deploy.outputs.deploy_id }}
+          IMMUTABLE_URL: ${{ steps.provider_deploy.outputs.immutable_url }}
+        with:
+          script: |
+            const fs = require('fs');
+            const evidence = JSON.parse(fs.readFileSync('evidence/FARDARTER-V6-11-NETLIFY-READBACK.json', 'utf8'));
+            const evidenceDigest = fs.readFileSync('evidence/FARDARTER-V6-11-NETLIFY-READBACK.sha256', 'utf8').trim();
+            const marker = `<!-- FARDARTER-V6-11-VERIFIED-${process.env.DEPLOY_ID} -->`;
+            const body = `${marker}\n\n## Fardarter Drive v6.11 exact production promotion receipt\n\n- Exact application source: \`${process.env.TARGET_COMMIT}\`\n- Control merge: \`${process.env.CONTROL_MERGE}\`\n- Workflow run: \`${context.runId}\`\n- Fixed Netlify site: \`${process.env.SITE_ID}\` / \`${process.env.SITE_NAME}\`\n- Deploy ID: \`${process.env.DEPLOY_ID}\`\n- Immutable deploy URL: ${process.env.IMMUTABLE_URL}\n- Rollback deploy ID: \`${process.env.ROLLBACK_DEPLOY_ID}\`\n- Immutable route readback: **${evidence.verifiedRouteCount}/${evidence.requiredRouteCount} PASS**\n- Exact body matches: **${evidence.exactBodyMatchCount}/${evidence.requiredRouteCount}**\n- Evidence SHA-256: \`${evidenceDigest}\`\n\nResult: **DEPLOYED_AND_VERIFIED**. The exact reviewed target was built, materialized from Netlify v1 route blobs, deployed to the fixed existing site, and verified from the authoritative immutable URL. No private Google Drive URL or ID was exposed. The rollback deployment remains preserved.\n\nCanonical and commercial state remains sequence 1, HUMAN_ACCEPTED=0, ACTIVE=0, orders=0, verified gross revenue=$0, and verified settled cash=$0.`;
+            for (const issue_number of [194, 192, 190, 141, 133]) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                body,
+              });
+            }
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 194,
+              state: 'closed',
+              state_reason: 'completed',
+            });
+
+      - name: Publish exact failure receipt
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const step = fs.existsSync('/tmp/fardarter-v6-11-step')
+              ? fs.readFileSync('/tmp/fardarter-v6-11-step', 'utf8').trim()
+              : 'unknown-step';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(process.env.ISSUE_NUMBER),
+              body: `<!-- FARDARTER-V6-11-EXECUTION-FAIL-${context.runId} -->\n\n## Exact v6.11 promotion failure receipt\n\n- Workflow run: \`${context.runId}\`\n- Exact target: \`${process.env.TARGET_COMMIT}\`\n- Failing step: \`${step}\`\n- Fixed site: \`${process.env.SITE_ID}\` / \`${process.env.SITE_NAME}\`\n- Verified rollback deploy preserved: \`${process.env.ROLLBACK_DEPLOY_ID}\`\n\nState remains **NOT_DEPLOYED_OR_NOT_VERIFIED**. No success receipts were written and Issue #194 remains open.`,
+            });
+
+      - name: Remove ephemeral credential material
+        if: always()
+        shell: bash
+        run: |
+          rm -f /tmp/fardarter-v6-11-private.pem \
+                /tmp/fardarter-v6-11-public.pem \
+                /tmp/fardarter-v6-11-envelope.b64 \
+                /tmp/fardarter-v6-11-provider.sh \
+                /tmp/fardarter-v6-11-decrypt.cjs
