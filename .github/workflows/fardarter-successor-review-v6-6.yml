@@ -1,4 +1,4 @@
-name: Fardarter Successor Review v6.6
+name: Fardarter Successor Review v6.6.1
 
 on:
   issues:
@@ -10,7 +10,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: fardarter-successor-v6-6-${{ github.event.issue.number || github.run_id }}
+  group: fardarter-successor-v6-6-1-${{ github.event.issue.number || github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -37,13 +37,13 @@ jobs:
               const match = body.match(new RegExp(`### ${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n### |$)`));
               return match?.[1]?.trim() || '';
             };
-            const issueNumber = Number((section('Source entity issue').match(/#?(\\d+)/) || [])[1]);
-            const expectedState = section('Expected current canonical state').split(/\\s+/)[0];
-            const candidateState = section('Candidate successor state').split(/\\s+/)[0];
+            const issueNumber = Number((section('Source entity issue').match(/#?(\d+)/) || [])[1]);
+            const expectedState = section('Expected current canonical state').split(/\s+/)[0];
+            const candidateState = section('Candidate successor state').split(/\s+/)[0];
             const key = section('Public-safe successor idempotency key');
             const evidence = section('Public-safe evidence references');
             const reviewBy = section('Review-by or expiry time');
-            const marker = `jp-fardarter-successor-v6-6-${issueNumber}-${expectedState}-${candidateState}-${key}`
+            const marker = `jp-fardarter-successor-v6-6-1-${issueNumber}-${expectedState}-${candidateState}-${key}`
               .replace(/[^A-Za-z0-9:_-]+/g,'-').slice(0,220);
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, per_page: 100,
@@ -69,7 +69,7 @@ jobs:
             await github.rest.issues.addLabels({owner:context.repo.owner,repo:context.repo.repo,issue_number:issue.number,labels});
             const message = [
               `<!-- ${marker} -->`,
-              '**Fardarter Drive™ v6.6 dynamic-head successor receipt**',
+              '**Fardarter Drive™ v6.6.1 dynamic-head successor receipt**',
               `- Decision: **${decision}**`,
               `- Source entity: **Issue #${issueNumber || 'UNKNOWN'}**`,
               `- Canonical state: **${currentState || 'UNKNOWN'}**`,
@@ -84,5 +84,5 @@ jobs:
               '- Contract / payment / paid work / ACTIVE / capacity change: **NONE**',
               '',
               'A consequential gate is never satisfied by broad system-development authorization. Buyer consent and exact application evidence must be independently verified before a reviewed merge may append the next event.',
-            ].join('\\n');
+            ].join('\n');
             await github.rest.issues.createComment({owner:context.repo.owner,repo:context.repo.repo,issue_number:issue.number,body:message});
