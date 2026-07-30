@@ -1,0 +1,114 @@
+name: Fardarter consent evidence review
+about: Request a public-safe review of private counterparty-consent evidence state without posting the evidence.
+title: "[FD consent evidence]: "
+labels:
+  - fd-consent-evidence-approved-v6-7
+  - fd-consent-evidence-noncanonical
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form records public-safe evidence states only. Do not post a buyer's identity, contact information, signature, consent text, authentication data, contract text, private Drive reference, provider identifier, banking data, or counsel notes.
+
+  - type: input
+    id: source-issue
+    attributes:
+      label: Source entity issue
+      description: GitHub issue whose canonical state is being evaluated.
+      placeholder: "Issue #159"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: package-state
+    attributes:
+      label: Claimed private package state
+      options:
+        - NO_PACKAGE
+        - PRIVATE_PACKAGE_PREPARED
+        - INDEPENDENTLY_VERIFIED
+        - APPLIED_BY_REVIEWED_MERGE
+    validations:
+      required: true
+
+  - type: input
+    id: attestation-digest
+    attributes:
+      label: Public-safe attestation digest
+      description: Optional 64-character SHA-256 metadata digest. A digest alone does not prove consent.
+      placeholder: "NONE or 64 lowercase hexadecimal characters"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reviewer-role
+    attributes:
+      label: Independent reviewer role classification
+      options:
+        - NOT_ASSIGNED
+        - INDEPENDENT_HUMAN_REVIEWER
+        - APPROVED_VERIFICATION_PROCESS
+    validations:
+      required: true
+
+  - type: dropdown
+    id: verification-state
+    attributes:
+      label: Claimed independent verification state
+      options:
+        - NOT_PERFORMED
+        - PARTIAL
+        - VERIFIED
+    validations:
+      required: true
+
+  - type: dropdown
+    id: revocation-state
+    attributes:
+      label: Revocation and contradiction state
+      options:
+        - NOT_CHECKED
+        - CLEAR
+        - REVOKED_OR_CONFLICTED
+    validations:
+      required: true
+
+  - type: input
+    id: review-by
+    attributes:
+      label: Review-by or expiry time
+      description: Public-safe ISO timestamp for package review, not the private consent timestamp.
+      placeholder: "2026-08-06T23:59:59Z"
+    validations:
+      required: true
+
+  - type: input
+    id: idempotency-key
+    attributes:
+      label: Public-safe consent review idempotency key
+      placeholder: "issue-159-consent-package-v6-7-review-1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: public-summary
+    attributes:
+      label: Public-safe evidence-state summary
+      description: Describe states and missing items only. Do not quote or identify the counterparty.
+      placeholder: "No package exists; identity, authority, exact-scope consent, authentication, expiry, revocation, and independent review remain missing."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Evidence and consequence boundaries
+      options:
+        - label: I have not posted identity, contact, signature, authentication, consent text, contract text, private Drive references, provider identifiers, banking data, or counsel notes.
+          required: true
+        - label: I understand a public claim or digest does not prove counterparty consent.
+          required: true
+        - label: I understand system-development authorization is not buyer consent.
+          required: true
+        - label: I understand this review cannot create HUMAN_ACCEPTED, an order, a contract, payment, paid work, ACTIVE use, a capacity change, legal terms, or a canonical event.
+          required: true

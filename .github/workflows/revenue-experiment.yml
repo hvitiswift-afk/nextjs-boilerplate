@@ -59,7 +59,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify Fardarter Drive v6.5 reviewed canonicalization
+    name: Verify Fardarter Drive v6.7 consent evidence
     runs-on: ubuntu-latest
     timeout-minutes: 16
     steps:
@@ -69,7 +69,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Validate v6.5 authority, capacity, chain, reconciliation, application, Drive, and product
+      - name: Validate authority, capacity, chain, successor, consent evidence, Drive, and product
         run: npm run revenue:verify
       - name: Verify JSON syntax
         run: |
@@ -90,6 +90,10 @@ jobs:
             "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json",
             "receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-5.json",
             "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-APPLICATION-V6-5.json",
+            "receipts/revenue/FARDARTER-DRIVE-SUCCESSOR-CONTROL-V6-6.json",
+            "receipts/revenue/FARDARTER-DRIVE-SUCCESSOR-REVIEW-BUNDLE-V6-6.sample.json",
+            "receipts/revenue/FARDARTER-DRIVE-CONSENT-EVIDENCE-V6-7.json",
+            "receipts/revenue/FARDARTER-DRIVE-CONSENT-ATTESTATION-V6-7.sample.json",
             "schemas/revenue/fardarter-drive-gdrive-v6.schema.json",
             "schemas/revenue/fardarter-drive-state-event-v6-2.schema.json",
             "schemas/revenue/fardarter-drive-state-events-v6-2.schema.json",
@@ -97,19 +101,29 @@ jobs:
             "schemas/revenue/fardarter-drive-canonicalization-previews-v6-4.schema.json",
             "schemas/revenue/fardarter-drive-canonicalization-review-bundle-v6-4.schema.json",
             "schemas/revenue/fardarter-drive-reconciliation-v6-5.schema.json",
-            "schemas/revenue/fardarter-drive-canonicalization-application-v6-5.schema.json"
-          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.5 JSON syntax: PASS")'
+            "schemas/revenue/fardarter-drive-canonicalization-application-v6-5.schema.json",
+            "schemas/revenue/fardarter-drive-successor-control-v6-6.schema.json",
+            "schemas/revenue/fardarter-drive-successor-review-bundle-v6-6.schema.json",
+            "schemas/revenue/fardarter-drive-consent-evidence-v6-7.schema.json",
+            "schemas/revenue/fardarter-drive-consent-attestation-v6-7.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.7 JSON syntax: PASS")'
       - name: Emit non-financial receipt
         run: |
           echo "result=PASS"
           echo "drive_id=FARDARTER-DRIVE-V6"
-          echo "controller_version=6.5.0"
+          echo "controller_version=6.7.0"
           echo "canonical_head_sequence=1"
           echo "canonical_event_digest=3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b"
           echo "reconciliation_digest=9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"
           echo "application_digest=f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d"
+          echo "consent_manifest_digest=6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878"
+          echo "public_attestation_digest=0026a05117e349524c51e7000adffc773c5be4986149c4636c111306b8dbe7e8"
+          echo "attestation_receipt_digest=27c8fb452b3b7112d9f714449a232b9416e66718677b8595c0a0eda438078a7d"
+          echo "consent_package_state=NO_PACKAGE"
+          echo "consent_decision=AWAITING_COUNTERPARTY_EVIDENCE"
           echo "canonical_business_events=1"
           echo "scope_drafted=1"
+          echo "human_accepted=0"
           echo "active_deliveries=0"
           echo "active_headroom=100"
           echo "orders=0"

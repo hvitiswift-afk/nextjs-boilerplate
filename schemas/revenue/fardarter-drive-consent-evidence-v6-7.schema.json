@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-consent-evidence-v6-7.schema.json",
+  "title": "Fardarter Drive Consent Evidence v6.7",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion","controlId","driveId","controllerVersion","controllingIssue","currentCanonical","lifecycle","requiredEvidence","verificationSeparation","attestation","decision","evidenceBoundaries","privacy","googleDriveContinuity","actualEffects","generatedAt","manifestDigest"],
+  "properties": {
+    "schemaVersion": {"const":"1.0.0"},
+    "controlId": {"const":"FARDARTER-DRIVE-CONSENT-EVIDENCE-V6-7"},
+    "driveId": {"const":"FARDARTER-DRIVE-V6"},
+    "controllerVersion": {"const":"6.7.0"},
+    "controllingIssue": {"const":180},
+    "currentCanonical": {
+      "type":"object","additionalProperties":false,
+      "required":["eventHeadSequence","eventHeadDigest","reconciliationSequence","reconciliationDigest","applicationDigest","sourceEntityIssue","sourceState","targetState","requiredGate","humanAcceptedCount","activeDeliveries","activeHeadroom","orders","verifiedGrossRevenueUsd","verifiedSettledCashUsd"],
+      "properties": {
+        "eventHeadSequence":{"const":1},"eventHeadDigest":{"const":"3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b"},
+        "reconciliationSequence":{"const":1},"reconciliationDigest":{"const":"9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"},
+        "applicationDigest":{"const":"f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d"},
+        "sourceEntityIssue":{"const":159},"sourceState":{"const":"SCOPE_DRAFTED"},"targetState":{"const":"HUMAN_ACCEPTED"},"requiredGate":{"const":"HUMAN_APPROVAL_AND_BUYER_CONSENT"},
+        "humanAcceptedCount":{"const":0},"activeDeliveries":{"const":0},"activeHeadroom":{"const":100},"orders":{"const":0},"verifiedGrossRevenueUsd":{"const":0},"verifiedSettledCashUsd":{"const":0}
+      }
+    },
+    "lifecycle": {"type":"array","minItems":4,"maxItems":4,"items":{"type":"object","additionalProperties":false,"required":["state","meaning","canonicalEffect"],"properties":{"state":{"enum":["NO_PACKAGE","PRIVATE_PACKAGE_PREPARED","INDEPENDENTLY_VERIFIED","APPLIED_BY_REVIEWED_MERGE"]},"meaning":{"type":"string","minLength":20},"canonicalEffect":{"type":"boolean"}}}},
+    "requiredEvidence": {"type":"array","minItems":10,"maxItems":10,"items":{"type":"object","additionalProperties":false,"required":["evidenceId","classification","required","currentState"],"properties":{"evidenceId":{"type":"string","minLength":5},"classification":{"enum":["PRIVATE","PUBLIC_SAFE"]},"required":{"const":true},"currentState":{"enum":["MISSING","NOT_PERFORMED","NOT_ESTABLISHED","VERIFIED"]}}}},
+    "verificationSeparation": {"type":"object","additionalProperties":false,"required":["packageAssemblerMaySelfVerify","automationMayVerifyStructureAndHashes","automationMayDecideHumanConsent","independentHumanOrApprovedVerificationRequired"],"properties":{"packageAssemblerMaySelfVerify":{"const":false},"automationMayVerifyStructureAndHashes":{"const":true},"automationMayDecideHumanConsent":{"const":false},"independentHumanOrApprovedVerificationRequired":{"const":true}}},
+    "attestation": {"type":"object","additionalProperties":false,"required":["canonicalization","digestAlgorithm","publicSafeMetadataOnly","identityIncluded","signatureIncluded","privateFileIdsIncluded","evidenceContentsIncluded","digestAloneProvesConsent"],"properties":{"canonicalization":{"const":"JSON_SORTED_KEYS_UTF8"},"digestAlgorithm":{"const":"SHA-256"},"publicSafeMetadataOnly":{"const":true},"identityIncluded":{"const":false},"signatureIncluded":{"const":false},"privateFileIdsIncluded":{"const":false},"evidenceContentsIncluded":{"const":false},"digestAloneProvesConsent":{"const":false}}},
+    "decision": {"type":"object","additionalProperties":false,"required":["packageState","decision","eligibleForApplicationReview","canonicalEventAppended","nextCandidateEventSequence","nextCandidatePreviousDigest","nextCandidateReconciliationSequence","nextCandidatePreviousSnapshotDigest"],"properties":{"packageState":{"const":"NO_PACKAGE"},"decision":{"const":"AWAITING_COUNTERPARTY_EVIDENCE"},"eligibleForApplicationReview":{"const":false},"canonicalEventAppended":{"const":false},"nextCandidateEventSequence":{"const":2},"nextCandidatePreviousDigest":{"const":"3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b"},"nextCandidateReconciliationSequence":{"const":2},"nextCandidatePreviousSnapshotDigest":{"const":"9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"}}},
+    "evidenceBoundaries": {"type":"object","additionalProperties":false,"required":["systemAuthorizationEqualsBuyerConsent","publicClaimCreatesVerifiedPackage","driveFileCreatesConsent","attestationDigestAloneCreatesConsent","preparedPackageCreatesOrder","verifiedPackageCreatesCanonicalEvent","automaticApplication","reviewedMergeRequired","receivedCashRequires","templateIsIndemnityProof"],"properties":{"systemAuthorizationEqualsBuyerConsent":{"const":false},"publicClaimCreatesVerifiedPackage":{"const":false},"driveFileCreatesConsent":{"const":false},"attestationDigestAloneCreatesConsent":{"const":false},"preparedPackageCreatesOrder":{"const":false},"verifiedPackageCreatesCanonicalEvent":{"const":false},"automaticApplication":{"const":false},"reviewedMergeRequired":{"const":true},"receivedCashRequires":{"const":"PAID_SETTLED"},"templateIsIndemnityProof":{"const":false}}},
+    "privacy": {"type":"object","additionalProperties":false,"required":["buyerIdentityPublic","contactDataPublic","signaturePublic","authenticationDataPublic","consentTextPublic","contractTextPublic","driveReferencesPublic","privateReviewerNotesPublic"],"properties":{"buyerIdentityPublic":{"const":false},"contactDataPublic":{"const":false},"signaturePublic":{"const":false},"authenticationDataPublic":{"const":false},"consentTextPublic":{"const":false},"contractTextPublic":{"const":false},"driveReferencesPublic":{"const":false},"privateReviewerNotesPublic":{"const":false}}},
+    "googleDriveContinuity": {"type":"object","additionalProperties":false,"required":["state","documentTitles","publicReferencesExposed"],"properties":{"state":{"const":"CONNECTED_PRIVATE"},"documentTitles":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"string"}},"publicReferencesExposed":{"const":false}}},
+    "actualEffects": {"type":"object","additionalProperties":false,"required":["humanAcceptedCreated","customerCreated","orderCreated","contractAccepted","paymentObligationCreated","paymentProved","paidWorkStarted","activeCapacityUsed","capacityCeilingChanged","legalTermsSelected","indemnityResultCreated"],"properties":{"humanAcceptedCreated":{"const":false},"customerCreated":{"const":false},"orderCreated":{"const":false},"contractAccepted":{"const":false},"paymentObligationCreated":{"const":false},"paymentProved":{"const":false},"paidWorkStarted":{"const":false},"activeCapacityUsed":{"const":false},"capacityCeilingChanged":{"const":false},"legalTermsSelected":{"const":false},"indemnityResultCreated":{"const":false}}},
+    "generatedAt": {"type":"string","format":"date-time"},
+    "manifestDigest": {"const":"6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878"}
+  }
+}

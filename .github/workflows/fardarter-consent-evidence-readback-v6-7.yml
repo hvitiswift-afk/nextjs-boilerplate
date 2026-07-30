@@ -1,0 +1,158 @@
+name: Fardarter Consent Evidence Readback v6.7
+
+on:
+  pull_request:
+    paths:
+      - ".github/ISSUE_TEMPLATE/fardarter-consent-evidence.yml"
+      - ".github/workflows/fardarter-consent-evidence-v6-7.yml"
+      - ".github/workflows/fardarter-consent-evidence-readback-v6-7.yml"
+      - "app/api/revenue/consent-evidence/**"
+      - "app/github-control-tower-audit/consent-evidence/**"
+      - "src/lib/revenue/canonical-consent-evidence.ts"
+      - "receipts/revenue/FARDARTER-DRIVE-CONSENT-*.json"
+      - "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json"
+      - "schemas/revenue/fardarter-drive-consent-*.json"
+      - "schemas/revenue/fardarter-drive-gdrive-v6.schema.json"
+      - "scripts/check-fardarter-consent-evidence-v6-7.mjs"
+      - "docs/repository/FARDARTER-DRIVE-V6-7-CONSENT-EVIDENCE.md"
+      - "package.json"
+      - "app/sitemap.ts"
+  workflow_run:
+    workflows: [Netlify Audit Product Deploy]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    name: Validate v6.7 consent evidence source
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run fardarter:consent:check
+      - run: npm run build
+
+  immutable-readback:
+    name: Verify immutable v6.7 consent evidence API
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download Netlify deployment artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          pattern: netlify-fardarter-v6-*
+          path: deployment-artifacts
+          merge-multiple: true
+
+      - name: Resolve immutable deploy
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESULT="$(find deployment-artifacts -name netlify-deploy-result.json -print -quit)"
+          test -n "$RESULT" || { echo "Missing Netlify deploy result"; exit 1; }
+          DEPLOY_URL="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_url || x.deploy_ssl_url || x.ssl_url || x.url || "")' "$RESULT")"
+          DEPLOY_ID="$(node -e 'const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); console.log(x.deploy_id || x.id || "")' "$RESULT")"
+          test -n "$DEPLOY_URL" || { echo "Missing immutable deploy URL"; exit 1; }
+          test -n "$DEPLOY_ID" || { echo "Missing deploy ID"; exit 1; }
+          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Read consent evidence surfaces
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          set -euo pipefail
+          get() { curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 30 "$1" --output "$2"; }
+          get "$DEPLOY_URL/api/revenue/consent-evidence" consent.json
+          get "$DEPLOY_URL/github-control-tower-audit/consent-evidence" consent.html
+          get "$DEPLOY_URL/api/revenue/operations" operations.json
+          get "$DEPLOY_URL/sitemap.xml" sitemap.xml
+
+          node <<'NODE'
+          const fs = require('node:fs');
+          const consent = JSON.parse(fs.readFileSync('consent.json','utf8'));
+          const operations = JSON.parse(fs.readFileSync('operations.json','utf8'));
+          const html = fs.readFileSync('consent.html','utf8');
+          const sitemap = fs.readFileSync('sitemap.xml','utf8');
+          const MANIFEST = '6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878';
+          const ATTESTATION = '0026a05117e349524c51e7000adffc773c5be4986149c4636c111306b8dbe7e8';
+          const RECEIPT = '27c8fb452b3b7112d9f714449a232b9416e66718677b8595c0a0eda438078a7d';
+          const EVENT = '3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b';
+          const SNAPSHOT = '9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f';
+          const required = [
+            [consent.schemaVersion === '1.0.0', 'consent.schemaVersion'],
+            [consent.controllerVersion === '6.7.0', 'consent.controllerVersion'],
+            [consent.controllingIssue === 180, 'consent.controllingIssue'],
+            [consent.manifestDigest === MANIFEST, 'consent.manifestDigest'],
+            [consent.publicSafeAttestationDigest === ATTESTATION, 'consent.attestationDigest'],
+            [consent.attestationReceiptDigest === RECEIPT, 'consent.receiptDigest'],
+            [consent.package?.state === 'NO_PACKAGE', 'consent.packageState'],
+            [consent.review?.decision === 'AWAITING_COUNTERPARTY_EVIDENCE', 'consent.decision'],
+            [consent.review?.independentVerificationPerformed === false, 'consent.verification'],
+            [consent.review?.eligibleForHumanApplicationReview === false, 'consent.eligibility'],
+            [consent.canonical?.eventHeadSequence === 1 && consent.canonical?.eventHeadDigest === EVENT, 'consent.eventHead'],
+            [consent.canonical?.reconciliationSequence === 1 && consent.canonical?.reconciliationDigest === SNAPSHOT, 'consent.reconciliation'],
+            [consent.canonical?.humanAcceptedCount === 0 && consent.canonical?.activeDeliveries === 0, 'consent.states'],
+            [consent.canonical?.orders === 0 && consent.canonical?.verifiedGrossRevenueUsd === 0 && consent.canonical?.verifiedSettledCashUsd === 0, 'consent.money'],
+            [consent.canonical?.receivedCashRequires === 'PAID_SETTLED', 'consent.cashGate'],
+            [consent.nextCandidate?.eventSequence === 2 && consent.nextCandidate?.canonical === false && consent.nextCandidate?.applied === false, 'consent.nextCandidate'],
+            [consent.derived?.matchesCanonicalHead === true && consent.derived?.attestationMatchesHead === true, 'consent.headMatch'],
+            [consent.derived?.allRequiredEvidenceVerified === false && consent.derived?.automaticApplication === false, 'consent.boundary'],
+            [Object.values(consent.actualEffects || {}).every((value) => value === false), 'consent.zeroEffects'],
+            [consent.googleDriveContinuity?.state === 'CONNECTED_PRIVATE' && consent.googleDriveContinuity?.publicReferencesExposed === false, 'consent.drive'],
+            [operations.receiptChain?.headSequence === 1 && operations.canonicalCounts?.HUMAN_ACCEPTED === 0, 'operations.head'],
+            [html.includes('Counterparty consent evidence attestation'), 'consent.page'],
+            [html.includes('AWAITING_COUNTERPARTY_EVIDENCE'), 'consent.pageDecision'],
+            [html.includes('System-development authorization is not buyer consent'), 'consent.pageBoundary'],
+            [sitemap.includes('/github-control-tower-audit/consent-evidence'), 'sitemap.route'],
+          ];
+          const failed = required.filter(([ok]) => !ok).map(([,label]) => label);
+          if (failed.length) throw new Error(`v6.7 consent readback failed: ${failed.join(', ')}`);
+          console.log('Fardarter Drive v6.7 immutable consent evidence readback: PASS');
+          NODE
+
+      - name: Write v6.7 consent evidence receipt
+        env:
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          fs.writeFileSync('fardarter-v6-7-consent-readback.json', JSON.stringify({
+            schemaVersion: '1.0.0',
+            result: 'DEPLOYED_AND_VERIFIED',
+            deployId: process.env.DEPLOY_ID,
+            deployUrl: process.env.DEPLOY_URL,
+            manifestDigest: '6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878',
+            publicSafeAttestationDigest: '0026a05117e349524c51e7000adffc773c5be4986149c4636c111306b8dbe7e8',
+            attestationReceiptDigest: '27c8fb452b3b7112d9f714449a232b9416e66718677b8595c0a0eda438078a7d',
+            packageState: 'NO_PACKAGE',
+            decision: 'AWAITING_COUNTERPARTY_EVIDENCE',
+            humanAccepted: 0,
+            orders: 0,
+            activeDeliveries: 0,
+            verifiedGrossRevenueUsd: 0,
+            verifiedSettledCashUsd: 0,
+            generatedAt: new Date().toISOString(),
+          }, null, 2) + '\n');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-consent-evidence-v6-7-${{ github.event.workflow_run.head_sha }}
+          path: fardarter-v6-7-consent-readback.json
+          retention-days: 30

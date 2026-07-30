@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "1.0.0",
+  "controlId": "FARDARTER-DRIVE-CONSENT-EVIDENCE-V6-7",
+  "driveId": "FARDARTER-DRIVE-V6",
+  "controllerVersion": "6.7.0",
+  "controllingIssue": 180,
+  "currentCanonical": {
+    "eventHeadSequence": 1,
+    "eventHeadDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "reconciliationSequence": 1,
+    "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+    "applicationDigest": "f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d",
+    "sourceEntityIssue": 159,
+    "sourceState": "SCOPE_DRAFTED",
+    "targetState": "HUMAN_ACCEPTED",
+    "requiredGate": "HUMAN_APPROVAL_AND_BUYER_CONSENT",
+    "humanAcceptedCount": 0,
+    "activeDeliveries": 0,
+    "activeHeadroom": 100,
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0
+  },
+  "lifecycle": [
+    {"state":"NO_PACKAGE","meaning":"No private counterparty evidence package exists.","canonicalEffect":false},
+    {"state":"PRIVATE_PACKAGE_PREPARED","meaning":"Private evidence is assembled but not independently verified.","canonicalEffect":false},
+    {"state":"INDEPENDENTLY_VERIFIED","meaning":"A separate qualified reviewer verified every required item and produced a public-safe attestation digest.","canonicalEffect":false},
+    {"state":"APPLIED_BY_REVIEWED_MERGE","meaning":"A separate append-only canonical event was reviewed, merged, and read back.","canonicalEffect":true}
+  ],
+  "requiredEvidence": [
+    {"evidenceId":"COUNTERPARTY_IDENTITY","classification":"PRIVATE","required":true,"currentState":"MISSING"},
+    {"evidenceId":"AUTHORITY_AND_CAPACITY_TO_CONSENT","classification":"PRIVATE","required":true,"currentState":"MISSING"},
+    {"evidenceId":"EXACT_SCOPE_PRESENTED","classification":"PRIVATE","required":true,"currentState":"MISSING"},
+    {"evidenceId":"AFFIRMATIVE_CONSENT_TO_EXACT_SCOPE","classification":"PRIVATE","required":true,"currentState":"MISSING"},
+    {"evidenceId":"CONSENT_TIMESTAMP_AND_CHANNEL","classification":"PRIVATE","required":true,"currentState":"MISSING"},
+    {"evidenceId":"AUTHENTICATION_OR_SIGNATURE_EVIDENCE","classification":"PRIVATE","required":true,"currentState":"MISSING"},
+    {"evidenceId":"REVOCATION_AND_CONTRADICTION_CHECK","classification":"PRIVATE","required":true,"currentState":"NOT_PERFORMED"},
+    {"evidenceId":"EXPIRY_VALIDITY","classification":"PRIVATE","required":true,"currentState":"NOT_ESTABLISHED"},
+    {"evidenceId":"SOURCE_ENTITY_LINKAGE","classification":"PUBLIC_SAFE","required":true,"currentState":"VERIFIED"},
+    {"evidenceId":"INDEPENDENT_REVIEWER_ATTESTATION","classification":"PRIVATE","required":true,"currentState":"MISSING"}
+  ],
+  "verificationSeparation": {
+    "packageAssemblerMaySelfVerify": false,
+    "automationMayVerifyStructureAndHashes": true,
+    "automationMayDecideHumanConsent": false,
+    "independentHumanOrApprovedVerificationRequired": true
+  },
+  "attestation": {
+    "canonicalization": "JSON_SORTED_KEYS_UTF8",
+    "digestAlgorithm": "SHA-256",
+    "publicSafeMetadataOnly": true,
+    "identityIncluded": false,
+    "signatureIncluded": false,
+    "privateFileIdsIncluded": false,
+    "evidenceContentsIncluded": false,
+    "digestAloneProvesConsent": false
+  },
+  "decision": {
+    "packageState": "NO_PACKAGE",
+    "decision": "AWAITING_COUNTERPARTY_EVIDENCE",
+    "eligibleForApplicationReview": false,
+    "canonicalEventAppended": false,
+    "nextCandidateEventSequence": 2,
+    "nextCandidatePreviousDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "nextCandidateReconciliationSequence": 2,
+    "nextCandidatePreviousSnapshotDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"
+  },
+  "evidenceBoundaries": {
+    "systemAuthorizationEqualsBuyerConsent": false,
+    "publicClaimCreatesVerifiedPackage": false,
+    "driveFileCreatesConsent": false,
+    "attestationDigestAloneCreatesConsent": false,
+    "preparedPackageCreatesOrder": false,
+    "verifiedPackageCreatesCanonicalEvent": false,
+    "automaticApplication": false,
+    "reviewedMergeRequired": true,
+    "receivedCashRequires": "PAID_SETTLED",
+    "templateIsIndemnityProof": false
+  },
+  "privacy": {
+    "buyerIdentityPublic": false,
+    "contactDataPublic": false,
+    "signaturePublic": false,
+    "authenticationDataPublic": false,
+    "consentTextPublic": false,
+    "contractTextPublic": false,
+    "driveReferencesPublic": false,
+    "privateReviewerNotesPublic": false
+  },
+  "googleDriveContinuity": {
+    "state": "CONNECTED_PRIVATE",
+    "documentTitles": [
+      "Fardarter Drive™ v6.7 — Counterparty Consent Evidence Charter",
+      "Fardarter Drive™ v6.7 — Counterparty Consent Intake Register"
+    ],
+    "publicReferencesExposed": false
+  },
+  "actualEffects": {
+    "humanAcceptedCreated": false,
+    "customerCreated": false,
+    "orderCreated": false,
+    "contractAccepted": false,
+    "paymentObligationCreated": false,
+    "paymentProved": false,
+    "paidWorkStarted": false,
+    "activeCapacityUsed": false,
+    "capacityCeilingChanged": false,
+    "legalTermsSelected": false,
+    "indemnityResultCreated": false
+  },
+  "generatedAt": "2026-07-30T11:35:00Z",
+  "manifestDigest": "6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878"
+}

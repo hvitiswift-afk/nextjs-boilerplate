@@ -13,5 +13,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/github-control-tower-audit/canonicalization-preview`, changeFrequency: "daily", priority: 0.8 },
     { url: `${siteUrl}/github-control-tower-audit/canonicalization-application`, changeFrequency: "daily", priority: 0.84 },
     { url: `${siteUrl}/github-control-tower-audit/successor-readiness`, changeFrequency: "daily", priority: 0.83 },
+    { url: `${siteUrl}/github-control-tower-audit/consent-evidence`, changeFrequency: "daily", priority: 0.81 },
   ];
 }
