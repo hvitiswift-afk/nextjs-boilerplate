@@ -1,0 +1,121 @@
+{
+  "controlId": "FARDARTER-DRIVE-GITHUB-FIRST-RESPONSE-V6-9",
+  "controllerVersion": "6.9.0",
+  "controllingIssue": 185,
+  "predecessor": {
+    "controllerVersion": "6.8.0",
+    "implementationMerge": "4cb63ed2e480e3719c1015e28db007b09aad7f30",
+    "identityModel": "GITHUB_ISSUE_AUTHOR",
+    "channelModel": "EXACT_GITHUB_ISSUE_THREAD"
+  },
+  "currentCanonical": {
+    "eventHeadSequence": 1,
+    "eventHeadDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+    "reconciliationSequence": 1,
+    "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+    "stateCounts": {
+      "SCOPE_DRAFTED": 1,
+      "HUMAN_ACCEPTED": 0,
+      "ACTIVE": 0
+    },
+    "orders": 0,
+    "verifiedGrossRevenueUsd": 0,
+    "verifiedSettledCashUsd": 0,
+    "receivedCashRequires": "PAID_SETTLED"
+  },
+  "trigger": {
+    "events": [
+      "issues.opened",
+      "issues.edited",
+      "issues.reopened",
+      "issues.labeled",
+      "issue_comment.created"
+    ],
+    "titlePrefix": "[Audit request]:",
+    "authorizationLabel": "contact-github-authorized",
+    "authorizationReceiptMarker": "<!-- jp-audit-github-contact-v1 -->"
+  },
+  "eligibility": {
+    "issueMustBeOpen": true,
+    "pullRequestAllowed": false,
+    "requiredLabels": [
+      "audit-fit-check",
+      "contact-github-authorized"
+    ],
+    "authorType": "User",
+    "repositoryOwnerAllowed": false,
+    "botsAllowed": false,
+    "authorizationReceiptRequired": true,
+    "sensitivePublicContentAllowed": false
+  },
+  "publicFieldPolicy": {
+    "repositoryUrlPattern": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$",
+    "enumeratedFields": {
+      "relationship": [
+        "Owner or administrator",
+        "Maintainer or authorized contributor",
+        "Client representative with authority to request review",
+        "Evaluating fit before obtaining authority"
+      ],
+      "size": [
+        "Up to 10 open pull requests and 25 open issues",
+        "Up to 25 open pull requests and 50 open issues",
+        "Larger than the published scope",
+        "Not sure"
+      ],
+      "package": [
+        "$100 USD Control Tower Audit",
+        "$250 USD Implementation Pack after audit",
+        "Audit first; implementation undecided",
+        "Fit check only"
+      ]
+    },
+    "freeFormTextEchoAllowed": false
+  },
+  "response": {
+    "responseMarker": "<!-- jp-audit-github-first-response-v1 -->",
+    "responseVersion": "1.0.0",
+    "maxResponsesPerIssue": 1,
+    "maxClarificationItems": 6,
+    "emailRequired": false,
+    "emailAllowed": false,
+    "repeatedUnsolicitedFollowUpAllowed": false,
+    "acceptsScope": false,
+    "createsOrder": false,
+    "reservesCapacity": false,
+    "confirmsPayment": false,
+    "startsWork": false,
+    "provesConsent": false
+  },
+  "decisionLabels": {
+    "replied": "contact-github-replied",
+    "blocked": "contact-github-reply-blocked",
+    "mutuallyExclusive": true
+  },
+  "safety": {
+    "blockPublicEmailAddress": true,
+    "blockCredentialAssignment": true,
+    "blockPrivateKeyBlock": true,
+    "blockProviderTransactionIdentifier": true,
+    "blockBankingNumberDisclosure": true,
+    "ordinaryBoundaryLanguageAllowed": true,
+    "guessedRecipientAllowed": false,
+    "massOutreachAllowed": false,
+    "automaticEmailAllowed": false,
+    "automaticFollowUpAllowed": false
+  },
+  "actualEffects": {
+    "externalRequesterContactedByImplementation": false,
+    "emailSent": false,
+    "canonicalEventAppended": false,
+    "humanAcceptedCreated": false,
+    "orderCreated": false,
+    "contractAccepted": false,
+    "paymentConfirmed": false,
+    "paidWorkStarted": false,
+    "activeCapacityUsed": false,
+    "capacityChanged": false,
+    "legalTermSelected": false
+  },
+  "manifestDigest": "af6e9fd7c97dcb97f511f92b5d1f8baf907d6ea8b45c3ccdeef00a2d18eef3d9"
+}
