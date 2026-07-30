@@ -24,6 +24,7 @@ export default async function CanonicalizationPreviewPage() {
   const event = reviewBundle.candidateEvent;
   const projection = reviewBundle.candidateProjection;
   const snapshot = reviewBundle.candidateReconciliation;
+  const previewReadyState: "PREVIEW_READY" = reviewBundle.expectedDecision;
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-14">
@@ -80,7 +81,7 @@ export default async function CanonicalizationPreviewPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-neutral-400">
             Prepared review bundle
           </p>
-          <h2 className="mt-3 text-2xl font-semibold">{reviewBundle.expectedDecision}</h2>
+          <h2 className="mt-3 text-2xl font-semibold">{previewReadyState}</h2>
           <dl className="mt-6 space-y-3 text-sm">
             <div className="flex justify-between gap-4"><dt className="text-neutral-400">Bundle state</dt><dd>{reviewBundle.state}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-neutral-400">Source proposal</dt><dd>Issue #{reviewBundle.source.proposalIssue}</dd></div>
