@@ -1,0 +1,350 @@
+name: Fardarter Drive v6.4 Static Materialized Deploy
+
+on:
+  push:
+    branches:
+      - deploy/fardarter-v6-4-exact-20260730
+    paths:
+      - .github/workflows/fardarter-v6-4-static-materialized-deploy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: fardarter-v6-4-static-materialized-deploy
+  cancel-in-progress: true
+
+env:
+  EXACT_SOURCE_COMMIT: e482004bfff1bb90aba2d67b8da62a524f18cdb4
+  NETLIFY_SITE_ID: 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f
+  NETLIFY_SITE_NAME: lichburn-v0-2-8
+  NETLIFY_PRIMARY_ORIGIN: https://lichburn-v0-2-8.netlify.app
+  NETLIFY_NEXT_ADAPTER_VERSION: 5.15.11
+
+jobs:
+  deploy:
+    name: Materialize exact v6.4 and verify immutable deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Set up Node 20
+        id: setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Check out deployment control scripts
+        id: control_checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          fetch-depth: 1
+
+      - name: Check out exact v6.4 source
+        id: source_checkout
+        uses: actions/checkout@v4
+        with:
+          ref: e482004bfff1bb90aba2d67b8da62a524f18cdb4
+          path: source
+          fetch-depth: 1
+
+      - name: Verify exact source and locked blobs
+        id: source_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source
+          test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_COMMIT"
+          check_blob() {
+            local path="$1" expected="$2" actual
+            actual="$(git hash-object "$path")"
+            printf '%s  %s\n' "$actual" "$path"
+            test "$actual" = "$expected" || { echo "Blob mismatch for $path: expected $expected, got $actual"; exit 1; }
+          }
+          check_blob receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4.json 99a4bb840df5630efdf55d7e5fd4d6bdd0b62996
+          check_blob receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json e55188c34b34dddbe22652442b1ed6d0d932f25b
+          check_blob receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json bd24a05b0372ef77c97d520609baef73d0b778c6
+          check_blob app/api/revenue/canonicalization-preview/route.ts 95cf068221fd49fc6ddba755f8d47f72dc3da55e
+          check_blob .github/workflows/fardarter-canonicalization-preview-v6-4.yml 6d2a32710a00bdb2a8fa49275447699fe8e2c7b3
+
+      - name: Generate exact Netlify v1 route blobs
+        id: route_build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source
+          npm install --package-lock-only --ignore-scripts --save-dev --registry=https://registry.npmjs.org \
+            "@netlify/plugin-nextjs@$NETLIFY_NEXT_ADAPTER_VERSION"
+          cat >> netlify.toml <<'TOML'
+
+          [[plugins]]
+            package = "@netlify/plugin-nextjs"
+          TOML
+          mkdir -p .netlify
+          printf '{"siteId":"%s"}\n' "$NETLIFY_SITE_ID" > .netlify/state.json
+          npm ci --include=dev --registry=https://registry.npmjs.org
+          npx --yes --registry=https://registry.npmjs.org netlify-cli@latest build --context production --offline
+          test -d .netlify/deploy/v1/blobs/deploy
+
+      - name: Reverify application boundary after route generation
+        id: route_boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source
+          test "$(git hash-object receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4.json)" = 99a4bb840df5630efdf55d7e5fd4d6bdd0b62996
+          test "$(git hash-object receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json)" = e55188c34b34dddbe22652442b1ed6d0d932f25b
+          test "$(git hash-object receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json)" = bd24a05b0372ef77c97d520609baef73d0b778c6
+          test "$(git hash-object app/api/revenue/canonicalization-preview/route.ts)" = 95cf068221fd49fc6ddba755f8d47f72dc3da55e
+          test "$(git hash-object .github/workflows/fardarter-canonicalization-preview-v6-4.yml)" = 6d2a32710a00bdb2a8fa49275447699fe8e2c7b3
+          CHANGED="$(git diff --name-only)"
+          test "$CHANGED" = $'netlify.toml\npackage-lock.json\npackage.json' || { echo "Unexpected exact-source mutations:"; printf '%s\n' "$CHANGED"; exit 1; }
+
+      - name: Materialize pure static deployment package
+        id: materialize
+        shell: bash
+        run: |
+          set -euo pipefail
+          node control/.github/scripts/materialize-fardarter-v6-4-static-site.cjs source static-package
+          cd static-package
+          node verify-package.cjs
+          test ! -d netlify/functions
+          test ! -d .netlify/functions-internal
+          mkdir -p ../artifacts
+          cp materialization-receipt.json ../artifacts/
+          sha256sum materialization-receipt.json netlify.toml package.json verify-package.cjs dist/_redirects dist/_headers > ../artifacts/static-package-control.sha256
+          tar --sort=name --mtime='UTC 2026-07-30' --owner=0 --group=0 --numeric-owner \
+            -czf ../artifacts/fardarter-v6-4-static-package.tar.gz .
+          sha256sum ../artifacts/fardarter-v6-4-static-package.tar.gz > ../artifacts/fardarter-v6-4-static-package.tar.gz.sha256
+
+      - name: Generate ephemeral proxy encryption key
+        id: key
+        shell: bash
+        run: |
+          set -euo pipefail
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$RUNNER_TEMP/proxy-private.pem" 2>/dev/null
+          openssl pkey -in "$RUNNER_TEMP/proxy-private.pem" -pubout -out "$RUNNER_TEMP/proxy-public.pem" 2>/dev/null
+          chmod 600 "$RUNNER_TEMP/proxy-private.pem"
+          base64 -w0 "$RUNNER_TEMP/proxy-public.pem" > "$RUNNER_TEMP/proxy-public.b64"
+
+      - name: Publish ephemeral public key
+        id: publish_key
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const { owner, repo } = context.repo;
+            const key = fs.readFileSync(process.env.RUNNER_TEMP + '/proxy-public.b64', 'utf8').trim();
+            const marker = `<!-- FARDARTER-V6-4-STATIC-PROXY-KEY-${context.runId} -->`;
+            const body = `${marker}\n\n## Exact v6.4 static-materialization secure handoff\n\n` +
+              `- Workflow run: https://github.com/${owner}/${repo}/actions/runs/${context.runId}\n` +
+              `- Exact source: \`${process.env.EXACT_SOURCE_COMMIT}\`\n` +
+              `- Materialization: verified Netlify v1 route blobs, no runtime function dependency for requested routes.\n` +
+              `- Public key (base64 PEM; private key remains only in this live runner):\n\n` +
+              `\`\`\`text\n${key}\n\`\`\``;
+            await github.rest.issues.createComment({ owner, repo, issue_number: 136, body });
+
+      - name: Await encrypted one-time Netlify proxy
+        id: await_cipher
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          (async () => {
+            const marker = `<!-- FARDARTER-V6-4-STATIC-PROXY-CIPHER-${process.env.RUN_ID} -->`;
+            const endpoint = `https://api.github.com/repos/${process.env.REPOSITORY}/issues/136/comments?per_page=100`;
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            for (let attempt = 1; attempt <= 180; attempt++) {
+              const response = await fetch(endpoint, { headers: {
+                Accept: 'application/vnd.github+json', Authorization: `Bearer ${process.env.GH_TOKEN}`,
+                'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'fardarter-v6-4-static-materialized-deploy',
+              }});
+              if (!response.ok) throw new Error(`Issue comment poll failed: ${response.status}`);
+              const comments = await response.json();
+              const match = [...comments].reverse().find((comment) =>
+                comment?.user?.login === 'hvitiswift-afk' && comment?.body?.includes(marker));
+              if (match) {
+                const fenced = match.body.match(/```json\s*([\s\S]*?)```/i);
+                if (!fenced) throw new Error('Encrypted proxy comment is missing JSON code fence');
+                const payload = JSON.parse(fenced[1]);
+                for (const field of ['encryptedKey', 'nonce', 'ciphertext']) {
+                  if (typeof payload[field] !== 'string' || payload[field].length < 8) throw new Error(`Invalid encrypted payload field: ${field}`);
+                }
+                fs.writeFileSync(process.env.RUNNER_TEMP + '/proxy-cipher.json', JSON.stringify(payload));
+                console.log(`Encrypted proxy received on poll ${attempt}.`);
+                return;
+              }
+              if (attempt % 12 === 0) console.log(`Awaiting encrypted proxy: poll ${attempt}/180`);
+              await sleep(5000);
+            }
+            throw new Error('Timed out awaiting encrypted proxy payload');
+          })().catch((error) => { console.error(error); process.exit(1); });
+          NODE
+
+      - name: Decrypt proxy in runner memory
+        id: decrypt
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const payload = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/proxy-cipher.json', 'utf8'));
+          const privateKey = fs.readFileSync(process.env.RUNNER_TEMP + '/proxy-private.pem');
+          const key = crypto.privateDecrypt({ key: privateKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING, oaepHash: 'sha256' }, Buffer.from(payload.encryptedKey, 'base64'));
+          const nonce = Buffer.from(payload.nonce, 'base64');
+          const packed = Buffer.from(payload.ciphertext, 'base64');
+          const tag = packed.subarray(packed.length - 16);
+          const encrypted = packed.subarray(0, packed.length - 16);
+          const decipher = crypto.createDecipheriv('aes-256-gcm', key, nonce);
+          decipher.setAuthTag(tag);
+          const proxy = Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
+          if (!proxy.startsWith('https://netlify-mcp.netlify.app/proxy/') || proxy.length > 2000 || /\s/.test(proxy)) throw new Error('Decrypted proxy failed boundary validation');
+          fs.writeFileSync(process.env.RUNNER_TEMP + '/proxy-url', proxy, { mode: 0o600 });
+          console.log('Encrypted proxy decrypted and boundary-validated.');
+          NODE
+          rm -f "$RUNNER_TEMP/proxy-cipher.json"
+
+      - name: Deploy static materialization to fixed Netlify site
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROXY_PATH="$(cat "$RUNNER_TEMP/proxy-url")"
+          cd static-package
+          set +e
+          npx --yes --registry=https://registry.npmjs.org @netlify/mcp@1.15.1 \
+            --site-id "$NETLIFY_SITE_ID" --proxy-path "$PROXY_PATH" > "$RUNNER_TEMP/netlify-static-deploy.log" 2>&1
+          STATUS=$?
+          set -e
+          cat "$RUNNER_TEMP/netlify-static-deploy.log"
+          rm -f "$RUNNER_TEMP/proxy-url" "$RUNNER_TEMP/proxy-private.pem" "$RUNNER_TEMP/proxy-public.pem" "$RUNNER_TEMP/proxy-public.b64"
+          test "$STATUS" -eq 0 || exit "$STATUS"
+          READY_JSON="$(grep 'Deploy is ready!' "$RUNNER_TEMP/netlify-static-deploy.log" | tail -1 | sed 's/^.*Deploy is ready! //')"
+          test -n "$READY_JSON" || { echo 'Missing ready deployment JSON'; exit 1; }
+          DEPLOY_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.deployId || "")' "$READY_JSON")"
+          test -n "$DEPLOY_ID" || { echo 'Missing real deploy ID'; exit 1; }
+          IMMUTABLE_URL="https://${DEPLOY_ID}--${NETLIFY_SITE_NAME}.netlify.app"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+          echo "immutable_url=$IMMUTABLE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Read back every required immutable route
+        id: readback
+        shell: bash
+        env:
+          IMMUTABLE_URL: ${{ steps.deploy.outputs.immutable_url }}
+        run: |
+          set -euo pipefail
+          cp "$RUNNER_TEMP/netlify-static-deploy.log" artifacts/netlify-static-deploy.log
+          get() {
+            local route="$1" output="$2"
+            echo "GET $IMMUTABLE_URL$route"
+            curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors --max-time 45 \
+              "$IMMUTABLE_URL$route" --output "$output"
+            test -s "$output"
+          }
+          get / artifacts/home.html
+          get /github-control-tower-audit artifacts/audit.html
+          get /github-control-tower-audit/operations artifacts/operations.html
+          get /github-control-tower-audit/reconciliation artifacts/reconciliation.html
+          get /github-control-tower-audit/canonicalization-preview artifacts/canonicalization-preview.html
+          get /api/revenue/pilot artifacts/pilot.json
+          get /api/revenue/capacity artifacts/capacity.json
+          get /api/revenue/operations artifacts/operations.json
+          get /api/revenue/reconciliation artifacts/reconciliation.json
+          get /api/revenue/canonicalization-preview artifacts/canonicalization-preview.json
+          get /sitemap.xml artifacts/sitemap.xml
+          get /robots.txt artifacts/robots.txt
+
+      - name: Validate exact v6.4 immutable contract
+        id: validate
+        shell: bash
+        env:
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          IMMUTABLE_URL: ${{ steps.deploy.outputs.immutable_url }}
+        run: |
+          set -euo pipefail
+          node control/.github/scripts/verify-fardarter-v6-4-immutable-readback.cjs artifacts
+
+      - name: Upload durable deployment evidence
+        id: upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-v6-4-static-materialized-${{ github.run_id }}
+          path: artifacts
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish rollout outcome
+        id: report
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          SETUP_OUTCOME: ${{ steps.setup.outcome }}
+          CONTROL_CHECKOUT_OUTCOME: ${{ steps.control_checkout.outcome }}
+          SOURCE_CHECKOUT_OUTCOME: ${{ steps.source_checkout.outcome }}
+          SOURCE_GATE_OUTCOME: ${{ steps.source_gate.outcome }}
+          ROUTE_BUILD_OUTCOME: ${{ steps.route_build.outcome }}
+          ROUTE_BOUNDARY_OUTCOME: ${{ steps.route_boundary.outcome }}
+          MATERIALIZE_OUTCOME: ${{ steps.materialize.outcome }}
+          KEY_OUTCOME: ${{ steps.key.outcome }}
+          PUBLISH_KEY_OUTCOME: ${{ steps.publish_key.outcome }}
+          AWAIT_CIPHER_OUTCOME: ${{ steps.await_cipher.outcome }}
+          DECRYPT_OUTCOME: ${{ steps.decrypt.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          READBACK_OUTCOME: ${{ steps.readback.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
+          IMMUTABLE_URL: ${{ steps.deploy.outputs.immutable_url }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const stages = [
+              ['set up Node', process.env.SETUP_OUTCOME], ['checkout control scripts', process.env.CONTROL_CHECKOUT_OUTCOME],
+              ['checkout exact commit', process.env.SOURCE_CHECKOUT_OUTCOME], ['verify exact source and blobs', process.env.SOURCE_GATE_OUTCOME],
+              ['generate exact Netlify route blobs', process.env.ROUTE_BUILD_OUTCOME], ['reverify application boundary', process.env.ROUTE_BOUNDARY_OUTCOME],
+              ['materialize static package', process.env.MATERIALIZE_OUTCOME], ['generate ephemeral key', process.env.KEY_OUTCOME],
+              ['publish public key', process.env.PUBLISH_KEY_OUTCOME], ['receive encrypted proxy', process.env.AWAIT_CIPHER_OUTCOME],
+              ['decrypt proxy in runner memory', process.env.DECRYPT_OUTCOME], ['Netlify static upload/build', process.env.DEPLOY_OUTCOME],
+              ['immutable route readback', process.env.READBACK_OUTCOME], ['exact v6.4 validation', process.env.VALIDATE_OUTCOME],
+              ['upload evidence artifact', process.env.UPLOAD_OUTCOME],
+            ];
+            const success = stages.every(([, outcome]) => outcome === 'success');
+            const failing = stages.find(([, outcome]) => outcome !== 'success');
+            const deployId = process.env.DEPLOY_ID || 'UNAVAILABLE';
+            const immutableUrl = process.env.IMMUTABLE_URL || 'UNAVAILABLE';
+            const marker = success ? `<!-- FARDARTER-V6-4-VERIFIED-${deployId} -->` : `<!-- FARDARTER-V6-4-STATIC-FAIL-${context.runId} -->`;
+            let body = `${marker}\n\n## Fardarter Drive v6.4 static-materialized ${success ? 'deployment receipt' : 'failure receipt'}\n\n` +
+              `- Exact application source: \`${process.env.EXACT_SOURCE_COMMIT}\`\n` +
+              `- Workflow run: https://github.com/${owner}/${repo}/actions/runs/${context.runId}\n` +
+              `- Fixed Netlify site: \`${process.env.NETLIFY_SITE_ID}\` / \`${process.env.NETLIFY_SITE_NAME}\`\n` +
+              `- Deploy ID: \`${deployId}\`\n` +
+              `- Immutable deploy URL: ${immutableUrl === 'UNAVAILABLE' ? '**UNAVAILABLE**' : immutableUrl}\n`;
+            if (success) {
+              body += `\nResult: **DEPLOYED_AND_VERIFIED**. All 12 requested immutable routes and every exact v6.4 evidence boundary passed. The public package was materialized from Netlify's exact v1 route blobs; all five locked application blobs remained unchanged and no runtime function was required for the requested surfaces.\n\n` +
+                `Blobs: \`99a4bb840df5630efdf55d7e5fd4d6bdd0b62996\`, \`e55188c34b34dddbe22652442b1ed6d0d932f25b\`, \`bd24a05b0372ef77c97d520609baef73d0b778c6\`, \`95cf068221fd49fc6ddba755f8d47f72dc3da55e\`, \`6d2a32710a00bdb2a8fa49275447699fe8e2c7b3\`.\n\n` +
+                `Digests: \`4c401dd352d4263786ac22072d616f67775761656a771ea8815e4623a7a3975b\`, \`3c85fe2fc195d5a0c9de45b679f9ef3a5589f36f948ea4a8acc0720483a6dc9e\`, \`4035cd406a5db019c4f3b9122e0021b2fb3fcbb23e7e10b040333fdedeb41a22\`, \`2e369ed175bfbd2d2a9ae8cc35ab29a48afc7e25adbfc9591b0127fc2b3fb174\`, \`4e7e2ead4c466704ad0559fed73cc01cf028722d701ffe47669626858a96c8de\`, \`3198341aebdf82e95d8cd0de680a16553cf9c3b3c2e4fd4824d197de79aa6ef2\`, \`9294df7c63b535b292f163bc1bbc183883d05f7bd99329ed845db9d62e2e7a8c\`.\n\n` +
+                `Canonical state remains sequence 0, one genesis event, zero business events, zero ACTIVE/orders, and $0 gross/$0 settled.`;
+            } else {
+              body += `\nResult: **FAILED**. Exact failing step: **${failing?.[0] || 'unknown'}** (outcome \`${failing?.[1] || 'unknown'}\`).\n\nNo downstream success receipts were written; #136 and #143 remain open.`;
+            }
+            const targets = success ? [136, 143, 133, 141, 151, 153, 156, 160, 165] : [136, 143];
+            for (const issue_number of targets) {
+              const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+              if (!comments.some((comment) => comment.body?.includes(marker))) await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+            if (success) {
+              for (const issue_number of [136, 143]) await github.rest.issues.update({ owner, repo, issue_number, state: 'closed', state_reason: 'completed' });
+            }
