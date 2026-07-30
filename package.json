@@ -11,8 +11,9 @@
     "fardarter:check": "node scripts/check-fardarter-drive-v6.mjs",
     "fardarter:capacity:check": "node scripts/check-fardarter-capacity-ledger-v6-1.mjs",
     "fardarter:state:check": "node scripts/check-fardarter-state-machine-v6-2.mjs",
-    "fardarter:reconciliation:check": "node scripts/check-fardarter-reconciliation-v6-3.mjs && node scripts/check-fardarter-proposal-trigger-v6-3.mjs",
-    "revenue:verify": "npm run revenue:experiment:check && npm run revenue:surface:check && npm run fardarter:check && npm run fardarter:capacity:check && npm run fardarter:state:check && npm run fardarter:reconciliation:check",
+    "fardarter:reconciliation:check": "node scripts/check-fardarter-reconciliation-v6-3.mjs",
+    "fardarter:proposal-trigger:check": "node scripts/check-fardarter-proposal-trigger-v6-3.mjs",
+    "revenue:verify": "npm run revenue:experiment:check && npm run revenue:surface:check && npm run fardarter:check && npm run fardarter:capacity:check && npm run fardarter:state:check && npm run fardarter:reconciliation:check && npm run fardarter:proposal-trigger:check",
     "db:migrate": "node scripts/migrate-memory-vault.mjs",
     "observer:routes": "node scripts/print-observer-route-scenarios.mjs",
     "observer:routes:check": "node scripts/check-observer-route-scenarios.mjs",
@@ -60,7 +61,7 @@
     "@types/pg": "^8.11.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "tailwindcss": "^4",
+    "tailwindcss": "^5",
     "typescript": "^5"
   }
 }
