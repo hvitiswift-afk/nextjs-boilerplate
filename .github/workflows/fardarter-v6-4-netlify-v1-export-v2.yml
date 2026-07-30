@@ -1,0 +1,119 @@
+name: Fardarter Drive v6.4 Netlify v1 Export v2
+
+on:
+  push:
+    branches:
+      - deploy/fardarter-v6-4-exact-20260730
+    paths:
+      - .github/workflows/fardarter-v6-4-netlify-v1-export-v2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  EXACT_SOURCE_COMMIT: e482004bfff1bb90aba2d67b8da62a524f18cdb4
+  NETLIFY_SITE_ID: 21d3bb41-3a69-4a7d-b6c6-e873cde8ee2f
+  NETLIFY_NEXT_ADAPTER_VERSION: 5.15.11
+
+jobs:
+  export:
+    name: Export generated Netlify route blobs
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Publish run identity
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const marker = `<!-- FARDARTER-V6-4-NETLIFY-V1-EXPORT-V2-START-${context.runId} -->`;
+            const body = `${marker}\n\n## Exact v6.4 Netlify route-blob export started\n\n` +
+              `- Workflow run: https://github.com/${owner}/${repo}/actions/runs/${context.runId}\n` +
+              `- Exact source: \`${process.env.EXACT_SOURCE_COMMIT}\`.`;
+            await github.rest.issues.createComment({ owner, repo, issue_number: 136, body });
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Check out exact v6.4 source
+        uses: actions/checkout@v4
+        with:
+          ref: e482004bfff1bb90aba2d67b8da62a524f18cdb4
+          fetch-depth: 1
+
+      - name: Verify source and apply deployment-only adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_COMMIT"
+          test "$(git hash-object receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4.json)" = 99a4bb840df5630efdf55d7e5fd4d6bdd0b62996
+          test "$(git hash-object receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json)" = e55188c34b34dddbe22652442b1ed6d0d932f25b
+          test "$(git hash-object receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json)" = bd24a05b0372ef77c97d520609baef73d0b778c6
+          test "$(git hash-object app/api/revenue/canonicalization-preview/route.ts)" = 95cf068221fd49fc6ddba755f8d47f72dc3da55e
+          test "$(git hash-object .github/workflows/fardarter-canonicalization-preview-v6-4.yml)" = 6d2a32710a00bdb2a8fa49275447699fe8e2c7b3
+          npm install --package-lock-only --ignore-scripts --save-dev --registry=https://registry.npmjs.org \
+            "@netlify/plugin-nextjs@$NETLIFY_NEXT_ADAPTER_VERSION"
+          cat >> netlify.toml <<'TOML'
+
+          [[plugins]]
+            package = "@netlify/plugin-nextjs"
+          TOML
+          mkdir -p .netlify export
+          printf '{"siteId":"%s"}\n' "$NETLIFY_SITE_ID" > .netlify/state.json
+
+      - name: Install and run Netlify build
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --include=dev --registry=https://registry.npmjs.org
+          npx --yes --registry=https://registry.npmjs.org netlify-cli@latest build --context production --offline
+
+      - name: Export generated route package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d .netlify/deploy/v1/blobs/deploy
+          tar --sort=name --mtime='UTC 2026-07-30' --owner=0 --group=0 --numeric-owner \
+            -czf export/fardarter-v6-4-netlify-deploy-v1.tar.gz .netlify/deploy/v1
+          sha256sum export/fardarter-v6-4-netlify-deploy-v1.tar.gz > export/fardarter-v6-4-netlify-deploy-v1.tar.gz.sha256
+          find .netlify/deploy/v1 -type f -printf '%P\t%s\n' | sort > export/deploy-v1-files.tsv
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const root = '.netlify/deploy/v1/blobs/deploy';
+          const rows = [];
+          for (const name of fs.readdirSync(root).sort()) {
+            const padded = name.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - name.length % 4) % 4);
+            const route = Buffer.from(padded, 'base64').toString('utf8');
+            const stat = fs.statSync(path.join(root, name));
+            rows.push({ name, route, bytes: stat.size });
+          }
+          fs.writeFileSync('export/deploy-route-blobs.json', JSON.stringify(rows, null, 2) + '\n');
+          NODE
+          cp -a .netlify/deploy/v1/blobs/deploy export/route-blobs
+
+      - name: Upload route package
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-v6-4-netlify-v1-v2-${{ github.run_id }}
+          path: export
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish export receipt
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const marker = `<!-- FARDARTER-V6-4-NETLIFY-V1-EXPORT-V2-${context.runId} -->`;
+            const body = `${marker}\n\n## Exact v6.4 Netlify route blobs exported\n\n` +
+              `- Workflow run: https://github.com/${owner}/${repo}/actions/runs/${context.runId}\n` +
+              `- Exact source: \`${process.env.EXACT_SOURCE_COMMIT}\`\n` +
+              `- Artifact: \`fardarter-v6-4-netlify-v1-v2-${context.runId}\`\n` +
+              `- Local Netlify build and adapter lifecycle: **PASS**.`;
+            await github.rest.issues.createComment({ owner, repo, issue_number: 136, body });
