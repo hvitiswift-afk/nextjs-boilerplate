@@ -211,7 +211,7 @@ jobs:
           echo "current_control_state=CURRENT_CONTROL_HEAD_RECONCILED"
           echo "historical_job_identity_v619=name: Verify Fardarter Drive v6.19 strategy authority map"
           echo "historical_job_identity_v618=name: Verify Fardarter Drive v6.18 standing control head"
-          echo "historical_job_identity_v616=name: Verify Fardarter Drive v6.16 aggregate control"
+          echo "historical_control_v616=FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16"
           echo "application_control=FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20"
           echo "application_control_manifest_digest=6e1145e5088761f54f2c1c0d320aa2ba349f91f18b9a0ee6c5c2060f49cbfc16"
           echo "application_page_sha256=249ba20fffaa208330b416d9a42335508bd393c0d722848a5fc2e66febf76fcc"
