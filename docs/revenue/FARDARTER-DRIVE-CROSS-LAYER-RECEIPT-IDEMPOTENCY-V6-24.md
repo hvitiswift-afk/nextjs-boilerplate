@@ -3,6 +3,7 @@
 **Control:** `FARDARTER-DRIVE-CROSS-LAYER-RECEIPT-IDEMPOTENCY-V6-24`  
 **Controlling issues:** #232 and #233  
 **Manifest digest:** `56cb6b6395262f095d5888f2f45837b30fb7da5ca4f53c17c9238c9571b6d056`  
+**Post-merge state:** `CROSS_LAYER_RECEIPT_IDEMPOTENCY_RECONCILED`  
 **Prepared against:** `f564ab950998aec1317ea095a1700d61b7409fa9`
 
 ## Purpose
