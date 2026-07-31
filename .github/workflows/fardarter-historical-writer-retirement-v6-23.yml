@@ -1,0 +1,51 @@
+name: Fardarter Historical Writer Retirement v6.23
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fardarter-reconciliation-v6-3.yml"
+      - ".github/workflows/fardarter-historical-writer-retirement-v6-23.yml"
+      - "receipts/revenue/FARDARTER-DRIVE-HISTORICAL-WRITER-RETIREMENT-V6-23.json"
+      - "schemas/revenue/fardarter-drive-historical-writer-retirement-v6-23.schema.json"
+      - "scripts/check-fardarter-historical-writer-retirement-v6-23.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-HISTORICAL-WRITER-RETIREMENT-V6-23.md"
+      - "package.json"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/fardarter-reconciliation-v6-3.yml"
+      - ".github/workflows/fardarter-historical-writer-retirement-v6-23.yml"
+      - "receipts/revenue/FARDARTER-DRIVE-HISTORICAL-WRITER-RETIREMENT-V6-23.json"
+      - "schemas/revenue/fardarter-drive-historical-writer-retirement-v6-23.schema.json"
+      - "scripts/check-fardarter-historical-writer-retirement-v6-23.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-HISTORICAL-WRITER-RETIREMENT-V6-23.md"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-historical-writer-retirement-v6-23-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify historical public writer retirement v6.23
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify v6.23 historical writer retirement
+        run: npm run fardarter:historical-writer-retirement:check
+      - name: Verify exact JSON syntax
+        run: |
+          node -e 'for (const path of [
+            "receipts/revenue/FARDARTER-DRIVE-HISTORICAL-WRITER-RETIREMENT-V6-23.json",
+            "schemas/revenue/fardarter-drive-historical-writer-retirement-v6-23.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.23 JSON syntax: PASS")'
