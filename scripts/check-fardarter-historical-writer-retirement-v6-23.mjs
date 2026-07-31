@@ -179,7 +179,7 @@ assert(
   pkg.scripts["fardarter:historical-writer-retirement:check"] ===
       "node scripts/check-fardarter-historical-writer-retirement-v6-23.mjs" &&
     pkg.scripts["revenue:verify"].includes(
-      "npm run fardarter:public-control-head-projection:check && npm run fardarter:historical-writer-retirement:check && npm run fardarter:current-control-head:check",
+      "npm run fardarter:public-control-head-projection:check && npm run fardarter:current-control-head:check && npm run fardarter:historical-writer-retirement:check && npm run fardarter:strategy-rail:check",
     ) &&
     pkg.scripts["revenue:verify"].endsWith("npm run fardarter:strategy-rail:check"),
   "v6.23 package integration mismatch",
