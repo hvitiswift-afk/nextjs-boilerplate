@@ -1,11 +1,14 @@
-name: Publish Fardarter Startup Site
+name: Publish Fardarter GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
-      - 'fardarter-startup/**'
-      - '.github/workflows/fardarter-pages.yml'
+      - "fardarter-startup/**"
+      - "config/fardarter-pages-readiness.json"
+      - "scripts/build-fardarter-github-pages.mjs"
+      - "scripts/verify-fardarter-pages-publication.mjs"
+      - ".github/workflows/fardarter-pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -14,27 +17,108 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: fardarter-github-pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  source-readiness:
+    runs-on: ubuntu-latest
+    outputs:
+      pages_configured: ${{ steps.pages-probe.outputs.configured }}
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify Pages source readiness
+        run: node scripts/verify-fardarter-pages-readiness.mjs
+
+      - name: Build deterministic static artifact
+        run: node scripts/build-fardarter-github-pages.mjs --output dist/fardarter-pages --source-commit "${GITHUB_SHA}"
+
+      - name: Verify source artifact
+        run: |
+          node scripts/verify-fardarter-pages-publication.mjs \
+            --fixture-dir dist/fardarter-pages \
+            --receipt-file dist/fardarter-pages/source-fixture-verification.json
+
+      - name: Probe current GitHub Pages configuration
+        id: pages-probe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/pages" > /tmp/pages.json 2>/tmp/pages-error.txt; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "pages_configuration=present"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "pages_configuration=absent_or_not_visible"
+            cat /tmp/pages-error.txt
+          fi
+
+      - name: Upload source evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-pages-source-${{ github.run_id }}
+          path: dist/fardarter-pages
+          if-no-files-found: error
+          retention-days: 30
+
+  build-deploy-verify:
+    needs: source-readiness
+    if: needs.source-readiness.outputs.pages_configured == 'true'
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout exact source
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
-      - name: Upload startup site
+      - name: Build deterministic static artifact
+        run: node scripts/build-fardarter-github-pages.mjs --output dist/fardarter-pages --source-commit "${GITHUB_SHA}"
+
+      - name: Configure existing GitHub Pages site
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: fardarter-startup
+          path: dist/fardarter-pages
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify public URL and required content
+        run: |
+          node scripts/verify-fardarter-pages-publication.mjs \
+            --base-url "${{ steps.deployment.outputs.page_url }}" \
+            --attempts 18 \
+            --delay-ms 5000 \
+            --receipt-file /tmp/fardarter-pages-publication-receipt.json
+
+      - name: Upload operational publication receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-pages-publication-${{ github.run_id }}
+          path: |
+            /tmp/fardarter-pages-publication-receipt.json
+            dist/fardarter-pages/publication-source-receipt.json
+            dist/fardarter-pages/status.json
+          if-no-files-found: error
+          retention-days: 30

@@ -1,4 +1,4 @@
-name: Enable Fardarter GitHub Pages
+name: Enable and Publish Fardarter GitHub Pages
 
 on:
   workflow_dispatch:
@@ -8,23 +8,75 @@ permissions:
   pages: write
   id-token: write
 
-jobs:
-  enable-pages:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+concurrency:
+  group: fardarter-github-pages
+  cancel-in-progress: false
 
-      - name: Enable and configure GitHub Pages
+jobs:
+  enable-build-deploy-verify:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Preflight private admin capability
+        shell: bash
+        run: |
+          if [ -z "$GH_ADMIN_TOKEN" ]; then
+            echo "::error::GH_ADMIN_TOKEN is absent. Create it privately with the exact repository Pages/Administration permission before dispatch."
+            exit 1
+          fi
+          echo "admin_capability=present_masked"
+
+      - name: Verify Pages source readiness
+        run: node scripts/verify-fardarter-pages-readiness.mjs
+
+      - name: Build deterministic static artifact
+        run: node scripts/build-fardarter-github-pages.mjs --output dist/fardarter-pages --source-commit "${GITHUB_SHA}"
+
+      - name: Enable GitHub Pages with workflow build source
         id: pages
         uses: actions/configure-pages@v6
         with:
           enablement: true
           token: ${{ secrets.GH_ADMIN_TOKEN }}
 
-      - name: Record enablement receipt
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/fardarter-pages
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Verify public URL and required content
         run: |
-          echo "base_url=${{ steps.pages.outputs.base_url }}"
-          echo "origin=${{ steps.pages.outputs.origin }}"
-          echo "base_path=${{ steps.pages.outputs.base_path }}"
-          echo "Pages is configured. Run Publish Fardarter Startup Site next."
+          node scripts/verify-fardarter-pages-publication.mjs \
+            --base-url "${{ steps.deployment.outputs.page_url }}" \
+            --attempts 18 \
+            --delay-ms 5000 \
+            --receipt-file /tmp/fardarter-pages-publication-receipt.json
+
+      - name: Upload operational publication receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-pages-publication-${{ github.run_id }}
+          path: |
+            /tmp/fardarter-pages-publication-receipt.json
+            dist/fardarter-pages/publication-source-receipt.json
+            dist/fardarter-pages/status.json
+          if-no-files-found: error
+          retention-days: 30
