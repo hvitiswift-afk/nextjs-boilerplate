@@ -1,0 +1,52 @@
+name: Fardarter Public Offer v6.14
+
+on:
+  pull_request:
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-PUBLIC-OFFER-V6-14.json"
+      - "schemas/revenue/fardarter-drive-public-offer-v6-14.schema.json"
+      - "templates/fardarter-drive-public-offer-v6-14.md"
+      - "docs/revenue/FARDARTER-DRIVE-PUBLIC-OFFER-V6-14.md"
+      - "scripts/check-fardarter-public-offer-v6-14.mjs"
+      - ".github/workflows/fardarter-public-offer-v6-14.yml"
+      - ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml"
+      - "package.json"
+  push:
+    branches:
+      - main
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-PUBLIC-OFFER-V6-14.json"
+      - "schemas/revenue/fardarter-drive-public-offer-v6-14.schema.json"
+      - "templates/fardarter-drive-public-offer-v6-14.md"
+      - "docs/revenue/FARDARTER-DRIVE-PUBLIC-OFFER-V6-14.md"
+      - "scripts/check-fardarter-public-offer-v6-14.mjs"
+      - ".github/workflows/fardarter-public-offer-v6-14.yml"
+      - ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-public-offer-v6-14-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify public offer truth and external-input readiness
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run deterministic v6.14 verifier
+        run: npm run fardarter:public-offer:check
+      - name: Verify JSON syntax
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('receipts/revenue/FARDARTER-DRIVE-PUBLIC-OFFER-V6-14.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('schemas/revenue/fardarter-drive-public-offer-v6-14.schema.json','utf8'))"
