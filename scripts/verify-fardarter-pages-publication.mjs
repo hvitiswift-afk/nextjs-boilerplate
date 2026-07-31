@@ -10,6 +10,7 @@ const arg = (name, fallback = null) => {
 const baseUrl = arg("--base-url");
 const fixtureDir = arg("--fixture-dir");
 const receiptFile = arg("--receipt-file", "fardarter-pages-publication-receipt.json");
+const expectedSourceCommit = arg("--expected-source-commit");
 const attempts = Number(arg("--attempts", "12"));
 const delayMs = Number(arg("--delay-ms", "5000"));
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -43,6 +44,8 @@ async function verifyOnce() {
     status.sourceAuthority === "GITHUB_PRIMARY_INTENDED" &&
     status.contactChannel === "GITHUB_ISSUES" &&
     status.pagesLiveClaim === false;
+  checks["status.sourceCommit"] =
+    !expectedSourceCommit || status.sourceCommit === expectedSourceCommit;
   const failed = Object.entries(checks).filter(([, ok]) => !ok).map(([name]) => name);
   if (failed.length) throw new Error(`content checks failed: ${failed.join(", ")}`);
   return { checks, status };
@@ -62,11 +65,12 @@ for (let attempt = 1; attempt <= Math.max(1, attempts); attempt += 1) {
 if (!result) throw lastError;
 
 const receipt = {
-  schemaVersion: "1.0.0",
+  schemaVersion: "1.1.0",
   controlId: "FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29",
   manifestDigest: "e729a5b31f853723918d63a0dfa759f34f0671fb67beb04cc994e1d5d617fde8",
   mode: fixtureDir ? "SOURCE_FIXTURE" : "PUBLIC_GITHUB_PAGES",
   baseUrl: fixtureDir ? null : baseUrl,
+  expectedSourceCommit,
   sourceCommit: result.status.sourceCommit,
   checks: result.checks,
   result: fixtureDir ? "SOURCE_FIXTURE_PASS" : "PUBLIC_GITHUB_PAGES_READBACK_PASS",

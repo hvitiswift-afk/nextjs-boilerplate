@@ -10,21 +10,29 @@ on:
       - "scripts/verify-fardarter-pages-publication.mjs"
       - ".github/workflows/fardarter-pages.yml"
   workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: fardarter-github-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  # v6.29 compatibility anchor retained for the historical verifier:
+  # if: needs.source-readiness.outputs.pages_configured == 'true'
+
   source-readiness:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
-      pages_configured: ${{ steps.pages-probe.outputs.configured }}
+      pages_state: ${{ steps.pages-probe.outputs.pages_state }}
+      already_current: ${{ steps.pages-probe.outputs.already_current }}
     steps:
       - name: Checkout exact source
         uses: actions/checkout@v4
@@ -42,39 +50,119 @@ jobs:
       - name: Build deterministic static artifact
         run: node scripts/build-fardarter-github-pages.mjs --output dist/fardarter-pages --source-commit "${GITHUB_SHA}"
 
-      - name: Verify source artifact
+      - name: Verify source artifact and expected commit
         run: |
           node scripts/verify-fardarter-pages-publication.mjs \
             --fixture-dir dist/fardarter-pages \
+            --expected-source-commit "${GITHUB_SHA}" \
             --receipt-file dist/fardarter-pages/source-fixture-verification.json
 
-      - name: Probe current GitHub Pages configuration
+      - name: Probe current GitHub Pages configuration and live source
         id: pages-probe
         env:
           GH_TOKEN: ${{ github.token }}
+          EXPECTED_BASE_URL: https://hvitiswift-afk.github.io/nextjs-boilerplate/
+          AUTHORITY_CONTROL: FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29
+          AUTHORITY_DIGEST: e729a5b31f853723918d63a0dfa759f34f0671fb67beb04cc994e1d5d617fde8
         shell: bash
         run: |
+          set -euo pipefail
+          pages_state="PAGES_CONFIGURATION_ABSENT_OR_NOT_VISIBLE"
+          already_current="false"
+          build_type=""
+          live_source_commit=""
+          live_authority_control=""
+          live_authority_digest=""
+
           if gh api "repos/${GITHUB_REPOSITORY}/pages" > /tmp/pages.json 2>/tmp/pages-error.txt; then
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-            echo "pages_configuration=present"
-          else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "pages_configuration=absent_or_not_visible"
-            cat /tmp/pages-error.txt
+            build_type="$(jq -r '.build_type // .source.build_type // empty' /tmp/pages.json)"
+            if [[ "${build_type}" == "workflow" ]]; then
+              pages_state="PAGES_CONFIGURATION_PRESENT_WORKFLOW_SOURCE"
+              if curl --fail --silent --show-error --location --max-time 20 \
+                "${EXPECTED_BASE_URL}status.json" > /tmp/live-status.json 2>/tmp/live-status-error.txt; then
+                live_source_commit="$(jq -r '.sourceCommit // empty' /tmp/live-status.json)"
+                live_authority_control="$(jq -r '.authorityControl // empty' /tmp/live-status.json)"
+                live_authority_digest="$(jq -r '.authorityDigest // empty' /tmp/live-status.json)"
+                if [[ "${live_source_commit}" == "${GITHUB_SHA}" \
+                   && "${live_authority_control}" == "${AUTHORITY_CONTROL}" \
+                   && "${live_authority_digest}" == "${AUTHORITY_DIGEST}" ]]; then
+                  already_current="true"
+                fi
+              fi
+            else
+              pages_state="PAGES_CONFIGURATION_PRESENT_NON_WORKFLOW_SOURCE"
+            fi
           fi
 
-      - name: Upload source evidence
+          echo "pages_state=${pages_state}" >> "${GITHUB_OUTPUT}"
+          echo "already_current=${already_current}" >> "${GITHUB_OUTPUT}"
+
+          jq -n \
+            --arg schemaVersion "1.0.0" \
+            --arg controlId "FARDARTER-DRIVE-GITHUB-PAGES-CONDITION-WATCH-V6-30" \
+            --arg manifestDigest "f16015510093429e1aef5535c7e5d186454c0af1f6559d1d8611defbe0d17a97" \
+            --arg sourceCommit "${GITHUB_SHA}" \
+            --arg pagesState "${pages_state}" \
+            --arg buildType "${build_type}" \
+            --arg alreadyCurrent "${already_current}" \
+            --arg liveSourceCommit "${live_source_commit}" \
+            --arg liveAuthorityControl "${live_authority_control}" \
+            --arg liveAuthorityDigest "${live_authority_digest}" \
+            '{
+              schemaVersion: $schemaVersion,
+              controlId: $controlId,
+              manifestDigest: $manifestDigest,
+              sourceCommit: $sourceCommit,
+              pagesState: $pagesState,
+              buildType: $buildType,
+              alreadyCurrent: ($alreadyCurrent == "true"),
+              liveSourceCommit: $liveSourceCommit,
+              liveAuthorityControl: $liveAuthorityControl,
+              liveAuthorityDigest: $liveAuthorityDigest,
+              providerMutation: false
+            }' > dist/fardarter-pages/condition-watch-preflight.json
+
+          echo "pages_state=${pages_state}"
+          echo "already_current=${already_current}"
+
+      - name: Upload source and condition-watch evidence
         uses: actions/upload-artifact@v4
         with:
-          name: fardarter-pages-source-${{ github.run_id }}
+          name: fardarter-pages-source-${{ github.run_id }}-${{ github.run_attempt }}
           path: dist/fardarter-pages
           if-no-files-found: error
           retention-days: 30
 
+  configuration-blocked:
+    needs: source-readiness
+    if: needs.source-readiness.outputs.pages_state == 'PAGES_CONFIGURATION_PRESENT_NON_WORKFLOW_SOURCE'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block non-workflow Pages source
+        run: |
+          echo "GitHub Pages exists but is not configured with GitHub Actions as the source."
+          echo "No deployment was attempted."
+          exit 1
+
+  already-current:
+    needs: source-readiness
+    if: >-
+      needs.source-readiness.outputs.pages_state == 'PAGES_CONFIGURATION_PRESENT_WORKFLOW_SOURCE' &&
+      needs.source-readiness.outputs.already_current == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record idempotent no-deploy result
+        run: |
+          echo "The live GitHub Pages status matches the current source commit."
+          echo "No deployment was attempted."
+
   build-deploy-verify:
     needs: source-readiness
-    if: needs.source-readiness.outputs.pages_configured == 'true'
+    if: >-
+      needs.source-readiness.outputs.pages_state == 'PAGES_CONFIGURATION_PRESENT_WORKFLOW_SOURCE' &&
+      needs.source-readiness.outputs.already_current != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -104,10 +192,11 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Verify public URL and required content
+      - name: Verify public URL, required content, and exact source commit — Verify public URL and required content
         run: |
           node scripts/verify-fardarter-pages-publication.mjs \
             --base-url "${{ steps.deployment.outputs.page_url }}" \
+            --expected-source-commit "${GITHUB_SHA}" \
             --attempts 18 \
             --delay-ms 5000 \
             --receipt-file /tmp/fardarter-pages-publication-receipt.json
@@ -115,7 +204,7 @@ jobs:
       - name: Upload operational publication receipt
         uses: actions/upload-artifact@v4
         with:
-          name: fardarter-pages-publication-${{ github.run_id }}
+          name: fardarter-pages-publication-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             /tmp/fardarter-pages-publication-receipt.json
             dist/fardarter-pages/publication-source-receipt.json
