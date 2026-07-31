@@ -1,0 +1,54 @@
+name: Fardarter Unified Control v6.13
+
+on:
+  pull_request:
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6-13.json"
+      - "receipts/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.json"
+      - "schemas/revenue/fardarter-drive-gdrive-v6-13.schema.json"
+      - "schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json"
+      - "scripts/check-fardarter-unified-control-v6-13.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.md"
+      - "package.json"
+      - ".github/workflows/fardarter-unified-control-v6-13.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6-13.json"
+      - "receipts/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.json"
+      - "schemas/revenue/fardarter-drive-gdrive-v6-13.schema.json"
+      - "schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json"
+      - "scripts/check-fardarter-unified-control-v6-13.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.md"
+      - "package.json"
+      - ".github/workflows/fardarter-unified-control-v6-13.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-unified-control-v6-13-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify unified control and private continuity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run deterministic v6.13 verifier
+        run: npm run fardarter:unified-control:check
+      - name: Verify JSON syntax
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6-13.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('receipts/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('schemas/revenue/fardarter-drive-gdrive-v6-13.schema.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json','utf8'))"
