@@ -4,6 +4,7 @@
 **Controlling issues:** #232 and #233  
 **Manifest digest:** `56cb6b6395262f095d5888f2f45837b30fb7da5ca4f53c17c9238c9571b6d056`  
 **Post-merge state:** `CROSS_LAYER_RECEIPT_IDEMPOTENCY_RECONCILED`  
+**Conflict restart action:** `RESTART_FROM_FIRST_SEARCH`  
 **Prepared against:** `f564ab950998aec1317ea095a1700d61b7409fa9`
 
 ## Purpose
@@ -44,7 +45,7 @@ Run IDs, timestamps, generated times, read revision IDs, comment IDs, provider-g
 7. Count exact marker and tuple occurrences.
 8. Complete when the count is one; quarantine when it exceeds one.
 
-A Google Docs revision conflict or a GitHub crossed message restarts from the first search. A stale write is never retried directly.
+A Google Docs revision conflict or a GitHub crossed message uses `RESTART_FROM_FIRST_SEARCH`. A stale write is never retried directly.
 
 ## Destination controls
 
