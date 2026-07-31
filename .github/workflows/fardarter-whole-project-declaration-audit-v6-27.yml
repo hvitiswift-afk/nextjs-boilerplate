@@ -1,0 +1,94 @@
+name: Fardarter Whole Project Declaration Audit v6.27
+
+on:
+  pull_request:
+    paths:
+      - "receipts/repository/FARDARTER-DRIVE-WHOLE-PROJECT-DECLARATION-AUDIT-V6-27.json"
+      - "schemas/repository/fardarter-drive-whole-project-declaration-audit-v6-27.schema.json"
+      - "scripts/check-fardarter-whole-project-declaration-audit-v6-27.mjs"
+      - "docs/repository/FARDARTER-DRIVE-WHOLE-PROJECT-DECLARATION-AUDIT-V6-27.md"
+      - ".github/workflows/fardarter-whole-project-declaration-audit-v6-27.yml"
+      - "package.json"
+  workflow_dispatch:
+  schedule:
+    - cron: "17 9 * * 1"
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  verify:
+    name: Verify whole-project declarations and paused work v6.27
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout complete repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Fetch all repository head refs for divergence review
+        run: git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Capture every issue page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --paginate "repos/${GITHUB_REPOSITORY}/issues?state=all&per_page=100" --slurp > /tmp/fardarter-v6-27-issues.json
+      - name: Capture every pull-request page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=all&per_page=100" --slurp > /tmp/fardarter-v6-27-pulls.json
+      - name: Capture every issue-comment page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/comments?per_page=100" --slurp > /tmp/fardarter-v6-27-comments.json
+      - name: Capture every branch page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --paginate "repos/${GITHUB_REPOSITORY}/branches?per_page=100" --slurp > /tmp/fardarter-v6-27-branches.json
+      - name: Capture every workflow page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/workflows?per_page=100" --slurp > /tmp/fardarter-v6-27-workflows.json
+      - name: Capture every head ref and source path
+        run: |
+          git ls-remote --heads origin > /tmp/fardarter-v6-27-refs.txt
+          git ls-tree -r --name-only HEAD > /tmp/fardarter-v6-27-tree.txt
+      - name: Verify static and complete live project audit
+        run: >-
+          npm run fardarter:whole-project-audit:check --
+          --issues /tmp/fardarter-v6-27-issues.json
+          --pulls /tmp/fardarter-v6-27-pulls.json
+          --comments /tmp/fardarter-v6-27-comments.json
+          --branches /tmp/fardarter-v6-27-branches.json
+          --workflows /tmp/fardarter-v6-27-workflows.json
+          --tree /tmp/fardarter-v6-27-tree.txt
+          --refs /tmp/fardarter-v6-27-refs.txt
+          --output-dir /tmp/fardarter-v6-27-audit
+      - name: Verify exact JSON syntax
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('receipts/repository/FARDARTER-DRIVE-WHOLE-PROJECT-DECLARATION-AUDIT-V6-27.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('schemas/repository/fardarter-drive-whole-project-declaration-audit-v6-27.schema.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('/tmp/fardarter-v6-27-audit/whole-project-inventory-v6-27.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('/tmp/fardarter-v6-27-audit/connector-coverage-v6-27.json','utf8'))"
+      - name: Upload complete project-audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-whole-project-audit-v6-27-${{ github.run_id }}
+          path: /tmp/fardarter-v6-27-audit
+          if-no-files-found: error
+          retention-days: 30
+      - name: Emit nonconsequential governance receipt
+        run: |
+          echo "control=FARDARTER-DRIVE-WHOLE-PROJECT-DECLARATION-AUDIT-V6-27"
+          echo "manifest_digest=3487f55a5365c7737d51b41ca8a7878e96df164deedc28089abab694701657ce"
+          echo "prepared_state=PREPARED_SOURCE_ONLY_PENDING_REVIEWED_MERGE"
+          echo "post_merge_state=WHOLE_PROJECT_DECLARATION_AND_PAUSED_WORK_RECONCILED"
+          echo "active_top_level_head=FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21"
+          echo "governance_predecessor=FARDARTER-DRIVE-CLAIM-WITNESS-REF-INTEGRITY-V6-26"
+          echo "automatic_remediation=false"
+          echo "consequential_effects=ZERO"
