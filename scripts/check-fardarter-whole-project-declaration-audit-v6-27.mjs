@@ -195,12 +195,12 @@ function classifyIssue(issue, context) {
   if (issue.state==="closed") return "COMPLETED_HISTORICAL";
   if (duplicate && number!==duplicate.canonicalIssueNumber) return "DUPLICATE_OPEN_REVIEW";
   if (/placeholder|no[- ]?op|accidental|unintentionally|routing incident/i.test(combined)) return "NO_EFFECT_HISTORICAL";
+  if ([30,31,54,93,119].includes(number) || /safe merge order|open pr stack|lockfile.*(?:fail|mismatch|repair)|npm ci.*fail|deployment\s+(?:is\s+)?unverified|public .*deployment remains .*unverified|evaluate netlify.*fallback|10 total audit|maximum active deliveries\s*2/i.test(combined))
+    return "STALE_DECLARATION_REVIEW";
+  if ([83,94,96,102].includes(number) || /github pages|pages activation|remote \/mcp|remote endpoint|build week submission|app directory|plugin submission|provider setting|oauth permission|external portal/i.test(combined)) return "EXTERNALLY_BLOCKED_REVIEW";
   if (context.primaryRoutes.length && context.primaryRoutes.every((r)=>context.routeSet.has(r))) return "IMPLEMENTED_BY_CURRENT_MAIN_REVIEW";
   if (context.referencedFiles.length && context.referencedFiles.every((f)=>context.treeSet.has(f))) return "IMPLEMENTED_BY_CURRENT_MAIN_REVIEW";
   if (context.linkedOpenPulls.length) return "PAUSED_WORK_REVIEW";
-  if (/github pages|pages activation|remote \/mcp|remote endpoint|build week submission|app directory|plugin submission|provider setting|oauth permission|external portal/i.test(combined)) return "EXTERNALLY_BLOCKED_REVIEW";
-  if ([93,119].includes(number) || /lockfile.*(?:fail|mismatch|repair)|npm ci.*fail|deployment\s+(?:is\s+)?unverified|public .*deployment remains .*unverified|10 total audit|maximum active deliveries\s*2/i.test(combined))
-    return "STALE_DECLARATION_REVIEW";
   if (context.linkedPulls.length) return "PAUSED_WORK_REVIEW";
   if (!context.linkedPulls.length) return "BACKLOG_UNSTARTED";
   return "MANUAL_CLASSIFICATION_REQUIRED";
