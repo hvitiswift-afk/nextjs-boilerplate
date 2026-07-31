@@ -1,0 +1,88 @@
+name: Fardarter GitHub Pages Condition Watch v6.30
+
+on:
+  pull_request:
+    paths:
+      - "receipts/repository/FARDARTER-DRIVE-GITHUB-PAGES-CONDITION-WATCH-V6-30.json"
+      - "schemas/repository/fardarter-drive-github-pages-condition-watch-v6-30.schema.json"
+      - "scripts/check-fardarter-github-pages-condition-watch-v6-30.mjs"
+      - "scripts/verify-fardarter-pages-publication.mjs"
+      - "docs/repository/FARDARTER-DRIVE-GITHUB-PAGES-CONDITION-WATCH-V6-30.md"
+      - ".github/workflows/fardarter-github-pages-condition-watch-v6-30.yml"
+      - ".github/workflows/fardarter-pages.yml"
+      - "package.json"
+  workflow_dispatch:
+  schedule:
+    - cron: "30 10 * * 1"
+
+permissions:
+  contents: read
+  issues: read
+  actions: read
+
+jobs:
+  verify-condition-watch:
+    name: Verify GitHub Pages condition watch v6.30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Capture bounded issue state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : > /tmp/fardarter-v6-30-issues.ndjson
+          for issue in 102 249 250 252 253; do
+            gh api "repos/${GITHUB_REPOSITORY}/issues/${issue}" >> /tmp/fardarter-v6-30-issues.ndjson
+          done
+          jq -s '.' /tmp/fardarter-v6-30-issues.ndjson > /tmp/fardarter-v6-30-issues.json
+
+      - name: Capture GitHub Pages state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/pages" > /tmp/fardarter-v6-30-pages.json 2>/tmp/fardarter-v6-30-pages-error.txt; then
+            true
+          else
+            jq -n --arg error "PAGES_NOT_ENABLED_OR_NOT_VISIBLE" --rawfile detail /tmp/fardarter-v6-30-pages-error.txt \
+              '{error:$error,detail:$detail}' > /tmp/fardarter-v6-30-pages.json
+          fi
+
+      - name: Verify condition-watch source and declarations
+        run: >-
+          npm run fardarter:pages-condition-watch:check --
+          --issues /tmp/fardarter-v6-30-issues.json
+          --pages /tmp/fardarter-v6-30-pages.json
+          | tee /tmp/fardarter-v6-30-receipt.json
+
+      - name: Assemble read-only condition-watch evidence
+        run: |
+          mkdir -p /tmp/fardarter-v6-30-artifact
+          cp /tmp/fardarter-v6-30-receipt.json /tmp/fardarter-v6-30-artifact/
+          cp /tmp/fardarter-v6-30-issues.json /tmp/fardarter-v6-30-artifact/
+          cp /tmp/fardarter-v6-30-pages.json /tmp/fardarter-v6-30-artifact/
+          cp receipts/repository/FARDARTER-DRIVE-GITHUB-PAGES-CONDITION-WATCH-V6-30.json /tmp/fardarter-v6-30-artifact/
+
+      - name: Upload read-only condition-watch evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-pages-condition-watch-v6-30-${{ github.run_id }}
+          path: /tmp/fardarter-v6-30-artifact
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Emit nonconsequential source receipt
+        run: |
+          echo "control=FARDARTER-DRIVE-GITHUB-PAGES-CONDITION-WATCH-V6-30"
+          echo "manifest_digest=f16015510093429e1aef5535c7e5d186454c0af1f6559d1d8611defbe0d17a97"
+          echo "source_state=READY_FOR_REVIEWED_GITHUB_PAGES_CONDITION_WATCH_SOURCE"
+          echo "pages_live_claim=false"
+          echo "provider_mutation=false"
