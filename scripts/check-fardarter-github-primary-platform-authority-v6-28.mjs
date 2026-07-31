@@ -66,7 +66,10 @@ for (const token of [
   "Capture bounded issue state", "Capture GitHub Pages state",
   "npm run fardarter:github-primary:check", "actions/upload-artifact@v4"
 ]) assert(workflow.includes(token), `workflow missing ${token}`);
-for (const token of ["contents: write", "issues: write", "pages: write", "deploy-pages", "git push", "netlify", "vercel deploy", "send_email", "gmail"]) {
+for (const token of [
+  "contents: write", "issues: write", "pages: write", "deploy-pages",
+  "git push", "netlify deploy", "deploy-site", "vercel deploy", "send_email", "gmail"
+]) {
   assert(!workflow.toLowerCase().includes(token), `workflow is not read-only: ${token}`);
 }
 
