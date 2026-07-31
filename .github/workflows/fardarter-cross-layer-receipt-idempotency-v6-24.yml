@@ -1,0 +1,56 @@
+name: Fardarter Cross-Layer Receipt Idempotency v6.24
+
+on:
+  pull_request:
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-CROSS-LAYER-RECEIPT-IDEMPOTENCY-V6-24.json"
+      - "schemas/revenue/fardarter-drive-cross-layer-receipt-idempotency-v6-24.schema.json"
+      - "scripts/check-fardarter-cross-layer-receipt-idempotency-v6-24.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-CROSS-LAYER-RECEIPT-IDEMPOTENCY-V6-24.md"
+      - ".github/workflows/fardarter-cross-layer-receipt-idempotency-v6-24.yml"
+      - "package.json"
+  push:
+    branches: [main]
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-CROSS-LAYER-RECEIPT-IDEMPOTENCY-V6-24.json"
+      - "schemas/revenue/fardarter-drive-cross-layer-receipt-idempotency-v6-24.schema.json"
+      - "scripts/check-fardarter-cross-layer-receipt-idempotency-v6-24.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-CROSS-LAYER-RECEIPT-IDEMPOTENCY-V6-24.md"
+      - ".github/workflows/fardarter-cross-layer-receipt-idempotency-v6-24.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify cross-layer receipt idempotency v6.24
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify v6.24 receipt idempotency contract
+        run: npm run fardarter:receipt-idempotency:check
+      - name: Verify exact JSON syntax
+        run: |
+          node -e 'for (const path of [
+            "receipts/revenue/FARDARTER-DRIVE-CROSS-LAYER-RECEIPT-IDEMPOTENCY-V6-24.json",
+            "schemas/revenue/fardarter-drive-cross-layer-receipt-idempotency-v6-24.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.24 receipt idempotency JSON syntax: PASS")'
+      - name: Emit nonconsequential governance receipt
+        run: |
+          echo "result=PASS"
+          echo "control=FARDARTER-DRIVE-CROSS-LAYER-RECEIPT-IDEMPOTENCY-V6-24"
+          echo "manifest_digest=56cb6b6395262f095d5888f2f45837b30fb7da5ca4f53c17c9238c9571b6d056"
+          echo "prepared_state=PREPARED_SOURCE_ONLY_PENDING_REVIEWED_MERGE"
+          echo "post_merge_state=CROSS_LAYER_RECEIPT_IDEMPOTENCY_RECONCILED"
+          echo "active_top_level_head=FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21"
+          echo "provider_mutation=false"
+          echo "canonical_mutation=false"
+          echo "commercial_effects=ZERO"
