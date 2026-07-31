@@ -8,8 +8,10 @@ on:
       - "schemas/revenue/fardarter-drive-gdrive-v6-13.schema.json"
       - "schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json"
       - "scripts/check-fardarter-unified-control-v6-13.mjs"
+      - "scripts/check-fardarter-revenue-receipt-v6-13.mjs"
       - "docs/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.md"
       - "package.json"
+      - ".github/workflows/revenue-experiment.yml"
       - ".github/workflows/fardarter-unified-control-v6-13.yml"
   push:
     branches:
@@ -20,8 +22,10 @@ on:
       - "schemas/revenue/fardarter-drive-gdrive-v6-13.schema.json"
       - "schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json"
       - "scripts/check-fardarter-unified-control-v6-13.mjs"
+      - "scripts/check-fardarter-revenue-receipt-v6-13.mjs"
       - "docs/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.md"
       - "package.json"
+      - ".github/workflows/revenue-experiment.yml"
       - ".github/workflows/fardarter-unified-control-v6-13.yml"
   workflow_dispatch:
 
@@ -34,7 +38,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify unified control and private continuity
+    name: Verify unified control, private continuity, and aggregate receipt
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -46,6 +50,8 @@ jobs:
           node-version: 24
       - name: Run deterministic v6.13 verifier
         run: npm run fardarter:unified-control:check
+      - name: Reject stale aggregate revenue receipts
+        run: npm run fardarter:revenue-receipt:check
       - name: Verify JSON syntax
         run: |
           node -e "JSON.parse(require('fs').readFileSync('receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6-13.json','utf8'))"
