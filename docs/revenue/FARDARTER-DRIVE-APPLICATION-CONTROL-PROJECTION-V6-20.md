@@ -45,7 +45,7 @@ Issue #141 remains open as `HISTORICAL_STRATEGY_AND_STAGE_GOVERNANCE_RAIL`. Its 
 
 ```text
 Successor page SHA-256
-9ead161311fe67fdd01ccc4a56b40328e56e2c928ad457380b6e089f0a62ab20
+249ba20fffaa208330b416d9a42335508bd393c0d722848a5fc2e66febf76fcc
 
 Successor API SHA-256
 23f00e6d2714257405f193b1c1272070258e2592c9cf1eb141ad0210678742eb
@@ -54,7 +54,7 @@ next.config.ts SHA-256
 6b52b272308e66ecd7b828db0c80e532d70ed8d6ee38b42b08d3044a467043e5
 
 Manifest digest
-e2be32a3bd3531f932acfed100a911b23213b73f78c1a8683d7a4f3df99eb31b
+6e1145e5088761f54f2c1c0d320aa2ba349f91f18b9a0ee6c5c2060f49cbfc16
 ```
 
 The v6.15 source hashes remain historical evidence:
