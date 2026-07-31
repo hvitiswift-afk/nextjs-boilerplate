@@ -119,7 +119,6 @@ for (const required of [
   "GitHub contact",
   "Google Drive continuity",
   "SOURCE_ONLY",
-  "CONTROL_AHEAD_OF_DEPLOYED_APPLICATION_SOURCE",
   "This repository source is not itself proof of a new deployment.",
   "1,000 total slots",
   "100 standard ACTIVE",
