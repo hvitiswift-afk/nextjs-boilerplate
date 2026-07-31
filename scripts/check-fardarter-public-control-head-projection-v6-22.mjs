@@ -189,7 +189,7 @@ for (const required of [
   "FARDARTER-DRIVE-PUBLIC-CONTROL-HEAD-PROJECTION-V6-22",
   "FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21",
   "currentHead.repository.postMergeState",
-  "SOURCE_MERGED_NOT_DEPLOYED",
+  "current.applicationSource.state",
   "schemaVersion: \"1.8.0\"",
   "/github-control-tower-audit/control-head",
   "/api/revenue/control-head",
