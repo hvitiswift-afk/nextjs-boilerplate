@@ -181,7 +181,6 @@ jobs:
           echo "github_contact_identity=GITHUB_ISSUE_AUTHOR"
           echo "github_contact_channel=EXACT_GITHUB_ISSUE_THREAD"
           echo "github_first_response_owner=NATIVE_V6_9_WORKFLOW"
-          echo "gmail_authenticated_sender=justin.rackham@gmail.com"
           echo "private_drive_state=CONNECTED_PRIVATE"
           echo "private_drive_known_documents=17"
           echo "private_drive_owner_only=true"
