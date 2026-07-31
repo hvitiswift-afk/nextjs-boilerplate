@@ -67,7 +67,7 @@
     "griploom:verify": "node scripts/verify-griploom-build.mjs",
     "fardarter:control-head:check": "node scripts/check-fardarter-control-head-v6-18.mjs",
     "fardarter:strategy-rail:check": "node scripts/check-fardarter-strategy-rail-v6-19.mjs",
-    "fardarter:application-control-projection:check": "node scripts/check-fardarter-application-control-projection-v6-20.mjs"
+    "fardarter:application-control-projection:check": "node scripts/check-fardarter-application-control-projection-v6-20-current.mjs"
   },
   "dependencies": {
     "next": "15.5.2",
