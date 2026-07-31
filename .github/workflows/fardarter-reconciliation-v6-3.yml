@@ -1,4 +1,4 @@
-name: Fardarter Reconciliation v6.3
+name: Fardarter Reconciliation v6.3 — Historical Read-Only
 
 on:
   pull_request:
@@ -6,52 +6,54 @@ on:
       - ".github/ISSUE_TEMPLATE/fardarter-event-proposal.yml"
       - ".github/workflows/fardarter-event-proposal-v6-3.yml"
       - ".github/workflows/fardarter-reconciliation-v6-3.yml"
+      - ".github/workflows/fardarter-historical-writer-retirement-v6-23.yml"
       - "app/api/revenue/reconciliation/**"
       - "app/github-control-tower-audit/reconciliation/**"
       - "receipts/revenue/FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3.json"
       - "receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json"
+      - "receipts/revenue/FARDARTER-DRIVE-HISTORICAL-WRITER-RETIREMENT-V6-23.json"
       - "schemas/revenue/fardarter-drive-event-proposal*.json"
       - "schemas/revenue/fardarter-drive-reconciliation-v6-3.schema.json"
-      - "scripts/check-fardarter-reconciliation-v6-3.mjs"
+      - "schemas/revenue/fardarter-drive-historical-writer-retirement-v6-23.schema.json"
+      - "scripts/check-fardarter-historical-writer-retirement-v6-23.mjs"
       - "src/lib/revenue/public-reconciliation-ledger.ts"
+      - "docs/revenue/FARDARTER-DRIVE-HISTORICAL-WRITER-RETIREMENT-V6-23.md"
       - "package.json"
-  schedule:
-    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
-  issues: write
+  issues: read
 
 concurrency:
-  group: fardarter-reconciliation-v6-3-${{ github.ref || github.run_id }}
-  cancel-in-progress: false
+  group: fardarter-reconciliation-v6-3-readonly-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
-    name: Validate v6.3 proposal and reconciliation source
+    name: Validate retired v6.3 writer and current reconciliation source
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run fardarter:reconciliation:check
+      - run: npm run fardarter:historical-writer-retirement:check
       - run: npm run build
 
-  reconcile:
-    name: Generate public-safe reconciliation artifact
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+  diagnose:
+    name: Generate read-only current-chain diagnostic artifact
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
 
-      - name: Reconcile public signals, proposals, and canonical source
+      - name: Build stable material diagnostic without public mutation
         uses: actions/github-script@v7
         with:
           script: |
@@ -63,7 +65,6 @@ jobs:
             const eventChain = JSON.parse(fs.readFileSync('receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json', 'utf8'));
             const capacity = JSON.parse(fs.readFileSync('receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json', 'utf8'));
             const proposalLedger = JSON.parse(fs.readFileSync('receipts/revenue/FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3.json', 'utf8'));
-            const genesisSnapshot = JSON.parse(fs.readFileSync('receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json', 'utf8'));
 
             const stableStringify = (value) => {
               if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
@@ -78,6 +79,36 @@ jobs:
               const match = (body || '').match(new RegExp(`### ${escaped}\\s*\\n\\n([\\s\\S]*?)(?=\\n### |$)`));
               return match?.[1]?.trim() || '';
             };
+            const conflicts = [];
+            const addConflict = (type, details = {}) => conflicts.push({ type, ...details });
+
+            if (eventChain.eventCount !== eventChain.events.length) {
+              addConflict('EVENT_COUNT_MISMATCH', { declared: eventChain.eventCount, actual: eventChain.events.length });
+            }
+            if (!eventChain.events.length) addConflict('EMPTY_EVENT_CHAIN');
+            for (let index = 0; index < eventChain.events.length; index += 1) {
+              const event = eventChain.events[index];
+              if (event.sequence !== index) addConflict('EVENT_SEQUENCE_GAP', { index, sequence: event.sequence });
+              if (event.canonical !== true) addConflict('NONCANONICAL_EVENT_IN_CANONICAL_CHAIN', { sequence: event.sequence });
+              if (index === 0 && event.previousEventDigest !== null) {
+                addConflict('GENESIS_PREVIOUS_DIGEST_NOT_NULL');
+              }
+              if (index > 0 && event.previousEventDigest !== eventChain.events[index - 1].eventDigest) {
+                addConflict('PREVIOUS_DIGEST_LINK_MISMATCH', { sequence: event.sequence });
+              }
+            }
+            const lastEvent = eventChain.events.at(-1);
+            if (eventChain.headSequence !== lastEvent?.sequence) addConflict('HEAD_SEQUENCE_MISMATCH');
+            if (eventChain.headDigest !== lastEvent?.eventDigest) addConflict('HEAD_DIGEST_MISMATCH');
+            const derivedBusinessEventCount = eventChain.events.filter(
+              (event) => event.canonical === true && event.classification === 'CANONICAL_BUSINESS_EVENT',
+            ).length;
+            if (eventChain.canonicalBusinessEventCount !== derivedBusinessEventCount) {
+              addConflict('CANONICAL_BUSINESS_EVENT_COUNT_MISMATCH', {
+                declared: eventChain.canonicalBusinessEventCount,
+                derived: derivedBusinessEventCount,
+              });
+            }
 
             const openItems = await github.paginate(
               github.rest.issues.listForRepo,
@@ -85,90 +116,46 @@ jobs:
             );
             const issues = openItems.filter((item) => !item.pull_request);
             const knownStateLabels = new Set(stateMachine.states.map((state) => state.publicLabel));
-            const knownStates = new Set(stateMachine.states.map((state) => state.stateId));
-            const allowedTransitions = new Set(
-              stateMachine.allowedTransitions.map((item) => `${item.fromState}->${item.toState}`),
-            );
             const stateCounts = Object.fromEntries(stateMachine.states.map((state) => [state.stateId, 0]));
-            const conflicts = [];
             const proposalKeys = new Map();
-            const proposalDecisionCounts = {
-              PROPOSED: 0,
-              READY_FOR_REVIEW: 0,
-              QUARANTINED: 0,
-              REJECTED: 0,
-              CANONICALIZED_BY_REVIEWED_MERGE: 0,
-            };
-
+            let openProposalIssues = 0;
             for (const issue of issues) {
               const labels = (issue.labels || []).map((label) => typeof label === 'string' ? label : label.name).filter(Boolean);
               const stateLabels = labels.filter((label) => label.startsWith('fd-state-'));
               const unknownStateLabels = stateLabels.filter((label) => !knownStateLabels.has(label));
-              if (unknownStateLabels.length) conflicts.push({ issue: issue.number, type: 'UNKNOWN_STATE_LABEL' });
-              if (stateLabels.length > 1) conflicts.push({ issue: issue.number, type: 'MULTIPLE_STATE_LABELS' });
+              if (unknownStateLabels.length) addConflict('UNKNOWN_STATE_LABEL', { issue: issue.number });
+              if (stateLabels.length > 1) addConflict('MULTIPLE_STATE_LABELS', { issue: issue.number });
               if (stateLabels.length === 1 && knownStateLabels.has(stateLabels[0])) {
                 const state = stateMachine.states.find((item) => item.publicLabel === stateLabels[0]);
                 stateCounts[state.stateId] += 1;
               }
 
               if (!issue.title.startsWith('[FD event proposal]:')) continue;
-              const body = issue.body || '';
-              const sourceIssue = Number(section(body, 'Source issue or public-safe entity reference').match(/Issue\s*#(\d+)/i)?.[1] || 0);
-              const expected = section(body, 'Expected current public signal state');
-              const fromState = section(body, 'Proposed canonical from-state');
-              const toState = section(body, 'Proposed canonical to-state');
-              const key = section(body, 'Public-safe idempotency key');
-              const reviewBy = Date.parse(section(body, 'Review-by or expiry time'));
-              const decisionLabels = labels.filter((label) => [
-                'fd-proposal-ready-for-review', 'fd-proposal-quarantined'
-              ].includes(label));
-              if (decisionLabels.includes('fd-proposal-ready-for-review')) proposalDecisionCounts.READY_FOR_REVIEW += 1;
-              else if (decisionLabels.includes('fd-proposal-quarantined')) proposalDecisionCounts.QUARANTINED += 1;
-              else proposalDecisionCounts.PROPOSED += 1;
-              if (decisionLabels.length > 1) conflicts.push({ issue: issue.number, type: 'PROPOSAL_DECISION_CONFLICT' });
-              if (!key || proposalKeys.has(key)) conflicts.push({ issue: issue.number, type: 'DUPLICATE_PROPOSAL_KEY' });
+              openProposalIssues += 1;
+              const key = section(issue.body || '', 'Public-safe idempotency key');
+              if (!key || proposalKeys.has(key)) addConflict('DUPLICATE_PROPOSAL_KEY', { issue: issue.number });
               else proposalKeys.set(key, issue.number);
-              if (!Number.isFinite(reviewBy) || reviewBy <= Date.now()) conflicts.push({ issue: issue.number, type: 'STALE_OR_EXPIRED_PROPOSAL' });
-              if (!knownStates.has(expected) || expected !== fromState || !allowedTransitions.has(`${fromState}->${toState}`)) {
-                conflicts.push({ issue: issue.number, type: 'INVALID_TRANSITION' });
-              }
-              if (sourceIssue > 0) {
-                try {
-                  const target = await github.rest.issues.get({ owner, repo, issue_number: sourceIssue });
-                  const targetLabels = (target.data.labels || [])
-                    .map((label) => typeof label === 'string' ? label : label.name)
-                    .filter((label) => label?.startsWith('fd-state-'));
-                  const expectedLabel = stateMachine.states.find((item) => item.stateId === expected)?.publicLabel;
-                  if (targetLabels.length !== 1 || targetLabels[0] !== expectedLabel) {
-                    conflicts.push({ issue: issue.number, type: 'PUBLIC_CANONICAL_DRIFT' });
-                  }
-                } catch {
-                  conflicts.push({ issue: issue.number, type: 'SOURCE_ENTITY_UNAVAILABLE' });
-                }
-              }
             }
 
             if (stateCounts.ACTIVE > capacity.canonicalCapacity.effectiveActiveCeiling) {
-              conflicts.push({ issue: 160, type: 'ACTIVE_CAPACITY_OVERFLOW' });
+              addConflict('ACTIVE_CAPACITY_OVERFLOW', {
+                publicActiveSignals: stateCounts.ACTIVE,
+                ceiling: capacity.canonicalCapacity.effectiveActiveCeiling,
+              });
             }
-            const canonicalHealthy =
-              eventChain.eventCount === eventChain.events.length &&
-              eventChain.headSequence === eventChain.events.at(-1)?.sequence &&
-              eventChain.headDigest === eventChain.events.at(-1)?.eventDigest &&
-              eventChain.canonicalBusinessEventCount === 0;
-            if (!canonicalHealthy) conflicts.push({ issue: 160, type: 'BROKEN_EVENT_CHAIN' });
 
-            const snapshot = {
-              schemaVersion: '1.0.0',
-              snapshotId: `FARDARTER-RECONCILIATION-RUNTIME-V6-3-${context.runId}`,
-              sequence: 1,
-              previousSnapshotDigest: genesisSnapshot.snapshotDigest,
-              controllerVersion: '6.3.0',
+            const sortedConflicts = conflicts
+              .map((item) => JSON.parse(stableStringify(item)))
+              .sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
+            const material = {
+              diagnosticVersion: '6.23.0',
+              historicalController: '6.3.0',
               canonicalHead: {
                 sequence: eventChain.headSequence,
                 digest: eventChain.headDigest,
-                healthy: canonicalHealthy,
+                eventCount: eventChain.eventCount,
                 canonicalBusinessEventCount: eventChain.canonicalBusinessEventCount,
+                derivedBusinessEventCount,
               },
               capacity: {
                 totalPlanningSlots: capacity.canonicalCapacity.totalPlanningSlots,
@@ -179,13 +166,12 @@ jobs:
               },
               publicStateCounts: stateCounts,
               proposals: {
-                openProposalIssues: issues.filter((issue) => issue.title.startsWith('[FD event proposal]:')).length,
-                decisionCounts: proposalDecisionCounts,
+                openProposalIssues,
                 canonicalProposalCount: proposalLedger.proposalCount,
               },
               conflicts: {
-                total: conflicts.length,
-                items: conflicts,
+                total: sortedConflicts.length,
+                items: sortedConflicts,
               },
               commercialEvidence: {
                 orders: capacity.canonicalCapacity.orders,
@@ -193,41 +179,36 @@ jobs:
                 verifiedSettledCashUsd: capacity.financialEvidence.verifiedSettledCashUsd,
                 receivedCashRequires: capacity.financialEvidence.receivedCashRequires,
               },
-              deploymentState: 'UNVERIFIED',
-              generatedAt: new Date().toISOString(),
             };
-            snapshot.snapshotDigest = digest(snapshot);
+            const artifact = {
+              schemaVersion: '1.0.0',
+              artifactId: 'FARDARTER-RECONCILIATION-V6-3-READONLY-DIAGNOSTIC',
+              materialFingerprint: digest(material),
+              material,
+              generatedAt: new Date().toISOString(),
+              publicIssueMutationPerformed: false,
+              canonicalMutationPerformed: false,
+              providerMutationPerformed: false,
+            };
+            artifact.artifactDigest = digest(artifact);
             fs.mkdirSync('artifacts', { recursive: true });
             fs.writeFileSync(
-              'artifacts/fardarter-reconciliation-runtime-v6-3.json',
-              JSON.stringify(snapshot, null, 2) + '\n',
+              'artifacts/fardarter-reconciliation-v6-3-readonly.json',
+              JSON.stringify(artifact, null, 2) + '\n',
             );
 
             await core.summary
-              .addHeading('Fardarter Drive v6.3 reconciliation')
-              .addRaw(`Snapshot digest: ${snapshot.snapshotDigest}\n`)
-              .addRaw(`Canonical head: ${snapshot.canonicalHead.sequence} / ${snapshot.canonicalHead.digest}\n`)
-              .addRaw(`Open proposals: ${snapshot.proposals.openProposalIssues}\n`)
-              .addRaw(`Conflicts: ${snapshot.conflicts.total}\n`)
+              .addHeading('Fardarter v6.3 historical read-only diagnostic')
+              .addRaw(`Material fingerprint: ${artifact.materialFingerprint}\n`)
+              .addRaw(`Canonical head: ${material.canonicalHead.sequence} / ${material.canonicalHead.digest}\n`)
+              .addRaw(`Canonical business events: ${material.canonicalHead.canonicalBusinessEventCount}\n`)
+              .addRaw(`Conflicts: ${material.conflicts.total}\n`)
+              .addRaw('Public issue mutation: NO\n')
               .write();
 
-            if (conflicts.length) {
-              const marker = `<!-- jp-fardarter-reconciliation-v6-3-${snapshot.snapshotDigest} -->`;
-              const comments = await github.paginate(
-                github.rest.issues.listComments,
-                { owner, repo, issue_number: 160, per_page: 100 },
-              );
-              if (!comments.some((comment) => comment.body?.includes(marker))) {
-                await github.rest.issues.createComment({
-                  owner, repo, issue_number: 160,
-                  body: `${marker}\n**Fardarter Drive™ v6.3 reconciliation conflict receipt**\n\n- Snapshot digest: \`${snapshot.snapshotDigest}\`\n- Conflicts: **${conflicts.length}**\n- Canonical event appended: **NO**\n- Canonical mutation: **FROZEN**\n- Orders / verified gross / settled cash: **0 / $0 / $0 canonical baseline**\n\nReview the public-safe conflict artifact and the private quarantine register. Do not copy sensitive evidence into GitHub.`,
-                });
-              }
-            }
-
-      - name: Upload reconciliation artifact
+      - name: Upload read-only diagnostic artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fardarter-reconciliation-v6-3-${{ github.run_id }}
-          path: artifacts/fardarter-reconciliation-runtime-v6-3.json
+          name: fardarter-reconciliation-v6-3-readonly
+          path: artifacts/fardarter-reconciliation-v6-3-readonly.json
           retention-days: 30
