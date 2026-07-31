@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hvitiswift-afk/nextjs-boilerplate/schemas/revenue/fardarter-drive-public-offer-v6-14.schema.json",
+  "title": "Fardarter Drive v6.14 Public Offer Truth Receipt",
+  "type": "object",
+  "const": {
+    "controlId": "FARDARTER-DRIVE-PUBLIC-OFFER-V6-14",
+    "controllerVersion": "6.14.0",
+    "controllingIssue": 200,
+    "implementationIssue": 201,
+    "publicOfferIssue": 133,
+    "repository": {
+      "baseHead": "d284510c179a4ac38a0459c18cea23b474973605",
+      "unifiedControlVersion": "6.13.0",
+      "unifiedControlDigest": "2f33a58938a480b70ce9ea26e24c74677e6294e93729412e3fb81db006e5e29c",
+      "publicOfferState": "PREPARED_PENDING_REVIEWED_MERGE_AND_ISSUE_UPDATE"
+    },
+    "publicIssue": {
+      "targetTitle": "GitHub Control Tower Audit + Fardarter Drive™ v6.14 — verified production / public-safe intake open",
+      "bodyTemplatePath": "templates/fardarter-drive-public-offer-v6-14.md",
+      "bodyMarker": "<!-- jp-fardarter-public-offer-v6-14 -->",
+      "bodySha256": "369338fda0fe9e2236eecd68a1321635e025e85365eb701e10ee1d8bb3c405e0",
+      "operatingSurface": "MUTABLE_CURRENT_TRUTH_WITH_APPEND_ONLY_COMPLETION_RECEIPTS",
+      "historicalCommentsPreserved": true,
+      "exactPostMergeUpdateRequired": true,
+      "issueFormPath": ".github/ISSUE_TEMPLATE/control-tower-audit-request.yml",
+      "requestTitlePrefix": "[Audit request]:"
+    },
+    "offer": {
+      "name": "GitHub Control Tower Audit",
+      "primaryAuditPriceUsd": 100,
+      "publicState": "OPEN_FOR_VERIFIED_FIT_CHECKS",
+      "openExternalAuditRequestsAtPreparation": 0,
+      "dynamicFitCheckCountIsOrderCount": false,
+      "fitApprovalBinding": false
+    },
+    "production": {
+      "controlVersion": "6.12.0",
+      "reconciliationDigest": "1e8aa2af8bb3af332185b7419c63e2c1ad8c19c866e45b62fe04a2fc969932ee",
+      "applicationSource": "88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334",
+      "deployId": "6a6ba0366ebec6650d843ac3",
+      "applicationState": "DEPLOYED_AND_VERIFIED",
+      "controlState": "RECONCILED",
+      "verifiedRouteCount": 18,
+      "exactBodyMatchCount": 18,
+      "repositoryRelationship": "CONTROL_AHEAD_OF_DEPLOYED_APPLICATION_SOURCE",
+      "publicOfferUpdateCreatesDeployment": false,
+      "futurePromotionOwnedBySeparateLiveWatch": true
+    },
+    "contact": {
+      "contactGateVersion": "6.8.0",
+      "firstResponseVersion": "6.9.0",
+      "identityModel": "GITHUB_ISSUE_AUTHOR",
+      "channelModel": "EXACT_GITHUB_ISSUE_THREAD",
+      "nativeWorkflowSoleWriter": true,
+      "maxAutomaticFirstResponsesPerIssue": 1,
+      "publicEmailRequired": false,
+      "repeatedUnsolicitedFollowUpAllowed": false,
+      "deliveryOrSilenceProvesConsent": false
+    },
+    "drive": {
+      "state": "CONNECTED_PRIVATE",
+      "continuityVersion": "6.13.0",
+      "receiptDigest": "8680243c828c6503d2aadd76b361cfea41482ec17f8fa29018947abcef3f3ea4",
+      "knownDocumentCount": 17,
+      "ownerOnly": true,
+      "shared": false,
+      "publicPrivateReferencesExposed": false
+    },
+    "canonical": {
+      "eventHeadSequence": 1,
+      "eventHeadDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+      "reconciliationSequence": 1,
+      "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+      "scopeDrafted": 1,
+      "humanAccepted": 0,
+      "active": 0,
+      "event2Present": false
+    },
+    "consent": {
+      "packageState": "NO_PACKAGE",
+      "decision": "AWAITING_COUNTERPARTY_EVIDENCE",
+      "independentVerificationPerformed": false,
+      "publicOfferOrContactProvesConsent": false
+    },
+    "capacity": {
+      "totalPlanningSlots": 1000,
+      "effectiveActiveCeiling": 100,
+      "activeDeliveries": 0,
+      "activeHeadroom": 100,
+      "overrideState": "INACTIVE_NO_RECEIPT",
+      "automaticOverrideActivationAllowed": false
+    },
+    "money": {
+      "orders": 0,
+      "verifiedGrossRevenueUsd": 0,
+      "verifiedSettledCashUsd": 0,
+      "receivedCashRequires": "PAID_SETTLED"
+    },
+    "pointInTimeScan": {
+      "capturedAt": "2026-07-31T02:17:43Z",
+      "openExternalAuditRequests": 0,
+      "relevantInboundCounterpartyMessages": 0,
+      "newConsentPackages": 0,
+      "contactConflicts": 0,
+      "financingSolicitationExcludedAsCounterpartyCase": true,
+      "notBackgroundMonitoringGuarantee": true
+    },
+    "decision": {
+      "state": "READY_FOR_REVIEWED_PUBLIC_RECONCILIATION",
+      "postMergeAction": "UPDATE_ISSUE_133_EXACTLY_ONCE_AND_APPEND_COMPLETION_RECEIPT",
+      "automaticCanonicalAdvanceAllowed": false
+    },
+    "consequentialEffects": {
+      "deploymentCreated": false,
+      "deploymentChanged": false,
+      "externalRequesterContacted": false,
+      "emailSent": false,
+      "buyerConsentProven": false,
+      "canonicalEventAppended": false,
+      "humanAcceptedCreated": false,
+      "orderCreated": false,
+      "paymentConfirmed": false,
+      "revenueRecognized": false,
+      "settledCashRecognized": false,
+      "workStarted": false,
+      "activeCapacityUsed": false,
+      "capacityChanged": false,
+      "legalTermSelected": false,
+      "privateReferenceExposed": false
+    },
+    "manifestDigest": "b16a39679d1baea0c34b11f1544f0c4fa3aa0702d0187a51b6965853fa93a836"
+  }
+}
