@@ -59,14 +59,14 @@ assert(
 );
 assert(
   sha256(stable(noDigest)) === manifest.manifestDigest &&
-    manifest.manifestDigest === "f2a7344f1a437174e9abc4adfcb2a18a4a80ed2d952a88afd4e55c61993ebc36",
+    manifest.manifestDigest === "8be9b7beb73c706054c7e1b7869250177de9495fc6b1e95eb013b13643e52fbb",
   "v6.22 manifest digest mismatch",
 );
 assert(schema.type === "object" && stable(schema.const) === stable(manifest), "v6.22 strict schema mismatch");
 
 assert(
-  sha256(text.page) === "52a7baa2f4fa35f4060d807c5dfedb2dc0fa51e867fd2064aa73bc2c689ddf4a" &&
-    manifest.surface.pageSha256 === "52a7baa2f4fa35f4060d807c5dfedb2dc0fa51e867fd2064aa73bc2c689ddf4a",
+  sha256(text.page) === "55a9b4cfc88b3ba3ea1633f38e6a16fd63e33d4b57509f9c9a381018f361b73b" &&
+    manifest.surface.pageSha256 === "55a9b4cfc88b3ba3ea1633f38e6a16fd63e33d4b57509f9c9a381018f361b73b",
   "v6.22 page hash mismatch",
 );
 assert(
@@ -237,8 +237,8 @@ for (const required of [
   "CURRENT_CONTROL_HEAD_RECONCILED",
   "SOURCE_MERGED_NOT_DEPLOYED",
   "No private Google Drive URL or file ID",
-  "f2a7344f1a437174e9abc4adfcb2a18a4a80ed2d952a88afd4e55c61993ebc36",
-  "52a7baa2f4fa35f4060d807c5dfedb2dc0fa51e867fd2064aa73bc2c689ddf4a",
+  "8be9b7beb73c706054c7e1b7869250177de9495fc6b1e95eb013b13643e52fbb",
+  "55a9b4cfc88b3ba3ea1633f38e6a16fd63e33d4b57509f9c9a381018f361b73b",
   "bdcd8d954ce8d0777338d705e499fb39eba4d6c4ed949e25528f59f36f9d52ff",
 ]) {
   assert(text.docs.includes(required), `v6.22 documentation missing ${required}`);
