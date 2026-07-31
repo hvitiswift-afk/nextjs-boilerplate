@@ -176,8 +176,8 @@ assert(text.revenueWorkflow.includes("npm run revenue:verify"), "revenue workflo
 assert(text.deployWorkflow.includes("FARDARTER-DRIVE-V6"), "deployment workflow must verify v6");
 assert(text.deployWorkflow.includes("CAPACITY_OVERRIDE_ACTIVE"), "deployment workflow must verify override state");
 
-for (const required of ["FARDARTER-DRIVE-V6.json", "FARDARTER-DRIVE-AUTHORITY-V6.json", "FARDARTER-DRIVE-GDRIVE-V6.json", "FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json", "schemaVersion: \"1.5.0\""]) {
-  assert(text.api.includes(required), `API missing v6 source: ${required}`);
+for (const required of ["FARDARTER-DRIVE-V6.json", "FARDARTER-DRIVE-AUTHORITY-V6.json", "FARDARTER-DRIVE-GDRIVE-V6.json", "FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json", "schemaVersion: \"1.6.0\""]) {
+  assert(text.api.includes(required), `API missing v6/v6.15 source: ${required}`);
 }
 for (const required of ["Fardarter Drive™ v6", "1,000 total slots", "100 standard ACTIVE", "Above 100 is allowed", "CAPACITY_OVERRIDE_ACTIVE", "INACTIVE_NO_RECEIPT", "$100,000", "$1 quadrillion", "not indemnity-proof"]) {
   assert(text.page.includes(required), `page missing v6 boundary: ${required}`);
