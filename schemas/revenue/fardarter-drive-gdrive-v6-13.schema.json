@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jp.systems/schemas/revenue/fardarter-drive-gdrive-v6-13.schema.json",
+  "title": "Fardarter Drive v6.13 Private Google Drive Continuity Receipt",
+  "description": "Exact public-safe schema lock for the owner-only v6.13 private continuity receipt. Private Drive references are deliberately absent.",
+  "const": {
+    "schemaVersion": "1.1.0",
+    "receiptId": "FARDARTER-DRIVE-GDRIVE-V6-13-2026-07-30",
+    "controllerVersion": "6.13.0",
+    "controllingIssue": 197,
+    "state": "CONNECTED_PRIVATE",
+    "folderTitle": "Fardarter Drive™",
+    "folderReferenceStoredPrivately": true,
+    "publicFolderUrlExposed": false,
+    "publicFileIdsExposed": false,
+    "previousReceipt": {
+      "path": "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json",
+      "historicalLatestControlVersion": "6.7.0",
+      "historicalDocumentCount": 15,
+      "preservedImmutable": true
+    },
+    "newDocuments": [
+      {
+        "title": "Fardarter Drive™ v6.13 — Unified Control Plane Charter",
+        "purpose": "Private repository, deployment, GitHub contact, Gmail, Drive, canonical, consent, capacity, money, authority-separation, and drift controls",
+        "nativeGoogleDoc": true,
+        "referenceStoredPrivately": true,
+        "publicUrlExposed": false,
+        "ownerOnlyVerified": true,
+        "shared": false
+      },
+      {
+        "title": "Fardarter Drive™ v6.13 — Public-Private Reconciliation Register",
+        "purpose": "Private connected-scan receipt, cross-layer drift reconciliation, current locks, zero-consequence effects, and next controlled action",
+        "nativeGoogleDoc": true,
+        "referenceStoredPrivately": true,
+        "publicUrlExposed": false,
+        "ownerOnlyVerified": true,
+        "shared": false
+      }
+    ],
+    "continuity": {
+      "previousDocumentsPreserved": true,
+      "newDocumentCount": 2,
+      "totalKnownDocumentCount": 17,
+      "privateReferencesVerifiedNotPublic": true,
+      "repositoryAdvancedThrough": "6.12.0",
+      "privateContinuityAdvancedThrough": "6.13.0",
+      "crossLayerDriftReconciled": true
+    },
+    "automation": {
+      "maintainGitHubContactGate": true,
+      "maintainGitHubFirstResponse": true,
+      "nativeGitHubFirstResponseSoleWriter": true,
+      "maintainRoutineGmailRail": true,
+      "maintainPrivateWorkPackages": true,
+      "maintainCounterpartyConsentEvidence": true,
+      "maintainProductionReconciliation": true,
+      "maintainUnifiedControlRegister": true,
+      "sendEmailToUnverifiedRecipient": false,
+      "duplicateNativeGitHubFirstResponse": false,
+      "activateOverrideWithoutCompleteReceipt": false,
+      "applyCanonicalEventWithoutReviewedMerge": false,
+      "verifyConsentWithoutIndependentReview": false,
+      "applyHumanAcceptedWithoutVerifiedConsent": false,
+      "publicReceiptMayExposeDriveUrl": false,
+      "publicReceiptMayExposeDriveFileId": false,
+      "workPackageCreatesContract": false,
+      "workPackageCreatesPaymentObligation": false,
+      "workPackageStartsPaidDelivery": false
+    },
+    "privacyBoundary": {
+      "buyerIdentityPublic": false,
+      "buyerConsentEvidencePublic": false,
+      "counterpartyIdentityEvidencePublic": false,
+      "consentTextPublic": false,
+      "authenticationEvidencePublic": false,
+      "signaturePublic": false,
+      "providerReceiptContentsPublic": false,
+      "bankingDataPublic": false,
+      "counselNotesPublic": false,
+      "privateReviewDeliberationsPublic": false,
+      "privateDriveUrlPublic": false,
+      "privateDriveFileIdPublic": false
+    },
+    "canonicalBoundaries": {
+      "eventHeadSequence": 1,
+      "eventHeadDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+      "reconciliationSequence": 1,
+      "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+      "scopeDrafted": 1,
+      "humanAccepted": 0,
+      "active": 0,
+      "orders": 0,
+      "verifiedGrossRevenueUsd": 0,
+      "verifiedSettledCashUsd": 0,
+      "receivedCashRequires": "PAID_SETTLED"
+    },
+    "actualEffects": {
+      "privateCharterCreated": true,
+      "privateRegisterCreated": true,
+      "providerDeploymentCreated": false,
+      "providerDeploymentChanged": false,
+      "externalRequesterContacted": false,
+      "emailSent": false,
+      "buyerConsentProven": false,
+      "canonicalEventAppended": false,
+      "humanAcceptedCreated": false,
+      "orderCreated": false,
+      "paymentConfirmed": false,
+      "revenueRecognized": false,
+      "paidWorkStarted": false,
+      "activeCapacityUsed": false,
+      "capacityChanged": false,
+      "legalTermSelected": false,
+      "privateReferenceExposed": false
+    },
+    "nextControlledAction": "HOLD_FOR_GENUINE_EXTERNAL_INPUT",
+    "receiptDigest": "8680243c828c6503d2aadd76b361cfea41482ec17f8fa29018947abcef3f3ea4"
+  }
+}
