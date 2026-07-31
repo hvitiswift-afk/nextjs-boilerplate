@@ -1,0 +1,39 @@
+name: Fardarter Owner Routing v6.17
+
+on:
+  pull_request:
+    paths:
+      - receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json
+      - schemas/revenue/fardarter-drive-owner-routing-v6-17.schema.json
+      - scripts/check-fardarter-owner-routing-v6-17.mjs
+      - docs/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.md
+      - package.json
+      - .github/workflows/fardarter-owner-routing-v6-17.yml
+  push:
+    branches: [main]
+    paths:
+      - receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json
+      - schemas/revenue/fardarter-drive-owner-routing-v6-17.schema.json
+      - scripts/check-fardarter-owner-routing-v6-17.mjs
+      - docs/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.md
+      - package.json
+      - .github/workflows/fardarter-owner-routing-v6-17.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify owner routing and notification materiality
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run deterministic verifier
+        run: npm run fardarter:owner-routing:check
