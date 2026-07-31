@@ -5,7 +5,9 @@ import authorityReceipt from "@/receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.js
 import fardarterDrive from "@/receipts/revenue/FARDARTER-DRIVE-V6.json";
 import googleDriveReceipt from "@/receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json";
 import capacityOverride from "@/receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json";
-import publicationReceipt from "@/receipts/revenue/JP-REV-001-PUBLICATION.json";
+import publicOffer from "@/receipts/revenue/FARDARTER-DRIVE-PUBLIC-OFFER-V6-14.json";
+import unifiedControl from "@/receipts/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.json";
+import productionReconciliation from "@/receipts/revenue/FARDARTER-DRIVE-PRODUCTION-RECONCILIATION-V6-12.json";
 import {
   getPublicAuditInterest,
   publicAuditRequestsUrl,
@@ -15,23 +17,26 @@ import { getSiteUrl } from "@/lib/site-url";
 export const dynamic = "force-static";
 export const revalidate = 900;
 
+const applicationProjectionVersion = "6.15.0";
 const canonicalUrl = `${getSiteUrl()}/github-control-tower-audit`;
 const requestUrl =
   "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/new?template=control-tower-audit-request.yml";
 const issueUrl =
   "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/133";
-const controlIssueUrl =
-  "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/151";
+const publicOfferControlUrl =
+  "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/200";
+const applicationControlUrl =
+  "https://github.com/hvitiswift-afk/nextjs-boilerplate/issues/203";
 
 export const metadata: Metadata = {
-  title: "GitHub Control Tower Audit + Fardarter Drive™ v6 | JP Systems",
+  title: "GitHub Control Tower Audit | Fardarter Drive™ v6.15 source projection",
   description:
-    "A $100 fixed-scope GitHub repository audit with 1,000 total slots, 100 standard ACTIVE deliveries, receipted above-100 capacity, nonbinding fit acceptance, one-shot execution, and private Google Drive continuity.",
+    "A $100 fixed-scope GitHub repository audit with a reviewed v6.14 public offer, verified v6.12 production evidence, canonical 1/1 truth, private continuity, and an explicit repository-source versus deployed-application boundary.",
   alternates: { canonical: canonicalUrl },
   openGraph: {
-    title: "GitHub Control Tower Audit + Fardarter Drive™ v6",
+    title: "GitHub Control Tower Audit — Fardarter Drive™ v6.15 source projection",
     description:
-      "1,000 total planning slots, a 100-ACTIVE standard ceiling, allowed receipted capacity overrides, and evidence-first commercial boundaries.",
+      "Public offer open for verified fit checks; repository source is projected separately from the verified deployed application.",
     type: "website",
     url: canonicalUrl,
   },
@@ -48,9 +53,19 @@ const formatScaleUsd = (amountUsd: string) =>
 
 const faqItems = [
   {
+    question: "Is this v6.15 repository source already live?",
+    answer:
+      "No. This is a repository-source truth projection. Verified production remains the separately evidenced application source and deploy shown on this page. A later promotion requires exact provider evidence and separate authorization.",
+  },
+  {
     question: "What can automation accept?",
     answer:
       "A qualifying controlled request may enter FIT_APPROVED_FOR_SCOPE_DRAFT. This is nonbinding and does not create an order, reservation, contract, invoice, payment obligation, deadline, indemnity agreement, or paid work start.",
+  },
+  {
+    question: "How does GitHub contact work?",
+    answer:
+      "The requester’s GitHub account is the identity and the exact request issue is the channel when permission is checked. The native workflow may post one public-safe clarification; it does not prove consent.",
   },
   {
     question: "What is the standard capacity?",
@@ -60,17 +75,12 @@ const faqItems = [
   {
     question: "Can active capacity go above 100?",
     answer:
-      "Above 100 is allowed, but only through a complete receipted override. The override must record the exact ceiling, readiness, scope, expiration or review point, backpressure, rollback, and authorization. The baseline remains INACTIVE_NO_RECEIPT.",
-  },
-  {
-    question: "What can automation execute?",
-    answer:
-      "One-shot execution may run approved validation, builds, receipts, private Drive drafting, read-only analysis, and capacity-headroom checks. It cannot silently activate an override or create a commercial or financial state.",
+      "Above 100 is allowed, but only through a complete receipted override. The baseline remains INACTIVE_NO_RECEIPT and approval alone never activates capacity.",
   },
   {
     question: "Is Google Drive public?",
     answer:
-      "No. Google Drive continuity is CONNECTED_PRIVATE. Public records name document titles and status only; private URLs, IDs, identities, signatures, provider receipts, counsel notes, and readiness evidence stay private.",
+      "No. Google Drive continuity is CONNECTED_PRIVATE. Public records expose status and document count only; private URLs, IDs, identities, signatures, provider records, counsel notes, and evidence stay private.",
   },
   {
     question: "Is the package indemnity-proof?",
@@ -81,17 +91,19 @@ const faqItems = [
 
 export default async function GitHubControlTowerAuditPage() {
   const publicInterest = await getPublicAuditInterest();
-  const { offer, metrics, money, status, experimentId } = experiment;
+  const { offer, metrics, money, experimentId } = experiment;
   const slotsRemaining = Math.max(offer.capacity - metrics.orders, 0);
   const standardActiveCeiling = fardarterDrive.capacityModel.standardActiveCeiling;
-  const effectiveActiveCeiling = fardarterDrive.capacityModel.effectiveActiveCeiling;
-  const activeDeliveries = fardarterDrive.currentEvidence.activeDeliveries;
-  const activeHeadroom = Math.max(effectiveActiveCeiling - activeDeliveries, 0);
+  const effectiveActiveCeiling = publicOffer.capacity.effectiveActiveCeiling;
+  const activeDeliveries = publicOffer.capacity.activeDeliveries;
+  const activeHeadroom = publicOffer.capacity.activeHeadroom;
   const backpressureActive = activeDeliveries >= effectiveActiveCeiling;
   const publicRequestValue =
     publicInterest.publicRequestCount === null
       ? "Unavailable"
       : String(publicInterest.publicRequestCount);
+  const deployedSource =
+    productionReconciliation.repository.deployedApplicationSource;
 
   const structuredData = [
     {
@@ -99,7 +111,7 @@ export default async function GitHubControlTowerAuditPage() {
       "@type": "Service",
       name: offer.name,
       description:
-        "A fixed-scope GitHub repository operations audit with evidence-gated acceptance, capacity, and execution.",
+        "A fixed-scope GitHub repository operations audit with evidence-gated acceptance, source/deployment separation, capacity, and execution.",
       url: canonicalUrl,
       offers: {
         "@type": "Offer",
@@ -146,10 +158,13 @@ export default async function GitHubControlTowerAuditPage() {
           </a>
           <div className="flex flex-wrap gap-4">
             <a className="transition hover:text-cyan-100" href={issueUrl}>
-              Public offer #{publicationReceipt.issueNumber}
+              Public offer #{publicOffer.publicOfferIssue}
             </a>
-            <a className="transition hover:text-cyan-100" href={controlIssueUrl}>
-              v6 control #151
+            <a className="transition hover:text-cyan-100" href={publicOfferControlUrl}>
+              v6.14 offer control
+            </a>
+            <a className="transition hover:text-cyan-100" href={applicationControlUrl}>
+              v6.15 source control
             </a>
             <a className="transition hover:text-cyan-100" href={publicAuditRequestsUrl}>
               Public fit checks
@@ -163,24 +178,24 @@ export default async function GitHubControlTowerAuditPage() {
         <section className="grid gap-10 py-16 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
           <div>
             <p className="mb-5 inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-100">
-              {status} • Fardarter Drive™ v6 • {slotsRemaining} of {offer.capacity.toLocaleString("en-US")} total slots available
+              {publicOffer.offer.publicState} • source projection v{applicationProjectionVersion} • public offer v{publicOffer.controllerVersion}
             </p>
             <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-7xl">
-              Scale the queue while every consequential state remains receipted.
+              One offer. Separate source, production, consent, and money truth.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-              A fixed-scope GitHub operations audit with 1,000 total slots, 100 standard ACTIVE deliveries, nonbinding fit acceptance, one-shot execution, private Google Drive continuity, and an explicit capacity-override rail.
+              A fixed-scope GitHub operations audit with 1,000 total slots, 100 standard ACTIVE deliveries, verified production evidence, nonbinding fit intake, private continuity, and an explicit repository-source versus deployed-application boundary.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a className="rounded-full bg-cyan-200 px-6 py-3 font-bold text-black" href={requestUrl}>
                 Request a public-safe fit check
               </a>
-              <a className="rounded-full border border-white/20 px-6 py-3 font-bold" href={controlIssueUrl}>
-                Review v6 authority
+              <a className="rounded-full border border-white/20 px-6 py-3 font-bold" href={issueUrl}>
+                Review current public offer
               </a>
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-white/45">
-              A request may enter FIT_APPROVED_FOR_SCOPE_DRAFT after bounded checks. That state is nonbinding and creates no order, reservation, contract, invoice, payment obligation, deadline, indemnity agreement, waiver, release, or paid work start.
+              This repository source is not itself proof of a new deployment. A request may enter FIT_APPROVED_FOR_SCOPE_DRAFT after bounded checks, but that state creates no order, reservation, contract, invoice, payment, work start, consent, or canonical event.
             </p>
           </div>
 
@@ -197,43 +212,77 @@ export default async function GitHubControlTowerAuditPage() {
             </div>
 
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <Metric label="Offer" value={publicOffer.offer.publicState} />
+              <Metric label="Production" value={publicOffer.production.applicationState} />
+              <Metric label="Control" value={publicOffer.production.controlState} />
+              <Metric label="Canonical" value={`${publicOffer.canonical.eventHeadSequence}/${publicOffer.canonical.reconciliationSequence}`} />
+              <Metric label="SCOPE_DRAFTED" value={String(publicOffer.canonical.scopeDrafted)} />
+              <Metric label="Consent" value={publicOffer.consent.packageState} />
               <Metric label="Slots left" value={`${slotsRemaining.toLocaleString("en-US")}/${offer.capacity.toLocaleString("en-US")}`} />
               <Metric label="100 standard ACTIVE" value={`${activeDeliveries}/${standardActiveCeiling}`} />
-              <Metric label="Effective ceiling" value={String(effectiveActiveCeiling)} />
               <Metric label="Active headroom" value={String(activeHeadroom)} />
-              <Metric label="Fit-approved" value={String(fardarterDrive.currentEvidence.fitApprovedRequests)} />
-              <Metric label="Orders" value={String(metrics.orders)} />
+              <Metric label="Orders" value={String(publicOffer.money.orders)} />
+              <Metric label="Current gross" value={usd.format(publicOffer.money.verifiedGrossRevenueUsd)} />
+              <Metric label="Settled cash" value={usd.format(publicOffer.money.verifiedSettledCashUsd)} />
               <Metric label="Public fit checks" value={publicRequestValue} />
-              <Metric label="Current gross" value={usd.format(money.grossRevenueUsd)} />
-              <Metric label="Settled cash" value={usd.format(money.netCashUsd)} />
-              <Metric label="Gross capacity target" value={usd.format(offer.grossTargetUsd)} />
-              <Metric label="Backpressure" value={backpressureActive ? "ACTIVE" : "OPEN"} />
-              <Metric label="Override" value={capacityOverride.state} />
+              <Metric label="Drive documents" value={String(publicOffer.drive.knownDocumentCount)} />
+              <Metric label="Override" value={publicOffer.capacity.overrideState} />
             </div>
 
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/60">
-              <strong className="text-white">Authority v{authorityReceipt.authorityVersion}:</strong>{" "}
-              1,000 total slots and the 100-ACTIVE standard ceiling are active. Above 100 is allowed through a complete receipted override. Current override state: INACTIVE_NO_RECEIPT.
+              <strong className="text-white">Source boundary:</strong>{" "}
+              repository controls are ahead of deployed application source <span className="font-mono">{deployedSource.slice(0, 12)}…</span>. This page source requires a separate exact provider promotion before it may be described as live.
             </div>
           </aside>
         </section>
 
-        <section className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-3">
+        <section className="grid gap-6 border-t border-white/10 py-12 lg:grid-cols-2">
           <StateCard
-            title="Automated acceptance"
-            state="FIT_APPROVED_FOR_SCOPE_DRAFT"
-            text="A qualifying request may enter private scope drafting. It remains nonbinding and does not reserve capacity or begin paid work."
+            title="Public operating offer"
+            state={`v${publicOffer.controllerVersion} / ${publicOffer.offer.publicState}`}
+            text="Issue #133 is the reviewed current public offer. Dynamic fit-check counts are interest only and never orders or capacity reservations."
           />
           <StateCard
-            title="One-shot execution"
-            state={fardarterDrive.executionModel.state}
-            text="Approved validation, builds, receipts, private drafting, read-only analysis, and headroom checks may execute once per controlling issue."
+            title="Repository application source"
+            state={`v${applicationProjectionVersion} / SOURCE_ONLY`}
+            text="This source projects reviewed truth but creates no provider deployment. Future promotion remains separately authorized and evidenced."
+          />
+          <StateCard
+            title="Verified production"
+            state={`${publicOffer.production.applicationState} / ${publicOffer.production.controlState}`}
+            text={`The verified production source remains ${deployedSource.slice(0, 12)}… at deploy ${publicOffer.production.deployId}, with 18/18 route and exact-body readback.`}
+          />
+          <StateCard
+            title="Canonical and consent"
+            state={`${publicOffer.canonical.eventHeadSequence}/${publicOffer.canonical.reconciliationSequence} • ${publicOffer.consent.packageState}`}
+            text="SCOPE_DRAFTED=1, HUMAN_ACCEPTED=0, ACTIVE=0, event 2 absent, and consent remains AWAITING_COUNTERPARTY_EVIDENCE."
+          />
+          <StateCard
+            title="GitHub contact"
+            state={`${publicOffer.contact.identityModel} / ${publicOffer.contact.channelModel}`}
+            text="The native workflow is the sole first-response writer and may post at most one bounded public-safe clarification per qualifying external issue."
           />
           <StateCard
             title="Google Drive continuity"
-            state={googleDriveReceipt.state}
-            text="CONNECTED_PRIVATE records retain work packages and restricted capacity evidence without publishing private Drive references."
+            state={`${googleDriveReceipt.state} / ${unifiedControl.drive.knownDocumentCount} known documents`}
+            text="CONNECTED_PRIVATE records retain work packages and evidence without publishing private Drive references."
           />
+        </section>
+
+        <section className="border-t border-white/10 py-12">
+          <p className="font-mono text-sm uppercase tracking-[0.25em] text-emerald-200">Source versus production</p>
+          <h2 className="mt-3 text-3xl font-black">Repository truth can advance without silently changing the live application.</h2>
+          <p className="mt-4 max-w-4xl leading-7 text-white/60">
+            The verified deployed application remains source <span className="font-mono">{deployedSource}</span>. Repository control is {publicOffer.production.repositoryRelationship}. Any future production promotion requires an exact target commit, provider deploy ID, authoritative immutable URL, complete route readback, preserved rollback, no private-reference exposure, and separate approval.
+          </p>
+          <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Boundary label="Repository projection" value="6.15.0 / SOURCE_ONLY" />
+            <Boundary label="Verified deploy" value={publicOffer.production.deployId} />
+            <Boundary label="Verified routes" value={`${publicOffer.production.verifiedRouteCount}/${publicOffer.production.verifiedRouteCount}`} />
+            <Boundary label="Source equals deployed source" value="FALSE" />
+            <Boundary label="Automatic promotion" value="FALSE" />
+            <Boundary label="Deployment owner" value={unifiedControl.authoritySeparation.deploymentVerificationOwner} />
+          </div>
         </section>
 
         <section className="border-t border-white/10 py-12">
@@ -246,7 +295,7 @@ export default async function GitHubControlTowerAuditPage() {
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Boundary label="Current override state" value="INACTIVE_NO_RECEIPT" />
+              <Boundary label="Current override state" value={capacityOverride.state} />
               <Boundary label="Activation target" value="CAPACITY_OVERRIDE_ACTIVE" />
               <Boundary label="Automatic activation" value="FALSE" />
               <Boundary label="May exceed total 1,000" value="FALSE" />
@@ -280,8 +329,11 @@ export default async function GitHubControlTowerAuditPage() {
           <p className="font-mono text-sm uppercase tracking-[0.25em] text-amber-200">Commercial and legal boundary</p>
           <h2 className="mt-3 text-3xl font-black">Preparation can automate; consequences stay evidenced.</h2>
           <p className="mt-4 max-w-4xl leading-7 text-white/60">
-            Final contract acceptance, payment, paid delivery start, refunds, disputes, admissions, waivers, releases, banking, billing, domains, credentials, access controls, and destructive external actions remain independently gated. Indemnity and liability language remains counsel-reviewed and not indemnity-proof.
+            Final contract acceptance, buyer consent, payment, paid delivery start, refunds, disputes, admissions, waivers, releases, banking, billing, domains, credentials, access controls, provider deployment, and destructive external actions remain independently gated. Indemnity and liability language remains counsel-reviewed and not indemnity-proof.
           </p>
+          <div className="mt-7 rounded-3xl border border-white/10 bg-white/[0.035] p-6 text-sm leading-7 text-white/60">
+            Authority v{authorityReceipt.authorityVersion} retains the legacy 1,000-slot / 100 standard ACTIVE baseline. The current reviewed public offer, canonical state, consent state, production evidence, and private continuity are projected from v6.14, v6.13, and v6.12 receipts rather than inferred from that legacy baseline.
+          </div>
         </section>
 
         <section className="border-t border-white/10 py-12">
