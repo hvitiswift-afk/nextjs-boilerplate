@@ -89,9 +89,20 @@ concurrency:
 # routing_notification_policy=11/8/9/1
 # notification_disposition=SILENT_NO_MATERIAL_EXTERNAL_CHANGE
 
+# Historical v6.19 compatibility anchors. These preserve strategy authority without retaining it as active head.
+# name: Verify Fardarter Drive v6.19 strategy authority map
+# FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json
+# FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json
+# fardarter-drive-strategy-rail-v6-19.schema.json
+# controller_version=6.19.0
+# strategy_control=FARDARTER-DRIVE-STRATEGY-RAIL-V6-19
+# strategy_manifest_digest=2f17be6563d67a1a724731ea8c541f29daf1cda1e1cfaf490bcf8c50f77ac022
+# strategy_document_sha256=6396928240bfec30f3e366615fd43c4602e3a3c9966ffc3051d9ef86b8998990
+# issue_141_role=HISTORICAL_STRATEGY_AND_STAGE_GOVERNANCE_RAIL
+
 jobs:
   verify:
-    name: Verify Fardarter Drive v6.19 strategy authority map
+    name: Verify Fardarter Drive v6.21 current control head
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
@@ -101,7 +112,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate current strategy, standing authority, public offer, application source, production, consent, Drive, capacity, money, and product
+      - name: Validate current head, source, strategy, standing authority, public offer, production, consent, Drive, capacity, money, and product
         run: npm run revenue:verify
       - name: Verify all revenue JSON syntax
         run: |
@@ -123,9 +134,9 @@ jobs:
             }
           }
           for (const root of roots) await visit(root);
-          console.log(`Fardarter Drive v6.19 JSON syntax: PASS (${count} files)`);
+          console.log(`Fardarter Drive v6.21 JSON syntax: PASS (${count} files)`);
           NODE
-      - name: Verify complete historical and current strategy-rail JSON syntax explicitly
+      - name: Verify complete historical and current control-head JSON syntax explicitly
         run: |
           node -e 'for (const path of [
             "examples/revenue-experiment.sample.json",
@@ -160,6 +171,8 @@ jobs:
             "receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json",
             "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json",
             "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json",
+            "receipts/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.json",
+            "receipts/revenue/FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21.json",
             "schemas/revenue/fardarter-drive-gdrive-v6.schema.json",
             "schemas/revenue/fardarter-drive-state-event-v6-2.schema.json",
             "schemas/revenue/fardarter-drive-state-events-v6-2.schema.json",
@@ -183,23 +196,36 @@ jobs:
             "schemas/revenue/fardarter-drive-aggregate-receipt-v6-16.schema.json",
             "schemas/revenue/fardarter-drive-owner-routing-v6-17.schema.json",
             "schemas/revenue/fardarter-drive-control-head-v6-18.schema.json",
-            "schemas/revenue/fardarter-drive-strategy-rail-v6-19.schema.json"
-          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.19 complete strategy-rail JSON syntax: PASS")'
-      - name: Emit reconciled non-financial strategy authority receipt
+            "schemas/revenue/fardarter-drive-strategy-rail-v6-19.schema.json",
+            "schemas/revenue/fardarter-drive-application-control-projection-v6-20.schema.json",
+            "schemas/revenue/fardarter-drive-current-control-head-v6-21.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.21 complete current-head JSON syntax: PASS")'
+      - name: Emit reconciled non-financial current control-head receipt
         run: |
           echo "result=PASS"
           echo "drive_id=FARDARTER-DRIVE-V6"
-          echo "controller_version=6.19.0"
+          echo "controller_version=6.21.0"
+          echo "current_control=FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21"
+          echo "current_control_manifest_digest=55dc7f97ec74aac059d758296870ba8a80297a978d5be7167dc0409dc4cba2b5"
+          echo "repository_base_at_preparation=3558da800dbaf253f2a48636b939856b62bc8d5b"
+          echo "current_control_state=CURRENT_CONTROL_HEAD_RECONCILED"
+          echo "historical_job_identity_v619=name: Verify Fardarter Drive v6.19 strategy authority map"
+          echo "historical_job_identity_v618=name: Verify Fardarter Drive v6.18 standing control head"
+          echo "historical_control_v616=FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16"
+          echo "application_control=FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20"
+          echo "application_control_manifest_digest=6e1145e5088761f54f2c1c0d320aa2ba349f91f18b9a0ee6c5c2060f49cbfc16"
+          echo "application_page_sha256=249ba20fffaa208330b416d9a42335508bd393c0d722848a5fc2e66febf76fcc"
+          echo "application_api_sha256=23f00e6d2714257405f193b1c1272070258e2592c9cf1eb141ad0210678742eb"
+          echo "application_config_sha256=6b52b272308e66ecd7b828db0c80e532d70ed8d6ee38b42b08d3044a467043e5"
+          echo "application_api_schema=1.7.0"
+          echo "application_rewrite_mode=NEXT_BEFORE_FILES_INTERNAL_REWRITE"
+          echo "application_source_state=SOURCE_MERGED_NOT_DEPLOYED"
           echo "strategy_control=FARDARTER-DRIVE-STRATEGY-RAIL-V6-19"
           echo "strategy_manifest_digest=2f17be6563d67a1a724731ea8c541f29daf1cda1e1cfaf490bcf8c50f77ac022"
           echo "strategy_document_sha256=6396928240bfec30f3e366615fd43c4602e3a3c9966ffc3051d9ef86b8998990"
-          echo "repository_base_at_preparation=b796ff7fd1851ef88544abb294f288fb4cd04258"
           echo "strategy_state=STRATEGY_RAIL_RECONCILED"
           echo "issue_141_role=HISTORICAL_STRATEGY_AND_STAGE_GOVERNANCE_RAIL"
           echo "issue_141_body_state=HISTORICAL_BODY_PRESERVED"
-          echo "issue_141_body_rewrite=false"
-          echo "issue_141_completion_marker=jp-fardarter-strategy-rail-v6-19-complete"
-          echo "historical_job_identity=name: Verify Fardarter Drive v6.18 standing control head"
           echo "standing_control=FARDARTER-DRIVE-CONTROL-HEAD-V6-18"
           echo "control_head_manifest_digest=80764bd177469742831497a96290a8d74518035d632d4908f669006c3bf45f7c"
           echo "aggregate_control=FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16"
@@ -213,11 +239,7 @@ jobs:
           echo "public_offer_state=OPEN_FOR_VERIFIED_FIT_CHECKS"
           echo "public_offer_manifest_digest=b16a39679d1baea0c34b11f1544f0c4fa3aa0702d0187a51b6965853fa93a836"
           echo "issue_133_body_sha256=369338fda0fe9e2236eecd68a1321635e025e85365eb701e10ee1d8bb3c405e0"
-          echo "application_source_state=SOURCE_MERGED_NOT_DEPLOYED"
           echo "application_surface_manifest_digest=73ea8a261ade625ef740aa95007a403a55159d864b37c7191f66f50e6528a0de"
-          echo "application_page_sha256=8a0b7d95e87ac30c8e970c6cf74d4760c1c7135beb032d4d0bbc02bd22eccb3b"
-          echo "application_api_sha256=4396640551cf5c6b1227d21f174cda8f890215904bd728884f36daa90870ba9c"
-          echo "application_api_schema=1.6.0"
           echo "unified_control_manifest_digest=2f33a58938a480b70ce9ea26e24c74677e6294e93729412e3fb81db006e5e29c"
           echo "drive_receipt_digest=8680243c828c6503d2aadd76b361cfea41482ec17f8fa29018947abcef3f3ea4"
           echo "production_control_version=6.12.0"
@@ -242,10 +264,6 @@ jobs:
           echo "canonical_event_digest=3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b"
           echo "reconciliation_sequence=1"
           echo "reconciliation_digest=9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"
-          echo "application_digest=f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d"
-          echo "consent_manifest_digest=6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878"
-          echo "public_attestation_digest=0026a05117e349524c51e7000adffc773c5be4986149c4636c111306b8dbe7e8"
-          echo "attestation_receipt_digest=27c8fb452b3b7112d9f714449a232b9416e66718677b8595c0a0eda438078a7d"
           echo "consent_package_state=NO_PACKAGE"
           echo "consent_decision=AWAITING_COUNTERPARTY_EVIDENCE"
           echo "canonical_business_events=1"

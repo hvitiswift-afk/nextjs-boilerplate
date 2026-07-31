@@ -1,0 +1,68 @@
+name: Fardarter Current Control Head v6.21
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fardarter-current-control-head-v6-21.yml"
+      - ".github/workflows/revenue-experiment.yml"
+      - "docs/revenue/FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21.md"
+      - "package.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21.json"
+      - "receipts/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.json"
+      - "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json"
+      - "receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json"
+      - "receipts/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.json"
+      - "schemas/revenue/fardarter-drive-current-control-head-v6-21.schema.json"
+      - "scripts/check-fardarter-current-control-head-v6-21.mjs"
+      - "scripts/check-fardarter-strategy-rail-v6-19.mjs"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/fardarter-current-control-head-v6-21.yml"
+      - ".github/workflows/revenue-experiment.yml"
+      - "docs/revenue/FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21.md"
+      - "package.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21.json"
+      - "receipts/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.json"
+      - "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json"
+      - "receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json"
+      - "receipts/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.json"
+      - "schemas/revenue/fardarter-drive-current-control-head-v6-21.schema.json"
+      - "scripts/check-fardarter-current-control-head-v6-21.mjs"
+      - "scripts/check-fardarter-strategy-rail-v6-19.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-current-control-head-v6-21-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify v6.21 current control head
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run deterministic verifier
+        run: npm run fardarter:current-control-head:check
+      - name: Verify exact JSON syntax
+        run: |
+          node -e 'for (const path of [
+            "receipts/revenue/FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21.json",
+            "receipts/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.json",
+            "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json",
+            "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json",
+            "receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json",
+            "receipts/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.json",
+            "schemas/revenue/fardarter-drive-current-control-head-v6-21.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.21 exact JSON syntax: PASS")'
