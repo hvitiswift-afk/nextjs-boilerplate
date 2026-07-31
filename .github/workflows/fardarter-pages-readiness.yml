@@ -1,26 +1,63 @@
-name: Verify Fardarter Pages Readiness
+name: Verify Fardarter Pages Source Readiness
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "config/fardarter-pages-readiness.json"
+      - "scripts/build-fardarter-github-pages.mjs"
+      - "scripts/verify-fardarter-pages-publication.mjs"
+      - "scripts/verify-fardarter-pages-readiness.mjs"
+      - ".github/workflows/enable-fardarter-pages.yml"
+      - ".github/workflows/fardarter-pages.yml"
+      - ".github/workflows/fardarter-pages-readiness.yml"
+      - "fardarter-startup/**"
   push:
     branches: [main]
     paths:
-      - 'config/fardarter-pages-readiness.json'
-      - 'config/fardarter-github-app-manifest.example.json'
-      - 'docs/FARDARTER-GITHUB-APP-PERMISSION-PACKET.md'
-      - 'docs/FARDARTER-OAUTH-CONNECTOR-PACKET.md'
-      - 'scripts/verify-fardarter-pages-readiness.mjs'
-      - '.github/workflows/enable-fardarter-pages.yml'
-      - '.github/workflows/fardarter-pages.yml'
-      - 'fardarter-startup/**'
+      - "config/fardarter-pages-readiness.json"
+      - "scripts/build-fardarter-github-pages.mjs"
+      - "scripts/verify-fardarter-pages-publication.mjs"
+      - "scripts/verify-fardarter-pages-readiness.mjs"
+      - ".github/workflows/enable-fardarter-pages.yml"
+      - ".github/workflows/fardarter-pages.yml"
+      - ".github/workflows/fardarter-pages-readiness.yml"
+      - "fardarter-startup/**"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  verify:
+  verify-source:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Verify repository-side readiness
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify source readiness
         run: node scripts/verify-fardarter-pages-readiness.mjs
+
+      - name: Build preview artifact
+        run: node scripts/build-fardarter-github-pages.mjs --output dist/fardarter-pages --source-commit "${GITHUB_SHA}"
+
+      - name: Verify preview artifact
+        run: |
+          node scripts/verify-fardarter-pages-publication.mjs \
+            --fixture-dir dist/fardarter-pages \
+            --receipt-file dist/fardarter-pages/source-fixture-verification.json
+
+      - name: Upload preview evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-pages-source-${{ github.run_id }}
+          path: dist/fardarter-pages
+          if-no-files-found: error
+          retention-days: 30
