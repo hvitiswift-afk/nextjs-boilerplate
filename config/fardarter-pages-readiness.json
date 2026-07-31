@@ -1,11 +1,19 @@
 {
-  "version": "1.0",
+  "version": "2.0",
+  "authority_control": "FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29",
+  "authority_digest": "e729a5b31f853723918d63a0dfa759f34f0671fb67beb04cc994e1d5d617fde8",
   "repository": "hvitiswift-afk/nextjs-boilerplate",
   "site_path": "fardarter-startup",
+  "build_output": "dist/fardarter-pages",
   "expected_live_url": "https://hvitiswift-afk.github.io/nextjs-boilerplate/",
-  "routes": ["github_app", "oauth"],
-  "enable_workflow": ".github/workflows/enable-fardarter-pages.yml",
-  "publish_workflow": ".github/workflows/fardarter-pages.yml",
+  "initial_enable_and_publish_workflow": ".github/workflows/enable-fardarter-pages.yml",
+  "repeat_publish_workflow": ".github/workflows/fardarter-pages.yml",
+  "readiness_workflow": ".github/workflows/fardarter-pages-readiness.yml",
+  "builder": "scripts/build-fardarter-github-pages.mjs",
+  "public_verifier": "scripts/verify-fardarter-pages-publication.mjs",
   "receipt_issue": 102,
-  "status": "external_authorization_required"
+  "public_offer_issue": 133,
+  "contact_channel": "GITHUB_ISSUES",
+  "status": "SOURCE_READY_ADMIN_SECRET_OR_SUPPORTED_PAGES_ACTION_REQUIRED",
+  "pages_live_claim": false
 }
