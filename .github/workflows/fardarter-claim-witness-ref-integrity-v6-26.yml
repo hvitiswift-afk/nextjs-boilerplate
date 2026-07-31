@@ -1,0 +1,48 @@
+name: Fardarter Claim Witness Ref Integrity v6.26
+
+on:
+  pull_request:
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-CLAIM-WITNESS-REF-INTEGRITY-V6-26.json"
+      - "schemas/revenue/fardarter-drive-claim-witness-ref-integrity-v6-26.schema.json"
+      - "scripts/check-fardarter-claim-witness-ref-integrity-v6-26.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-CLAIM-WITNESS-REF-INTEGRITY-V6-26.md"
+      - ".github/workflows/fardarter-claim-witness-ref-integrity-v6-26.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  verify:
+    name: Verify live claim witness and ref integrity v6.26
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Capture live public claim refs
+        run: git ls-remote --heads origin 'refs/heads/fd-receipt-claim/*' > /tmp/fardarter-claim-refs.txt
+      - name: Capture repository issue comments
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/comments?per_page=100" --slurp > /tmp/fardarter-issue-comments.json
+      - name: Verify v6.26 claim witness
+        run: npm run fardarter:claim-witness:check -- --refs /tmp/fardarter-claim-refs.txt --comments /tmp/fardarter-issue-comments.json
+      - name: Verify exact JSON syntax
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('receipts/revenue/FARDARTER-DRIVE-CLAIM-WITNESS-REF-INTEGRITY-V6-26.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('schemas/revenue/fardarter-drive-claim-witness-ref-integrity-v6-26.schema.json','utf8'))"
+      - name: Emit nonconsequential governance receipt
+        run: |
+          echo "control=FARDARTER-DRIVE-CLAIM-WITNESS-REF-INTEGRITY-V6-26"
+          echo "manifest_digest=e90f270d50ea5e4bab10663204b6c07118b2effe5b9d82d5bbccc6c3d572164c"
+          echo "prepared_state=PREPARED_SOURCE_ONLY_PENDING_REVIEWED_MERGE"
+          echo "post_merge_state=CLAIM_WITNESS_AND_REF_INTEGRITY_RECONCILED"
+          echo "active_top_level_head=FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21"
+          echo "consequential_effects=ZERO"
