@@ -61,7 +61,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify Fardarter Drive v6.13 unified control
+    name: Verify Fardarter Drive v6.16 aggregate control
     runs-on: ubuntu-latest
     timeout-minutes: 16
     steps:
@@ -71,61 +71,63 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate unified authority, production, contact, consent, Drive, capacity, money, and product
+      - name: Validate aggregate authority, public offer, application source, production, consent, Drive, capacity, money, and product
         run: npm run revenue:verify
-      - name: Verify JSON syntax
+      - name: Verify all revenue JSON syntax
+        run: |
+          node --input-type=module - <<'NODE'
+          import { readdir, readFile } from "node:fs/promises";
+          import { join } from "node:path";
+
+          const roots = ["receipts/revenue", "schemas/revenue"];
+          let count = 0;
+          async function visit(path) {
+            for (const entry of await readdir(path, { withFileTypes: true })) {
+              const child = join(path, entry.name);
+              if (entry.isDirectory()) {
+                await visit(child);
+              } else if (entry.isFile() && entry.name.endsWith(".json")) {
+                JSON.parse(await readFile(child, "utf8"));
+                count += 1;
+              }
+            }
+          }
+          for (const root of roots) await visit(root);
+          console.log(`Fardarter Drive v6.16 JSON syntax: PASS (${count} files)`);
+          NODE
+      - name: Verify current aggregate manifest and predecessor syntax explicitly
         run: |
           node -e 'for (const path of [
-            "examples/revenue-experiment.sample.json",
-            "examples/github-control-tower-audit-receipt.sample.json",
-            "receipts/revenue/JP-REV-001-PUBLICATION.json",
-            "receipts/revenue/JP-REV-001-AUTHORITY.json",
-            "receipts/revenue/FARDARTER-DRIVE-V6.json",
-            "receipts/revenue/FARDARTER-DRIVE-AUTHORITY-V6.json",
-            "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json",
-            "receipts/revenue/FARDARTER-DRIVE-CAPACITY-LEDGER-V6-1.json",
-            "receipts/revenue/FARDARTER-DRIVE-STATE-MACHINE-V6-2.json",
-            "receipts/revenue/FARDARTER-DRIVE-STATE-EVENTS-V6-2.json",
-            "receipts/revenue/FARDARTER-DRIVE-EVENT-PROPOSALS-V6-3.json",
-            "receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-3.json",
-            "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-PREVIEWS-V6-4.json",
-            "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-REVIEW-BUNDLE-V6-4.sample.json",
-            "receipts/revenue/FARDARTER-DRIVE-RECONCILIATION-V6-5.json",
-            "receipts/revenue/FARDARTER-DRIVE-CANONICALIZATION-APPLICATION-V6-5.json",
-            "receipts/revenue/FARDARTER-DRIVE-SUCCESSOR-CONTROL-V6-6.json",
-            "receipts/revenue/FARDARTER-DRIVE-SUCCESSOR-REVIEW-BUNDLE-V6-6.sample.json",
-            "receipts/revenue/FARDARTER-DRIVE-CONSENT-EVIDENCE-V6-7.json",
-            "receipts/revenue/FARDARTER-DRIVE-CONSENT-ATTESTATION-V6-7.sample.json",
-            "receipts/revenue/FARDARTER-DRIVE-GITHUB-FIRST-RESPONSE-V6-9.json",
-            "receipts/revenue/FARDARTER-DRIVE-DEPLOYMENT-LINEAGE-V6-10.json",
-            "receipts/revenue/FARDARTER-DRIVE-PROMOTION-CANDIDATE-V6-11.json",
             "receipts/revenue/FARDARTER-DRIVE-PRODUCTION-RECONCILIATION-V6-12.json",
             "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6-13.json",
             "receipts/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.json",
-            "schemas/revenue/fardarter-drive-gdrive-v6.schema.json",
-            "schemas/revenue/fardarter-drive-state-event-v6-2.schema.json",
-            "schemas/revenue/fardarter-drive-state-events-v6-2.schema.json",
-            "schemas/revenue/fardarter-drive-reconciliation-v6-3.schema.json",
-            "schemas/revenue/fardarter-drive-canonicalization-previews-v6-4.schema.json",
-            "schemas/revenue/fardarter-drive-canonicalization-review-bundle-v6-4.schema.json",
-            "schemas/revenue/fardarter-drive-reconciliation-v6-5.schema.json",
-            "schemas/revenue/fardarter-drive-canonicalization-application-v6-5.schema.json",
-            "schemas/revenue/fardarter-drive-successor-control-v6-6.schema.json",
-            "schemas/revenue/fardarter-drive-successor-review-bundle-v6-6.schema.json",
-            "schemas/revenue/fardarter-drive-consent-evidence-v6-7.schema.json",
-            "schemas/revenue/fardarter-drive-consent-attestation-v6-7.schema.json",
-            "schemas/revenue/fardarter-drive-github-first-response-v6-9.schema.json",
-            "schemas/revenue/fardarter-drive-deployment-lineage-v6-10.schema.json",
-            "schemas/revenue/fardarter-drive-promotion-candidate-v6-11.schema.json",
+            "receipts/revenue/FARDARTER-DRIVE-PUBLIC-OFFER-V6-14.json",
+            "receipts/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.json",
+            "receipts/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.json",
             "schemas/revenue/fardarter-drive-production-reconciliation-v6-12.schema.json",
             "schemas/revenue/fardarter-drive-gdrive-v6-13.schema.json",
-            "schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json"
-          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.13 JSON syntax: PASS")'
-      - name: Emit reconciled non-financial receipt
+            "schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json",
+            "schemas/revenue/fardarter-drive-public-offer-v6-14.schema.json",
+            "schemas/revenue/fardarter-drive-application-surface-v6-15.schema.json",
+            "schemas/revenue/fardarter-drive-aggregate-receipt-v6-16.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter aggregate predecessor syntax: PASS")'
+      - name: Emit reconciled non-financial aggregate receipt
         run: |
           echo "result=PASS"
           echo "drive_id=FARDARTER-DRIVE-V6"
-          echo "controller_version=6.13.0"
+          echo "controller_version=6.16.0"
+          echo "aggregate_control=FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16"
+          echo "aggregate_manifest_digest=f70fa832c62264fcdf8f24d9067246e5ecdeb0ae5dc5bf211ee3041d7bf13a7e"
+          echo "repository_base_at_preparation=7635c698d7d5fbee3d648a66556df7dbceffd3e0"
+          echo "issue_133_integrity=EXACT_CURRENT_OFFER_INTACT"
+          echo "public_offer_state=OPEN_FOR_VERIFIED_FIT_CHECKS"
+          echo "public_offer_manifest_digest=b16a39679d1baea0c34b11f1544f0c4fa3aa0702d0187a51b6965853fa93a836"
+          echo "issue_133_body_sha256=369338fda0fe9e2236eecd68a1321635e025e85365eb701e10ee1d8bb3c405e0"
+          echo "application_source_state=SOURCE_MERGED_NOT_DEPLOYED"
+          echo "application_surface_manifest_digest=73ea8a261ade625ef740aa95007a403a55159d864b37c7191f66f50e6528a0de"
+          echo "application_page_sha256=8a0b7d95e87ac30c8e970c6cf74d4760c1c7135beb032d4d0bbc02bd22eccb3b"
+          echo "application_api_sha256=4396640551cf5c6b1227d21f174cda8f890215904bd728884f36daa90870ba9c"
+          echo "application_api_schema=1.6.0"
           echo "unified_control_manifest_digest=2f33a58938a480b70ce9ea26e24c74677e6294e93729412e3fb81db006e5e29c"
           echo "drive_receipt_digest=8680243c828c6503d2aadd76b361cfea41482ec17f8fa29018947abcef3f3ea4"
           echo "production_control_version=6.12.0"
@@ -136,32 +138,32 @@ jobs:
           echo "verified_deploy_id=6a6ba0366ebec6650d843ac3"
           echo "immutable_route_readback=18/18"
           echo "repository_head_relationship=CONTROL_AHEAD_OF_DEPLOYED_APPLICATION_SOURCE"
+          echo "source_gap=EXPECTED_CONTROL_ONLY_GAP"
           echo "deployment_verification_owner=FARDARTER_DRIVE_LIVE_WATCH"
           echo "github_contact_identity=GITHUB_ISSUE_AUTHOR"
           echo "github_contact_channel=EXACT_GITHUB_ISSUE_THREAD"
           echo "github_first_response_owner=NATIVE_V6_9_WORKFLOW"
-          echo "gmail_authenticated_sender=justin.rackham@gmail.com"
           echo "private_drive_state=CONNECTED_PRIVATE"
           echo "private_drive_known_documents=17"
+          echo "private_drive_owner_only=true"
+          echo "private_drive_shared=false"
+          echo "private_references_exposed=false"
           echo "canonical_head_sequence=1"
           echo "canonical_event_digest=3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b"
           echo "reconciliation_sequence=1"
           echo "reconciliation_digest=9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"
-          echo "application_digest=f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d"
-          echo "consent_manifest_digest=6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878"
-          echo "public_attestation_digest=0026a05117e349524c51e7000adffc773c5be4986149c4636c111306b8dbe7e8"
-          echo "attestation_receipt_digest=27c8fb452b3b7112d9f714449a232b9416e66718677b8595c0a0eda438078a7d"
-          echo "consent_package_state=NO_PACKAGE"
-          echo "consent_decision=AWAITING_COUNTERPARTY_EVIDENCE"
-          echo "canonical_business_events=1"
           echo "scope_drafted=1"
           echo "human_accepted=0"
           echo "active_deliveries=0"
           echo "active_headroom=100"
+          echo "capacity_override=INACTIVE_NO_RECEIPT"
           echo "orders=0"
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
           echo "received_cash_requires=PAID_SETTLED"
-          echo "control_decision=HOLD_FOR_GENUINE_EXTERNAL_INPUT"
-          echo "public_deployment=DEPLOYED_AND_VERIFIED"
+          echo "consent_package_state=NO_PACKAGE"
+          echo "consent_decision=AWAITING_COUNTERPARTY_EVIDENCE"
+          echo "actual_orders_active_gross_cash=0/0/0/0"
+          echo "projected_orders_active_gross_cash=0/0/0/0"
+          echo "control_decision=HOLD_FOR_GENUINE_EXTERNAL_INPUT_OR_SEPARATELY_AUTHORIZED_EXACT_PRODUCTION_PROMOTION"
           echo "consequential_effects=ZERO"
