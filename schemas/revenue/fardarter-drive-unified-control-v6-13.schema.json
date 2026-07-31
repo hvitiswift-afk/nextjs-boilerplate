@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jp.systems/schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json",
+  "title": "Fardarter Drive v6.13 Unified Control Plane",
+  "description": "Exact schema lock for repository, deployment, contact, Gmail, private Drive, canonical, consent, capacity, money, authority-separation, scan, decision, and effect truth.",
+  "const": {
+    "controlId": "FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13",
+    "controllerVersion": "6.13.0",
+    "controllingIssue": 197,
+    "implementationIssue": 198,
+    "repository": {
+      "baseHead": "a18f1ba0537a104e708927c178eac815a4d09e04",
+      "productionControlVersion": "6.12.0",
+      "productionReconciliationPath": "receipts/revenue/FARDARTER-DRIVE-PRODUCTION-RECONCILIATION-V6-12.json",
+      "productionReconciliationDigest": "1e8aa2af8bb3af332185b7419c63e2c1ad8c19c866e45b62fe04a2fc969932ee",
+      "unifiedControlState": "RECONCILED_PENDING_MERGE"
+    },
+    "production": {
+      "provider": "NETLIFY",
+      "siteName": "lichburn-v0-2-8",
+      "deployedApplicationSource": "88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334",
+      "deploymentControlMerge": "f5d3261bb513764fe14601ef9d0fc53e71ea83b3",
+      "deployId": "6a6ba0366ebec6650d843ac3",
+      "verificationState": "DEPLOYED_AND_VERIFIED",
+      "productionControlState": "RECONCILED",
+      "requiredRouteCount": 18,
+      "verifiedRouteCount": 18,
+      "exactBodyMatchCount": 18,
+      "repositoryHeadRelationship": "CONTROL_AHEAD_OF_DEPLOYED_APPLICATION_SOURCE",
+      "sourceGap": "EXPECTED_CONTROL_ONLY_GAP",
+      "ownedByUnifiedController": false,
+      "ownedBySeparateLiveWatch": true
+    },
+    "contact": {
+      "contactGateVersion": "6.8.0",
+      "contactGateMerge": "4cb63ed2e480e3719c1015e28db007b09aad7f30",
+      "firstResponseVersion": "6.9.0",
+      "firstResponseMerge": "760d198316c392a7de3af36faffa93df42ecca64",
+      "firstResponseManifestDigest": "af6e9fd7c97dcb97f511f92b5d1f8baf907d6ea8b45c3ccdeef00a2d18eef3d9",
+      "identityModel": "GITHUB_ISSUE_AUTHOR",
+      "channelModel": "EXACT_GITHUB_ISSUE_THREAD",
+      "nativeWorkflowSoleWriter": true,
+      "maxAutomaticFirstResponsesPerIssue": 1,
+      "emailRequired": false,
+      "deliveryOrSilenceProvesConsent": false
+    },
+    "gmail": {
+      "authenticatedSender": "justin.rackham@gmail.com",
+      "automaticRoutineNonbindingSendReplyAllowed": true,
+      "verifiedRecipientRequired": true,
+      "verifiedThreadRequired": true,
+      "caseAndScopeRequired": true,
+      "minimumNecessaryPrivacyRequired": true,
+      "duplicatePreventionRequired": true,
+      "githubChannelPreferenceMustBeHonored": true,
+      "contractAcceptanceAllowed": false,
+      "consentCertificationAllowed": false,
+      "paymentOrSettlementConfirmationAllowed": false,
+      "workStartAllowed": false,
+      "capacityActivationAllowed": false,
+      "legalPositionAllowed": false
+    },
+    "drive": {
+      "state": "CONNECTED_PRIVATE",
+      "receiptPath": "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6-13.json",
+      "receiptDigest": "8680243c828c6503d2aadd76b361cfea41482ec17f8fa29018947abcef3f3ea4",
+      "historicalReceiptPreserved": "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json",
+      "knownDocumentCount": 17,
+      "newPrivateDocumentTitles": [
+        "Fardarter Drive™ v6.13 — Unified Control Plane Charter",
+        "Fardarter Drive™ v6.13 — Public-Private Reconciliation Register"
+      ],
+      "ownerOnlyVerified": true,
+      "shared": false,
+      "publicReferencesExposed": false
+    },
+    "canonical": {
+      "eventHeadSequence": 1,
+      "eventHeadDigest": "3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b",
+      "reconciliationSequence": 1,
+      "reconciliationDigest": "9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f",
+      "scopeDrafted": 1,
+      "humanAccepted": 0,
+      "active": 0,
+      "event2Present": false
+    },
+    "consent": {
+      "manifestDigest": "6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878",
+      "publicSafeAttestationDigest": "0026a05117e349524c51e7000adffc773c5be4986149c4636c111306b8dbe7e8",
+      "attestationReceiptDigest": "27c8fb452b3b7112d9f714449a232b9416e66718677b8595c0a0eda438078a7d",
+      "packageState": "NO_PACKAGE",
+      "decision": "AWAITING_COUNTERPARTY_EVIDENCE",
+      "independentVerificationPerformed": false,
+      "eligibleForCanonicalApplication": false
+    },
+    "capacity": {
+      "totalPlanningSlots": 1000,
+      "effectiveActiveCeiling": 100,
+      "activeDeliveries": 0,
+      "activeHeadroom": 100,
+      "overrideState": "INACTIVE_NO_RECEIPT",
+      "automaticOverrideActivationAllowed": false
+    },
+    "money": {
+      "orders": 0,
+      "verifiedGrossRevenueUsd": 0,
+      "verifiedSettledCashUsd": 0,
+      "receivedCashRequires": "PAID_SETTLED"
+    },
+    "pointInTimeScan": {
+      "capturedAt": "2026-07-31T01:49:58Z",
+      "openExternalAuditRequests": 0,
+      "relevantInboundGmailMessages": 0,
+      "newPrivateConsentPackages": 0,
+      "newPrivateWorkPackagesRequired": 0,
+      "contactConflicts": 0,
+      "notBackgroundMonitoringGuarantee": true
+    },
+    "authoritySeparation": {
+      "deploymentVerificationOwner": "FARDARTER_DRIVE_LIVE_WATCH",
+      "githubFirstResponseOwner": "NATIVE_V6_9_WORKFLOW",
+      "gmailRoutineCommunicationOwner": "CONNECTED_GMAIL_CONTROLLER",
+      "privateContinuityOwner": "OWNER_ONLY_GOOGLE_DRIVE",
+      "canonicalApplicationRequires": "PROPOSAL_PREVIEW_EXACT_EVIDENCE_REVIEWED_APPEND_ONLY_MERGE_IMMUTABLE_READBACK"
+    },
+    "decision": {
+      "state": "HOLD_FOR_GENUINE_EXTERNAL_INPUT",
+      "nextAcceptableInputs": [
+        "EXTERNAL_AUDIT_REQUEST",
+        "VERIFIED_COUNTERPARTY_EMAIL",
+        "PRIVATE_COUNTERPARTY_CONSENT_EVIDENCE"
+      ],
+      "automaticCanonicalAdvanceAllowed": false
+    },
+    "administrativeEffects": {
+      "privateCharterCreated": true,
+      "privateRegisterCreated": true,
+      "versionedDriveReceiptPrepared": true,
+      "unifiedManifestPrepared": true,
+      "standingControllerUpdateDeferredUntilMergedReadback": true
+    },
+    "consequentialEffects": {
+      "deploymentCreated": false,
+      "deploymentChanged": false,
+      "externalRequesterContacted": false,
+      "emailSent": false,
+      "buyerConsentProven": false,
+      "canonicalEventAppended": false,
+      "humanAcceptedCreated": false,
+      "orderCreated": false,
+      "paymentConfirmed": false,
+      "revenueRecognized": false,
+      "settledCashRecognized": false,
+      "workStarted": false,
+      "activeCapacityUsed": false,
+      "capacityChanged": false,
+      "legalTermSelected": false,
+      "privateReferenceExposed": false
+    },
+    "manifestDigest": "2f33a58938a480b70ce9ea26e24c74677e6294e93729412e3fb81db006e5e29c"
+  }
+}
