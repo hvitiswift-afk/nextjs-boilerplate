@@ -1,0 +1,107 @@
+name: Fardarter GitHub Pages One Run v6.29
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/fardarter-github-pages-one-run-v6-29.yml"
+      - ".github/workflows/enable-fardarter-pages.yml"
+      - ".github/workflows/fardarter-pages.yml"
+      - ".github/workflows/fardarter-pages-readiness.yml"
+      - "config/fardarter-pages-readiness.json"
+      - "docs/repository/FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29.md"
+      - "fardarter-startup/**"
+      - "package.json"
+      - "receipts/repository/FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29.json"
+      - "schemas/repository/fardarter-drive-github-pages-one-run-publication-v6-29.schema.json"
+      - "scripts/build-fardarter-github-pages.mjs"
+      - "scripts/check-fardarter-github-pages-one-run-v6-29.mjs"
+      - "scripts/verify-fardarter-pages-publication.mjs"
+      - "scripts/verify-fardarter-pages-readiness.mjs"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/fardarter-github-pages-one-run-v6-29.yml"
+      - ".github/workflows/enable-fardarter-pages.yml"
+      - ".github/workflows/fardarter-pages.yml"
+      - ".github/workflows/fardarter-pages-readiness.yml"
+      - "config/fardarter-pages-readiness.json"
+      - "docs/repository/FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29.md"
+      - "fardarter-startup/**"
+      - "package.json"
+      - "receipts/repository/FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29.json"
+      - "schemas/repository/fardarter-drive-github-pages-one-run-publication-v6-29.schema.json"
+      - "scripts/build-fardarter-github-pages.mjs"
+      - "scripts/check-fardarter-github-pages-one-run-v6-29.mjs"
+      - "scripts/verify-fardarter-pages-publication.mjs"
+      - "scripts/verify-fardarter-pages-readiness.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  actions: read
+
+jobs:
+  verify-github-pages-one-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Capture bounded issue state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : > /tmp/fardarter-v6-29-issues.ndjson
+          for issue in 102 249 250; do
+            gh api "repos/${GITHUB_REPOSITORY}/issues/${issue}" >> /tmp/fardarter-v6-29-issues.ndjson
+          done
+          jq -s '.' /tmp/fardarter-v6-29-issues.ndjson > /tmp/fardarter-v6-29-issues.json
+
+      - name: Capture GitHub Pages state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/pages" > /tmp/fardarter-v6-29-pages.json 2>/tmp/fardarter-v6-29-pages-error.txt; then
+            true
+          else
+            jq -n --arg error "PAGES_NOT_ENABLED_OR_NOT_VISIBLE" --rawfile detail /tmp/fardarter-v6-29-pages-error.txt '{error:$error,detail:$detail}' > /tmp/fardarter-v6-29-pages.json
+          fi
+
+      - name: Verify GitHub Pages one-run source
+        run: |
+          npm run fardarter:pages-one-run:check -- \
+            --issues /tmp/fardarter-v6-29-issues.json \
+            --pages /tmp/fardarter-v6-29-pages.json | tee /tmp/fardarter-v6-29-receipt.json
+
+      - name: Assemble read-only evidence
+        run: |
+          mkdir -p /tmp/fardarter-v6-29-artifact
+          cp /tmp/fardarter-v6-29-receipt.json /tmp/fardarter-v6-29-artifact/
+          cp /tmp/fardarter-v6-29-issues.json /tmp/fardarter-v6-29-artifact/
+          cp /tmp/fardarter-v6-29-pages.json /tmp/fardarter-v6-29-artifact/
+          cp receipts/repository/FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29.json /tmp/fardarter-v6-29-artifact/
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fardarter-github-pages-one-run-v6-29-${{ github.run_id }}
+          path: /tmp/fardarter-v6-29-artifact
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Emit nonconsequential source receipt
+        run: |
+          echo "control=FARDARTER-DRIVE-GITHUB-PAGES-ONE-RUN-PUBLICATION-V6-29"
+          echo "manifest_digest=e729a5b31f853723918d63a0dfa759f34f0671fb67beb04cc994e1d5d617fde8"
+          echo "source_state=READY_FOR_REVIEWED_GITHUB_PAGES_ONE_RUN_SOURCE"
+          echo "pages_live_claim=false"
+          echo "provider_mutation=false"
