@@ -1,0 +1,50 @@
+name: Fardarter Aggregate Receipt v6.16
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fardarter-aggregate-receipt-v6-16.yml"
+      - ".github/workflows/revenue-experiment.yml"
+      - "receipts/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.json"
+      - "schemas/revenue/fardarter-drive-aggregate-receipt-v6-16.schema.json"
+      - "scripts/check-fardarter-revenue-receipt-v6-16.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.md"
+      - "package.json"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/fardarter-aggregate-receipt-v6-16.yml"
+      - ".github/workflows/revenue-experiment.yml"
+      - "receipts/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.json"
+      - "schemas/revenue/fardarter-drive-aggregate-receipt-v6-16.schema.json"
+      - "scripts/check-fardarter-revenue-receipt-v6-16.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.md"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-aggregate-receipt-v6-16-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify aggregate head and zero-consequence boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify Fardarter aggregate receipt
+        run: npm run fardarter:revenue-receipt:check
+      - name: Verify exact JSON syntax
+        run: |
+          node -e "JSON.parse(require('node:fs').readFileSync('receipts/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.json','utf8'))"
+          node -e "JSON.parse(require('node:fs').readFileSync('schemas/revenue/fardarter-drive-aggregate-receipt-v6-16.schema.json','utf8'))"
