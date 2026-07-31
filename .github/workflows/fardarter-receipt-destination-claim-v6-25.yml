@@ -1,0 +1,60 @@
+name: Fardarter Receipt Destination Claim v6.25
+
+on:
+  pull_request:
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-RECEIPT-DESTINATION-CLAIM-V6-25.json"
+      - "schemas/revenue/fardarter-drive-receipt-destination-claim-v6-25.schema.json"
+      - "scripts/check-fardarter-receipt-destination-claim-v6-25.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-RECEIPT-DESTINATION-CLAIM-V6-25.md"
+      - ".github/workflows/fardarter-receipt-destination-claim-v6-25.yml"
+      - "package.json"
+  push:
+    branches: [main]
+    paths:
+      - "receipts/revenue/FARDARTER-DRIVE-RECEIPT-DESTINATION-CLAIM-V6-25.json"
+      - "schemas/revenue/fardarter-drive-receipt-destination-claim-v6-25.schema.json"
+      - "scripts/check-fardarter-receipt-destination-claim-v6-25.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-RECEIPT-DESTINATION-CLAIM-V6-25.md"
+      - ".github/workflows/fardarter-receipt-destination-claim-v6-25.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-receipt-destination-claim-v6-25-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify receipt destination and claim v6.25
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify v6.25 destination and claim contract
+        run: npm run fardarter:receipt-destination-claim:check
+      - name: Verify exact JSON syntax
+        run: |
+          node -e 'for (const path of [
+            "receipts/revenue/FARDARTER-DRIVE-RECEIPT-DESTINATION-CLAIM-V6-25.json",
+            "schemas/revenue/fardarter-drive-receipt-destination-claim-v6-25.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.25 JSON syntax: PASS")'
+      - name: Emit nonconsequential governance receipt
+        run: |
+          echo "result=PASS"
+          echo "control=FARDARTER-DRIVE-RECEIPT-DESTINATION-CLAIM-V6-25"
+          echo "manifest_digest=52b032dcbaee35ef4039a82285cb37b9aaa0abbd8a30f97a555a76372f7d26e6"
+          echo "prepared_state=PREPARED_SOURCE_ONLY_PENDING_REVIEWED_MERGE"
+          echo "post_merge_state=RECEIPT_DESTINATION_AND_CLAIM_RECONCILED"
+          echo "active_top_level_head=FARDARTER-DRIVE-CURRENT-CONTROL-HEAD-V6-21"
+          echo "provider_mutation=false"
+          echo "canonical_mutation=false"
+          echo "commercial_effects=ZERO"
