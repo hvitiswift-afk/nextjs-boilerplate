@@ -12,9 +12,9 @@ v6.22 adds a separate public-safe source page and read-only API that project the
 
 ```text
 Control              FARDARTER-DRIVE-PUBLIC-CONTROL-HEAD-PROJECTION-V6-22
-Manifest digest      f2a7344f1a437174e9abc4adfcb2a18a4a80ed2d952a88afd4e55c61993ebc36
+Manifest digest      8be9b7beb73c706054c7e1b7869250177de9495fc6b1e95eb013b13643e52fbb
 Page path             /github-control-tower-audit/control-head
-Page SHA-256          52a7baa2f4fa35f4060d807c5dfedb2dc0fa51e867fd2064aa73bc2c689ddf4a
+Page SHA-256          55a9b4cfc88b3ba3ea1633f38e6a16fd63e33d4b57509f9c9a381018f361b73b
 API path              /api/revenue/control-head
 API SHA-256           bdcd8d954ce8d0777338d705e499fb39eba4d6c4ed949e25528f59f36f9d52ff
 API schema            1.8.0
