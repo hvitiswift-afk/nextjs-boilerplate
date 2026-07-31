@@ -192,7 +192,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Verify public URL and required content with exact source commit
+      - name: Verify public URL, required content, and exact source commit — Verify public URL and required content
         run: |
           node scripts/verify-fardarter-pages-publication.mjs \
             --base-url "${{ steps.deployment.outputs.page_url }}" \
