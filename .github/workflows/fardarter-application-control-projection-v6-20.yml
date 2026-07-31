@@ -53,6 +53,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Emit exact source hashes
+        run: |
+          sha256sum \
+            app/github-control-tower-audit/current/page.tsx \
+            app/api/revenue/pilot/current/route.ts \
+            next.config.ts
       - name: Run deterministic verifier
         run: npm run fardarter:application-control-projection:check
       - name: Verify exact JSON syntax
