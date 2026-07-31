@@ -210,9 +210,16 @@ function classifyIssue(issue, context) {
   if (duplicate && number !== duplicate.canonicalIssueNumber) return "DUPLICATE_OPEN_REVIEW";
   if (/placeholder|no[- ]?op|accidental|unintentionally|routing incident/i.test(declaration)) return "NO_EFFECT_HISTORICAL";
   if (number === 241 || number === 242) return "PAUSED_WORK_REVIEW";
-  if (title === "GRIPLOOM ML + GOBLIN ML implementation plan" && context.files.length > 0 && context.files.every((file) => pathExists(file, context.treeSet, context.tree))) return "IMPLEMENTED_BY_CURRENT_MAIN_REVIEW";
+  if (title === "GRIPLOOM ML + GOBLIN ML implementation plan") {
+    const core = [
+      "src/lib/griploom/types.ts", "src/lib/griploom/mesh.ts", "src/lib/griploom/vitality.ts",
+      "src/lib/ml/griploom-ml.ts", "src/lib/ml/goblin-ml.ts", "src/lib/blackletter/gate.ts",
+      "src/app/api/ml/score/route.ts", "src/app/api/tick/route.ts", "docs/WHITEPAPER.md"
+    ];
+    if (core.every((file) => pathExists(file, context.treeSet, context.tree))) return "IMPLEMENTED_BY_CURRENT_MAIN_REVIEW";
+  }
   if ([30, 31, 54, 93, 119].includes(number) || /safe merge order|open pr stack|lockfile.*(?:fail|mismatch|repair)|npm ci.*fail|deployment\s+(?:is\s+)?unverified|public .*deployment remains .*unverified|evaluate netlify.*fallback|10 total audit|maximum active deliveries\s*2/i.test(declaration)) return "STALE_DECLARATION_REVIEW";
-  if ([94, 96, 102].includes(number) || /github pages|pages activation|remote \/mcp|remote endpoint|build week submission|app directory|plugin submission|provider setting|oauth permission|external portal/i.test(declaration)) return "EXTERNALLY_BLOCKED_REVIEW";
+  if ([10, 94, 96, 102].includes(number) || /pages activation|remote \/mcp|remote endpoint|build week submission|app directory|plugin submission|provider setting|oauth permission|external portal/i.test(declaration)) return "EXTERNALLY_BLOCKED_REVIEW";
   if (context.routes.length > 0 && context.routes.every((route) => context.routeSet.has(route))) return "IMPLEMENTED_BY_CURRENT_MAIN_REVIEW";
   if (context.files.length > 0 && context.files.every((file) => pathExists(file, context.treeSet, context.tree))) return "IMPLEMENTED_BY_CURRENT_MAIN_REVIEW";
   if (context.linkedOpenPulls.length > 0 || context.linkedPulls.length > 0) return "PAUSED_WORK_REVIEW";
