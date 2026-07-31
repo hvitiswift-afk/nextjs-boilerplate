@@ -127,6 +127,28 @@ Open:
 http://localhost:3000
 ```
 
+## Observer routing and release rail
+
+Observer routing remains a first-class GitHub-native verification and release-evidence lane.
+
+```bash
+npm run observer:routes
+npm run observer:routes:check
+npm run observer:release:receipt
+```
+
+Artifacts and runbooks:
+
+- `docs/observer-route-harness.md`
+- `docs/observer-route-ci.md`
+- `docs/observer-route-release.md`
+- `docs/observer-route-release-gates.md`
+- `.github/workflows/observer-routes.yml`
+- `examples/observer-route-scenarios.sample.json`
+- `examples/observer-route-release.receipt.sample.json`
+
+The release receipt may be printed from repository state, but release/publication still requires its exact gates and evidence.
+
 ## Primary verification
 
 ```bash
