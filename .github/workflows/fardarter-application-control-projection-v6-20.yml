@@ -1,0 +1,73 @@
+name: Fardarter Application Control Projection v6.20
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fardarter-application-control-projection-v6-20.yml"
+      - "app/github-control-tower-audit/current/page.tsx"
+      - "app/api/revenue/pilot/current/route.ts"
+      - "next.config.ts"
+      - "docs/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.md"
+      - "package.json"
+      - "receipts/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.json"
+      - "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json"
+      - "receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json"
+      - "receipts/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.json"
+      - "schemas/revenue/fardarter-drive-application-control-projection-v6-20.schema.json"
+      - "scripts/check-fardarter-application-control-projection-v6-20.mjs"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/fardarter-application-control-projection-v6-20.yml"
+      - "app/github-control-tower-audit/current/page.tsx"
+      - "app/api/revenue/pilot/current/route.ts"
+      - "next.config.ts"
+      - "docs/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.md"
+      - "package.json"
+      - "receipts/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.json"
+      - "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json"
+      - "receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json"
+      - "receipts/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.json"
+      - "schemas/revenue/fardarter-drive-application-control-projection-v6-20.schema.json"
+      - "scripts/check-fardarter-application-control-projection-v6-20.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-application-control-projection-v6-20-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify buyer-facing current-control source projection
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Emit exact source hashes
+        run: |
+          sha256sum \
+            app/github-control-tower-audit/current/page.tsx \
+            app/api/revenue/pilot/current/route.ts \
+            next.config.ts
+      - name: Run deterministic verifier
+        run: npm run fardarter:application-control-projection:check
+      - name: Verify exact JSON syntax
+        run: |
+          node -e 'for (const path of [
+            "receipts/revenue/FARDARTER-DRIVE-APPLICATION-CONTROL-PROJECTION-V6-20.json",
+            "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json",
+            "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json",
+            "receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json",
+            "receipts/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.json",
+            "schemas/revenue/fardarter-drive-application-control-projection-v6-20.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.20 exact JSON syntax: PASS")'
