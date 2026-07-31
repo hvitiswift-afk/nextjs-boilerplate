@@ -86,7 +86,7 @@ Exact normalized issue-body duplicates are grouped by SHA-256. The lowest issue 
 - Branch API results are cross-checked against every remote head ref.
 - Workflow registry entries are cross-checked against every workflow source file.
 - Workflow source is inspected for schedules, write permissions, and provider-facing names.
-- Branch divergence is calculated against the audited checkout.
+- Branch divergence is calculated against `origin/main`, never against a pull-request merge ref.
 - All outputs receive stable SHA-256 digests over sorted material fields.
 - Provider timestamps, run IDs, comment IDs, workflow IDs, and similar generated metadata do not enter the project declaration digest.
 - The audit reads job logs and artifacts, not status alone.
