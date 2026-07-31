@@ -104,7 +104,7 @@ assert(
 assert(
   manifest.production.reconciliationDigest === production.manifestDigest &&
     production.manifestDigest === "1e8aa2af8bb3af332185b7419c63e2c1ad8c19c866e45b62fe04a2fc969932ee" &&
-    manifest.production.applicationSource === production.verifiedProduction.deployedApplicationSource &&
+    manifest.production.applicationSource === production.repository.deployedApplicationSource &&
     manifest.production.deployId === production.verifiedProduction.deployId &&
     manifest.production.applicationState === "DEPLOYED_AND_VERIFIED" &&
     manifest.production.controlState === "RECONCILED" &&
