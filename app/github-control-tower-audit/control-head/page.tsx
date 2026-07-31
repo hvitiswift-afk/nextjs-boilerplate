@@ -132,7 +132,7 @@ export default function PublicControlHeadPage() {
           />
           <LayerCard
             title="Reviewed public offer"
-            state={`Issue #${current.issue133.issueNumber} / ${current.issue133.publicState}`}
+            state={`Issue #${publicOffer.publicOfferIssue} / ${current.issue133.publicState}`}
             text={`The exact v6.14 offer remains read-only at ${usd.format(publicOffer.offer.primaryAuditPriceUsd)} per separately accepted scope.`}
           />
           <LayerCard
