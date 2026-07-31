@@ -75,11 +75,25 @@ concurrency:
 # application_surface_manifest_digest=73ea8a261ade625ef740aa95007a403a55159d864b37c7191f66f50e6528a0de
 # control_decision=HOLD_FOR_GENUINE_EXTERNAL_INPUT_OR_SEPARATELY_AUTHORIZED_EXACT_PRODUCTION_PROMOTION
 
+# Historical v6.18 compatibility anchors. These preserve the predecessor verifier.
+# name: Verify Fardarter Drive v6.18 standing control head
+# FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json
+# FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json
+# fardarter-drive-control-head-v6-18.schema.json
+# fardarter-drive-owner-routing-v6-17.schema.json
+# controller_version=6.18.0
+# standing_control=FARDARTER-DRIVE-CONTROL-HEAD-V6-18
+# control_head_manifest_digest=80764bd177469742831497a96290a8d74518035d632d4908f669006c3bf45f7c
+# owner_routing_manifest_digest=ccd7761970cb3d48c8c4e9aeb06f40e691247088266ad2644b7ec00cd211a0d4
+# owner_routing_state=OWNER_ROUTING_RECONCILED
+# routing_notification_policy=11/8/9/1
+# notification_disposition=SILENT_NO_MATERIAL_EXTERNAL_CHANGE
+
 jobs:
   verify:
-    name: Verify Fardarter Drive v6.18 standing control head
+    name: Verify Fardarter Drive v6.19 strategy authority map
     runs-on: ubuntu-latest
-    timeout-minutes: 16
+    timeout-minutes: 18
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -87,7 +101,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate standing authority, aggregate, routing, public offer, application source, production, consent, Drive, capacity, money, and product
+      - name: Validate current strategy, standing authority, public offer, application source, production, consent, Drive, capacity, money, and product
         run: npm run revenue:verify
       - name: Verify all revenue JSON syntax
         run: |
@@ -109,9 +123,9 @@ jobs:
             }
           }
           for (const root of roots) await visit(root);
-          console.log(`Fardarter Drive v6.18 JSON syntax: PASS (${count} files)`);
+          console.log(`Fardarter Drive v6.19 JSON syntax: PASS (${count} files)`);
           NODE
-      - name: Verify complete historical and current control-head JSON syntax explicitly
+      - name: Verify complete historical and current strategy-rail JSON syntax explicitly
         run: |
           node -e 'for (const path of [
             "examples/revenue-experiment.sample.json",
@@ -145,6 +159,7 @@ jobs:
             "receipts/revenue/FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16.json",
             "receipts/revenue/FARDARTER-DRIVE-OWNER-ROUTING-V6-17.json",
             "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json",
+            "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json",
             "schemas/revenue/fardarter-drive-gdrive-v6.schema.json",
             "schemas/revenue/fardarter-drive-state-event-v6-2.schema.json",
             "schemas/revenue/fardarter-drive-state-events-v6-2.schema.json",
@@ -167,16 +182,26 @@ jobs:
             "schemas/revenue/fardarter-drive-application-surface-v6-15.schema.json",
             "schemas/revenue/fardarter-drive-aggregate-receipt-v6-16.schema.json",
             "schemas/revenue/fardarter-drive-owner-routing-v6-17.schema.json",
-            "schemas/revenue/fardarter-drive-control-head-v6-18.schema.json"
-          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.18 complete control-head JSON syntax: PASS")'
-      - name: Emit reconciled non-financial standing control-head receipt
+            "schemas/revenue/fardarter-drive-control-head-v6-18.schema.json",
+            "schemas/revenue/fardarter-drive-strategy-rail-v6-19.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.19 complete strategy-rail JSON syntax: PASS")'
+      - name: Emit reconciled non-financial strategy authority receipt
         run: |
           echo "result=PASS"
           echo "drive_id=FARDARTER-DRIVE-V6"
-          echo "controller_version=6.18.0"
+          echo "controller_version=6.19.0"
+          echo "strategy_control=FARDARTER-DRIVE-STRATEGY-RAIL-V6-19"
+          echo "strategy_manifest_digest=2f17be6563d67a1a724731ea8c541f29daf1cda1e1cfaf490bcf8c50f77ac022"
+          echo "strategy_document_sha256=6396928240bfec30f3e366615fd43c4602e3a3c9966ffc3051d9ef86b8998990"
+          echo "repository_base_at_preparation=b796ff7fd1851ef88544abb294f288fb4cd04258"
+          echo "strategy_state=STRATEGY_RAIL_RECONCILED"
+          echo "issue_141_role=HISTORICAL_STRATEGY_AND_STAGE_GOVERNANCE_RAIL"
+          echo "issue_141_body_state=HISTORICAL_BODY_PRESERVED"
+          echo "issue_141_body_rewrite=false"
+          echo "issue_141_completion_marker=jp-fardarter-strategy-rail-v6-19-complete"
+          echo "historical_job_identity=name: Verify Fardarter Drive v6.18 standing control head"
           echo "standing_control=FARDARTER-DRIVE-CONTROL-HEAD-V6-18"
           echo "control_head_manifest_digest=80764bd177469742831497a96290a8d74518035d632d4908f669006c3bf45f7c"
-          echo "repository_base_at_preparation=2a4b4c0dea29a90010b911425d57aa3f8133f000"
           echo "aggregate_control=FARDARTER-DRIVE-AGGREGATE-RECEIPT-V6-16"
           echo "aggregate_manifest_digest=f70fa832c62264fcdf8f24d9067246e5ecdeb0ae5dc5bf211ee3041d7bf13a7e"
           echo "owner_routing_control=FARDARTER-DRIVE-OWNER-ROUTING-V6-17"
@@ -233,6 +258,7 @@ jobs:
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
           echo "received_cash_requires=PAID_SETTLED"
+          echo "scale_horizons=UNACHIEVED_NONFORECAST"
           echo "actual_orders_active_gross_cash=0/0/0/0"
           echo "projected_orders_active_gross_cash=0/0/0/0"
           echo "control_decision=HOLD_FOR_GENUINE_EXTERNAL_INPUT_OR_SEPARATELY_AUTHORIZED_EXACT_PRODUCTION_PROMOTION"

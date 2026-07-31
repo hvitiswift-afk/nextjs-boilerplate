@@ -1,0 +1,61 @@
+name: Fardarter Strategy Rail v6.19
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fardarter-strategy-rail-v6-19.yml"
+      - ".github/workflows/revenue-experiment.yml"
+      - "docs/repository/FARDARTER-DRIVE.md"
+      - "docs/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.md"
+      - "package.json"
+      - "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json"
+      - "schemas/revenue/fardarter-drive-strategy-rail-v6-19.schema.json"
+      - "schemas/revenue/fardarter-drive-control-head-v6-18.schema.json"
+      - "scripts/check-fardarter-strategy-rail-v6-19.mjs"
+      - "scripts/check-fardarter-control-head-v6-18.mjs"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/fardarter-strategy-rail-v6-19.yml"
+      - ".github/workflows/revenue-experiment.yml"
+      - "docs/repository/FARDARTER-DRIVE.md"
+      - "docs/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.md"
+      - "package.json"
+      - "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json"
+      - "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json"
+      - "schemas/revenue/fardarter-drive-strategy-rail-v6-19.schema.json"
+      - "schemas/revenue/fardarter-drive-control-head-v6-18.schema.json"
+      - "scripts/check-fardarter-strategy-rail-v6-19.mjs"
+      - "scripts/check-fardarter-control-head-v6-18.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-strategy-rail-v6-19-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify strategy rail and public authority map
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run deterministic verifier
+        run: npm run fardarter:strategy-rail:check
+      - name: Verify exact JSON syntax
+        run: |
+          node -e 'for (const path of [
+            "receipts/revenue/FARDARTER-DRIVE-STRATEGY-RAIL-V6-19.json",
+            "receipts/revenue/FARDARTER-DRIVE-CONTROL-HEAD-V6-18.json",
+            "schemas/revenue/fardarter-drive-strategy-rail-v6-19.schema.json",
+            "schemas/revenue/fardarter-drive-control-head-v6-18.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.19 exact JSON syntax: PASS")'
