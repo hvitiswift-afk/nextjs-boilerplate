@@ -58,7 +58,7 @@ export async function GET() {
     },
     publicOffer: {
       version: publicOffer.controllerVersion,
-      issueNumber: current.issue133.issueNumber,
+      issueNumber: publicOffer.publicOfferIssue,
       state: current.issue133.publicState,
       primaryAuditPriceUsd: publicOffer.offer.primaryAuditPriceUsd,
       manifestDigest: publicOffer.manifestDigest,
