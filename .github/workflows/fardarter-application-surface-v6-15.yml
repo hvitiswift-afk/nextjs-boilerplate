@@ -1,0 +1,56 @@
+name: Fardarter Application Surface v6.15
+
+on:
+  pull_request:
+    paths:
+      - "app/github-control-tower-audit/page.tsx"
+      - "app/api/revenue/pilot/route.ts"
+      - "receipts/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.json"
+      - "schemas/revenue/fardarter-drive-application-surface-v6-15.schema.json"
+      - "scripts/check-fardarter-application-surface-v6-15.mjs"
+      - "scripts/check-revenue-product-surface-v6.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.md"
+      - "package.json"
+      - ".github/workflows/fardarter-application-surface-v6-15.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "app/github-control-tower-audit/page.tsx"
+      - "app/api/revenue/pilot/route.ts"
+      - "receipts/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.json"
+      - "schemas/revenue/fardarter-drive-application-surface-v6-15.schema.json"
+      - "scripts/check-fardarter-application-surface-v6-15.mjs"
+      - "scripts/check-revenue-product-surface-v6.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.md"
+      - "package.json"
+      - ".github/workflows/fardarter-application-surface-v6-15.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-application-surface-v6-15-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify application source and deployment boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run deterministic v6.15 verifier
+        run: npm run fardarter:application-surface:check
+      - name: Verify legacy-compatible product surface
+        run: npm run revenue:surface:check
+      - name: Verify JSON syntax
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('receipts/revenue/FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('schemas/revenue/fardarter-drive-application-surface-v6-15.schema.json','utf8'))"
