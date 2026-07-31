@@ -14,6 +14,7 @@ on:
       - "app/sitemap.ts"
       - "app/robots.ts"
       - "docs/repository/**FARDARTER*"
+      - "docs/revenue/**FARDARTER*"
       - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
       - "examples/*.json"
       - "package.json"
@@ -38,6 +39,7 @@ on:
       - "app/sitemap.ts"
       - "app/robots.ts"
       - "docs/repository/**FARDARTER*"
+      - "docs/revenue/**FARDARTER*"
       - "docs/repository/GITHUB-CONTROL-TOWER-AUDIT-OFFER.md"
       - "examples/*.json"
       - "package.json"
@@ -59,7 +61,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify Fardarter Drive v6.7 consent evidence
+    name: Verify Fardarter Drive v6.13 unified control
     runs-on: ubuntu-latest
     timeout-minutes: 16
     steps:
@@ -68,8 +70,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Validate authority, capacity, chain, successor, consent evidence, Drive, and product
+          node-version: 24
+      - name: Validate unified authority, production, contact, consent, Drive, capacity, money, and product
         run: npm run revenue:verify
       - name: Verify JSON syntax
         run: |
@@ -94,6 +96,12 @@ jobs:
             "receipts/revenue/FARDARTER-DRIVE-SUCCESSOR-REVIEW-BUNDLE-V6-6.sample.json",
             "receipts/revenue/FARDARTER-DRIVE-CONSENT-EVIDENCE-V6-7.json",
             "receipts/revenue/FARDARTER-DRIVE-CONSENT-ATTESTATION-V6-7.sample.json",
+            "receipts/revenue/FARDARTER-DRIVE-GITHUB-FIRST-RESPONSE-V6-9.json",
+            "receipts/revenue/FARDARTER-DRIVE-DEPLOYMENT-LINEAGE-V6-10.json",
+            "receipts/revenue/FARDARTER-DRIVE-PROMOTION-CANDIDATE-V6-11.json",
+            "receipts/revenue/FARDARTER-DRIVE-PRODUCTION-RECONCILIATION-V6-12.json",
+            "receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6-13.json",
+            "receipts/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.json",
             "schemas/revenue/fardarter-drive-gdrive-v6.schema.json",
             "schemas/revenue/fardarter-drive-state-event-v6-2.schema.json",
             "schemas/revenue/fardarter-drive-state-events-v6-2.schema.json",
@@ -105,15 +113,39 @@ jobs:
             "schemas/revenue/fardarter-drive-successor-control-v6-6.schema.json",
             "schemas/revenue/fardarter-drive-successor-review-bundle-v6-6.schema.json",
             "schemas/revenue/fardarter-drive-consent-evidence-v6-7.schema.json",
-            "schemas/revenue/fardarter-drive-consent-attestation-v6-7.schema.json"
-          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.7 JSON syntax: PASS")'
-      - name: Emit non-financial receipt
+            "schemas/revenue/fardarter-drive-consent-attestation-v6-7.schema.json",
+            "schemas/revenue/fardarter-drive-github-first-response-v6-9.schema.json",
+            "schemas/revenue/fardarter-drive-deployment-lineage-v6-10.schema.json",
+            "schemas/revenue/fardarter-drive-promotion-candidate-v6-11.schema.json",
+            "schemas/revenue/fardarter-drive-production-reconciliation-v6-12.schema.json",
+            "schemas/revenue/fardarter-drive-gdrive-v6-13.schema.json",
+            "schemas/revenue/fardarter-drive-unified-control-v6-13.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.13 JSON syntax: PASS")'
+      - name: Emit reconciled non-financial receipt
         run: |
           echo "result=PASS"
           echo "drive_id=FARDARTER-DRIVE-V6"
-          echo "controller_version=6.7.0"
+          echo "controller_version=6.13.0"
+          echo "unified_control_manifest_digest=2f33a58938a480b70ce9ea26e24c74677e6294e93729412e3fb81db006e5e29c"
+          echo "drive_receipt_digest=8680243c828c6503d2aadd76b361cfea41482ec17f8fa29018947abcef3f3ea4"
+          echo "production_control_version=6.12.0"
+          echo "production_reconciliation_digest=1e8aa2af8bb3af332185b7419c63e2c1ad8c19c866e45b62fe04a2fc969932ee"
+          echo "production_application=DEPLOYED_AND_VERIFIED"
+          echo "production_control_state=RECONCILED"
+          echo "deployed_application_source=88bd8dc89a0bd95f42c7e1a21dccc56fe9dc7334"
+          echo "verified_deploy_id=6a6ba0366ebec6650d843ac3"
+          echo "immutable_route_readback=18/18"
+          echo "repository_head_relationship=CONTROL_AHEAD_OF_DEPLOYED_APPLICATION_SOURCE"
+          echo "deployment_verification_owner=FARDARTER_DRIVE_LIVE_WATCH"
+          echo "github_contact_identity=GITHUB_ISSUE_AUTHOR"
+          echo "github_contact_channel=EXACT_GITHUB_ISSUE_THREAD"
+          echo "github_first_response_owner=NATIVE_V6_9_WORKFLOW"
+          echo "gmail_authenticated_sender=justin.rackham@gmail.com"
+          echo "private_drive_state=CONNECTED_PRIVATE"
+          echo "private_drive_known_documents=17"
           echo "canonical_head_sequence=1"
           echo "canonical_event_digest=3859eac9c63bef83624111704d38cf217b0c1a4ece6df874e72a76e9fb1ffc3b"
+          echo "reconciliation_sequence=1"
           echo "reconciliation_digest=9f4f878cc0f8f2ddfa7bbdb594d2b9164064acd8901301404aed57b4065eca0f"
           echo "application_digest=f2285c4c02c10f4403302600f092926b519d0c2e2c5d0d3e9d078fbf7828be3d"
           echo "consent_manifest_digest=6d13d80a7034533b0f155a0d522ce8b2afb34586ff9e8ca2f90c0d355bb5c878"
@@ -130,4 +162,6 @@ jobs:
           echo "verified_revenue_usd=0"
           echo "settled_cash_usd=0"
           echo "received_cash_requires=PAID_SETTLED"
-          echo "public_deployment=UNVERIFIED"
+          echo "control_decision=HOLD_FOR_GENUINE_EXTERNAL_INPUT"
+          echo "public_deployment=DEPLOYED_AND_VERIFIED"
+          echo "consequential_effects=ZERO"
