@@ -8,6 +8,8 @@
 
 v6.23 retires the historical v6.3 scheduled public conflict writer after it produced repeated false conflict receipts against the valid reviewed sequence-1 canonical chain.
 
+Historical conflict classification: `HISTORICAL_WORKFLOW_STALE_FALSE_CONFLICT`.
+
 Issue #160 and its four conflict comments remain append-only historical evidence. This repair changes future workflow behavior only.
 
 ## Exact control package
