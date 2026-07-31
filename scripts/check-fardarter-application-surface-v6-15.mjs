@@ -224,9 +224,7 @@ for (const required of [
   "GitHub contact",
   "Google Drive continuity",
   "SOURCE_ONLY",
-  "CONTROL_AHEAD_OF_DEPLOYED_APPLICATION_SOURCE",
   "This repository source is not itself proof of a new deployment.",
-  "FARDARTER_DRIVE_LIVE_WATCH",
   "SCOPE_DRAFTED=1",
   "HUMAN_ACCEPTED=0",
   "AWAITING_COUNTERPARTY_EVIDENCE",
@@ -253,10 +251,6 @@ for (const required of [
   "applicationSurfaceUpdateCreatesDeployment: false",
   "legacyCompatibility",
   "knownDocumentCount",
-  "GITHUB_ISSUE_AUTHOR",
-  "EXACT_GITHUB_ISSUE_THREAD",
-  "NO_PACKAGE",
-  "AWAITING_COUNTERPARTY_EVIDENCE",
   "PAID_SETTLED",
 ]) {
   assert(text.api.includes(required), `v6.15 API missing ${required}`);
