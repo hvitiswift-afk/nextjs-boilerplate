@@ -4,6 +4,9 @@ import fardarterDrive from "@/receipts/revenue/FARDARTER-DRIVE-V6.json";
 import googleDriveReceipt from "@/receipts/revenue/FARDARTER-DRIVE-GDRIVE-V6.json";
 import capacityOverride from "@/receipts/revenue/FARDARTER-DRIVE-CAPACITY-OVERRIDE-V6.sample.json";
 import publicationReceipt from "@/receipts/revenue/JP-REV-001-PUBLICATION.json";
+import publicOffer from "@/receipts/revenue/FARDARTER-DRIVE-PUBLIC-OFFER-V6-14.json";
+import unifiedControl from "@/receipts/revenue/FARDARTER-DRIVE-UNIFIED-CONTROL-V6-13.json";
+import productionReconciliation from "@/receipts/revenue/FARDARTER-DRIVE-PRODUCTION-RECONCILIATION-V6-12.json";
 import { getPublicAuditInterest } from "@/lib/revenue/public-audit-interest";
 
 export const dynamic = "force-static";
@@ -19,14 +22,97 @@ export async function GET() {
     authorityReceipt.grants.map((grant) => [grant.grantId, grant.state]),
   );
   const standardActiveCeiling = fardarterDrive.capacityModel.standardActiveCeiling;
-  const effectiveActiveCeiling = fardarterDrive.capacityModel.effectiveActiveCeiling;
-  const activeDeliveries = fardarterDrive.currentEvidence.activeDeliveries;
+  const effectiveActiveCeiling = publicOffer.capacity.effectiveActiveCeiling;
+  const activeDeliveries = publicOffer.capacity.activeDeliveries;
+  const deployedApplicationSource =
+    productionReconciliation.repository.deployedApplicationSource;
 
   return Response.json(
     {
-      schemaVersion: "1.5.0",
+      schemaVersion: "1.6.0",
       experimentId: experiment.experimentId,
-      status: experiment.status,
+      status: publicOffer.offer.publicState,
+      applicationSurface: {
+        controlId: "FARDARTER-DRIVE-APPLICATION-SURFACE-V6-15",
+        version: "6.15.0",
+        state: "REPOSITORY_SOURCE_ONLY_PENDING_SEPARATE_PROVIDER_PROMOTION",
+        repositoryBaseAtPreparation: "f461e7dc0724010265bbb439b4cfb857660c095f",
+        pagePath: "/github-control-tower-audit",
+        apiPath: "/api/revenue/pilot",
+        sourceEqualsDeployedApplicationSource: false,
+        sourceUpdateCreatesDeployment: false,
+        futurePromotionOwner:
+          unifiedControl.authoritySeparation.deploymentVerificationOwner,
+      },
+      publicOffer: {
+        version: publicOffer.controllerVersion,
+        issueNumber: publicOffer.publicOfferIssue,
+        state: publicOffer.offer.publicState,
+        primaryAuditPriceUsd: publicOffer.offer.primaryAuditPriceUsd,
+        manifestDigest: publicOffer.manifestDigest,
+        issueTitle: publicOffer.publicIssue.targetTitle,
+        requestTitlePrefix: publicOffer.publicIssue.requestTitlePrefix,
+        fitApprovalBinding: publicOffer.offer.fitApprovalBinding,
+      },
+      production: {
+        controlVersion: publicOffer.production.controlVersion,
+        reconciliationDigest: publicOffer.production.reconciliationDigest,
+        applicationState: publicOffer.production.applicationState,
+        controlState: publicOffer.production.controlState,
+        deployedApplicationSource,
+        deployId: publicOffer.production.deployId,
+        verifiedRouteCount: publicOffer.production.verifiedRouteCount,
+        exactBodyMatchCount: publicOffer.production.exactBodyMatchCount,
+        repositoryRelationship:
+          publicOffer.production.repositoryRelationship,
+        sourceGap:
+          productionReconciliation.stateClassification.sourceGap,
+        repositorySourceIsCurrentlyDeployed: false,
+        futurePromotionRequiresSeparateProviderEvidence: true,
+      },
+      canonical: {
+        eventHeadSequence: publicOffer.canonical.eventHeadSequence,
+        eventHeadDigest: publicOffer.canonical.eventHeadDigest,
+        reconciliationSequence: publicOffer.canonical.reconciliationSequence,
+        reconciliationDigest: publicOffer.canonical.reconciliationDigest,
+        scopeDrafted: publicOffer.canonical.scopeDrafted,
+        humanAccepted: publicOffer.canonical.humanAccepted,
+        active: publicOffer.canonical.active,
+        event2Present: publicOffer.canonical.event2Present,
+      },
+      consent: {
+        packageState: publicOffer.consent.packageState,
+        decision: publicOffer.consent.decision,
+        independentVerificationPerformed:
+          publicOffer.consent.independentVerificationPerformed,
+        eligibleForCanonicalApplication:
+          unifiedControl.consent.eligibleForCanonicalApplication,
+        publicOfferOrContactProvesConsent:
+          publicOffer.consent.publicOfferOrContactProvesConsent,
+      },
+      contact: {
+        identityModel: publicOffer.contact.identityModel,
+        channelModel: publicOffer.contact.channelModel,
+        nativeWorkflowSoleWriter:
+          publicOffer.contact.nativeWorkflowSoleWriter,
+        maxAutomaticFirstResponsesPerIssue:
+          publicOffer.contact.maxAutomaticFirstResponsesPerIssue,
+        publicEmailRequired: publicOffer.contact.publicEmailRequired,
+        repeatedUnsolicitedFollowUpAllowed:
+          publicOffer.contact.repeatedUnsolicitedFollowUpAllowed,
+        deliveryOrSilenceProvesConsent:
+          publicOffer.contact.deliveryOrSilenceProvesConsent,
+      },
+      privateContinuity: {
+        state: publicOffer.drive.state,
+        version: publicOffer.drive.continuityVersion,
+        knownDocumentCount: publicOffer.drive.knownDocumentCount,
+        ownerOnly: publicOffer.drive.ownerOnly,
+        shared: publicOffer.drive.shared,
+        publicPrivateReferencesExposed:
+          publicOffer.drive.publicPrivateReferencesExposed,
+        receiptDigest: publicOffer.drive.receiptDigest,
+      },
       offer: {
         name: experiment.offer.name,
         priceUsd: experiment.offer.priceUsd,
@@ -40,12 +126,12 @@ export async function GET() {
       },
       availability: {
         fitApprovedRequests: fardarterDrive.currentEvidence.fitApprovedRequests,
-        orders: experiment.metrics.orders,
+        orders: publicOffer.money.orders,
         slotsRemaining,
         activeDeliveries,
         standardActiveCeiling,
         effectiveActiveCeiling,
-        activeHeadroom: Math.max(effectiveActiveCeiling - activeDeliveries, 0),
+        activeHeadroom: publicOffer.capacity.activeHeadroom,
         backpressureActive: activeDeliveries >= effectiveActiveCeiling,
         deliveriesAccepted: experiment.metrics.deliveriesAccepted,
       },
@@ -53,7 +139,7 @@ export async function GET() {
         above100Allowed: fardarterDrive.capacityModel.aboveStandardAllowed,
         standardActiveCeiling,
         effectiveActiveCeiling,
-        state: capacityOverride.state,
+        state: publicOffer.capacity.overrideState,
         activationTarget: "CAPACITY_OVERRIDE_ACTIVE",
         requestedActiveCeiling: capacityOverride.requestedActiveCeiling,
         approvedActiveCeiling: capacityOverride.approvedActiveCeiling,
@@ -63,7 +149,7 @@ export async function GET() {
         automaticActivation: false,
         mayExceed100: true,
         mayExceedTotalPlanningCapacity: false,
-        totalPlanningCapacity: fardarterDrive.capacityModel.totalPlanningCapacity,
+        totalPlanningCapacity: publicOffer.capacity.totalPlanningSlots,
         rollbackCeiling: capacityOverride.backpressure.rollbackCeiling,
       },
       publicInterest: {
@@ -75,30 +161,25 @@ export async function GET() {
       },
       money: {
         settlementState: experiment.money.settlementState,
-        grossRevenueUsd: experiment.money.grossRevenueUsd,
+        grossRevenueUsd: publicOffer.money.verifiedGrossRevenueUsd,
         feesUsd: experiment.money.feesUsd,
         refundsUsd: experiment.money.refundsUsd,
-        netCashUsd: experiment.money.netCashUsd,
+        netCashUsd: publicOffer.money.verifiedSettledCashUsd,
+        receivedCashRequires: publicOffer.money.receivedCashRequires,
       },
-      fardarterDrive: {
+      legacyCompatibility: {
         driveId: fardarterDrive.driveId,
-        name: fardarterDrive.name,
+        driveName: fardarterDrive.name,
         controllingIssues: fardarterDrive.controllingIssues,
-        currentEvidence: fardarterDrive.currentEvidence,
-        capacityModel: fardarterDrive.capacityModel,
         acceptanceModel: fardarterDrive.acceptanceModel,
         executionModel: fardarterDrive.executionModel,
         horizons: fardarterDrive.horizons,
         progressionRules: fardarterDrive.progressionRules,
-        legalRisk: fardarterDrive.legalRisk,
-        claims: fardarterDrive.claims,
+        authorityReceiptId: authorityReceipt.receiptId,
+        authorityVersion: authorityReceipt.authorityVersion,
+        googleDriveState: googleDriveReceipt.state,
       },
       authority: {
-        receiptId: authorityReceipt.receiptId,
-        version: authorityReceipt.authorityVersion,
-        authorizedBy: authorityReceipt.authorizedBy,
-        authorizedAt: authorityReceipt.authorizedAt,
-        revoked: authorityReceipt.revoked,
         capacity1000: grantStates.CAPACITY_1000,
         standardActiveLimit100: grantStates.STANDARD_ACTIVE_LIMIT_100,
         above100ActiveOverride: grantStates.ABOVE_100_ACTIVE_OVERRIDE,
@@ -141,6 +222,7 @@ export async function GET() {
         documentTitles: googleDriveReceipt.documents.map(
           (document) => document.title,
         ),
+        knownDocumentCount: publicOffer.drive.knownDocumentCount,
         publicFolderUrlExposed: googleDriveReceipt.publicFolderUrlExposed,
         publicFileIdsExposed: googleDriveReceipt.publicFileIdsExposed,
         createPrivateWorkPackageAfterFitApproval:
@@ -161,6 +243,9 @@ export async function GET() {
       },
       evidenceBoundary: {
         receivedCashRequires: "PAID_SETTLED",
+        repositorySourceEqualsDeployedApplicationSource: false,
+        applicationSurfaceUpdateCreatesDeployment: false,
+        publicOfferOrContactProvesConsent: false,
         capacityEqualsDemand: false,
         capacityEqualsCustomerCount: false,
         capacityEqualsOrders: false,
@@ -183,7 +268,8 @@ export async function GET() {
         buyerConsentRequiredForBindingAgreement: true,
         earningsGuaranteed: false,
       },
-      nextControlledAction: fardarterDrive.nextControlledAction,
+      nextControlledAction:
+        "HOLD_FOR_GENUINE_EXTERNAL_INPUT_OR_SEPARATELY_AUTHORIZED_EXACT_PRODUCTION_PROMOTION",
     },
     {
       headers: {
