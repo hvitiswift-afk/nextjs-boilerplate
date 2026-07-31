@@ -1,0 +1,53 @@
+name: Fardarter Public Control Head Projection v6.22
+
+on:
+  pull_request:
+    paths:
+      - "app/github-control-tower-audit/control-head/**"
+      - "app/api/revenue/control-head/**"
+      - "receipts/revenue/FARDARTER-DRIVE-PUBLIC-CONTROL-HEAD-PROJECTION-V6-22.json"
+      - "schemas/revenue/fardarter-drive-public-control-head-projection-v6-22.schema.json"
+      - "scripts/check-fardarter-public-control-head-projection-v6-22.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-PUBLIC-CONTROL-HEAD-PROJECTION-V6-22.md"
+      - ".github/workflows/fardarter-public-control-head-projection-v6-22.yml"
+      - "package.json"
+  push:
+    branches: [main]
+    paths:
+      - "app/github-control-tower-audit/control-head/**"
+      - "app/api/revenue/control-head/**"
+      - "receipts/revenue/FARDARTER-DRIVE-PUBLIC-CONTROL-HEAD-PROJECTION-V6-22.json"
+      - "schemas/revenue/fardarter-drive-public-control-head-projection-v6-22.schema.json"
+      - "scripts/check-fardarter-public-control-head-projection-v6-22.mjs"
+      - "docs/revenue/FARDARTER-DRIVE-PUBLIC-CONTROL-HEAD-PROJECTION-V6-22.md"
+      - ".github/workflows/fardarter-public-control-head-projection-v6-22.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fardarter-public-control-head-v6-22-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify public control-head projection v6.22
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify v6.22 public control-head projection
+        run: npm run fardarter:public-control-head-projection:check
+      - name: Verify exact JSON syntax
+        run: |
+          node -e 'for (const path of [
+            "receipts/revenue/FARDARTER-DRIVE-PUBLIC-CONTROL-HEAD-PROJECTION-V6-22.json",
+            "schemas/revenue/fardarter-drive-public-control-head-projection-v6-22.schema.json"
+          ]) JSON.parse(require("node:fs").readFileSync(path, "utf8")); console.log("Fardarter Drive v6.22 JSON syntax: PASS")'
