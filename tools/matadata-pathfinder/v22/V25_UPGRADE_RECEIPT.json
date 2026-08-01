@@ -1,0 +1,369 @@
+{
+  "status": "UPGRADED_STAGED_NOT_EXECUTED",
+  "fromVersion": "2.4.0",
+  "runnerVersion": "2.5.0",
+  "packageSha256": "78c1edc9a4b469f771a9b59742bb1c5f65acadaac2d40d2fd2af4b6a0f284358",
+  "runnerSha256": "6f56edf83efeaec921112c5997d751f7d8a04e810205a7928c1c249906128ab6",
+  "runnerGzipSha256": "75f8c1d9cedd7c968ecb6928f9332ac3d99fdd67eca594eebe75397cd179055d",
+  "applicationSha256": "54a4f19763f3d5ac2cbddc57d946f30fe4a7cd3938908c570443c5996120812a",
+  "packageBytes": 39100,
+  "packageParts": [
+    "package.part.00",
+    "package.part.01",
+    "package.part.02",
+    "package.part.03",
+    "package.part.04"
+  ],
+  "repair": {
+    "sourceStatusPhase": "VALIDATION_ERROR",
+    "sourceSubmitClicks": 0,
+    "field": "funding",
+    "expectedLength": 960,
+    "observedLength": 961,
+    "v24Result": "The single-terminal-LF and CRLF rules did not classify the extra code unit.",
+    "v25Rule": "Accept exactly one terminal Unicode White_Space or Format code point for a textarea only, record its code point/category, and reject every internal or multi-character difference.",
+    "substantiveDifferencesStillBlocked": true
+  },
+  "selfTest": {
+    "runnerVersion": "2.5.0",
+    "submissionId": "matadata-openai-cybersecurity-grant-v1",
+    "sessionId": "49783996-c089-4c5f-9c48-4da468fccf5d",
+    "passed": true,
+    "tests": [
+      {
+        "name": "field-spec-count",
+        "ok": true,
+        "details": 13
+      },
+      {
+        "name": "unique-stable-field-names",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "no-descriptive-sentence-duplicate",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "fresh-field-resolution",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "full-field-verification",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "single-terminal-linebreak-equivalence",
+        "ok": true,
+        "details": {
+          "ok": true,
+          "mode": "single-terminal-unicode-formatting",
+          "expectedLength": 10,
+          "observedLength": 11,
+          "expectedCodePoints": 10,
+          "observedCodePoints": 11,
+          "expectedSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedSha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee",
+          "expectedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "rawLengthDelta": 1,
+          "codePointDelta": 1,
+          "firstDifferenceCodePointIndex": 10,
+          "extraTerminalCodePoint": "U+000A",
+          "extraTerminalCharacterName": "LINE FEED",
+          "canonicalizationRule": "remove-exactly-one-terminal-unicode-whitespace-or-format-code-point"
+        }
+      },
+      {
+        "name": "line-ending-normalization-equivalence",
+        "ok": true,
+        "details": {
+          "ok": true,
+          "mode": "line-ending-normalized",
+          "expectedLength": 10,
+          "observedLength": 11,
+          "expectedCodePoints": 10,
+          "observedCodePoints": 10,
+          "expectedSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedSha256": "4854aaef74503959fd26363306e2ef967a9d50bdda90d033a3a4acacbbd57547",
+          "expectedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "rawLengthDelta": 1,
+          "codePointDelta": 0,
+          "firstDifferenceCodePointIndex": null,
+          "extraTerminalCodePoint": null,
+          "extraTerminalCharacterName": null,
+          "canonicalizationRule": null
+        }
+      },
+      {
+        "name": "single-terminal-space-equivalence",
+        "ok": true,
+        "details": {
+          "ok": true,
+          "mode": "single-terminal-unicode-formatting",
+          "expectedLength": 10,
+          "observedLength": 11,
+          "expectedCodePoints": 10,
+          "observedCodePoints": 11,
+          "expectedSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedSha256": "d3ecb2cf4d863bf40f54e8be253e265c21f08d565c4a5938822b6b37c235ab3c",
+          "expectedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "rawLengthDelta": 1,
+          "codePointDelta": 1,
+          "firstDifferenceCodePointIndex": 10,
+          "extraTerminalCodePoint": "U+0020",
+          "extraTerminalCharacterName": "SPACE",
+          "canonicalizationRule": "remove-exactly-one-terminal-unicode-whitespace-or-format-code-point"
+        }
+      },
+      {
+        "name": "single-terminal-nbsp-equivalence",
+        "ok": true,
+        "details": {
+          "ok": true,
+          "mode": "single-terminal-unicode-formatting",
+          "expectedLength": 10,
+          "observedLength": 11,
+          "expectedCodePoints": 10,
+          "observedCodePoints": 11,
+          "expectedSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedSha256": "7fd85657292d271b634508fe6ab874aad1a95b3fb2614e07040faa4bc612adea",
+          "expectedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "rawLengthDelta": 1,
+          "codePointDelta": 1,
+          "firstDifferenceCodePointIndex": 10,
+          "extraTerminalCodePoint": "U+00A0",
+          "extraTerminalCharacterName": "NO-BREAK SPACE",
+          "canonicalizationRule": "remove-exactly-one-terminal-unicode-whitespace-or-format-code-point"
+        }
+      },
+      {
+        "name": "single-terminal-zero-width-equivalence",
+        "ok": true,
+        "details": {
+          "ok": true,
+          "mode": "single-terminal-unicode-formatting",
+          "expectedLength": 10,
+          "observedLength": 11,
+          "expectedCodePoints": 10,
+          "observedCodePoints": 11,
+          "expectedSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedSha256": "9708ba7eb2d92840b0742d4815631b7e6cf6b621bb47d9a4f34262b21859f210",
+          "expectedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "rawLengthDelta": 1,
+          "codePointDelta": 1,
+          "firstDifferenceCodePointIndex": 10,
+          "extraTerminalCodePoint": "U+200B",
+          "extraTerminalCharacterName": "ZERO WIDTH SPACE",
+          "canonicalizationRule": "remove-exactly-one-terminal-unicode-whitespace-or-format-code-point"
+        }
+      },
+      {
+        "name": "multiple-terminal-formatting-rejected",
+        "ok": true,
+        "details": {
+          "ok": false,
+          "mode": "mismatch",
+          "expectedLength": 10,
+          "observedLength": 12,
+          "expectedCodePoints": 10,
+          "observedCodePoints": 12,
+          "expectedSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedSha256": "d8bd103a2cd634d80509c3d32c04003b50752d154b4a523e89e9f6066c37f3fb",
+          "expectedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedCanonicalSha256": "d8bd103a2cd634d80509c3d32c04003b50752d154b4a523e89e9f6066c37f3fb",
+          "rawLengthDelta": 2,
+          "codePointDelta": 2,
+          "firstDifferenceCodePointIndex": 10,
+          "extraTerminalCodePoint": "U+0020",
+          "extraTerminalCharacterName": "SPACE",
+          "canonicalizationRule": "remove-exactly-one-terminal-unicode-whitespace-or-format-code-point"
+        }
+      },
+      {
+        "name": "internal-field-difference-rejected",
+        "ok": true,
+        "details": {
+          "ok": false,
+          "mode": "mismatch",
+          "expectedLength": 10,
+          "observedLength": 11,
+          "expectedCodePoints": 10,
+          "observedCodePoints": 11,
+          "expectedSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedSha256": "a2162cbde7b439649f0eaef14dfec338334b9b1c6792d92d8807ce0d05d7114b",
+          "expectedCanonicalSha256": "bbfb79e82216bd2db1ad2c507d44ddf80aeb12f64f9562056afe93aad43154d9",
+          "observedCanonicalSha256": "a2162cbde7b439649f0eaef14dfec338334b9b1c6792d92d8807ce0d05d7114b",
+          "rawLengthDelta": 1,
+          "codePointDelta": 1,
+          "firstDifferenceCodePointIndex": 5,
+          "extraTerminalCodePoint": null,
+          "extraTerminalCharacterName": null,
+          "canonicalizationRule": null
+        }
+      },
+      {
+        "name": "non-textarea-terminal-formatting-rejected",
+        "ok": true,
+        "details": {
+          "ok": false,
+          "mode": "mismatch",
+          "expectedLength": 5,
+          "observedLength": 6,
+          "expectedCodePoints": 5,
+          "observedCodePoints": 6,
+          "expectedSha256": "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8",
+          "observedSha256": "0bd0509bafa4223a02ad82a903d73ab47b6e5407b0674336534a9f5fc6837d03",
+          "expectedCanonicalSha256": "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8",
+          "observedCanonicalSha256": "0bd0509bafa4223a02ad82a903d73ab47b6e5407b0674336534a9f5fc6837d03",
+          "rawLengthDelta": 1,
+          "codePointDelta": 1,
+          "firstDifferenceCodePointIndex": 5,
+          "extraTerminalCodePoint": null,
+          "extraTerminalCharacterName": null,
+          "canonicalizationRule": null
+        }
+      },
+      {
+        "name": "terms-text-only-acknowledgment",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "application-keys",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "proposal-limit",
+        "ok": true,
+        "details": 902
+      },
+      {
+        "name": "problem-limit",
+        "ok": true,
+        "details": 147
+      },
+      {
+        "name": "authorization-language",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "html-token-removal",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "direct-submit-block",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "acknowledgment-proxy-panel",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "acknowledgment-proxy-endpoint",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "acknowledgment-text-validation",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "acknowledgment-affirmation-gate",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "personal-affirmation-submit-precondition",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "trusted-origin-gate",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "candidate-submission-classifier",
+        "ok": true,
+        "details": {
+          "length": 184,
+          "sha256": "fdf24799fb53aebd5282a0296ca9ea47a8dde0ec8fbc704142debc95bdf3f5c4",
+          "markerCount": 3,
+          "markers": [
+            "email",
+            "project-title",
+            "matadata"
+          ],
+          "candidate": true
+        }
+      },
+      {
+        "name": "cookie-reconnect-client",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "screen-etag-and-token",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "low-bandwidth-profile",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "stale-screen-token-guard",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "acknowledgment-stability-sampling",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "tamper-evident-event-chain",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "positive-candidate-network-evidence",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "browser-health-watchdog",
+        "ok": true,
+        "details": null
+      },
+      {
+        "name": "event-chain-runtime",
+        "ok": true,
+        "details": {
+          "chainBefore": "0000000000000000000000000000000000000000000000000000000000000000",
+          "chainMiddle": "2b4f19a6403b4ecbc4519f3d36b1992a244ae083192f721387dbb967a6cdde0b",
+          "chainAfter": "ac0835ab573dbccb6d16626c088f82637f64d98a1648f7d3aba59904c9d28d87"
+        }
+      }
+    ],
+    "applicationSha256": "54a4f19763f3d5ac2cbddc57d946f30fe4a7cd3938908c570443c5996120812a",
+    "eventChainHead": "ac0835ab573dbccb6d16626c088f82637f64d98a1648f7d3aba59904c9d28d87",
+    "timestamp": "2026-07-27T05:06:16.411Z"
+  },
+  "liveExecution": false
+}
