@@ -1,11 +1,14 @@
 {
-  "schema": "nexus.documentation-receipt.v1",
-  "recorded_at": "2026-08-01T13:20:00-04:00",
+  "schema": "nexus.documentation-receipt.v2",
+  "control_id": "NEXUS-PROVENANCE-CONTROL-V2",
+  "recorded_at": "2026-08-01T13:37:00-04:00",
   "timezone": "America/Detroit",
   "repository": "hvitiswift-afk/nextjs-boilerplate",
+  "pull_request": 255,
   "base_branch": "main",
   "base_commit": "65715ff2a849fb4142e0db91c00aaebe8e878b05",
   "branch": "agent/nexus-project-summary",
+  "prior_verified_head": "6a6e73d41a89387fec3f60c072462affda14754a",
   "human_principal": "Justin Lee Rackham (JP)",
   "change_class": "documentation-only",
   "workflow": [
@@ -22,11 +25,23 @@
   "files": [
     {
       "path": "docs/nexus/PROJECT_SUMMARY.md",
-      "sha256": "bf537432084e1e461e54244cb819b009eff8868b666ca0c8c36ab3a1dbe0f016"
+      "sha256": "92c9afdbb22ff7df9bdf78839fec97fcab7256fe6bebabedf1bdae2badb3b72a"
+    },
+    {
+      "path": "docs/nexus/AUTHORITY_AND_IDENTITY_MAP.md",
+      "sha256": "7942eb67f5dffa576c71f94f21c6fe34026efa9af8cfe433c8f4b59ca9901ee8"
     },
     {
       "path": "docs/nexus/PROVENANCE.md",
-      "sha256": "7a7c092ca2bfff3be0c30d958bec9ba3dc2ca9a315f7d7691fcc8db4de6a7e84"
+      "sha256": "ccb28fc620a8679649c0357fe7b6239859d08354f67dea70400c957872652500"
+    },
+    {
+      "path": "docs/nexus/RIGHTS_CLEARANCE_MATRIX.md",
+      "sha256": "9806298281e7d381dbb470e2c23f7d4b8fb5ef8063e3cf92cddee2cc8d576383"
+    },
+    {
+      "path": "docs/nexus/EVIDENCE_INDEX.md",
+      "sha256": "7643e1547a4d4cbba05a4ff8f16f4c14925aa813eee7db775cae08fabf6c815e"
     }
   ],
   "source_objects": [
@@ -51,14 +66,25 @@
       "git_blob_sha": "c2a9cb604bcf0610edc2d6bf402287aeb22b148f"
     }
   ],
-  "excluded": [
-    "passwords",
-    "security codes",
-    "credentials",
-    "private financial identifiers",
-    "unnecessary personal information",
-    "private canonical source"
+  "prior_head_verification": {
+    "head": "6a6e73d41a89387fec3f60c072462affda14754a",
+    "successful_run_ids": [
+      30710251018,
+      30710251031,
+      30710251006,
+      30710251013,
+      30710251025
+    ],
+    "scope": "Prior-head only; later commits require current-head verification."
+  },
+  "excluded_classes": [
+    "authentication_secrets",
+    "private_financial_data",
+    "unnecessary_personal_data",
+    "private_canonical_source",
+    "unsupported_external_rights_claims"
   ],
   "receipt_self_hash": "excluded",
-  "approval_boundary": "Consequential use and merge require Justin Lee Rackham (JP) review and approval."
+  "approval_boundary": "Consequential use and merge require Justin Lee Rackham (JP) review and approval.",
+  "supersedes": "nexus.documentation-receipt.v1"
 }
