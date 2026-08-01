@@ -3,18 +3,19 @@
 **Evidence snapshot:** 2026-08-01 (America/Detroit)  
 **Repository:** `hvitiswift-afk/nextjs-boilerplate`  
 **Baseline branch:** `main`  
-**Baseline commit:** `65715ff2a849fb4142e0db91c00aaebe8e878b05`
+**Baseline commit:** `65715ff2a849fb4142e0db91c00aaebe8e878b05`  
+**Documentation control:** `NEXUS-PROVENANCE-CONTROL-V2`
 
 ## Purpose
 
-This repository is the public, reviewable GitHub hub for JP's related application, documentation, verification, evidence, and receipt work. This summary adds a concise identity and governance map for the Fardarter / V# / MATADATA / Nexus project family without changing application code, workflows, provider settings, credentials, payments, or deployment state.
+This repository is the public, reviewable GitHub hub for JP's related application, documentation, verification, evidence, and receipt work. This packet provides a concise identity, authority, provenance, rights, and safety map for the Fardarter / V# / MATADATA / Nexus project family without changing application code, workflows, provider settings, credentials, payments, or deployment state.
 
 ## Identity
 
 - **Human principal and final approver:** Justin Lee Rackham (JP)
 - **House-brand track:** Fardarter Company
 - **Business-entity track:** Fardarter Gaming LLC — legal status must be established through current official records before it is represented as verified
-- **Fictional project persona:** Veyrion Prime — not a separate human, legal person, company, account holder, or rights owner
+- **Fictional project persona:** Veyrion Prime — not a separate human, legal person, company, account holder, witness, signer, or rights owner
 - **Technology providers and AI-assistance sources:** OpenAI and ChatGPT — not partners, co-owners, employers, agents with independent authority, or endorsers unless a signed agreement establishes otherwise
 
 ## Project family
@@ -29,7 +30,15 @@ These names identify project lanes or conceptual components. Their inclusion in 
 SOURCE → IDENTITY → PROVENANCE → RIGHTS → SAFETY → IMPLEMENT → VERIFY → RECEIPT → JUSTIN
 ```
 
-Consequential actions remain gated by exact evidence and JP's final approval. Repository preparation alone does not authorize publication, deployment, account changes, submissions, outreach, money movement, licensing, or transfer of rights.
+Each step must produce or preserve evidence appropriate to the consequence level. A later step cannot repair a missing authority source retroactively.
+
+## Control documents
+
+- [`AUTHORITY_AND_IDENTITY_MAP.md`](AUTHORITY_AND_IDENTITY_MAP.md) — who or what may speak, decide, approve, or act
+- [`PROVENANCE.md`](PROVENANCE.md) — source, contributor, evidence, privacy, and correction rules
+- [`RIGHTS_CLEARANCE_MATRIX.md`](RIGHTS_CLEARANCE_MATRIX.md) — release treatment for original, AI-assisted, licensed, public-domain, fictional, and third-party material
+- [`EVIDENCE_INDEX.md`](EVIDENCE_INDEX.md) — dated source objects, verification runs, evidence classes, and limitations
+- [`RECEIPT.json`](RECEIPT.json) — machine-readable baseline, file hashes, exclusions, and approval boundary
 
 ## Current repository context
 
@@ -43,12 +52,16 @@ At the evidence snapshot:
 
 ## Reality boundary
 
-This project does not treat fictional transfers, future information, alternate universes, telepathy, time travel, simulated identities, or generated narratives as verified external reality. Real people are represented through directly sourced and verified records, direct quotations with source context, or material clearly labeled as fictional or AI-generated.
+This project does not treat fictional transfers, future information, alternate universes, telepathy, time travel, simulated identities, generated narratives, or project personas as verified external reality. Real people are represented through directly sourced and verified records, direct quotations with source context, or material clearly labeled as fictional or AI-generated.
 
 ## External-rights boundary
 
-No ownership or control is claimed over OpenAI, Microsoft, Amazon, Verizon, celebrities, franchises, or other external entities. Third-party names, products, fictional settings, brands, and cultural references remain subject to their respective rights and may require permission, licensing, attribution, transformation, or removal before release.
+No ownership or control is claimed over OpenAI, Microsoft, Amazon, Verizon, celebrities, franchises, or other external entities. Third-party names, products, fictional settings, brands, and cultural references remain subject to their respective rights and may require permission, licensing, attribution, transformation, replacement, or removal before release.
+
+## Consequential-action boundary
+
+Repository preparation alone does not authorize publication, deployment, account changes, submissions, outreach, money movement, licensing, legal representations, or transfer of rights. Consequential actions require an authorized provider or channel, an exact target and action, evidence of authority, safety and legality fit, explicit JP confirmation, and a durable receipt.
 
 ## Approval
 
-This document is a documentation-only project map. Justin Lee Rackham (JP) remains the final human approver for consequential use.
+This documentation packet is review material. Justin Lee Rackham (JP) remains the final human approver for consequential use and merge.
