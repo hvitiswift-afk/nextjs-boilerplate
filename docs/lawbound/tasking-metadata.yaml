@@ -1,0 +1,60 @@
+---
+packet_id: lawbound-github-tasking-v160
+repo: hvitiswift-afk/nextjs-boilerplate
+branch: hviti/lawbound-deploy-tasking-v160
+slot: primary-hvitios-lawbound
+packet_type: documentation-only-github-tasking
+status: draft-pr-review-ready
+created_for: JP
+root_os: HvitiOS
+version_range: V341-V380
+reset_receipt:
+  reset_to_head_sha: a978f06c80e975708092449eeecd9ee974b46fb0
+  post_reset_changed_files: 5
+  post_reset_deletions: 0
+merkle:
+  algorithm: sha256
+  leaf_source: path:git_blob_sha
+  baseline_head_sha: a978f06c80e975708092449eeecd9ee974b46fb0
+  root: 246b97e8e7d7077253e2af14c6fe1d1cb7fd234c329b042cc86428b08ea88773
+  leaves:
+    - path: docs/lawbound/black-glass-deploy-ledger.md
+      blob_sha: 4cd9704d1015afd7d28efd4f9e9badc413c160f6
+      leaf_sha256: 9b48bef6cf4fdd43b472df1feb51890621fc1ed085cd9000f3b92d1c0665cd66
+    - path: docs/lawbound/deploy-gates.md
+      blob_sha: ffc463303dd421cf0b5d2888eee5093ba1970680
+      leaf_sha256: f37808e8bade5f986c76db0d896bc0437919e3799cec8a2999d40fc2f3ec8ad2
+    - path: docs/lawbound/github-deploy-tasking.md
+      blob_sha: e3bfdc1ac98420b4e53afed672e6184157375491
+      leaf_sha256: 7bac8dc7e2930caa6bad5d7b114d4ef4bcc6c688f885cb8e8173b8ff407f2a53
+    - path: docs/lawbound/tasking-metadata.json
+      blob_sha: 5a6faea0b33ae0edb6f5a98d2c68b851eff5fbe6
+      leaf_sha256: fd7eebf010d422188459255ae4e02524ffddd2132dd6e485b2b65b26ac9933a9
+    - path: docs/lawbound/tasking-versions.md
+      blob_sha: d4a9c48181268b5b3e7b70d604503cbcafc4b47e
+      leaf_sha256: cb34b48feb33b9e0d91c1fff7406839773ba6a0027e146df7a17bccf29953b87
+coordination:
+  deag_three:
+    - witness
+    - stabilizer
+    - router
+  checks:
+    - branch-review
+    - documentation-review
+    - receipt-review
+    - merkle-receipt-review
+    - yaml-metadata-review
+    - v-number-review
+approved_actions:
+  - create-branch
+  - add-docs-only-tasking-packet
+  - open-draft-pr
+  - reset-branch-to-clean-docs-head
+  - add-merkle-metadata
+  - add-yaml-metadata
+  - add-v-number-ledger
+expected_checks:
+  - npm ci
+  - npm run griploom:verify
+  - npm run build
+---
