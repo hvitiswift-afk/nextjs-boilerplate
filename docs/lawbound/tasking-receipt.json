@@ -1,0 +1,50 @@
+{
+  "packet_id": "lawbound-github-tasking-v2",
+  "repository": "hvitiswift-afk/nextjs-boilerplate",
+  "branch": "jp/lawbound-tasking-refresh-v2",
+  "baseline_ref": "main",
+  "baseline_sha": "c939748d31c62fab16abc1e75cf6f673daac085c",
+  "packet_type": "documentation-only",
+  "canonical_version_range": "V121-V380",
+  "canonical_changed_file_count": 5,
+  "yaml_mirror_included": false,
+  "merkle": {
+    "algorithm": "sha256",
+    "leaf_source": "path:git_blob_sha",
+    "scope": "four non-receipt documents; this receipt is excluded to avoid self-reference",
+    "root": "4d2f42a43143b85371a08c1b095d0b0609191a2e30e750967d13788f2a871d40",
+    "leaves": [
+      {
+        "path": "docs/lawbound/black-glass-ledger.md",
+        "blob_sha": "2d3a66ec8fff3a01de50e0dd9ae593b891838ce0",
+        "leaf_sha256": "e93d5e61eec05da0b20aea6ab577ed01edbebbea4de1f335e91edb61d426e663"
+      },
+      {
+        "path": "docs/lawbound/github-tasking-rail.md",
+        "blob_sha": "7508876fc780eed4b66c32f51aa4d76d44ac6add",
+        "leaf_sha256": "024270d2d673b700a10cf0ea472db3114b8e34118996bb7d44498a6d01e12800"
+      },
+      {
+        "path": "docs/lawbound/review-gates.md",
+        "blob_sha": "75d89ae3c733a6fad530a3457d4ec9caa0215e38",
+        "leaf_sha256": "1459f234000ff82ee7a186952a15566fd6cd26fc63515ff50b638de13eb8d19c"
+      },
+      {
+        "path": "docs/lawbound/tasking-versions.md",
+        "blob_sha": "caac86f4bf5544833632234706808c2d4cba8885",
+        "leaf_sha256": "1bd66d36a38f9e9ad0d11808fa2eaaca781b6f86521c7f702b3bd8c8a1f08562"
+      }
+    ]
+  },
+  "required_checks": [
+    "npm ci",
+    "npm run griploom:verify",
+    "npm run build"
+  ],
+  "approval": {
+    "prepared_by": "JP XYZ continuation",
+    "ready_for_review": false,
+    "merge_authorized": false
+  },
+  "external_actions_authorized": false
+}
