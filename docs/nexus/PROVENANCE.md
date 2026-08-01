@@ -2,7 +2,8 @@
 
 **Record date:** 2026-08-01 (America/Detroit)  
 **Repository:** `hvitiswift-afk/nextjs-boilerplate`  
-**Baseline:** `main@65715ff2a849fb4142e0db91c00aaebe8e878b05`
+**Baseline:** `main@65715ff2a849fb4142e0db91c00aaebe8e878b05`  
+**Documentation control:** `NEXUS-PROVENANCE-CONTROL-V2`
 
 ## Source record
 
@@ -16,7 +17,7 @@ This documentation was prepared from the repository's public `main` branch and J
 | `docs/repository/STATUS.md` | `8cc3c84eb9bb03eee20bd12482137b4a5f2933db` | Current status vocabulary, lane status, and pull-request hygiene |
 | `docs/repository/PUBLIC-PRIVATE-BOUNDARY.md` | `c2a9cb604bcf0610edc2d6bf402287aeb22b148f` | Restricted-data rules and external-action gates |
 
-GitHub blob SHAs identify the exact repository objects consulted. The accompanying receipt records SHA-256 digests for the new documentation files.
+GitHub blob SHAs identify the exact repository objects consulted. The accompanying receipt records SHA-256 digests for the documentation controlled by this packet.
 
 ## Contributor attribution
 
@@ -26,7 +27,7 @@ GitHub blob SHAs identify the exact repository objects consulted. The accompanyi
 
 ### AI assistance
 
-OpenAI's ChatGPT assisted with repository inspection, organization, drafting, and consistency checks under JP's direction. AI assistance is not independent authorship authority, legal identity, partnership, co-ownership, endorsement, or permission to act outside the exact connected tools and approved scope.
+OpenAI's ChatGPT assisted with repository inspection, organization, drafting, consistency checks, and connected GitHub operations under JP's direction. AI assistance is not independent authorship authority, legal identity, partnership, co-ownership, endorsement, or permission to act outside the exact connected tools and approved scope.
 
 ### Project personas
 
@@ -46,17 +47,19 @@ Additional human or organizational contributors should be added only from verifi
 | Broad genre or stylistic influence | Describe at a high level without implying copied expression or endorsement |
 | Licensed material | Preserve license text, licensor, version, scope, attribution, and restrictions |
 | Public-domain material | Preserve the jurisdictional and source basis for the public-domain determination |
-| Third-party material requiring clearance | Quarantine from release until permission, license, exception, or replacement is documented |
+| Third-party material requiring clearance | Quarantine from release until permission, license, exception, replacement, or removal is documented |
 | Fictional or simulated material | Label clearly and do not present as verified evidence about real people or events |
+| Unknown or disputed material | Preserve separately with the uncertainty and do not promote it into a verified claim |
 
 ## Rights boundaries
 
 1. A project name, concept, repository path, prompt, generated draft, or internal declaration is not by itself proof of copyright ownership, trademark rights, patent rights, trade-secret status, licensing authority, or legal-entity status.
 2. No ownership is claimed over OpenAI, Microsoft, Amazon, Verizon, celebrities, franchises, or other external entities.
-3. Third-party brands, fictional universes, characters, quotations, music, images, code, and datasets must be reviewed for permission, license, public-domain status, fair-use or other exception, and release risk.
+3. Third-party brands, fictional universes, characters, quotations, music, images, code, and datasets must be reviewed for permission, license, public-domain status, applicable exception, and release risk.
 4. Real people speak through project files only when their words are directly sourced, verified, quoted with context, or clearly labeled as fictional or AI-generated.
 5. OpenAI and ChatGPT are technology providers and AI-assistance sources, not partners or co-owners unless a signed agreement states otherwise.
 6. Fardarter Gaming LLC must not be represented as a verified active legal entity without current official evidence.
+7. A repository receipt proves only the exact recorded repository fact; it does not create ownership, consent, acceptance, funding, or legal effect.
 
 ## Safety and privacy boundaries
 
@@ -72,12 +75,17 @@ No money movement, payment, account action, submission, or irreversible provider
 ## Evidence and receipt rules
 
 - Preserve dates in an explicit timezone.
-- Preserve source paths, commit IDs, object IDs, and file hashes when available.
+- Preserve source paths, commit IDs, object IDs, workflow run IDs, and file hashes when available.
 - Distinguish verified facts, user-provided assertions, inferences, simulations, plans, and unknowns.
 - Do not rewrite history silently; add supersession or correction records.
 - Exclude receipt self-hashes unless a defined canonicalization and signing process is used.
 - Treat a successful build, workflow, draft, or prepared branch as evidence only of that exact state—not deployment, publication, funding, consent, acceptance, or legal effect.
+- A new head commit supersedes prior head-specific verification; verification must be rerun or explicitly scoped to the unchanged content it covered.
+
+## Correction and supersession
+
+Corrections should identify the prior statement or artifact, the reason for correction, the replacement, the effective date, and the approving human. Deleted or rewritten content should not be represented as though it never existed when it formed part of a consequential decision.
 
 ## Change scope
 
-This branch is documentation-only. It adds the Nexus summary, this provenance record, and a machine-readable receipt. It intentionally does not modify application source, dependencies, workflows, settings, secrets, deployment configuration, financial systems, or external accounts.
+This branch remains documentation-only. The controlled packet consists of the Nexus project summary, authority and identity map, provenance record, rights-clearance matrix, evidence index, and machine-readable receipt. It intentionally does not modify application source, dependencies, workflows, settings, secrets, deployment configuration, financial systems, or external accounts.
