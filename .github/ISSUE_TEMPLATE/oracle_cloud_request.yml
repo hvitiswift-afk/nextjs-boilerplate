@@ -1,0 +1,55 @@
+name: Oracle cloud readiness request
+description: Request Oracle Cloud or Oracle database readiness planning for JP / Hviti work.
+title: "Oracle readiness: "
+labels:
+  - oracle-readiness
+  - deploy-readiness
+body:
+  - type: dropdown
+    id: service
+    attributes:
+      label: Oracle service target
+      options:
+        - Autonomous Transaction Processing
+        - Autonomous JSON Database
+        - Autonomous Data Warehouse
+        - APEX Application Development
+        - Object Storage
+        - Vault
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: region
+    attributes:
+      label: OCI region
+      description: Region or home region, if known.
+    validations:
+      required: false
+  - type: dropdown
+    id: cost_boundary
+    attributes:
+      label: Cost boundary
+      options:
+        - Always Free review only
+        - Free Trial review only
+        - Paid account review required
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: intended_use
+    attributes:
+      label: Intended use
+      description: Describe the database or cloud service use case.
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Required boundaries
+      options:
+        - label: Do not commit passwords, private keys, wallet files, or billing details.
+        - label: Do not claim a database exists until Oracle Cloud Console or a tool confirms it.
+        - label: Do not claim no-cost operation forever; review provider terms and limits first.
+        - label: JP approval is required before production connection.

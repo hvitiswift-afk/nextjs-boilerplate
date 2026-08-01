@@ -1,0 +1,48 @@
+name: Deploy readiness request
+description: Request a deploy-readiness review or release-path check.
+title: "Deploy readiness: "
+labels:
+  - deploy-readiness
+body:
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      description: GitHub Pages, Vercel, Netlify, or other.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: dev, preview, staging, or production.
+    validations:
+      required: true
+  - type: input
+    id: branch
+    attributes:
+      label: Branch or commit
+      description: Branch name or commit SHA to review.
+    validations:
+      required: true
+  - type: textarea
+    id: action
+    attributes:
+      label: Requested action
+      description: Describe the requested build, review, publish, or release-path action.
+    validations:
+      required: true
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback plan
+      description: How should this be reversed if needed?
+    validations:
+      required: false
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundary checks
+      options:
+        - label: I understand that readiness review is not the same as publication.
+        - label: I understand that a platform/tool result is needed before claiming a release state.
