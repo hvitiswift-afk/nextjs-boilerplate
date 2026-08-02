@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "vsharp.armitron.definition.v25",
+  "componentId": "VSHARP-COMP-ARMITRON-001",
+  "protocol": "JP-XYZ-VSHARP-ARMITRON-COMPONENT/3",
+  "version": "25.0.0",
+  "ownerAndConceptDirection": "Justin Lee Rackham (JP)",
+  "project": "MATADATA",
+  "rootIdentity": "SELF-JP-001",
+  "definition": "Armitron v25 is the consent-gated umbrella for time, Digital Human, browser and account continuity, encrypted recall, distinct V# T# C# worlds, named and numbered universes, cross-world exchange, A2A discovery, GitHub enterprise readiness, and Google Cloud deployment and Marketplace readiness.",
+  "inherits": [
+    "Armitron v23 clock matrix and receipts",
+    "Gmail dual-account bridge P2",
+    "Armitron v24 MATADATA Digital Human and microscope recall",
+    "V#_T#_C#_FENCED_EXCHANGE_V0.2 recovered lineage"
+  ],
+  "worldSystem": {
+    "V#": "Values, authority, identity labels, commitments, evidence, and continuity.",
+    "T#": "Timelines, branches, triggers, review times, forecasts, expiry, and backcasts.",
+    "C#": "Truth, target, privacy, capability, reversibility, consequence, human gates, duplicate prevention, readback, and closure.",
+    "distinctnessRule": "World state, identity, history, privacy, governance, and authority remain separate unless a scoped envelope is explicitly copied or transformed."
+  },
+  "universeSystem": {
+    "identifier": "UNI-{V|T|C}-{NUMBER_6_DIGITS}-{NAME_SLUG}-V{VERSION}",
+    "requiredProperties": [
+      "world",
+      "number",
+      "name",
+      "aliases",
+      "version",
+      "governance",
+      "privacy",
+      "status"
+    ],
+    "linkGate": "V-10_TRANSVERSE_TRANSFER_TRANSFORM",
+    "linkProperties": [
+      "source and destination",
+      "direction",
+      "activity scopes",
+      "revocation",
+      "isolation",
+      "return route",
+      "status"
+    ]
+  },
+  "exchangeSystem": {
+    "activities": [
+      "message",
+      "reply",
+      "current_event",
+      "forecast",
+      "backcast",
+      "commitment",
+      "proposal",
+      "warning",
+      "outcome",
+      "code_patch",
+      "code_commit",
+      "test_result",
+      "artifact_transfer",
+      "generic_exchange",
+      "market_observation",
+      "trade_proposal",
+      "trade_execution_receipt",
+      "control",
+      "arrival_receipt",
+      "closure_receipt"
+    ],
+    "cSharpFences": [
+      "truth and provenance",
+      "identity and exact target",
+      "privacy minimization",
+      "capability",
+      "reversibility",
+      "consequence",
+      "human gate",
+      "duplicate and idempotency",
+      "readback",
+      "closure"
+    ],
+    "receiptLaw": "No arrival or closure receipt means the transfer is not verified complete.",
+    "financialBoundary": "Market observations and simulation-first trade proposals are exchange objects. Live financial orders are never automatic and require exact JP approval, broker authentication, and provider readback."
+  },
+  "googleCloudSystem": {
+    "protocol": "A2A 1.0-style discovery and JSON-RPC exchange",
+    "agentCard": "apps/armitron-a2a/agent-card.json",
+    "service": "apps/armitron-a2a/server.mjs",
+    "container": "apps/armitron-a2a/Dockerfile",
+    "deployment": ".github/workflows/google-cloud-armitron-p5-deploy.yml",
+    "identity": "GitHub Actions OIDC to Google Workload Identity Federation",
+    "marketplaceRoute": "AI Agents as a Service",
+    "currentTruth": "PREPARED_NOT_DEPLOYED_NOT_SUBMITTED_NOT_APPROVED"
+  },
+  "githubEnterpriseSystem": {
+    "userReport": "ENTERPRISE_CAPABILITY_AVAILABLE",
+    "connectorReadback": "PERSONAL_INSTALLATION_ONLY_NO_ORGANIZATION_VISIBLE",
+    "policy": "enterprise/github-enterprise-p5.json",
+    "ownership": ".github/CODEOWNERS",
+    "currentTruth": "ENTERPRISE_TARGET_PREPARED_ORGANIZATION_NOT_CONNECTED"
+  },
+  "protectedHumanOnly": [
+    "password",
+    "passkey",
+    "MFA",
+    "CAPTCHA",
+    "liveness",
+    "biometrics",
+    "identity attestation",
+    "signature",
+    "legal terms",
+    "payment",
+    "account recovery",
+    "live financial order authorization",
+    "final consequential action"
+  ],
+  "nonClaims": [
+    "no physical alternate-universe claim",
+    "no physical time merger",
+    "no future observation",
+    "no backward information transmission",
+    "no consciousness transfer",
+    "no biological or legal identity transfer",
+    "no automatic consent",
+    "no automatic live financial trading",
+    "no Google deployment or Marketplace approval without provider readback",
+    "no GitHub organization or enterprise activation without connector readback",
+    "no OpenAI or Google affiliation inferred from catalog observations"
+  ]
+}
