@@ -123,6 +123,20 @@ The verifier checks:
 - browser, email, and GitHub lane wrappers
 - watchdog health
 
+Verified GitHub Actions result on August 2, 2026:
+
+- workflow: `Armitron Clock Rail P3 Verify`
+- run: `30768793435`
+- head: `634425e7b1c4c819c2779017f0379e2365ab5fc8`
+- conclusion: `success`
+- artifact: `armitron-clock-p3-verification`
+- artifact ID: `8839834290`
+- digest: `sha256:864f565bec64d8a7119e58a6f8c5a8827c03e45cf1df8be281986e7c401017c4`
+- retention through: `2026-09-01T21:51:44Z`
+
+The Gmail P2 verification, Next.js build, and existing repository lineage gates
+also passed on the same head.
+
 ## Phone and Google OAuth state
 
 The code and CI can be developed from this session, but the current Google
@@ -133,4 +147,4 @@ The bridge is therefore prepared and verified while both account grants remain
 
 A future Google Cloud connector should automate project, API, consent-screen,
 and OAuth-client administration through an explicit connected service. No such
-connector is currently claimed or emulated here.
+connector is currently claimed or emulated here. This is tracked in issue #266.
