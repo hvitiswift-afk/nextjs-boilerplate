@@ -72,6 +72,20 @@ function dataParts(message) {
   return parts.filter((part) => part?.data && typeof part.data === 'object').map((part) => part.data);
 }
 
+export function activityLinkScope(activityType) {
+  if (['message', 'reply'].includes(activityType)) return 'message';
+  if (['current_event', 'market_observation', 'warning', 'outcome'].includes(activityType)) return 'evidence';
+  if (activityType === 'forecast') return 'forecast';
+  if (activityType === 'backcast') return 'backcast';
+  if (activityType === 'commitment') return 'commitment';
+  if (['proposal', 'generic_exchange', 'trade_proposal', 'trade_execution_receipt'].includes(activityType)) return 'proposal';
+  if (['code_patch', 'code_commit', 'test_result', 'artifact_transfer'].includes(activityType)) return 'artifact';
+  if (activityType === 'control') return 'control';
+  if (activityType === 'arrival_receipt') return 'receipt';
+  if (activityType === 'closure_receipt') return 'closure';
+  throw new Error(`No world-link scope mapping exists for activity type: ${activityType}`);
+}
+
 function parseExchangeRequest(params) {
   const message = params?.message ?? params;
   const data = dataParts(message)[0] ?? message?.metadata?.exchange ?? params?.exchange ?? {};
@@ -84,8 +98,8 @@ function parseExchangeRequest(params) {
     activityType,
     sourceUniverse: data.sourceUniverse ?? 'V#-ROOT',
     targetUniverse: data.targetUniverse ?? 'C#-ROOT',
-    linkActivity: data.linkActivity ?? (activityType === 'current_event' ? 'evidence' : activityType),
-    subject: data.subject ?? text.slice(0, 120) ?? activityType,
+    linkActivity: data.linkActivity ?? activityLinkScope(activityType),
+    subject: data.subject || text.slice(0, 120) || activityType,
     payload,
     transformPlan: data.transformPlan ?? `Transform ${activityType} into the destination world's declared schema without erasing source identity.`,
     evidenceClass: data.evidenceClass ?? 'USER_REPORTED_OR_LOCAL_OBSERVATION',
