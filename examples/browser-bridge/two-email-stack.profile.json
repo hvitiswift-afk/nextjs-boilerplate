@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "browser-bridge.email-stack.v1",
+  "profileId": "jp-github-enterprise-two-email-stack-v1",
+  "principal": "JP",
+  "purpose": "Use separate enterprise-facing and connected-operations inbox roles while preserving one human principal, protected credentials, deduplication, and provider readback.",
+  "addressesCommitted": false,
+  "roles": {
+    "enterpriseFacing": {
+      "runtimeSource": "JP_GITHUB_CONTACT_EMAIL",
+      "responsibilities": [
+        "receive GitHub Enterprise confirmations and receipts",
+        "receive enterprise-facing notices",
+        "preserve provider-original message context"
+      ]
+    },
+    "connectedOperations": {
+      "runtimeSource": "JP_GITHUB_OPERATIONS_EMAIL",
+      "responsibilities": [
+        "connected Gmail verification and search",
+        "operational follow-up and recovery coordination",
+        "connector-visible receipt reconciliation"
+      ]
+    }
+  },
+  "stackingRules": [
+    "Both inbox roles belong to the same JP-controlled mission but remain distinct provider identities.",
+    "Forward or relay ordinary provider confirmations when connector readback requires it.",
+    "Never forward passwords, passkeys, MFA codes, CAPTCHA answers, recovery codes, payment-card data, identity documents, private keys, or encrypted-note keys.",
+    "A forwarded message does not replace the provider-original message; preserve both records.",
+    "Deduplicate by provider message identity, subject, timestamp, enterprise slug, and confirmation reference before acting.",
+    "User-reported signup is recorded separately from email readback and authenticated provider readback.",
+    "No duplicate signup or blind retry is allowed while provider outcome is reported or unknown.",
+    "Consequential account, legal, identity, payment, billing, or recovery steps remain JP-only."
+  ],
+  "truthState": {
+    "userReport": "SIGNED_UP",
+    "enterpriseEmailReadback": "PENDING_FORWARD_OR_SECOND_MAILBOX_CONNECTION",
+    "providerReadback": "PENDING",
+    "organizationConnectorVisibility": "NOT_YET_VISIBLE",
+    "duplicateSignupAllowed": false
+  },
+  "receiptPolicy": {
+    "storeResolvedAddressesInPublicReceipts": false,
+    "storeSecrets": false,
+    "preserveProviderOriginal": true,
+    "preserveForwardedCopy": true,
+    "appendCorrections": true
+  }
+}
