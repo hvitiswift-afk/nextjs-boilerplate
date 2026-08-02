@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "browser-bridge.mission.v1",
+  "missionId": "github-enterprise-signup-fardarter-v1",
+  "title": "GitHub Enterprise Cloud signup",
+  "provider": "GitHub",
+  "accountLogin": "hvitiswift-afk",
+  "targetUrl": "https://github.com/account/enterprises/new",
+  "allowedOrigins": [
+    "https://github.com"
+  ],
+  "purpose": "Prepare a GitHub Enterprise Cloud trial for the proposed Fardarter Company enterprise using personal accounts.",
+  "currentState": "BLOCKED",
+  "truthState": "BLOCKED_REQUIRES_SHARED_AUTHENTICATED_BROWSER",
+  "authorization": {
+    "source": "explicit-user-request",
+    "scope": "prepare and complete signup with human-only gates preserved",
+    "finalAction": "create-enterprise-trial",
+    "exactlyOnce": true,
+    "legalAcceptanceByHumanOnly": true,
+    "paymentByHumanOnly": true
+  },
+  "fields": [
+    {
+      "key": "account_mode",
+      "label": "Enterprise account mode",
+      "agentFillAllowed": true,
+      "publicValue": "personal_accounts",
+      "verification": "selected option equals personal_accounts"
+    },
+    {
+      "key": "enterprise_name",
+      "label": "Enterprise name",
+      "agentFillAllowed": true,
+      "publicValue": "Fardarter Company",
+      "qualification": "proposed company or house-brand name; legal entity status not asserted",
+      "verification": "normalized live value equals Fardarter Company"
+    },
+    {
+      "key": "enterprise_slug",
+      "label": "Enterprise URL slug",
+      "agentFillAllowed": true,
+      "candidateValues": [
+        "fardarter",
+        "fardarter-company",
+        "matadata-enterprise"
+      ],
+      "verification": "provider reports selected slug is available"
+    },
+    {
+      "key": "industry",
+      "label": "Industry",
+      "agentFillAllowed": true,
+      "publicValue": "Technology",
+      "verification": "selected option is Technology or the closest provider equivalent"
+    },
+    {
+      "key": "team_size",
+      "label": "Team size",
+      "agentFillAllowed": true,
+      "publicValue": "1-10",
+      "verification": "selected option equals the smallest truthful available range"
+    },
+    {
+      "key": "initial_seats",
+      "label": "Initial seats",
+      "agentFillAllowed": true,
+      "publicValue": 1,
+      "verification": "live numeric value equals 1"
+    },
+    {
+      "key": "use_case",
+      "label": "Use case",
+      "agentFillAllowed": true,
+      "publicValue": "AI-assisted developer tools, cybersecurity research systems, software infrastructure, and experimental hardware technologies.",
+      "verification": "live value matches reviewed text after provider-safe whitespace normalization"
+    },
+    {
+      "key": "contact_email",
+      "label": "Contact and receipt email",
+      "agentFillAllowed": true,
+      "privateRuntimeSource": "JP_GITHUB_CONTACT_EMAIL",
+      "valueCommitted": false,
+      "verification": "live value matches the authenticated account's reviewed receipt email"
+    }
+  ],
+  "humanOnlyGates": [
+    "password",
+    "passkey",
+    "two_factor_authentication",
+    "captcha_or_human_verification",
+    "account_recovery",
+    "identity_attestation",
+    "legal_terms_acceptance",
+    "signature",
+    "payment_method",
+    "paid_plan_conversion"
+  ],
+  "confirmationRequirements": [
+    "provider confirmation page or enterprise settings readback",
+    "enterprise slug visible on github.com",
+    "authenticated account identifies hvitiswift-afk as owner or authorized administrator",
+    "no duplicate create action"
+  ],
+  "knownBlockers": [
+    {
+      "code": "CURRENT_SESSION_BROWSER_POLICY",
+      "evidence": "Local Chromium returned ERR_BLOCKED_BY_ADMINISTRATOR for the signup URL.",
+      "repair": "Resume in a shared authenticated browser surface or an approved local browser companion."
+    },
+    {
+      "code": "CONNECTOR_SCOPE",
+      "evidence": "The connected GitHub app supports repository operations but does not expose enterprise-account creation.",
+      "repair": "Use browser handoff for signup, then install or authorize the app on the resulting organization."
+    }
+  ]
+}

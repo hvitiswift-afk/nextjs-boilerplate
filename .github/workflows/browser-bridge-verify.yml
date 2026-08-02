@@ -1,0 +1,45 @@
+name: Human Agent Browser Bridge Verify
+
+on:
+  pull_request:
+    paths:
+      - "app/browser-bridge/**"
+      - "lib/browser-bridge/**"
+      - "examples/browser-bridge/**"
+      - "docs/browser-bridge/**"
+      - "scripts/check-browser-bridge.mjs"
+      - ".github/workflows/browser-bridge-verify.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-bridge-verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Verify mission, state rail, privacy boundary, and exactly-once guard
+        run: node scripts/check-browser-bridge.mjs
+
+      - name: Upload verification receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-bridge-p0-verification
+          path: artifacts/browser-bridge/P0_VERIFICATION_RECEIPT.json
+          if-no-files-found: warn
+          retention-days: 30
