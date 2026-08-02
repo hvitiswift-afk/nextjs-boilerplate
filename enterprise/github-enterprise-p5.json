@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "armitron.github-enterprise-target.v25",
+  "repository": "hvitiswift-afk/nextjs-boilerplate",
+  "enterpriseCapability": "USER_REPORTED_AVAILABLE",
+  "connectorReadback": {
+    "organizationMemberships": [],
+    "organizationInstallations": [],
+    "personalInstallation": "hvitiswift-afk",
+    "state": "PERSONAL_REPOSITORY_VISIBLE_ORGANIZATION_NOT_YET_VISIBLE"
+  },
+  "targetOperatingModel": {
+    "organization": "PENDING_PROVIDER_READBACK",
+    "enterpriseAccount": "PENDING_PROVIDER_READBACK",
+    "repositoryTransfer": "NOT_AUTHORIZED_OR_EXECUTED",
+    "defaultRepositoryVisibility": "private",
+    "requiredEnvironments": [
+      "google-cloud-preview",
+      "google-cloud-production"
+    ],
+    "productionProtection": [
+      "required reviewer",
+      "deployment branch restriction",
+      "no self-approval where supported",
+      "environment-scoped variables",
+      "OIDC-only Google authentication",
+      "no service-account key JSON",
+      "signed release artifact",
+      "provider deployment readback"
+    ],
+    "recommendedRulesets": [
+      "require pull request",
+      "require successful P1-P5 checks",
+      "require conversation resolution",
+      "block force pushes",
+      "block branch deletion",
+      "require signed commits where practical",
+      "restrict workflow-file changes",
+      "require CODEOWNERS review for auth, deployment, exchange, and enterprise policy paths"
+    ]
+  },
+  "googleOidcSubjectPolicy": {
+    "issuer": "https://token.actions.githubusercontent.com",
+    "repositoryClaim": "hvitiswift-afk/nextjs-boilerplate",
+    "productionSubjectTarget": "repo:hvitiswift-afk/nextjs-boilerplate:environment:google-cloud-production",
+    "previewSubjectTarget": "repo:hvitiswift-afk/nextjs-boilerplate:environment:google-cloud-preview",
+    "branchOnlyFallbackProhibitedForProduction": true,
+    "serviceAccountKeysProhibited": true
+  },
+  "truthLaw": [
+    "Enterprise capability reported by JP is not organization connector visibility.",
+    "Repository policy preparation is not repository transfer.",
+    "A successful GitHub workflow is not Google Marketplace publication.",
+    "No Google deployment is confirmed without Cloud Run provider readback."
+  ]
+}
