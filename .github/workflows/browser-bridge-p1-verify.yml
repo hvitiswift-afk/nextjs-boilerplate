@@ -1,0 +1,45 @@
+name: Human Agent Browser Bridge P1 Verify
+
+on:
+  pull_request:
+    branches: [main, agent/human-browser-bridge-v1]
+    paths:
+      - 'tools/browser-bridge/p1/**'
+      - 'examples/browser-bridge/**'
+      - 'scripts/check-browser-bridge-p1.mjs'
+      - 'app/browser-bridge/**'
+      - '.github/workflows/browser-bridge-p1-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-bridge-p1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify local companion, pressure, notes, and Digital Human boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run Browser Bridge P1 verification
+        run: node scripts/check-browser-bridge-p1.mjs
+
+      - name: Upload P1 verification receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-bridge-p1-verification
+          path: browser-bridge-p1-verification.json
+          if-no-files-found: warn
+          retention-days: 30
