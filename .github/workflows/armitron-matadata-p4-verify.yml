@@ -7,10 +7,13 @@ on:
       - 'tools/browser-bridge/p4/**'
       - 'apps/armitron-mcp/**'
       - 'examples/armitron/**'
+      - 'examples/openai/**'
       - 'examples/google-cloud/**'
       - 'docs/armitron/ARMITRON_V24_MATADATA_DIGITAL_HUMAN.md'
+      - 'docs/google-cloud/**'
       - 'app/browser-bridge/armitron/**'
       - 'scripts/check-armitron-matadata-p4.mjs'
+      - 'scripts/check-armitron-publication-p4.mjs'
       - '.github/workflows/armitron-matadata-p4-verify.yml'
       - '.gitignore'
   workflow_dispatch:
@@ -37,6 +40,9 @@ jobs:
 
       - name: Verify Armitron v24, MATADATA, Digital Human, recall, auth, MCP, and listing readiness
         run: node scripts/check-armitron-matadata-p4.mjs
+
+      - name: Verify ChatGPT app and Google Marketplace publication truth
+        run: node scripts/check-armitron-publication-p4.mjs
 
       - name: Exercise P4 browser help through Armitron GitHub lane
         run: >-
