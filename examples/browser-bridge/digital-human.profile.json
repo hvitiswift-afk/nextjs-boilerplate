@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "matadata.digital-human.v1",
+  "profileId": "jp-matadata-digital-human-browser-v1",
+  "principal": {
+    "preferredName": "JP",
+    "githubLogin": "hvitiswift-afk",
+    "authority": "human-principal-and-final-approver"
+  },
+  "project": {
+    "name": "MATADATA",
+    "relationship": "Browser Bridge is used with and as part of MATADATA under JP direction.",
+    "attribution": "Concept origin and project direction: Justin Lee Rackham (JP). AI-assisted engineering is disclosed.",
+    "ipBoundary": "No automatic assignment, provider ownership, partnership, endorsement, or final legal inventorship determination is created by this profile."
+  },
+  "digitalMind": {
+    "role": "intent-policy-memory-and-planning-layer",
+    "capabilities": [
+      "mission planning",
+      "origin and field policy",
+      "ordinary action selection",
+      "truth-state tracking",
+      "backward-looking encrypted notes",
+      "receipt interpretation",
+      "calendar-aware preparation"
+    ],
+    "nonClaims": [
+      "mind reading",
+      "neural capture",
+      "automatic consent",
+      "independent legal authority"
+    ]
+  },
+  "digitalBody": {
+    "role": "local-browser-device-and-visible-action-layer",
+    "capabilities": [
+      "loopback Chrome DevTools control",
+      "redacted control discovery",
+      "ordinary field entry",
+      "MATADATA pressure intents",
+      "visible pause-and-handoff",
+      "local encrypted receipt storage"
+    ],
+    "physicalState": "simulator-safe-unless-separately-verified-hardware-is-present",
+    "nonClaims": [
+      "biological body capture",
+      "powered human motion",
+      "force-applying actuation",
+      "uncontrolled thought-to-action"
+    ]
+  },
+  "digitalHuman": {
+    "definition": "A consent-gated software composite of Digital Mind and Digital Body operating under JP authority.",
+    "identityState": "symbolic-user-controlled-software-layer",
+    "may": [
+      "prepare account missions",
+      "fill ordinary reviewed fields",
+      "pause for protected human steps",
+      "resume after explicit handoff",
+      "verify provider confirmation",
+      "preserve redacted receipts"
+    ],
+    "mayNot": [
+      "impersonate JP",
+      "possess or expose credentials",
+      "accept legal terms automatically",
+      "complete CAPTCHA or liveness checks",
+      "sign documents",
+      "authorize payment",
+      "claim provider confirmation without readback",
+      "act outside the current mission and origin allowlist"
+    ]
+  },
+  "pressurePolicy": {
+    "source": "MATADATA required pressure rail",
+    "stages": [
+      "1/128 touch-detect",
+      "1/64 hover",
+      "1/32 focus",
+      "1/16 select",
+      "1/8 type-mode",
+      "1/4 activate-after-release",
+      "1/2 ordinary-confirmation",
+      "full ordinary-confirmation-or-protected-handoff"
+    ],
+    "rawSensorStorage": false,
+    "protectedStepBehavior": "pause-and-handoff"
+  },
+  "notesPolicy": {
+    "direction": "backward-looking-only",
+    "storage": "local-aes-256-gcm-append-only-chain",
+    "keySource": "JP_BROWSER_BRIDGE_NOTES_KEY",
+    "contentInReceipts": false,
+    "rewriteHistory": false
+  },
+  "calendarPolicy": {
+    "use": "read current schedule before material setup work and reuse an existing appropriate block when available",
+    "automaticWrites": "bounded scheduling writes only when the active task needs them and JP has authorized calendar use",
+    "externalEffect": "calendar presence is planning evidence, not proof of completion"
+  }
+}
