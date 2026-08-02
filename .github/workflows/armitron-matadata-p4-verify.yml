@@ -1,0 +1,79 @@
+name: Armitron MATADATA Digital Human P4 Verify
+
+on:
+  pull_request:
+    paths:
+      - 'tools/armitron/v24/**'
+      - 'tools/browser-bridge/p4/**'
+      - 'apps/armitron-mcp/**'
+      - 'examples/armitron/**'
+      - 'examples/openai/**'
+      - 'examples/google-cloud/**'
+      - 'docs/armitron/ARMITRON_V24_MATADATA_DIGITAL_HUMAN.md'
+      - 'docs/google-cloud/**'
+      - 'app/browser-bridge/armitron/**'
+      - 'scripts/check-armitron-matadata-p4.mjs'
+      - 'scripts/check-armitron-publication-p4.mjs'
+      - '.github/workflows/armitron-matadata-p4-verify.yml'
+      - '.gitignore'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify Armitron v24, MATADATA, Digital Human, recall, auth, MCP, and listing readiness
+        run: node scripts/check-armitron-matadata-p4.mjs
+
+      - name: Verify ChatGPT app and Google Marketplace publication truth
+        run: node scripts/check-armitron-publication-p4.mjs
+
+      - name: Exercise P4 browser help through Armitron GitHub lane
+        run: >-
+          node tools/armitron/v23/armitron-wrap.mjs
+          --lane github
+          --clock gray
+          --
+          node tools/browser-bridge/p4/armitron-digital-human.mjs help
+
+      - name: Exercise remote MCP health surface with static test authentication
+        env:
+          JP_ARMITRON_MCP_ORIGIN_ALLOWLIST: https://chatgpt.com
+          JP_ARMITRON_MCP_RESOURCE_URL: https://armitron.example.test
+          JP_ARMITRON_MCP_AUTHORIZATION_SERVER: https://auth.example.test
+          JP_ARMITRON_MCP_STATIC_TOKEN_SHA256: 1765b1e0eb7d1c28c67a89dc810890786a86c05c9fc22a5e9f6a17b6c006829a
+        run: node --check apps/armitron-mcp/server.mjs
+
+      - name: Build operator surfaces through Armitron GitHub lane
+        run: >-
+          node tools/armitron/v23/armitron-wrap.mjs
+          --lane github
+          --clock atomic
+          --
+          npm run build
+
+      - name: Upload P4 verification and Armitron receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: armitron-matadata-digital-human-p4-verification
+          path: |
+            armitron-matadata-p4-verification.json
+            .armitron/receipts/armitron-v23.jsonl
+          if-no-files-found: error
+          retention-days: 30

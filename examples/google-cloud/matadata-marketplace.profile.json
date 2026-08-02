@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "matadata.google-cloud-marketplace-readiness.v1",
+  "profileId": "matadata-armitron-digital-human-google-listing-v1",
+  "productName": "MATADATA Armitron Digital Human",
+  "ownerAndConceptDirection": "Justin Lee Rackham (JP)",
+  "candidateType": [
+    "AI agent",
+    "integrated SaaS"
+  ],
+  "notCandidateClaim": "This profile does not claim that MATADATA is a foundation model, a Google Model Garden publisher model, or a replacement for Google, Anthropic, xAI, or OpenAI models.",
+  "offering": {
+    "summary": "A consent-gated human-agent browser, recall, authentication-state, pressure-intent, continuity, and receipt system coordinated by Armitron.",
+    "primaryCapabilities": [
+      "Human ↔ Agent Browser Bridge",
+      "MATADATA pressure and protected-step handoff",
+      "Digital Human: Mind System + Body System + Digital Self + Agent Continuity Bridge",
+      "encrypted microscope recall from macro to nano",
+      "Armitron clock, watchdog, deadline, and receipt matrix",
+      "account and provider-readback continuity",
+      "remote MCP app readiness"
+    ],
+    "deploymentTarget": "Google Cloud-hosted SaaS or AI-agent control plane after project, security, billing, and provider review"
+  },
+  "requiredOnboarding": [
+    "verified organization and legal contracting authority",
+    "Google Cloud Partner Network enrollment",
+    "Cloud Marketplace vendor onboarding",
+    "Marketplace Vendor Agreement acceptance by an authorized Partner Admin",
+    "Google Cloud project for Marketplace products",
+    "Producer Portal access",
+    "product details and pricing review",
+    "technical integration review",
+    "security, privacy, support, and operational readiness",
+    "publication approval and provider readback"
+  ],
+  "currentTruth": {
+    "companyNamespace": "LOCAL_COMPANY_NAMESPACE_PREPARED",
+    "legalEntity": "UNVERIFIED",
+    "googleCloudPartner": "NOT_VERIFIED",
+    "marketplaceVendor": "NOT_ONBOARDED",
+    "producerPortal": "NOT_ACCESSED",
+    "googleCloudProject": "NOT_CONFIRMED",
+    "billingIntegration": "NOT_BUILT",
+    "remoteProductDeployment": "NOT_DEPLOYED",
+    "marketplaceSubmission": "NOT_SUBMITTED",
+    "marketplaceApproval": "NOT_APPROVED",
+    "modelGardenPublisherRelationship": "NOT_ESTABLISHED"
+  },
+  "readinessGates": {
+    "product": [
+      "stable remote deployment",
+      "customer onboarding and account linking",
+      "support and incident process",
+      "service plans and pricing",
+      "public documentation",
+      "security and privacy review",
+      "usage or entitlement integration"
+    ],
+    "identityAndLegal": [
+      "verify legal entity or authorized individual vendor path",
+      "verify product ownership and licensing",
+      "verify contracting authority",
+      "review MATADATA, Armitron, V#, and Digital Human naming and IP claims"
+    ],
+    "evidence": [
+      "live product URL",
+      "architecture diagram",
+      "data-flow and threat model",
+      "test and uptime evidence",
+      "provider-authenticated project and vendor receipts",
+      "approved listing content and images"
+    ]
+  },
+  "positioningBoundary": {
+    "claudeAndGrokObservation": "Third-party models may appear in Google's model or agent offerings through provider relationships. Their presence does not create a self-service right to publish MATADATA as a foundation model.",
+    "realisticPath": "Offer MATADATA as an AI agent or SaaS product through Google Cloud Marketplace after partner/vendor onboarding and validation.",
+    "openAiBoundary": "MATADATA may use OpenAI APIs under applicable terms, but it must not claim OpenAI affiliation, ownership, reseller status, or permission to list proprietary OpenAI models."
+  },
+  "nextActions": [
+    "verify organization/legal entity and contracting authority",
+    "deploy the remote MATADATA Armitron MCP/SaaS product",
+    "complete security and privacy documentation",
+    "join or apply to Google Cloud Partner Network",
+    "begin Cloud Marketplace vendor onboarding",
+    "prepare AI-agent or integrated-SaaS listing package",
+    "submit only after provider-authenticated prerequisites are met"
+  ]
+}

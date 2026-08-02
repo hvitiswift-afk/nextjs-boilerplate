@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "armitron.digital-human.profile.v24",
+  "profileId": "jp-matadata-digital-human-v24",
+  "rootIdentity": "SELF-JP-001",
+  "principal": {
+    "name": "JP",
+    "legalOrAdministrativeReference": "Justin Lee Rackham",
+    "authority": "human final authority and consent source"
+  },
+  "systems": {
+    "mindSystem": {
+      "functions": [
+        "mission framing",
+        "reasoning support",
+        "context selection",
+        "option comparison",
+        "risk and dependency detection",
+        "truth-state separation",
+        "micro-to-macro synthesis"
+      ],
+      "authority": "advisory and preparatory only"
+    },
+    "bodySystem": {
+      "functions": [
+        "browser control surface",
+        "redacted control discovery",
+        "ordinary field entry",
+        "pressure-intent mapping",
+        "visible pause and handoff",
+        "local receipt capture"
+      ],
+      "authority": "ordinary reversible actions within an approved mission"
+    },
+    "digitalSelf": {
+      "functions": [
+        "plan",
+        "summarize",
+        "route",
+        "record",
+        "recall",
+        "prepare artifacts",
+        "maintain continuity pointers"
+      ],
+      "authority": "no legal identity, independent consent, or hidden execution"
+    },
+    "agentContinuityBridge": {
+      "functions": [
+        "connect authorized context across browser, email, GitHub, Calendar, and notes",
+        "reconstruct prior decisions",
+        "identify unresolved gates",
+        "prevent duplicate or contradictory action",
+        "surface provider readback"
+      ],
+      "authority": "operates only through explicit tools and approved scopes"
+    }
+  },
+  "holisticHumanContext": {
+    "allowed": [
+      "deliberately shared thoughts",
+      "declared feelings",
+      "reported physical state",
+      "accessibility needs",
+      "authorized memories",
+      "user-selected files and messages",
+      "visible browser and account state"
+    ],
+    "prohibitedInferenceClaims": [
+      "unspoken thoughts",
+      "neural signals without an explicit verified device",
+      "biological state not reported or measured by an authorized device",
+      "automatic consent",
+      "ownership or legal authority not established by evidence"
+    ]
+  },
+  "microscopeRecall": {
+    "macro": "project, purpose, mission, overall outcome, major unresolved issue",
+    "meso": "stage, decision, actor, dependency, risk, handoff",
+    "micro": "browser page, control, ordinary action, pressure state, validation result",
+    "nano": "event pointer, timestamp, digest, redacted evidence reference, correction link"
+  },
+  "protectedHumanOnly": [
+    "password",
+    "passkey",
+    "MFA",
+    "CAPTCHA",
+    "liveness",
+    "biometric approval",
+    "identity attestation",
+    "signature",
+    "legal terms",
+    "payment",
+    "recovery",
+    "final consequential submit"
+  ],
+  "nonClaims": [
+    "not mind reading",
+    "not body capture",
+    "not consciousness transfer",
+    "not legal identity transfer",
+    "not autonomous consent",
+    "not independent personhood",
+    "not covert surveillance"
+  ]
+}

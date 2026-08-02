@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "vsharp.armitron.definition.v24",
+  "componentId": "VSHARP-COMP-ARMITRON-001",
+  "protocol": "JP-XYZ-VSHARP-ARMITRON-COMPONENT/2",
+  "version": "24.0.0",
+  "ownerAndConceptDirection": "Justin Lee Rackham (JP)",
+  "project": "MATADATA",
+  "status": "VSHARP_STANDARD_IMPLEMENTATION",
+  "definition": "Armitron is the consent-gated time, continuity, authentication-state, browser coordination, multi-scale recall, and receipt umbrella for JP's MATADATA Digital Human system.",
+  "rootIdentity": "SELF-JP-001",
+  "subsystems": {
+    "timeSystem": {
+      "responsibilities": [
+        "wall and monotonic time",
+        "high-resolution duration ordering",
+        "clock matrix",
+        "chronograph, countdown, interval, alarm, and second-timezone modes",
+        "watchdogs",
+        "deadlines",
+        "cooldowns",
+        "lockouts",
+        "failover",
+        "receipt timestamps and digest chains"
+      ],
+      "implementation": "tools/armitron/v23/armitron-clock.mjs"
+    },
+    "matadataSystem": {
+      "responsibilities": [
+        "pressure intent stages",
+        "account and ordinary form assistance",
+        "protected-step pause-and-handoff",
+        "reviewed upload gates",
+        "provider readback",
+        "no-blind-retry enforcement"
+      ],
+      "pressureStages": [
+        "1/128 touch detect",
+        "1/64 hover",
+        "1/32 focus",
+        "1/16 select",
+        "1/8 type mode",
+        "1/4 activate",
+        "1/2 ordinary confirmation",
+        "full ordinary confirmation or protected handoff"
+      ]
+    },
+    "digitalHumanSystem": {
+      "composition": [
+        "Mind System",
+        "Body System",
+        "Digital Self",
+        "Agent Continuity Bridge"
+      ],
+      "purpose": "A symbolic, user-controlled software and accessibility layer that coordinates declared intent, authorized context, browser interaction, recall, and receipts under JP authority.",
+      "allowedInputs": [
+        "deliberately shared thoughts",
+        "declared feelings",
+        "reported body states",
+        "authorized memories",
+        "uploaded artifacts",
+        "provider-visible browser and account state"
+      ]
+    },
+    "authenticationSystem": {
+      "dimensions": [
+        "principal identity",
+        "account role",
+        "authentication state",
+        "authorization scope",
+        "consent state",
+        "protected human step",
+        "provider readback",
+        "session expiry",
+        "revocation and recovery"
+      ],
+      "nativeAppTarget": "remote ChatGPT MCP app with OAuth 2.1 protected-resource discovery",
+      "currentTruth": "PREPARED_NOT_DEPLOYED_OR_CONNECTED"
+    },
+    "recallSystem": {
+      "name": "Armitron Microscope Recall",
+      "direction": "backward-looking",
+      "zoomLevels": [
+        "macro",
+        "meso",
+        "micro",
+        "nano"
+      ],
+      "responsibilities": [
+        "record what happened",
+        "preserve detailed notes",
+        "zoom from project outcome to individual event",
+        "zoom out from event to mission meaning",
+        "reconstruct timelines",
+        "append corrections without rewriting history",
+        "separate observation, user report, inference, and provider confirmation"
+      ],
+      "storage": "encrypted append-only local notes; public receipts contain hashes and pointers, never note text"
+    },
+    "laneSystem": {
+      "lanes": [
+        "browser",
+        "email",
+        "github",
+        "calendar",
+        "remote_mcp_app",
+        "google_cloud_marketplace"
+      ],
+      "rule": "Every consequential lane action records Armitron timing, authority, consent, authentication, result, and readback state."
+    }
+  },
+  "humanOnlyGates": [
+    "password",
+    "passkey",
+    "MFA or one-time code",
+    "CAPTCHA or human verification",
+    "liveness or biometrics",
+    "identity attestation",
+    "signature",
+    "legal terms or consent acceptance",
+    "payment method or paid conversion",
+    "account recovery",
+    "final consequential action when bound to legal, identity, billing, or irreversible effects"
+  ],
+  "nonClaims": [
+    "no mind reading",
+    "no neural capture",
+    "no biological body capture",
+    "no hidden surveillance",
+    "no identity overwrite",
+    "no legal identity transfer",
+    "no automatic consent",
+    "no independent legal authority",
+    "no provider affiliation or partnership without provider evidence",
+    "no physical atomic or ionic clock traceability without a verified connection"
+  ],
+  "truthLaw": [
+    "User report is not provider readback.",
+    "Prepared code is not a deployed or connected app.",
+    "OAuth design is not an OAuth grant.",
+    "Enterprise signup is not organization connector visibility.",
+    "Marketplace readiness is not listing approval.",
+    "Exact integer precision is not physical accuracy.",
+    "Full pressure is ordinary confirmation or protected handoff, never protected authorization."
+  ]
+}
