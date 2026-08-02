@@ -1,0 +1,32 @@
+{
+  "componentId": "VSHARP-COMP-ARMITRON-001",
+  "protocol": "JP-XYZ-VSHARP-ARMITRON-COMPONENT/1",
+  "timezone": "America/Detroit",
+  "clockTypes": [
+    "wall",
+    "monotonic",
+    "high_resolution",
+    "chronograph",
+    "countdown",
+    "interval",
+    "alarm",
+    "second_timezone",
+    "atomic",
+    "ionic",
+    "sonic",
+    "phonic",
+    "positronic",
+    "nuclear",
+    "neutronic",
+    "synthezoid",
+    "gray",
+    "ray",
+    "orbital",
+    "quartz",
+    "circadian",
+    "domain",
+    "facility",
+    "oracle",
+    "nexter"
+  ]
+}
