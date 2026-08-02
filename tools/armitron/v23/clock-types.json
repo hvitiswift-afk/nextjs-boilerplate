@@ -2,15 +2,19 @@
   "componentId": "VSHARP-COMP-ARMITRON-001",
   "protocol": "JP-XYZ-VSHARP-ARMITRON-COMPONENT/1",
   "timezone": "America/Detroit",
-  "clockTypes": [
+  "observedLocalSources": [
     "wall",
     "monotonic",
-    "high_resolution",
+    "high_resolution"
+  ],
+  "timerModes": [
     "chronograph",
     "countdown",
     "interval",
     "alarm",
-    "second_timezone",
+    "second_timezone"
+  ],
+  "referenceOrControlProfiles": [
     "atomic",
     "ionic",
     "sonic",
@@ -28,5 +32,11 @@
     "facility",
     "oracle",
     "nexter"
-  ]
+  ],
+  "truthBoundaries": {
+    "atomic": "REFERENCE_PROFILE_UNCONNECTED unless verified traceability is supplied",
+    "ionic": "SYMBOLIC_IONIC_COUNTDOWN_UNCONNECTED unless a verified laboratory adapter is supplied",
+    "gray": "derived binary-reflected Gray-code representation, not a more accurate source",
+    "ray": "derived radial display and uncertainty representation, not radiation"
+  }
 }
