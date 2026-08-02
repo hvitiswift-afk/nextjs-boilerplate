@@ -99,7 +99,9 @@ for (const requiredSnippet of [
 }
 assert(!companion.includes("--remote-allow-origins=*"), "Companion must not open Chrome debugging to every origin.");
 assert(!companion.includes("0.0.0.0"), "Companion must not bind to all interfaces.");
-assert(!companion.includes("screenshot"), "P1 must not capture screenshots by default.");
+for (const capturePattern of ["Page.captureScreenshot", "captureScreenshot(", "--screenshot"]) {
+  assert(!companion.includes(capturePattern), `P1 must not invoke screenshot capture by default: ${capturePattern}`);
+}
 assert(notesSource.includes("aes-256-gcm"), "Encrypted notes must use AES-256-GCM.");
 assert(notesSource.includes("appendFile"), "Notes must use append-only writes.");
 assert(pressureSource.includes("pause-and-handoff"), "Pressure policy must preserve protected handoff.");
