@@ -9,7 +9,11 @@ on:
       - 'examples/google-cloud/armitron-a2a-marketplace.profile.json'
       - 'enterprise/github-enterprise-p5.json'
       - 'docs/armitron/ARMITRON_V25_VTC_MULTIVERSE.md'
+      - 'docs/recovery/VTC_EXCHANGE_V02_RECOVERY_RECEIPT.json'
+      - 'app/browser-bridge/multiverse/**'
       - 'scripts/check-armitron-vtc-p5.mjs'
+      - 'scripts/check-enterprise-codeowners-p5.mjs'
+      - '.github/CODEOWNERS'
       - '.github/workflows/armitron-vtc-p5-verify.yml'
       - '.github/workflows/google-cloud-armitron-p5-deploy.yml'
       - '.gitignore'
@@ -37,6 +41,9 @@ jobs:
 
       - name: Verify worlds, universes, exchange, C# fences, A2A, enterprise, and Google readiness
         run: node scripts/check-armitron-vtc-p5.mjs
+
+      - name: Verify enterprise ownership coverage
+        run: node scripts/check-enterprise-codeowners-p5.mjs
 
       - name: Check A2A and exchange syntax through Armitron GitHub lane
         run: |
