@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "armitron.vtc.activity-examples.v25",
+  "examples": [
+    {
+      "name": "Private continuity message",
+      "activityType": "message",
+      "sourceUniverse": "V#-ROOT",
+      "targetUniverse": "C#-ROOT",
+      "linkActivity": "message",
+      "subject": "Preserve commitment and validate controls",
+      "payload": {
+        "text": "Carry this commitment into C# without changing the original V# record."
+      },
+      "transformPlan": "Create a C# validation object containing the source digest, authority, controls, return route, and closure requirements.",
+      "evidenceClass": "USER_REPORTED",
+      "expectedDisposition": "AUTO_PRIVATE_REVERSIBLE"
+    },
+    {
+      "name": "Sourced current event",
+      "activityType": "current_event",
+      "sourceUniverse": "V#-ROOT",
+      "targetUniverse": "T#-ROOT",
+      "linkActivity": "evidence",
+      "subject": "Provider catalog observation",
+      "payload": {
+        "headline": "A provider catalog changed or was observed",
+        "sourceUrl": "https://provider.example/documentation",
+        "publisher": "Example Provider",
+        "eventOccurredAt": null,
+        "observedAt": "2026-08-02T22:00:00Z",
+        "factSummary": "The documentation observation is recorded separately from interpretation.",
+        "inference": "A product-listing opportunity may exist.",
+        "confidence": "MEDIUM",
+        "correctionReference": null
+      },
+      "transformPlan": "Preserve source and observation time, create review and expiry markers, and retain a correction route.",
+      "evidenceClass": "SOURCED_CURRENT_EVENT",
+      "expectedDisposition": "AUTO_PRIVATE_REVERSIBLE"
+    },
+    {
+      "name": "Tested code patch",
+      "activityType": "code_patch",
+      "sourceUniverse": "V#-ROOT",
+      "targetUniverse": "C#-ROOT",
+      "linkActivity": "artifact",
+      "subject": "Validated code change",
+      "payload": {
+        "repository": "hvitiswift-afk/nextjs-boilerplate",
+        "branch": "agent/armitron-vtc-universe-exchange-p5",
+        "commitSha": "PROVIDER_READBACK_REQUIRED",
+        "patchHash": "SHA256_REQUIRED",
+        "tests": ["P5 verifier", "Next.js build"]
+      },
+      "transformPlan": "Create a C# validation and closure record bound to GitHub check and artifact readback.",
+      "evidenceClass": "GITHUB_PROVIDER_READBACK",
+      "expectedDisposition": "AUTO_PRIVATE_REVERSIBLE"
+    },
+    {
+      "name": "Simulation-first trade proposal",
+      "activityType": "trade_proposal",
+      "sourceUniverse": "V#-ROOT",
+      "targetUniverse": "C#-ROOT",
+      "linkActivity": "proposal",
+      "subject": "Market proposal for JP review",
+      "payload": {
+        "instrument": "EXAMPLE",
+        "market": "SIMULATED",
+        "thesis": "Evaluate risk and assumptions without submitting an order.",
+        "side": "BUY",
+        "quantity": 1,
+        "priceOrLimit": null,
+        "timeInForce": null,
+        "riskBudget": "SIMULATION_ONLY",
+        "simulationOnly": true,
+        "executionAuthority": "JP_TARGET_SPECIFIC_REQUIRED"
+      },
+      "transformPlan": "Create a C# risk-review object with no broker action.",
+      "evidenceClass": "SIMULATION_ONLY",
+      "expectedDisposition": "AUTO_PRIVATE_REVERSIBLE"
+    },
+    {
+      "name": "Unverified live execution claim",
+      "activityType": "trade_execution_receipt",
+      "sourceUniverse": "V#-ROOT",
+      "targetUniverse": "C#-ROOT",
+      "linkActivity": "proposal",
+      "subject": "Execution claim requiring provider evidence",
+      "payload": {
+        "instrument": "EXAMPLE",
+        "side": "BUY",
+        "orderType": "MARKET",
+        "quantity": 1,
+        "timeInForce": "DAY"
+      },
+      "transformPlan": "Evaluate the claim only. Do not submit an order.",
+      "evidenceClass": "USER_REPORTED",
+      "expectedDisposition": "BLOCK_UNTIL_JP_AND_BROKER_READBACK"
+    }
+  ]
+}

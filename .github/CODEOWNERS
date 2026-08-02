@@ -1,8 +1,33 @@
 # JP Systems Hub ownership map
 # Review ownership does not itself authorize merge, deployment, publication,
 # external submission, settings changes, secrets, billing, or payments.
+# Replace or extend owners with organization teams only after GitHub provider
+# readback confirms the organization and team slugs.
 
 * @hvitiswift-afk
+
+# Repository and deployment policy
 /.github/ @hvitiswift-afk
+/.github/CODEOWNERS @hvitiswift-afk
+/.github/workflows/ @hvitiswift-afk
+/enterprise/ @hvitiswift-afk
+
+# Armitron, MATADATA, browser, email, authentication, and exchange runtimes
+/apps/armitron-mcp/ @hvitiswift-afk
+/apps/armitron-a2a/ @hvitiswift-afk
+/tools/armitron/ @hvitiswift-afk
+/tools/browser-bridge/ @hvitiswift-afk
+/tools/gmail-bridge/ @hvitiswift-afk
+
+# World, universe, Digital Human, provider, and recovery definitions
+/examples/armitron/ @hvitiswift-afk
+/examples/google-cloud/ @hvitiswift-afk
+/examples/openai/ @hvitiswift-afk
+/docs/armitron/ @hvitiswift-afk
+/docs/google-cloud/ @hvitiswift-afk
+/docs/recovery/ @hvitiswift-afk
+
+# Verification and retained project ownership
+/scripts/check-armitron-*.mjs @hvitiswift-afk
 /docs/repository/ @hvitiswift-afk
 /projects/imperatus/ @hvitiswift-afk

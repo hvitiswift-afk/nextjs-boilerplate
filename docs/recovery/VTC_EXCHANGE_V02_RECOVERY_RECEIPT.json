@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "armitron.vtc.recovery-receipt.v25",
+  "recoveredAt": "2026-08-02",
+  "ownerAndConceptDirection": "Justin Lee Rackham (JP)",
+  "sources": [
+    {
+      "type": "gmail_message",
+      "subject": "V# ↔ T# ↔ C# Fenced Exchange — Automated Handoff",
+      "messageId": "19fc0192245c00f1",
+      "state": "READ_FROM_CONNECTED_GMAIL"
+    },
+    {
+      "type": "gmail_message",
+      "subject": "V# T# C# Cross-Account Exchange Bootstrap",
+      "messageId": "19fc01fa8fb5e3a1",
+      "state": "READ_FROM_CONNECTED_GMAIL"
+    },
+    {
+      "type": "google_sheet_export",
+      "title": "V# T# C# Note Exchange — Live Ledger",
+      "driveFileId": "1jGpGr4BP0y9p1OpO3_6i6li2y1lnDlJ6cbTa-hYpdYc",
+      "sha256": "8a0810e1f135dd60a9d0f8f062c70b07b3c97bc1233f7a30e3725ec345faffc9",
+      "state": "RECOVERED_RAW_EXPORT"
+    },
+    {
+      "type": "python_source",
+      "title": "vsharp_tsharp_csharp_exchange.py",
+      "driveFileId": "1nWDo8CwyDrzgDOdN79r8vmjm4dPIqLnU",
+      "sha256": "b9cccbe94483f9770d0d7936664872e5cc0e93ceb6ae8507630d2758d306bbee",
+      "lineCount": 686,
+      "byteCount": 27378,
+      "protocol": "V#_T#_C#_FENCED_EXCHANGE_V0.2",
+      "state": "RECOVERED_AND_REVIEWED"
+    }
+  ],
+  "inheritedDefinitions": {
+    "V#": [
+      "values",
+      "authority",
+      "identity labels",
+      "commitments",
+      "evidence",
+      "continuity"
+    ],
+    "T#": [
+      "timelines",
+      "branches",
+      "triggers",
+      "review times",
+      "forecasts",
+      "expiry",
+      "backcasts"
+    ],
+    "C#": [
+      "truth and provenance",
+      "exact target",
+      "privacy minimization",
+      "capability",
+      "reversibility",
+      "consequence",
+      "human gate",
+      "duplicate and idempotency",
+      "readback",
+      "closure"
+    ]
+  },
+  "inheritedSafety": [
+    "planning and private-work orchestration only",
+    "no physical-time merger",
+    "no future observation",
+    "no backward information transmission",
+    "no identity or consciousness transfer",
+    "external consequential action remains target-specific",
+    "every provider write requires readback and a receipt",
+    "no receipt means not verified"
+  ],
+  "v25Extensions": [
+    "named and numbered universe registry",
+    "V-10 scoped transfer and transform links",
+    "explicit tenth C# Closure fence",
+    "messages, current events, code artifacts, markets, and trade-proposal envelopes",
+    "arrival and closure receipts",
+    "A2A Agent Card and endpoint",
+    "Cloud Run container readiness",
+    "GitHub OIDC to Google Workload Identity Federation deployment rail",
+    "GitHub enterprise target policy"
+  ],
+  "truthState": "LEGACY_SOURCES_RECOVERED_V25_REIMPLEMENTATION_IN_GITHUB"
+}

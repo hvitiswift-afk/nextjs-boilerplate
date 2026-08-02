@@ -48,7 +48,11 @@ next-env.d.ts
 /client_secret_*.json
 /google-oauth-client*.json
 
-# local Armitron clock rail
+# temporary Google GitHub Actions credentials
+/gha-creds-*.json
+
+# local Armitron clock and exchange rails
 /.armitron/
 /armitron-p3-verification.json
 /armitron-matadata-p4-verification.json
+/armitron-vtc-p5-verification.json

@@ -1,0 +1,165 @@
+name: Google Cloud Armitron A2A P5 Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type DEPLOY to authorize this exact workflow run after reviewing the environment and image.
+        required: true
+        type: string
+      target_environment:
+        description: Protected GitHub environment to use.
+        required: true
+        type: choice
+        default: google-cloud-preview
+        options:
+          - google-cloud-preview
+          - google-cloud-production
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: armitron-a2a-${{ inputs.target_environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, push, and deploy with GitHub OIDC
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
+    timeout-minutes: 30
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@v4
+
+      - name: Refuse unconfigured or unreviewed deployment
+        shell: bash
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          READINESS: ${{ vars.P5_DEPLOYMENT_READINESS }}
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          GCP_ARTIFACT_REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+          GCP_CLOUD_RUN_SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          ARMITRON_A2A_PUBLIC_URL: ${{ vars.ARMITRON_A2A_PUBLIC_URL }}
+          ARMITRON_A2A_AUTHORIZATION_ISSUER: ${{ vars.ARMITRON_A2A_AUTHORIZATION_ISSUER }}
+        run: |
+          set -euo pipefail
+          test "$CONFIRM" = "DEPLOY" || { echo "Exact DEPLOY confirmation was not provided."; exit 1; }
+          test "$READINESS" = "PRODUCTION_AUTH_VERIFIER_READY" || {
+            echo "Production A2A token verification is not provider-ready; deployment is blocked."
+            exit 1
+          }
+          for name in \
+            GCP_PROJECT_ID GCP_REGION GCP_ARTIFACT_REPOSITORY \
+            GCP_CLOUD_RUN_SERVICE GCP_WORKLOAD_IDENTITY_PROVIDER \
+            GCP_SERVICE_ACCOUNT ARMITRON_A2A_PUBLIC_URL \
+            ARMITRON_A2A_AUTHORIZATION_ISSUER; do
+            test -n "${!name:-}" || { echo "Missing required environment variable: $name"; exit 1; }
+          done
+          test -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" || {
+            echo "Static Google credential files are prohibited."
+            exit 1
+          }
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify P1-P5 before deployment
+        run: |
+          node scripts/check-browser-bridge.mjs
+          node scripts/check-armitron-clock-p3.mjs
+          node scripts/check-armitron-matadata-p4.mjs
+          node scripts/check-armitron-publication-p4.mjs
+          node scripts/check-armitron-vtc-p5.mjs
+          npm run build
+
+      - name: Authenticate to Google Cloud with Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          create_credentials_file: true
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Configure Artifact Registry Docker authentication
+        shell: bash
+        env:
+          GCP_REGION: ${{ vars.GCP_REGION }}
+        run: gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
+
+      - name: Build and push reviewed container image
+        id: image
+        shell: bash
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          GCP_ARTIFACT_REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+          GCP_CLOUD_RUN_SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+        run: |
+          set -euo pipefail
+          IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GCP_ARTIFACT_REPOSITORY}/${GCP_CLOUD_RUN_SERVICE}:${GITHUB_SHA}"
+          docker build --file apps/armitron-a2a/Dockerfile --tag "$IMAGE" .
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+          region: ${{ vars.GCP_REGION }}
+          image: ${{ steps.image.outputs.image }}
+          flags: >-
+            --no-allow-unauthenticated
+            --min-instances=0
+            --max-instances=3
+            --concurrency=40
+            --cpu=1
+            --memory=512Mi
+          env_vars: |-
+            JP_ARMITRON_A2A_PUBLIC_URL=${{ vars.ARMITRON_A2A_PUBLIC_URL }}
+            JP_ARMITRON_A2A_AUTHORIZATION_ISSUER=${{ vars.ARMITRON_A2A_AUTHORIZATION_ISSUER }}
+            JP_ARMITRON_A2A_ORIGIN_ALLOWLIST=${{ vars.ARMITRON_A2A_ORIGIN_ALLOWLIST }}
+            JP_ARMITRON_RECEIPTS=/tmp/armitron/receipts.jsonl
+            JP_VTC_EXCHANGE_LEDGER=/tmp/armitron/vtc-exchange.jsonl
+
+      - name: Verify Cloud Run provider readback
+        shell: bash
+        env:
+          DEPLOYED_URL: ${{ steps.deploy.outputs.url }}
+          EXPECTED_PUBLIC_URL: ${{ vars.ARMITRON_A2A_PUBLIC_URL }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOYED_URL"
+          echo "Cloud Run provider returned: $DEPLOYED_URL"
+          test "$DEPLOYED_URL" = "$EXPECTED_PUBLIC_URL" || {
+            echo "Provider URL does not equal the reviewed public URL. Hold for DNS or configuration review."
+            exit 1
+          }
+
+      - name: Upload deployment receipt inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: armitron-a2a-p5-deployment-${{ github.run_id }}
+          path: |
+            armitron-vtc-p5-verification.json
+            .armitron/receipts/armitron-v23.jsonl
+          if-no-files-found: error
+          retention-days: 30

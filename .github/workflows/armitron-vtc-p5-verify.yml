@@ -1,0 +1,74 @@
+name: Armitron V# T# C# Multiverse P5 Verify
+
+on:
+  pull_request:
+    paths:
+      - 'tools/armitron/v25/**'
+      - 'apps/armitron-a2a/**'
+      - 'examples/armitron/v25/**'
+      - 'examples/google-cloud/armitron-a2a-marketplace.profile.json'
+      - 'enterprise/github-enterprise-p5.json'
+      - 'docs/armitron/ARMITRON_V25_VTC_MULTIVERSE.md'
+      - 'docs/recovery/VTC_EXCHANGE_V02_RECOVERY_RECEIPT.json'
+      - 'app/browser-bridge/multiverse/**'
+      - 'scripts/check-armitron-v25-definition.mjs'
+      - 'scripts/check-armitron-vtc-p5.mjs'
+      - 'scripts/check-enterprise-codeowners-p5.mjs'
+      - '.github/CODEOWNERS'
+      - '.github/workflows/armitron-vtc-p5-verify.yml'
+      - '.github/workflows/google-cloud-armitron-p5-deploy.yml'
+      - '.gitignore'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify Armitron v25 umbrella definition
+        run: node scripts/check-armitron-v25-definition.mjs
+
+      - name: Verify worlds, universes, exchange, C# fences, A2A, enterprise, and Google readiness
+        run: node scripts/check-armitron-vtc-p5.mjs
+
+      - name: Verify enterprise ownership coverage
+        run: node scripts/check-enterprise-codeowners-p5.mjs
+
+      - name: Check A2A and exchange syntax through Armitron GitHub lane
+        run: |
+          node tools/armitron/v23/armitron-wrap.mjs --lane github --clock orbital -- node --check apps/armitron-a2a/server.mjs
+          node tools/armitron/v23/armitron-wrap.mjs --lane github --clock domain -- node --check tools/armitron/v25/exchange-engine.mjs
+          node tools/armitron/v23/armitron-wrap.mjs --lane github --clock facility -- node --check tools/armitron/v25/world-registry.mjs
+
+      - name: Build all operator surfaces through Armitron GitHub lane
+        run: >-
+          node tools/armitron/v23/armitron-wrap.mjs
+          --lane github
+          --clock atomic
+          --
+          npm run build
+
+      - name: Upload P5 verification and Armitron receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: armitron-vtc-multiverse-p5-verification
+          path: |
+            armitron-vtc-p5-verification.json
+            .armitron/receipts/armitron-v23.jsonl
+          if-no-files-found: error
+          retention-days: 30
