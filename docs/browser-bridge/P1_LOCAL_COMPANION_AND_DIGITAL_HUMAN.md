@@ -6,6 +6,7 @@
 P0 protocol                 VERIFIED
 P1 local companion          IMPLEMENTED_ON_REVIEW_BRANCH
 P1 automated verification   PENDING_GITHUB_ACTIONS_READBACK
+Mission truth state         NOT_SUBMITTED_LOCAL_AUTHENTICATED_RUN_REQUIRED
 Local authenticated run     NOT_RUN
 GitHub Enterprise trial     NOT_CREATED_OR_NOT_YET_VERIFIED
 ```
