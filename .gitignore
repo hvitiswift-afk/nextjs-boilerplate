@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local browser and Digital Human runtime
+/.browser-bridge/
+
 # local Gmail dual-account bridge
 /.gmail-bridge/
 /client_secret_*.json
@@ -48,3 +51,4 @@ next-env.d.ts
 # local Armitron clock rail
 /.armitron/
 /armitron-p3-verification.json
+/armitron-matadata-p4-verification.json
