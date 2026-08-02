@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "armitron.chatgpt-app-readiness.v1",
+  "appName": "Armitron MATADATA Digital Human",
+  "ownerAndConceptDirection": "Justin Lee Rackham (JP)",
+  "mcpEndpointTarget": "https://DEPLOYED_HOST/mcp",
+  "authentication": {
+    "protocol": "OAuth 2.1 or OpenID Connect",
+    "protectedResourceMetadata": "IMPLEMENTED_IN_CODE",
+    "authorizationServer": "NOT_CONFIGURED",
+    "refreshAccess": "REQUIRED_FOR_PERSISTENT_CONNECTION",
+    "audienceValidation": "NOT_IMPLEMENTED_FOR_PRODUCTION",
+    "userAuthorization": "NOT_COMPLETED"
+  },
+  "tools": [
+    {
+      "name": "armitron_status",
+      "mode": "read",
+      "state": "IMPLEMENTED"
+    },
+    {
+      "name": "matadata_recall_readiness",
+      "mode": "read",
+      "state": "IMPLEMENTED"
+    },
+    {
+      "name": "matadata_authentication_readiness",
+      "mode": "read",
+      "state": "IMPLEMENTED"
+    },
+    {
+      "name": "matadata_google_listing_readiness",
+      "mode": "read",
+      "state": "IMPLEMENTED"
+    }
+  ],
+  "writeActions": {
+    "state": "NOT_EXPOSED_IN_REMOTE_APP",
+    "reason": "Write actions require deployed authentication, explicit scopes, workspace support, confirmation behavior, and safety review."
+  },
+  "currentTruth": {
+    "remoteDeployment": "NOT_DEPLOYED",
+    "httpsEndpoint": "NOT_AVAILABLE",
+    "oauthIssuer": "NOT_CONNECTED",
+    "chatGptDeveloperModeConfiguration": "NOT_CREATED",
+    "toolScan": "NOT_RUN",
+    "appAuthorization": "NOT_COMPLETED",
+    "workspacePublication": "NOT_PUBLISHED",
+    "appDirectorySubmission": "NOT_SUBMITTED",
+    "appDirectoryApproval": "NOT_APPROVED"
+  },
+  "publicationRequirements": [
+    "trusted remote HTTPS MCP server",
+    "OAuth protected-resource and authorization-server discovery",
+    "refresh-token support where persistent access is required",
+    "access-token issuer, audience, expiry, and scope validation",
+    "privacy policy and support information",
+    "tool descriptions and annotations",
+    "prompt-injection and data-exfiltration review",
+    "workspace developer-mode configuration and tool scan",
+    "authorized user testing",
+    "publication or app-directory review"
+  ],
+  "truthLaw": "Prepared MCP code is not a connected or published ChatGPT app."
+}
