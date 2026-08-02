@@ -11,6 +11,7 @@ on:
       - 'docs/armitron/ARMITRON_V25_VTC_MULTIVERSE.md'
       - 'docs/recovery/VTC_EXCHANGE_V02_RECOVERY_RECEIPT.json'
       - 'app/browser-bridge/multiverse/**'
+      - 'scripts/check-armitron-v25-definition.mjs'
       - 'scripts/check-armitron-vtc-p5.mjs'
       - 'scripts/check-enterprise-codeowners-p5.mjs'
       - '.github/CODEOWNERS'
@@ -38,6 +39,9 @@ jobs:
 
       - name: Install locked dependencies
         run: npm ci
+
+      - name: Verify Armitron v25 umbrella definition
+        run: node scripts/check-armitron-v25-definition.mjs
 
       - name: Verify worlds, universes, exchange, C# fences, A2A, enterprise, and Google readiness
         run: node scripts/check-armitron-vtc-p5.mjs
