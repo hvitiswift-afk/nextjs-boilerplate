@@ -1,0 +1,66 @@
+name: Governance baseline
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: governance-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  governance-baseline:
+    name: Verify governance controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify required governance files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required_files=(
+            "README.md"
+            "SECURITY.md"
+            "CONTRIBUTING.md"
+            ".github/CODEOWNERS"
+            ".github/PULL_REQUEST_TEMPLATE.md"
+            ".github/ISSUE_TEMPLATE/config.yml"
+            ".github/dependabot.yml"
+            "docs/repository/GITHUB-ENTERPRISE-READINESS.md"
+          )
+
+          for path in "${required_files[@]}"; do
+            if [[ ! -s "$path" ]]; then
+              echo "Missing or empty governance file: $path" >&2
+              exit 1
+            fi
+          done
+
+      - name: Verify owner and private-reporting routes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          grep -Fq "@hvitiswift-afk" .github/CODEOWNERS
+          grep -Fq "security/advisories/new" SECURITY.md
+          grep -Fq "security/advisories/new" .github/ISSUE_TEMPLATE/config.yml
+          grep -Fq "version: 2" .github/dependabot.yml
+          grep -Fq "ENTERPRISE_ACCOUNT_VERIFIED" docs/repository/GITHUB-ENTERPRISE-READINESS.md
+
+      - name: Confirm no authority overstatement in readiness state
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          grep -Fq "Enterprise account               NOT DIRECTLY VERIFIABLE BY CURRENT CONNECTOR" docs/repository/GITHUB-ENTERPRISE-READINESS.md
+          grep -Fq "Repository transfer              NOT PERFORMED" docs/repository/GITHUB-ENTERPRISE-READINESS.md
