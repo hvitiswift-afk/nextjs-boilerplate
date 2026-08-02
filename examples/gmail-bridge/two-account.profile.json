@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "gmail-bridge.two-account-profile.v1",
+  "profileId": "jp-gmail-xyz-dual-oauth-v1",
+  "principal": "JP",
+  "project": "MATADATA",
+  "purpose": "Cross-connect two JP-controlled Gmail accounts through separate Google OAuth grants while preserving account identity, consent, protected steps, and provider receipts.",
+  "accounts": {
+    "enterprise-facing": {
+      "expectedEmailRuntimeSource": "JP_GMAIL_ENTERPRISE_EMAIL",
+      "responsibilities": [
+        "receive enterprise confirmations and original provider receipts",
+        "send messages whose authenticated From identity is the enterprise-facing mailbox"
+      ]
+    },
+    "connected-operations": {
+      "expectedEmailRuntimeSource": "JP_GMAIL_OPERATIONS_EMAIL",
+      "responsibilities": [
+        "connected operational processing",
+        "reconciliation, recovery coordination, and cross-account continuity receipts"
+      ]
+    }
+  },
+  "authorization": {
+    "method": "Google OAuth 2.0 Desktop App with loopback redirect and PKCE",
+    "loopbackHost": "127.0.0.1",
+    "manualCopyPaste": false,
+    "separateConsentPerAccount": true,
+    "humanCompletesLoginMfaCaptchaAndConsent": true
+  },
+  "storage": {
+    "refreshTokens": "AES-256-GCM encrypted local vault",
+    "vaultKey": "runtime environment only",
+    "publicRepositorySecrets": false,
+    "messageBodiesInReceipts": false
+  },
+  "sendPolicy": {
+    "selectedTokenMustOwnAuthenticatedAccount": true,
+    "customFromMustBeAcceptedSendAsAlias": true,
+    "humanReviewRequired": true,
+    "confirmationFlag": "--confirm-send SEND",
+    "idempotencyKeyRequired": true,
+    "blindRetry": false,
+    "unknownProviderOutcomeLocksKey": true
+  },
+  "nonClaims": [
+    "This does not modify or extend ChatGPT's built-in Gmail connector.",
+    "Authorization by JP does not replace Google's OAuth authentication or consent screen.",
+    "The bridge cannot send as an account until that account completes OAuth locally.",
+    "No password, passkey, MFA code, recovery code, browser cookie, payment data, or identity document is accepted or stored."
+  ],
+  "truthState": "CODE_READY_LOCAL_OAUTH_NOT_YET_COMPLETED"
+}

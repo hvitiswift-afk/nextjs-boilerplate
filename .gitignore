@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local Gmail dual-account bridge
+/.gmail-bridge/
+/client_secret_*.json
+/google-oauth-client*.json
+
+# local Armitron clock rail
+/.armitron/
+/armitron-p3-verification.json

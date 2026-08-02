@@ -1,0 +1,48 @@
+name: Gmail Dual-Account Bridge P2 Verify
+
+on:
+  pull_request:
+    paths:
+      - 'tools/gmail-bridge/p2/**'
+      - 'examples/gmail-bridge/**'
+      - 'docs/gmail-bridge/**'
+      - 'scripts/check-gmail-bridge-p2.mjs'
+      - '.github/workflows/gmail-bridge-p2-verify.yml'
+  push:
+    branches:
+      - 'agent/gmail-dual-account-bridge-p2'
+    paths:
+      - 'tools/gmail-bridge/p2/**'
+      - 'examples/gmail-bridge/**'
+      - 'docs/gmail-bridge/**'
+      - 'scripts/check-gmail-bridge-p2.mjs'
+      - '.github/workflows/gmail-bridge-p2-verify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify dual-account bridge
+        run: node scripts/check-gmail-bridge-p2.mjs | tee gmail-bridge-p2-verification.json
+      - name: Build operator surface
+        run: npm run build
+      - name: Upload verification receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: gmail-bridge-p2-verification
+          path: gmail-bridge-p2-verification.json
+          if-no-files-found: error
+          retention-days: 30
