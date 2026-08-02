@@ -1,0 +1,95 @@
+{
+  "name": "MATADATA Armitron V# T# C# Exchange Agent",
+  "description": "A consent-gated multiverse exchange agent for distinct V# values/continuity, T# temporal/phase, and C# control/closure worlds. It exchanges messages, current-event observations, forecasts, code artifacts, commitments, and simulated trade proposals through ten C# fences and digest-chained receipts.",
+  "supportedInterfaces": [
+    {
+      "url": "https://DEPLOYED_HOST/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "provider": {
+    "organization": "MATADATA / JP",
+    "url": "https://github.com/hvitiswift-afk/nextjs-boilerplate"
+  },
+  "version": "25.0.0",
+  "documentationUrl": "https://github.com/hvitiswift-afk/nextjs-boilerplate/blob/agent/armitron-vtc-universe-exchange-p5/docs/armitron/ARMITRON_V25_VTC_MULTIVERSE.md",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "extendedAgentCard": false
+  },
+  "securitySchemes": {
+    "jpOidc": {
+      "openIdConnectSecurityScheme": {
+        "openIdConnectUrl": "https://AUTHORIZATION_ISSUER/.well-known/openid-configuration"
+      }
+    }
+  },
+  "security": [
+    {
+      "jpOidc": [
+        "armitron.exchange.read",
+        "armitron.exchange.write"
+      ]
+    }
+  ],
+  "defaultInputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "vtc-message-exchange",
+      "name": "V# T# C# message exchange",
+      "description": "Transfer or transform a message between named and numbered universes while preserving world boundaries, authority, timing, controls, return routes, and receipts.",
+      "tags": ["messages", "continuity", "multiverse", "receipts"],
+      "examples": [
+        "Send a V# commitment to T# for scheduling and return a C# control receipt.",
+        "Transfer a private message between two registered universes and record arrival and closure."
+      ],
+      "inputModes": ["text/plain", "application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "current-event-routing",
+      "name": "Current-event routing",
+      "description": "Record a sourced current-event observation in V#, map its timing in T#, and apply C# provenance, privacy, consequence, readback, and closure controls.",
+      "tags": ["current-events", "evidence", "timeline", "control"],
+      "examples": [
+        "Record a sourced current event and separate the fact summary from inference.",
+        "Route an event through forecast, expiry, and correction states."
+      ],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "code-artifact-transfer",
+      "name": "Code and artifact transfer",
+      "description": "Exchange code patches, commits, tests, and artifacts across worlds using explicit transform plans, immutable hashes, destination acceptance, and closure receipts.",
+      "tags": ["code", "artifacts", "tests", "github"],
+      "examples": [
+        "Transfer a tested code patch from V# continuity into C# validation.",
+        "Record a GitHub commit and its test artifact as a closed exchange."
+      ],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "market-observation-and-proposal",
+      "name": "Market observation and trade proposal",
+      "description": "Record market observations and simulation-first trade proposals. Real financial order execution remains JP-target-specific, broker-authenticated, and provider-confirmed.",
+      "tags": ["markets", "trading", "risk", "human-in-the-loop"],
+      "examples": [
+        "Record a market observation with source time and risk assumptions.",
+        "Create a simulation-only trade proposal without submitting an order."
+      ],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ]
+}
