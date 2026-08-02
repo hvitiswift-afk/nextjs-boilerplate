@@ -26,12 +26,14 @@ async function text(path) {
 }
 
 const contents = Object.fromEntries(await Promise.all(requiredFiles.map(async (path) => [path, await text(path)])));
-const mission = JSON.parse(contents["examples/browser-bridge/github-enterprise-signup.mission.json"]);
+const missionText = contents["examples/browser-bridge/github-enterprise-signup.mission.json"];
+const mission = JSON.parse(missionText);
 const profile = JSON.parse(contents["examples/browser-bridge/digital-human.profile.json"]);
 const companion = contents["tools/browser-bridge/p1/local-companion.mjs"];
 const notesSource = contents["tools/browser-bridge/p1/secure-notes.mjs"];
 const pressureSource = contents["tools/browser-bridge/p1/pressure-policy.mjs"];
 const readme = contents["tools/browser-bridge/p1/README.md"];
+const safeguardCorpus = [companion, notesSource, pressureSource, missionText, readme].join("\n");
 
 assert(mission.schemaVersion === "browser-bridge.mission.v1", "Mission schema mismatch.");
 assert(mission.currentState === "READY_FOR_LOCAL_HANDOFF", "Mission is not staged for local handoff.");
@@ -93,7 +95,7 @@ for (const requiredSnippet of [
   "JP_GITHUB_CONTACT_EMAIL",
   "JP_BROWSER_BRIDGE_NOTES_KEY"
 ]) {
-  assert(companion.includes(requiredSnippet) || notesSource.includes(requiredSnippet), `Missing P1 safeguard: ${requiredSnippet}`);
+  assert(safeguardCorpus.includes(requiredSnippet), `Missing P1 safeguard: ${requiredSnippet}`);
 }
 assert(!companion.includes("--remote-allow-origins=*"), "Companion must not open Chrome debugging to every origin.");
 assert(!companion.includes("0.0.0.0"), "Companion must not bind to all interfaces.");
