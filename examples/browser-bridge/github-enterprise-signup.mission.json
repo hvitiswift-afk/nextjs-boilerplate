@@ -1,35 +1,70 @@
 {
   "schemaVersion": "browser-bridge.mission.v1",
   "missionId": "github-enterprise-signup-fardarter-v1",
-  "title": "GitHub Enterprise Cloud signup",
+  "title": "GitHub Enterprise Cloud free-trial signup",
   "provider": "GitHub",
   "accountLogin": "hvitiswift-afk",
   "targetUrl": "https://github.com/account/enterprises/new",
   "allowedOrigins": [
     "https://github.com"
   ],
-  "purpose": "Prepare a GitHub Enterprise Cloud trial for the proposed Fardarter Company enterprise using personal accounts.",
-  "currentState": "BLOCKED",
-  "truthState": "BLOCKED_REQUIRES_SHARED_AUTHENTICATED_BROWSER",
+  "purpose": "Prepare and complete a GitHub Enterprise Cloud free trial for the proposed Fardarter Company enterprise using personal accounts, with JP completing every protected human step.",
+  "currentState": "READY_FOR_LOCAL_HANDOFF",
+  "truthState": "NOT_SUBMITTED_LOCAL_AUTHENTICATED_RUN_REQUIRED",
+  "sourceRecovery": {
+    "latestPreservedArtifact": "README(147).md",
+    "createdAtUtc": "2026-08-02T04:39:53.202419Z",
+    "chatTitle": "NOT_EXPOSED_BY_RETAINED_METADATA",
+    "incorporatedFeatures": [
+      "MATADATA pressure rail",
+      "account and ID-form assistance",
+      "protected-step pause-and-handoff",
+      "reviewed upload gates",
+      "local-only receipts",
+      "simulator-safe physical boundary"
+    ]
+  },
+  "digitalHumanProfile": "examples/browser-bridge/digital-human.profile.json",
+  "localCompanion": {
+    "runtime": "Node.js 22+",
+    "entrypoint": "tools/browser-bridge/p1/local-companion.mjs",
+    "endpoint": "http://127.0.0.1:9222",
+    "browserProfile": ".browser-bridge/chrome-profile",
+    "receipts": ".browser-bridge/receipts/browser-bridge-p1.jsonl",
+    "encryptedBackwardNotes": ".browser-bridge/notes/backward-looking.enc.jsonl",
+    "externalTunnel": false,
+    "loopbackOnly": true
+  },
   "authorization": {
     "source": "explicit-user-request",
     "scope": "prepare and complete signup with human-only gates preserved",
     "finalAction": "create-enterprise-trial",
     "exactlyOnce": true,
     "legalAcceptanceByHumanOnly": true,
-    "paymentByHumanOnly": true
+    "paymentByHumanOnly": true,
+    "protectedSubmitByHumanOnly": true
   },
   "fields": [
     {
       "key": "account_mode",
       "label": "Enterprise account mode",
+      "matchAliases": [
+        "personal accounts",
+        "enterprise with personal accounts",
+        "account type"
+      ],
       "agentFillAllowed": true,
       "publicValue": "personal_accounts",
-      "verification": "selected option equals personal_accounts"
+      "verification": "selected option equals personal accounts or the provider's equivalent wording"
     },
     {
       "key": "enterprise_name",
       "label": "Enterprise name",
+      "matchAliases": [
+        "business name",
+        "company name",
+        "enterprise account name"
+      ],
       "agentFillAllowed": true,
       "publicValue": "Fardarter Company",
       "qualification": "proposed company or house-brand name; legal entity status not asserted",
@@ -38,6 +73,11 @@
     {
       "key": "enterprise_slug",
       "label": "Enterprise URL slug",
+      "matchAliases": [
+        "enterprise url",
+        "url slug",
+        "enterprise handle"
+      ],
       "agentFillAllowed": true,
       "candidateValues": [
         "fardarter",
@@ -49,6 +89,10 @@
     {
       "key": "industry",
       "label": "Industry",
+      "matchAliases": [
+        "business industry",
+        "company industry"
+      ],
       "agentFillAllowed": true,
       "publicValue": "Technology",
       "verification": "selected option is Technology or the closest provider equivalent"
@@ -56,6 +100,11 @@
     {
       "key": "team_size",
       "label": "Team size",
+      "matchAliases": [
+        "company size",
+        "organization size",
+        "number of employees"
+      ],
       "agentFillAllowed": true,
       "publicValue": "1-10",
       "verification": "selected option equals the smallest truthful available range"
@@ -63,6 +112,11 @@
     {
       "key": "initial_seats",
       "label": "Initial seats",
+      "matchAliases": [
+        "users",
+        "licenses",
+        "seats"
+      ],
       "agentFillAllowed": true,
       "publicValue": 1,
       "verification": "live numeric value equals 1"
@@ -70,6 +124,11 @@
     {
       "key": "use_case",
       "label": "Use case",
+      "matchAliases": [
+        "how will you use github",
+        "business use case",
+        "tell us about your company"
+      ],
       "agentFillAllowed": true,
       "publicValue": "AI-assisted developer tools, cybersecurity research systems, software infrastructure, and experimental hardware technologies.",
       "verification": "live value matches reviewed text after provider-safe whitespace normalization"
@@ -77,6 +136,12 @@
     {
       "key": "contact_email",
       "label": "Contact and receipt email",
+      "matchAliases": [
+        "email",
+        "billing email",
+        "receipt email",
+        "contact email"
+      ],
       "agentFillAllowed": true,
       "privateRuntimeSource": "JP_GITHUB_CONTACT_EMAIL",
       "valueCommitted": false,
@@ -93,8 +158,28 @@
     "legal_terms_acceptance",
     "signature",
     "payment_method",
-    "paid_plan_conversion"
+    "paid_plan_conversion",
+    "final_create_action_when_bound_to_terms_or_billing"
   ],
+  "pressurePolicy": {
+    "module": "tools/browser-bridge/p1/pressure-policy.mjs",
+    "rawSensorStorage": false,
+    "protectedStepBehavior": "pause-and-handoff",
+    "fullPressureMeaning": "ordinary confirmation only; never protected authorization"
+  },
+  "confirmationSignals": {
+    "urlIncludes": [
+      "/enterprises/"
+    ],
+    "textIncludes": [
+      "enterprise"
+    ],
+    "rejectTextIncludes": [
+      "could not create",
+      "something went wrong",
+      "payment failed"
+    ]
+  },
   "confirmationRequirements": [
     "provider confirmation page or enterprise settings readback",
     "enterprise slug visible on github.com",
@@ -103,14 +188,14 @@
   ],
   "knownBlockers": [
     {
-      "code": "CURRENT_SESSION_BROWSER_POLICY",
-      "evidence": "Local Chromium returned ERR_BLOCKED_BY_ADMINISTRATOR for the signup URL.",
-      "repair": "Resume in a shared authenticated browser surface or an approved local browser companion."
+      "code": "CURRENT_CHAT_SESSION_BROWSER_POLICY",
+      "evidence": "The current ChatGPT runtime cannot attach to JP's signed-in local browser.",
+      "repair": "Run the P1 local companion on JP's computer during the scheduled calendar block."
     },
     {
       "code": "CONNECTOR_SCOPE",
       "evidence": "The connected GitHub app supports repository operations but does not expose enterprise-account creation.",
-      "repair": "Use browser handoff for signup, then install or authorize the app on the resulting organization."
+      "repair": "Use the authenticated local browser handoff for signup, then install or authorize the app on the resulting organization."
     }
   ]
 }

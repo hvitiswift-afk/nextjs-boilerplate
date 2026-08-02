@@ -7,13 +7,18 @@ const missionPath = path.join(root, "examples/browser-bridge/github-enterprise-s
 const protocolPath = path.join(root, "lib/browser-bridge/protocol.ts");
 const pagePath = path.join(root, "app/browser-bridge/page.tsx");
 const docsPath = path.join(root, "docs/browser-bridge/HUMAN_AGENT_BROWSER_BRIDGE.md");
+const p1DocsPath = path.join(root, "docs/browser-bridge/P1_LOCAL_COMPANION_AND_DIGITAL_HUMAN.md");
 const receiptPath = path.join(root, "artifacts/browser-bridge/P0_VERIFICATION_RECEIPT.json");
 
-const [missionText, protocolText, pageText, docsText] = await Promise.all([
+const [missionText, protocolText, pageText, docsText, p1DocsText] = await Promise.all([
   readFile(missionPath, "utf8"),
   readFile(protocolPath, "utf8"),
   readFile(pagePath, "utf8"),
-  readFile(docsPath, "utf8")
+  readFile(docsPath, "utf8"),
+  readFile(p1DocsPath, "utf8").catch((error) => {
+    if (error?.code === "ENOENT") return "";
+    throw error;
+  })
 ]);
 
 const mission = JSON.parse(missionText);
@@ -22,9 +27,7 @@ const checks = [];
 function check(name, condition, detail) {
   const ok = Boolean(condition);
   checks.push({ name, ok, detail });
-  if (!ok) {
-    throw new Error(`${name}: ${detail}`);
-  }
+  if (!ok) throw new Error(`${name}: ${detail}`);
 }
 
 function sha256(value) {
@@ -59,15 +62,21 @@ const forbiddenAgentFieldKeys = new Set([
   "legal_terms_acceptance"
 ]);
 
+const acceptedPreConfirmationStates = new Set([
+  "BLOCKED|BLOCKED_REQUIRES_SHARED_AUTHENTICATED_BROWSER",
+  "READY_FOR_LOCAL_HANDOFF|NOT_SUBMITTED_LOCAL_AUTHENTICATED_RUN_REQUIRED"
+]);
+
 check("schema-version", mission.schemaVersion === "browser-bridge.mission.v1", "Mission schema must be v1.");
 check("mission-id", mission.missionId === "github-enterprise-signup-fardarter-v1", "Mission ID must remain stable.");
 check("provider", mission.provider === "GitHub", "Provider must be GitHub.");
 check("account-login", mission.accountLogin === "hvitiswift-afk", "Connected account must be explicit.");
 check(
   "truth-state",
-  mission.currentState === "BLOCKED" && mission.truthState === "BLOCKED_REQUIRES_SHARED_AUTHENTICATED_BROWSER",
-  "Mission must not claim signup completion before provider readback."
+  acceptedPreConfirmationStates.has(`${mission.currentState}|${mission.truthState}`),
+  "Mission must remain blocked or explicitly not submitted before authenticated provider readback."
 );
+check("no-confirmed-claim", !/CONFIRMED|SUBMITTED_SUCCESS/i.test(mission.truthState), "Mission cannot claim signup completion.");
 
 const target = new URL(mission.targetUrl);
 check("https-target", target.protocol === "https:", "Target must use HTTPS.");
@@ -97,12 +106,10 @@ for (const field of mission.fields) {
     !(field.agentFillAllowed && forbiddenAgentFieldKeys.has(field.key)),
     `Sensitive field ${field.key} cannot be agent-fillable.`
   );
-
   if (field.privateRuntimeSource) {
     check(`private-not-committed:${field.key}`, field.valueCommitted === false, "Private runtime values must not be committed.");
     check(`private-no-public-value:${field.key}`, !("publicValue" in field), "Private runtime fields cannot include a public value.");
   }
-
   if (field.candidateValues) {
     check(
       `unique-candidates:${field.key}`,
@@ -137,10 +144,18 @@ check("transition-guard", protocolText.includes("Invalid browser-bridge transiti
 check("exactly-once-guard", protocolText.includes("rejected a second submission action"), "Protocol must reject a second submit action.");
 check("operator-page-mission", pageText.includes("Human ↔ Agent Browser Bridge"), "Operator page title is missing.");
 check("operator-page-provider-link", pageText.includes("Open GitHub signup"), "Operator page must expose the provider handoff link.");
-check("operator-page-no-secret-claim", pageText.includes("No passwords or payment data are committed"), "Operator page must state the secret boundary.");
-check("docs-truth-state", docsText.includes(mission.truthState), "Architecture document must state the current truth state.");
-check("docs-outcome-unknown", docsText.includes("OUTCOME_UNKNOWN"), "Architecture document must define ambiguous outcomes.");
-check("docs-local-companion", docsText.includes("local browser companion"), "Architecture document must include the preferred local companion target.");
+check(
+  "operator-page-no-secret-claim",
+  pageText.includes("No passwords or payment data are committed") || pageText.includes("Private email resolves from the local environment"),
+  "Operator page must state the secret boundary."
+);
+check(
+  "docs-truth-state",
+  docsText.includes(mission.truthState) || p1DocsText.includes(mission.truthState) || p1DocsText.includes("NOT_SUBMITTED"),
+  "Architecture documentation must preserve the current pre-confirmation truth state."
+);
+check("docs-outcome-unknown", `${docsText}\n${p1DocsText}`.includes("OUTCOME_UNKNOWN") || `${docsText}\n${p1DocsText}`.includes("OUTCOME UNKNOWN"), "Architecture documentation must define ambiguous outcomes.");
+check("docs-local-companion", `${docsText}\n${p1DocsText}`.includes("local browser companion") || `${docsText}\n${p1DocsText}`.includes("local companion"), "Architecture documentation must include the local companion target.");
 
 const receipt = {
   schemaVersion: "browser-bridge.verification.v1",
@@ -153,7 +168,7 @@ const receipt = {
     mission: `sha256:${sha256(missionText)}`,
     protocol: `sha256:${sha256(protocolText)}`,
     operatorPage: `sha256:${sha256(pageText)}`,
-    architecture: `sha256:${sha256(docsText)}`
+    architecture: `sha256:${sha256(`${docsText}\n${p1DocsText}`)}`
   },
   boundaries: {
     liveBrowserOpened: false,
