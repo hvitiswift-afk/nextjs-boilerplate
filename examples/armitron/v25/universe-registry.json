@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "armitron.multiverse.registry.v25",
+  "registryId": "ARMITRON-VTC-MULTIVERSE-001",
+  "ownerAndConceptDirection": "Justin Lee Rackham (JP)",
+  "project": "MATADATA",
+  "rootIdentity": "SELF-JP-001",
+  "worlds": {
+    "V#": {
+      "worldCode": "V",
+      "name": "Values and Continuity World",
+      "purpose": [
+        "values",
+        "authority",
+        "identity labels",
+        "commitments",
+        "evidence",
+        "continuity"
+      ],
+      "localAuthority": "V# records do not silently alter T# or C# state."
+    },
+    "T#": {
+      "worldCode": "T",
+      "name": "Temporal and Phase World",
+      "purpose": [
+        "timelines",
+        "branches",
+        "triggers",
+        "review times",
+        "forecasts",
+        "expiry",
+        "backcasts"
+      ],
+      "localAuthority": "T# scenarios are planning overlays, not future observation or backward transmission."
+    },
+    "C#": {
+      "worldCode": "C",
+      "name": "Control and Closure World",
+      "purpose": [
+        "truth and provenance",
+        "exact target",
+        "privacy minimization",
+        "capability",
+        "reversibility",
+        "consequence",
+        "human gates",
+        "duplicate prevention",
+        "readback",
+        "closure"
+      ],
+      "localAuthority": "C# permits or blocks scoped actions but does not become the identity or history of another world."
+    }
+  },
+  "universes": [
+    {
+      "universeId": "UNI-V-000001-VALUES-CONTINUITY-ROOT-V1",
+      "world": "V#",
+      "number": 1,
+      "name": "Values Continuity Root",
+      "aliases": ["V#-ROOT", "V-000001"],
+      "status": "ACTIVE_INTERNAL",
+      "governance": "JP_FINAL_AUTHORITY",
+      "privacy": "PRIVATE",
+      "version": 1
+    },
+    {
+      "universeId": "UNI-T-000001-TEMPORAL-BRANCH-ROOT-V1",
+      "world": "T#",
+      "number": 1,
+      "name": "Temporal Branch Root",
+      "aliases": ["T#-ROOT", "T-000001"],
+      "status": "ACTIVE_INTERNAL",
+      "governance": "JP_FINAL_AUTHORITY",
+      "privacy": "PRIVATE",
+      "version": 1
+    },
+    {
+      "universeId": "UNI-C-000001-CONTROL-CLOSURE-ROOT-V1",
+      "world": "C#",
+      "number": 1,
+      "name": "Control Closure Root",
+      "aliases": ["C#-ROOT", "C-000001"],
+      "status": "ACTIVE_INTERNAL",
+      "governance": "JP_FINAL_AUTHORITY",
+      "privacy": "PRIVATE",
+      "version": 1
+    }
+  ],
+  "links": [
+    {
+      "linkId": "LINK-VT-000001",
+      "sourceUniverseId": "UNI-V-000001-VALUES-CONTINUITY-ROOT-V1",
+      "targetUniverseId": "UNI-T-000001-TEMPORAL-BRANCH-ROOT-V1",
+      "direction": "BIDIRECTIONAL",
+      "gate": "V-10_TRANSVERSE_TRANSFER_TRANSFORM",
+      "scope": ["message", "forecast", "backcast", "commitment", "evidence"],
+      "revocable": true,
+      "isolatable": true,
+      "returnRouteRequired": true,
+      "status": "ACTIVE_INTERNAL"
+    },
+    {
+      "linkId": "LINK-VC-000001",
+      "sourceUniverseId": "UNI-V-000001-VALUES-CONTINUITY-ROOT-V1",
+      "targetUniverseId": "UNI-C-000001-CONTROL-CLOSURE-ROOT-V1",
+      "direction": "BIDIRECTIONAL",
+      "gate": "V-10_TRANSVERSE_TRANSFER_TRANSFORM",
+      "scope": ["authority", "evidence", "control", "receipt", "closure"],
+      "revocable": true,
+      "isolatable": true,
+      "returnRouteRequired": true,
+      "status": "ACTIVE_INTERNAL"
+    },
+    {
+      "linkId": "LINK-TC-000001",
+      "sourceUniverseId": "UNI-T-000001-TEMPORAL-BRANCH-ROOT-V1",
+      "targetUniverseId": "UNI-C-000001-CONTROL-CLOSURE-ROOT-V1",
+      "direction": "BIDIRECTIONAL",
+      "gate": "V-10_TRANSVERSE_TRANSFER_TRANSFORM",
+      "scope": ["trigger", "expiry", "phase", "control", "receipt", "closure"],
+      "revocable": true,
+      "isolatable": true,
+      "returnRouteRequired": true,
+      "status": "ACTIVE_INTERNAL"
+    }
+  ],
+  "truthBoundaries": [
+    "Worlds and universes are software namespaces and internal modeling domains.",
+    "A transfer copies or transforms an envelope; it does not merge world identity or erase local history.",
+    "No physical time merge, future observation, backward information transmission, consciousness transfer, legal identity transfer, or automatic consent is claimed.",
+    "External action requires target-specific authority and provider readback."
+  ]
+}
