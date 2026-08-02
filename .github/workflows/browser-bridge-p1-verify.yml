@@ -20,9 +20,9 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify local companion, pressure, notes, and Digital Human boundaries
+    name: Verify local companion, pressure, notes, Digital Human, and app build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -31,9 +31,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
 
       - name: Run Browser Bridge P1 verification
         run: node scripts/check-browser-bridge-p1.mjs
+
+      - name: Build the Next.js operator surface
+        run: npm run build
 
       - name: Upload P1 verification receipt
         if: always()
