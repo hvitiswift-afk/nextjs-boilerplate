@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "matadata.google-cloud-a2a-marketplace-readiness.v25",
+  "productName": "MATADATA Armitron V# T# C# Exchange Agent",
+  "ownerAndConceptDirection": "Justin Lee Rackham (JP)",
+  "listingRoute": "Google Cloud Marketplace AI Agents as a Service",
+  "protocol": {
+    "name": "Agent2Agent",
+    "targetVersion": "1.0",
+    "agentCardPath": "/.well-known/agent-card.json",
+    "endpointPath": "/a2a",
+    "binding": "JSONRPC",
+    "agentCardState": "DRAFT_IMPLEMENTED_NOT_PROVIDER_VALIDATED"
+  },
+  "productCapabilities": [
+    "named and numbered V# T# C# universe registry",
+    "V-10 transfer and transform gates",
+    "messages and replies",
+    "sourced current-event observations",
+    "forecasts and backcasts",
+    "code patches, commits, tests, and artifact exchange",
+    "commitments, proposals, warnings, outcomes, and receipts",
+    "generic asset and barter envelopes",
+    "market observations and simulation-first trade proposals",
+    "ten C# fences including readback and closure",
+    "Armitron time, watchdog, deadline, and receipt matrix"
+  ],
+  "deployment": {
+    "target": "Google Cloud Run",
+    "container": "apps/armitron-a2a/Dockerfile",
+    "githubWorkflow": ".github/workflows/google-cloud-armitron-p5-deploy.yml",
+    "authentication": "GitHub Actions OIDC to Google Workload Identity Federation",
+    "serviceAccountKeyJsonAllowed": false,
+    "productionAuthorizationVerifier": "NOT_IMPLEMENTED_OR_PROVIDER_READY",
+    "currentState": "CONFIGURATION_PREPARED_NOT_DEPLOYED"
+  },
+  "catalogObservation": {
+    "asOfDate": "2026-08-02",
+    "managedPartnerLanesObservedInOfficialGoogleDocumentation": [
+      "Anthropic Claude",
+      "xAI Grok"
+    ],
+    "openAiManagedPartnerLane": "NOT_LOCATED_IN_OFFICIAL_GOOGLE_DOCUMENTATION_REVIEWED_FOR_THIS_BUILD",
+    "interpretation": "Catalog presence is a provider relationship and product decision. It does not grant MATADATA a foundation-model publishing slot or OpenAI affiliation."
+  },
+  "currentTruth": {
+    "legalEntity": "UNVERIFIED",
+    "contractingAuthority": "UNVERIFIED",
+    "googleCloudPartner": "NOT_VERIFIED",
+    "marketplaceVendor": "NOT_ONBOARDED",
+    "producerPortal": "NOT_ACCESSED",
+    "productProject": "NOT_CONFIRMED",
+    "workloadIdentityPool": "NOT_CONFIRMED",
+    "workloadIdentityProvider": "NOT_CONFIRMED",
+    "serviceAccount": "NOT_CONFIRMED",
+    "artifactRegistry": "NOT_CONFIRMED",
+    "cloudRunService": "NOT_DEPLOYED",
+    "agentCardValidation": "NOT_RUN_BY_GOOGLE",
+    "technicalIntegrationReview": "NOT_SUBMITTED",
+    "marketplaceSubmission": "NOT_SUBMITTED",
+    "marketplaceApproval": "NOT_APPROVED",
+    "modelGardenPublisherRelationship": "NOT_ESTABLISHED"
+  },
+  "financialBoundary": {
+    "marketObservation": "ALLOWED_AS_SOURCED_INFORMATION",
+    "tradeProposal": "ALLOWED_AS_SIMULATION_OR_JP_REVIEW_OBJECT",
+    "liveFinancialOrder": "NOT_AN_A2A_AUTOMATIC_ACTION",
+    "executionRequirement": "Exact JP approval plus broker authentication and provider order readback."
+  },
+  "nextProviderGates": [
+    "verify legal entity and contracting authority",
+    "complete Marketplace vendor onboarding",
+    "create or confirm Google Cloud product project",
+    "configure Workload Identity Federation with repository and environment subject restrictions",
+    "implement and verify production OIDC access-token validation",
+    "create Artifact Registry and Cloud Run service",
+    "deploy through protected GitHub environment",
+    "validate public Agent Card and A2A endpoint",
+    "complete Producer Portal product and pricing reviews",
+    "submit and await Google provider approval"
+  ],
+  "truthLaw": "A built Agent Card, Cloud Run container, or passing GitHub workflow is not a deployed, submitted, listed, or approved Google Cloud Marketplace product."
+}
